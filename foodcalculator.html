@@ -59,6 +59,52 @@
         }
     </style>
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Event listeners for consumption options
+            document.querySelectorAll('input[name="consumptionOption"]').forEach(radio => {
+                radio.addEventListener('change', updateConsumptionMultiplier);
+            });
+
+            // Event listeners for edicts
+            document.querySelectorAll('.food-types input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateConsumptionMultiplier);
+            });
+        });
+
+        function updateConsumptionMultiplier() {
+            const consumptionOptions = {
+                'reduced40': 0.6,
+                'reduced20': 0.8,
+                'standard': 1.0,
+                'increased20': 1.2,
+                'increased40': 1.4
+            };
+
+            const edicts = {
+                'foodSaverI': 0.8,
+                'foodSaverII': 0.9,
+                'plentyOfFoodI': 1.25,
+                'plentyOfFoodII': 1.25
+            };
+
+            let consumptionMultiplier = consumptionOptions[document.querySelector('input[name="consumptionOption"]:checked').id] || 1.0;
+
+            // Initialize additive edict adjustment
+            let edictAdjustment = 0;
+
+            // Sum the values of selected edicts
+            for (const edict in edicts) {
+                if (document.getElementById(edict).checked) {
+                    edictAdjustment += edicts[edict] - 1; // Subtract 1 to avoid multiplying by 1
+                }
+            }
+
+            // Apply additive adjustment
+            consumptionMultiplier += edictAdjustment;
+
+            document.getElementById('consumptionMultiplier').value = consumptionMultiplier;
+        }
+
         function calculateFoodRequirements() {
             const population = parseInt(document.getElementById('population').value) || 0;
             const roundedPopulation = Math.round(population / 100) * 100;
@@ -106,6 +152,8 @@
                 }
             }
 
+            let consumptionMultiplier = parseFloat(document.getElementById('consumptionMultiplier').value) || 1.0;
+
             let results = '';
 
             if (categoryCounts > 0) {
@@ -113,8 +161,8 @@
                     if (foodTypeCounts[food] !== undefined) {
                         const demand = foodDemands[food];
                         const adjustedDemand = demand / foodTypeCounts[food] / categoryCounts;
-                        const requiredUnits = A * adjustedDemand;
-                        results += `<p>${food}: ${requiredUnits.toFixed(1)} units</p>`;
+                        const requiredUnits = A * adjustedDemand * consumptionMultiplier;
+                        results += `<p>${food}: ${requiredUnits.toFixed(1)} units per month</p>`;
                     }
                 }
             } else {
@@ -134,6 +182,11 @@
         <div class="form-group">
             <label for="population">Enter Population:</label>
             <input type="number" id="population" placeholder="Population">
+        </div>
+
+        <div class="form-group">
+            <label for="consumptionMultiplier">Consumption Multiplier:</label>
+            <input type="number" id="consumptionMultiplier" step="0.01" value="1.0" readonly>
         </div>
 
         <div class="category">
@@ -168,6 +221,27 @@
             <div class="food-types">
                 <input type="checkbox" id="snack">Snack<br>
                 <input type="checkbox" id="cake">Cake<br>
+            </div>
+        </div>
+
+        <div class="category">
+            <h3>Settlement Consumption Options</h3>
+            <div class="food-types">
+                <input type="radio" name="consumptionOption" id="reduced40">40% reduced<br>
+                <input type="radio" name="consumptionOption" id="reduced20">20% reduced<br>
+                <input type="radio" name="consumptionOption" id="standard" checked>Standard<br>
+                <input type="radio" name="consumptionOption" id="increased20">20% increased<br>
+                <input type="radio" name="consumptionOption" id="increased40">40% increased<br>
+            </div>
+        </div>
+
+        <div class="category">
+            <h3>Edicts</h3>
+            <div class="food-types">
+                <input type="checkbox" id="foodSaverI">Food Saver I<br>
+                <input type="checkbox" id="foodSaverII">Food Saver II<br>
+                <input type="checkbox" id="plentyOfFoodI">Plenty of Food I<br>
+                <input type="checkbox" id="plentyOfFoodII">Plenty of Food II<br>
             </div>
         </div>
 
