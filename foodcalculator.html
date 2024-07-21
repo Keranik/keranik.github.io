@@ -58,10 +58,9 @@
             text-align: left;
         }
     </style>
-    <script>function calculateFoodRequirements() {
+    <script>
+        function calculateFoodRequirements() {
             const population = parseInt(document.getElementById('population').value) || 0;
-            const Nc = population / 100;
-
             const foodDemands = {
                 'Potato': 4.7,
                 'Corn': 3.3,
@@ -76,18 +75,35 @@
                 'Cake': 2.8
             };
 
-            let results = '';
+            let selectedCategories = new Set();
+            let selectedFoods = [];
 
-            for (const [food, demand] of Object.entries(foodDemands)) {
+            for (const food in foodDemands) {
                 const checkbox = document.getElementById(food.toLowerCase());
                 if (checkbox && checkbox.checked) {
-                    const requiredUnits = Nc * demand;
-                    results += `<p>${food}: ${requiredUnits.toFixed(2)} units</p>`;
+                    selectedFoods.push(food);
+                    selectedCategories.add(checkbox.closest('.category').querySelector('h3').innerText);
                 }
             }
 
+            const Nc = selectedCategories.size;
+            const N = selectedFoods.length;
+
+            let results = '';
+
+            if (Nc > 0 && N > 0) {
+                selectedFoods.forEach(food => {
+                    const demand = foodDemands[food];
+                    const requiredUnits = (population * demand) / (Nc * N);
+                    results += `<p>${food}: ${requiredUnits.toFixed(2)} units</p>`;
+                });
+            } else {
+                results = '<p>Please select at least one food type.</p>';
+            }
+
             document.getElementById('results').innerHTML = results;
-        }</script>
+        }
+    </script>
 </head>
 <body>
     <header>
