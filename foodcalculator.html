@@ -114,7 +114,7 @@
                         const demand = foodDemands[food];
                         const adjustedDemand = demand / foodTypeCounts[food] / categoryCounts;
                         const requiredUnits = A * adjustedDemand;
-                        results += `<p>${food}: ${requiredUnits.toFixed(2)} units</p>`;
+                        results += `<p>${food}: ${requiredUnits.toFixed(2)} units per 60</p>`;
                     }
                 }
             } else {
