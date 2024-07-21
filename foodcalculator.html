@@ -61,7 +61,8 @@
     <script>
         function calculateFoodRequirements() {
             const population = parseInt(document.getElementById('population').value) || 0;
-            const Nc = population / 100;
+            const roundedPopulation = Math.round(population / 100) * 100;
+            const A = roundedPopulation / 100;
 
             const foodDemands = {
                 'Potato': 4.7,
@@ -96,8 +97,8 @@
             if (NcSelected > 0 && N > 0) {
                 selectedFoods.forEach(food => {
                     const demand = foodDemands[food];
-                    const requiredUnits = (population * demand) / (NcSelected * N);
-                    results += `<p>${food}: ${requiredUnits.toFixed(2)} units per month</p>`;
+                    const requiredUnits = A * demand / (NcSelected * N);
+                    results += `<p>${food}: ${requiredUnits.toFixed(2)} units</p>`;
                 });
             } else {
                 results = '<p>Please select at least one food type.</p>';
