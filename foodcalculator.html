@@ -114,7 +114,7 @@
                         const demand = foodDemands[food];
                         const adjustedDemand = demand / foodTypeCounts[food] / categoryCounts;
                         const requiredUnits = A * adjustedDemand;
-                        results += `<p>${food}: ${requiredUnits.toFixed(2)} units per month</p>`;
+                        results += `<p>${food}: ${requiredUnits.toFixed(2)} units</p>`;
                     }
                 }
             } else {
@@ -123,6 +123,7 @@
 
             document.getElementById('results').innerHTML = results;
         }
+
     </script>
 </head>
 <body>
