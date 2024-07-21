@@ -97,7 +97,7 @@
                 selectedFoods.forEach(food => {
                     const demand = foodDemands[food];
                     const requiredUnits = (population * demand) / (NcSelected * N);
-                    results += `<p>${food}: ${requiredUnits.toFixed(2)} units</p>`;
+                    results += `<p>${food}: ${requiredUnits.toFixed(2)} units per month</p>`;
                 });
             } else {
                 results = '<p>Please select at least one food type.</p>';
