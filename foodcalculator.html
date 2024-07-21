@@ -78,15 +78,47 @@
                 'Cake': 2.8
             };
 
+            const categories = {
+                'Carbs': ['Potato', 'Corn', 'Bread'],
+                'Protein': ['Meat', 'Eggs', 'Tofu', 'Sausage'],
+                'Vitamins': ['Vegetables', 'Fruit'],
+                'Treats': ['Snack', 'Cake']
+            };
+
+            let categoryCounts = 0;
+            let foodTypeCounts = {};
+
+            // Count selected categories and food types
+            for (const category in categories) {
+                let selectedFoodTypes = 0;
+                for (const food of categories[category]) {
+                    if (document.getElementById(food.toLowerCase()).checked) {
+                        selectedFoodTypes++;
+                    }
+                }
+                if (selectedFoodTypes > 0) {
+                    categoryCounts++;
+                    for (const food of categories[category]) {
+                        if (document.getElementById(food.toLowerCase()).checked) {
+                            foodTypeCounts[food] = selectedFoodTypes;
+                        }
+                    }
+                }
+            }
+
             let results = '';
 
-            for (const food in foodDemands) {
-                const checkbox = document.getElementById(food.toLowerCase());
-                if (checkbox && checkbox.checked) {
-                    const demand = foodDemands[food];
-                    const requiredUnits = A * demand;
-                    results += `<p>${food}: ${requiredUnits.toFixed(2)} units</p>`;
+            if (categoryCounts > 0) {
+                for (const food in foodDemands) {
+                    if (foodTypeCounts[food] !== undefined) {
+                        const demand = foodDemands[food];
+                        const adjustedDemand = demand / foodTypeCounts[food] / categoryCounts;
+                        const requiredUnits = A * adjustedDemand;
+                        results += `<p>${food}: ${requiredUnits.toFixed(2)} units</p>`;
+                    }
                 }
+            } else {
+                results = '<p>No food types selected.</p>';
             }
 
             document.getElementById('results').innerHTML = results;
