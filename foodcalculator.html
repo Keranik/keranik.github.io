@@ -113,8 +113,8 @@
                     if (foodTypeCounts[food] !== undefined) {
                         const demand = foodDemands[food];
                         const adjustedDemand = demand / foodTypeCounts[food] / categoryCounts;
-                        const requiredUnits = A * adjustedDemand;
-                        results += `<p>${food}: ${requiredUnits.toFixed(2)} units</p>`;
+                        const requiredUnits = demand / (foodTypeCounts[food] * categoryCounts);
+                        results += `<p>${food}: ${requiredUnits.toFixed(1)} units</p>`;
                     }
                 }
             } else {
