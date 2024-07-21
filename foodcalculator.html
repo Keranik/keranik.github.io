@@ -61,7 +61,7 @@
     <script>
         function calculateFoodRequirements() {
             const population = parseInt(document.getElementById('population').value) || 0;
-            const roundedPopulation = Math.round(population / 100) * 100;
+            const roundedPopulation = Math.floor(population / 100) * 100;
             const A = roundedPopulation / 100;
 
             const foodDemands = {
@@ -78,30 +78,15 @@
                 'Cake': 2.8
             };
 
-            let selectedCategories = new Set();
-            let selectedFoods = [];
+            let results = '';
 
             for (const food in foodDemands) {
                 const checkbox = document.getElementById(food.toLowerCase());
                 if (checkbox && checkbox.checked) {
-                    selectedFoods.push(food);
-                    selectedCategories.add(checkbox.closest('.category').querySelector('h3').innerText);
-                }
-            }
-
-            const NcSelected = selectedCategories.size;
-            const N = selectedFoods.length;
-
-            let results = '';
-
-            if (NcSelected > 0 && N > 0) {
-                selectedFoods.forEach(food => {
                     const demand = foodDemands[food];
-                    const requiredUnits = A * demand / (NcSelected * N);
+                    const requiredUnits = A * demand;
                     results += `<p>${food}: ${requiredUnits.toFixed(2)} units</p>`;
-                });
-            } else {
-                results = '<p>Please select at least one food type.</p>';
+                }
             }
 
             document.getElementById('results').innerHTML = results;
