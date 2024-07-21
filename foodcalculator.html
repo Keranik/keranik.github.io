@@ -61,7 +61,7 @@
     <script>
         function calculateFoodRequirements() {
             const population = parseInt(document.getElementById('population').value) || 0;
-            const roundedPopulation = Math.floor(population / 50) * 50;
+            const roundedPopulation = Math.round(population / 100) * 100;
             const A = roundedPopulation / 100;
 
             const foodDemands = {
