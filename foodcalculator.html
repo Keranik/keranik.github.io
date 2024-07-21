@@ -160,7 +160,7 @@
                 for (const food in foodDemands) {
                     if (foodTypeCounts[food] !== undefined) {
                         const demand = foodDemands[food];
-                        const adjustedDemand = demand / foodTypeCounts[food] / categoryCounts;
+                        const adjustedDemand = demand / categoryCounts / foodTypeCounts[food];
                         const requiredUnits = A * adjustedDemand * consumptionMultiplier;
                         results += `<p>${food}: ${requiredUnits.toFixed(1)} units per month</p>`;
                     }
