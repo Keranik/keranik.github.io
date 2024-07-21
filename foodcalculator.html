@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1em;
+            text-align: center;
+            width: 100%;
+        }
+
+        main {
+            margin: 2em;
+            text-align: center;
+        }
+
+        .form-group {
+            margin: 1em 0;
+        }
+
+            .form-group label {
+                font-weight: bold;
+            }
+
+            .form-group input {
+                margin-left: 0.5em;
+            }
+
+        .category {
+            margin-top: 1em;
+        }
+
+        .food-types {
+            margin-left: 1em;
+            text-align: left;
+        }
+
+            .food-types input {
+                margin-right: 0.5em;
+            }
+
+        #results {
+            margin-top: 2em;
+            text-align: left;
+        }
+    </style>
+    <script>function calculateFoodRequirements() {
+            const population = parseInt(document.getElementById('population').value) || 0;
+            const Nc = population / 100;
+
+            const foodDemands = {
+                'Potato': 4.7,
+                'Corn': 3.3,
+                'Bread': 2.2,
+                'Meat': 3.0,
+                'Eggs': 3.3,
+                'Tofu': 2.0,
+                'Sausage': 3.7,
+                'Vegetables': 4.7,
+                'Fruit': 3.5,
+                'Snack': 5.8,
+                'Cake': 2.8
+            };
+
+            let results = '';
+
+            for (const [food, demand] of Object.entries(foodDemands)) {
+                const checkbox = document.getElementById(food.toLowerCase());
+                if (checkbox && checkbox.checked) {
+                    const requiredUnits = Nc * demand;
+                    results += `<p>${food}: ${requiredUnits.toFixed(2)} units</p>`;
+                }
+            }
+
+            document.getElementById('results').innerHTML = results;
+        }</script>
+</head>
+<body>
+    <header>
+        <h1>Food Calculator</h1>
+    </header>
+    <main>
+        <div class="form-group">
+            <label for="population">Enter Population:</label>
+            <input type="number" id="population" placeholder="Population">
+        </div>
+
+        <div class="category">
+            <h3>Carbs</h3>
+            <div class="food-types">
+                <input type="checkbox" id="potato">Potato<br>
+                <input type="checkbox" id="corn">Corn<br>
+                <input type="checkbox" id="bread">Bread<br>
+            </div>
+        </div>
+
+        <div class="category">
+            <h3>Protein</h3>
+            <div class="food-types">
+                <input type="checkbox" id="meat">Meat<br>
+                <input type="checkbox" id="eggs">Eggs<br>
+                <input type="checkbox" id="tofu">Tofu<br>
+                <input type="checkbox" id="sausage">Sausage<br>
+            </div>
+        </div>
+
+        <div class="category">
+            <h3>Vitamins</h3>
+            <div class="food-types">
+                <input type="checkbox" id="vegetables">Vegetables<br>
+                <input type="checkbox" id="fruit">Fruit<br>
+            </div>
+        </div>
+
+        <div class="category">
+            <h3>Treats</h3>
+            <div class="food-types">
+                <input type="checkbox" id="snack">Snack<br>
+                <input type="checkbox" id="cake">Cake<br>
+            </div>
+        </div>
+
+        <button onclick="calculateFoodRequirements()">Calculate</button>
+
+        <div id="results"></div>
+    </main>
+</body>
+</html>
