@@ -32,13 +32,13 @@
             margin: 1em 0;
         }
 
-            .form-group label {
-                font-weight: bold;
-            }
+        .form-group label {
+            font-weight: bold;
+        }
 
-            .form-group input {
-                margin-left: 0.5em;
-            }
+        .form-group input {
+            margin-left: 0.5em;
+        }
 
         .category {
             margin-top: 1em;
@@ -49,9 +49,9 @@
             text-align: left;
         }
 
-            .food-types input {
-                margin-right: 0.5em;
-            }
+        .food-types input {
+            margin-right: 0.5em;
+        }
 
         #results {
             margin-top: 2em;
@@ -95,20 +95,22 @@
             // Sum the values of selected edicts
             for (const edict in edicts) {
                 if (document.getElementById(edict).checked) {
-                    edictAdjustment += edicts[edict] - 1; // Subtract 1 to avoid multiplying by 1
+                    edictAdjustment += edicts[edict] - 1; // Subtract 1 to get the adjustment
                 }
             }
 
             // Apply additive adjustment
             consumptionMultiplier += edictAdjustment;
 
-            document.getElementById('consumptionMultiplier').value = consumptionMultiplier;
+            document.getElementById('consumptionMultiplier').value = consumptionMultiplier.toFixed(2);
         }
 
         function calculateFoodRequirements() {
             const population = parseInt(document.getElementById('population').value) || 0;
-            const roundedPopulation = Math.round(population / 100) * 100;
-            const A = roundedPopulation / 100;
+            const consumptionMultiplier = parseFloat(document.getElementById('consumptionMultiplier').value) || 1.0;
+
+            // Total monthly pop days (1 pop day = 1 pop fed for 1 day, 30 days/month)
+            const totalPopDaysPerMonth = population * 30;
 
             const foodDemands = {
                 'Potato': 4.7,
@@ -131,47 +133,46 @@
                 'Treats': ['Snack', 'Cake']
             };
 
-            let categoryCounts = 0;
-            let foodTypeCounts = {};
+            // Count selected categories and food types within each category
+            let selectedCategoriesCount = 0;
+            let selectedFoodTypesPerCategory = {};
 
-            // Count selected categories and food types
             for (const category in categories) {
-                let selectedFoodTypes = 0;
-                for (const food of categories[category]) {
-                    if (document.getElementById(food.toLowerCase()).checked) {
-                        selectedFoodTypes++;
-                    }
-                }
-                if (selectedFoodTypes > 0) {
-                    categoryCounts++;
-                    for (const food of categories[category]) {
-                        if (document.getElementById(food.toLowerCase()).checked) {
-                            foodTypeCounts[food] = selectedFoodTypes;
-                        }
-                    }
+                let selectedFoodTypes = categories[category].filter(food => document.getElementById(food.toLowerCase()).checked);
+                if (selectedFoodTypes.length > 0) {
+                    selectedCategoriesCount++;
+                    selectedFoodTypesPerCategory[category] = selectedFoodTypes;
                 }
             }
 
-            let consumptionMultiplier = parseFloat(document.getElementById('consumptionMultiplier').value) || 1.0;
-
             let results = '';
 
-            if (categoryCounts > 0) {
-                for (const food in foodDemands) {
-                    if (foodTypeCounts[food] !== undefined) {
-                        const demand = foodDemands[food];
-                        const adjustedDemand = demand / categoryCounts / foodTypeCounts[food];
-                        const requiredUnits = A * adjustedDemand * consumptionMultiplier;
-                        results += `<p>${food}: ${requiredUnits.toFixed(1)} units per month</p>`;
+            if (selectedCategoriesCount === 0) {
+                results = '<p>No food types selected.</p>';
+            } else {
+                // Pop days per category per month
+                const popDaysPerCategory = totalPopDaysPerMonth / selectedCategoriesCount;
+
+                // Calculate demand for each selected food type
+                for (const category in categories) {
+                    const selectedFoodTypes = selectedFoodTypesPerCategory[category];
+                    if (selectedFoodTypes && selectedFoodTypes.length > 0) {
+                        // Pop days per food type in this category
+                        const popDaysPerFoodType = popDaysPerCategory / selectedFoodTypes.length;
+
+                        // Calculate quantity for each selected food type
+                        selectedFoodTypes.forEach(food => {
+                            const consumptionRate = foodDemands[food];
+                            // Quantity = (popDays × consumptionRate × multiplier) / 3000
+                            const quantityPerMonth = (popDaysPerFoodType * consumptionRate * consumptionMultiplier) / 3000;
+                            results += `<p>${food}: ${quantityPerMonth.toFixed(1)} units per month</p>`;
+                        });
                     }
                 }
-            } else {
-                results = '<p>No food types selected.</p>';
             }
 
             document.getElementById('results').innerHTML = results;
         }
-
     </script>
 </head>
 <body>
