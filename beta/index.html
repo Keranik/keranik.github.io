@@ -72,10 +72,17 @@
                     color: #FFF;
                 }
 
-        .tab-content {
-            flex: 1;
+        main {
+            flex: 1 0 auto;
             padding: 20px;
             background-color: #2A2A2A;
+            min-height: calc(100vh - 220px - 140px); /* Viewport height minus header (220px) and footer (140px) */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .tab-content {
             display: none;
         }
 
@@ -176,6 +183,7 @@
             }
 
         footer {
+            flex-shrink: 0;
             background: linear-gradient(0deg, #3C3C3C, #2A2A2A);
             padding: 20px;
             text-align: center;
@@ -382,7 +390,7 @@
             if (tabId === 'calculator') {
                 loadDesigns();
             } else if (tabId === 'mods') {
-                showModDetails(); // Refresh mod details when switching to Mods tab
+                showModDetails();
             }
         }
 
