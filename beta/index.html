@@ -5,33 +5,301 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Captain of Industry Calculator</title>
     <style>
+        @font-face {
+            font-family: 'GameFont';
+            src: url('assets/game-font.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'GameFont', 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: black;
+            background-color: #2A2A2A;
+            color: #D3D3D3;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh; /* Center content vertically */
-            color: white;
+            min-height: 100vh;
+        }
+
+        header {
+            background: url('assets/title-banner.png') no-repeat center center;
+            background-size: cover;
+            padding: 40px 20px;
             text-align: center;
+            border-bottom: 2px solid #FF4500;
         }
 
-        h1 {
-            font-size: 3em; /* Large font for main title */
-            margin: 0;
+            header h1 {
+                margin: 0;
+                font-size: 2.5em;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            }
+
+        .tabs {
+            background-color: #3C3C3C;
+            padding: 10px 0;
+            border-bottom: 1px solid #FF4500;
         }
 
-        p {
-            font-size: 2em; /* Slightly smaller font for "COMING SOON" */
-            margin: 0.5em 0 0 0;
+            .tabs ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+            }
+
+            .tabs li {
+                margin: 0 10px;
+            }
+
+            .tabs a {
+                text-decoration: none;
+                color: #D3D3D3;
+                background: url('assets/button-texture.png') repeat;
+                background-size: cover;
+                padding: 10px 20px;
+                border-radius: 5px;
+                border: 1px solid #555;
+                transition: background-color 0.3s, color 0.3s;
+            }
+
+                .tabs a:hover, .tabs a.active {
+                    background: url('assets/button-texture.png') repeat, #FF4500;
+                    background-size: cover;
+                    background-blend-mode: overlay;
+                    color: #FFF;
+                }
+
+        .tab-content {
+            flex: 1;
+            padding: 20px;
+            background: url('assets/background-texture.png') repeat;
+            background-size: cover;
+            display: none;
         }
+
+            .tab-content.active {
+                display: block;
+            }
+
+        .calculator {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: rgba(51, 51, 51, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #555;
+        }
+
+        label, select, input, button {
+            display: block;
+            margin: 10px auto;
+            font-size: 1.2em;
+        }
+
+        select, input {
+            padding: 8px;
+            width: 200px;
+            border: none;
+            border-radius: 4px;
+            background-color: #444;
+            color: #D3D3D3;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: url('assets/button-texture.png') repeat;
+            background-size: cover;
+            background-color: #FF4500;
+            background-blend-mode: overlay;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #FF6347;
+            }
+
+            button:disabled {
+                background-color: #666;
+                cursor: not-allowed;
+            }
+
+        #results, #savedDesigns {
+            margin-top: 20px;
+            font-size: 1.1em;
+        }
+
+        footer {
+            background: url('assets/background-texture.png') repeat;
+            background-size: cover;
+            padding: 10px;
+            text-align: center;
+            border-top: 2px solid #FF4500;
+        }
+
+            footer p {
+                margin: 5px 0;
+            }
+
+            footer a {
+                color: #FF4500;
+                text-decoration: none;
+            }
+
+                footer a:hover {
+                    text-decoration: underline;
+                }
     </style>
 </head>
 <body>
-    <h1>CAPTAIN OF INDUSTRY CALCULATOR</h1>
-    <p>COMING SOON!!</p>
+    <header>
+        <h1>Captain of Industry Calculator</h1>
+    </header>
+    <nav class="tabs">
+        <ul>
+            <li><a href="#calculator" class="active" onclick="showTab('calculator')">Calculator</a></li>
+            <li><a href="#savedDesigns" onclick="showTab('savedDesigns')">Saved Designs</a></li>
+            <li><a href="#settings" onclick="showTab('settings')">Settings</a></li>
+        </ul>
+    </nav>
+    <main>
+        <section id="calculator" class="tab-content active">
+            <div class="calculator">
+                <label for="item">Select Item:</label>
+                <select id="item">
+                    <option value="">Select an item</option>
+                </select>
+                <label for="amount">Amount Needed:</label>
+                <input type="number" id="amount" placeholder="e.g., 100" min="1">
+                <button onclick="calculate()">Calculate</button>
+                <button onclick="resetForm()">Reset</button>
+                <button onclick="saveDesign()">Save Design</button>
+                <button onclick="loadDesigns()">Load Designs</button>
+                <div id="results"></div>
+                <div id="savedDesigns"></div>
+            </div>
+        </section>
+        <section id="savedDesigns" class="tab-content">
+            <h2>Saved Designs</h2>
+            <p>Sign in to save and view your designs (coming soon).</p>
+            <button onclick="signIn()" disabled>Sign In (Coming Soon)</button>
+        </section>
+        <section id="settings" class="tab-content">
+            <h2>Settings</h2>
+            <p>Customize your calculator experience (coming soon).</p>
+        </section>
+    </main>
+    <footer>
+        <p>Captain of Industry Calculator © 2025 Keranik</p>
+        <p><a href="https://patreon.com/keranik" target="_blank">Support on Patreon</a> | <a href="https://github.com/Keranik/COI-Extended/releases" target="_blank">Download COI-Extended Mod</a></p>
+        <p>Assets used with permission from <a href="https://www.captain-of-industry.com/" target="_blank">Captain of Industry</a> developers. All images and assets are copyright their respective owners.</p>
+    </footer>
+    <script src="planner.js"></script>
+    <script>let planner;
+          initPlanner().then(p => {
+              planner = p;
+              populateItems();
+              loadDesigns();
+          });
+
+          function populateItems() {
+              const itemSelect = document.getElementById('item');
+              const items = [...new Set(planner.recipes.flatMap(r => r.outputs.map(o => o.name)))];
+              items.forEach(item => {
+                  const option = document.createElement('option');
+                  option.value = item;
+                  option.textContent = item;
+                  itemSelect.appendChild(option);
+              });
+          }
+
+          async function calculate() {
+              const item = document.getElementById('item').value;
+              const amount = parseFloat(document.getElementById('amount').value);
+              const resultsDiv = document.getElementById('results');
+
+              if (!item || isNaN(amount) || amount <= 0) {
+                  resultsDiv.innerHTML = 'Please select an item and enter a valid amount.';
+                  return;
+              }
+
+              const result = planner.calculateProduction(item, amount);
+              if (Object.keys(result).length === 0) {
+                  resultsDiv.innerHTML = `No recipe found for ${item}.`;
+                  return;
+              }
+
+              let output = '<h3>Required Inputs:</h3>';
+              for (const [inputItem, inputAmount] of Object.entries(result)) {
+                  output += `${inputItem}: ${inputAmount.toFixed(2)}<br>`;
+              }
+              resultsDiv.innerHTML = output;
+
+              window.currentDesign = { item, amount, result };
+          }
+
+          function resetForm() {
+              document.getElementById('item').value = '';
+              document.getElementById('amount').value = '';
+              document.getElementById('results').innerHTML = '';
+              window.currentDesign = null;
+          }
+
+          function saveDesign() {
+              if (!window.currentDesign) {
+                  alert('Please calculate a design before saving.');
+                  return;
+              }
+              const savedDesigns = JSON.parse(localStorage.getItem('savedDesigns')) || [];
+              savedDesigns.push(window.currentDesign);
+              localStorage.setItem('savedDesigns', JSON.stringify(savedDesigns));
+              alert('Design saved locally!');
+              loadDesigns();
+          }
+
+          function loadDesigns() {
+              const savedDesigns = JSON.parse(localStorage.getItem('savedDesigns')) || [];
+              const savedDesignsDiv = document.getElementById('savedDesigns');
+              if (savedDesigns.length === 0) {
+                  savedDesignsDiv.innerHTML = '<p>No saved designs found.</p>';
+                  return;
+              }
+
+              let output = '<h3>Saved Designs:</h3>';
+              savedDesigns.forEach((design, index) => {
+                  output += `<p>Design ${index + 1}: ${design.item} (${design.amount})<br>`;
+                  for (const [inputItem, inputAmount] of Object.entries(design.result)) {
+                      output += `${inputItem}: ${inputAmount.toFixed(2)}<br>`;
+                  }
+                  output += '</p>';
+              });
+              savedDesignsDiv.innerHTML = output;
+          }
+
+          function signIn() {
+              alert('Sign-in feature coming soon!');
+          }
+
+          function showTab(tabId) {
+              document.querySelectorAll('.tab-content').forEach(tab => {
+                  tab.classList.remove('active');
+              });
+              document.querySelectorAll('.tabs a').forEach(link => {
+                  link.classList.remove('active');
+              });
+              document.getElementById(tabId).classList.add('active');
+              document.querySelector(`a[href="#${tabId}"]`).classList.add('active');
+              if (tabId === 'calculator') {
+                  loadDesigns();
+              }
+          }</script>
 </body>
 </html>

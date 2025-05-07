@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Projects\\Website\\Calculator\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Projects\\Website\\Calculator\\beta\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:beta\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Projects\\Website\\Calculator\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
@@ -40,11 +44,24 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "index.html",
+              "DocumentMoniker": "C:\\Projects\\Website\\Calculator\\beta\\index.html",
+              "RelativeDocumentMoniker": "beta\\index.html",
+              "ToolTip": "C:\\Projects\\Website\\Calculator\\beta\\index.html",
+              "RelativeToolTip": "beta\\index.html",
+              "ViewState": "AgIAABwAAAAAAAAAAAAmwDcAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2025-05-07T11:55:43.897Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "index.html",
               "DocumentMoniker": "C:\\Projects\\Website\\Calculator\\index.html",
               "RelativeDocumentMoniker": "index.html",
               "ToolTip": "C:\\Projects\\Website\\Calculator\\index.html",
               "RelativeToolTip": "index.html",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAATAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACEAAAArAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
               "WhenOpened": "2025-05-07T11:53:42.836Z",
               "EditorCaption": ""
