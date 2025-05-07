@@ -24,8 +24,7 @@
         }
 
         header {
-            background: url('assets/title-banner.png') no-repeat center center;
-            background-size: cover;
+            background: linear-gradient(180deg, #3C3C3C, #2A2A2A);
             padding: 40px 20px;
             text-align: center;
             border-bottom: 2px solid #FF4500;
@@ -61,8 +60,7 @@
             .tabs a {
                 text-decoration: none;
                 color: #D3D3D3;
-                background: url('assets/button-texture.png') repeat;
-                background-size: cover;
+                background-color: #4A4A4A;
                 padding: 10px 20px;
                 border-radius: 5px;
                 border: 1px solid #555;
@@ -70,17 +68,14 @@
             }
 
                 .tabs a:hover, .tabs a.active {
-                    background: url('assets/button-texture.png') repeat, #FF4500;
-                    background-size: cover;
-                    background-blend-mode: overlay;
+                    background-color: #FF4500;
                     color: #FFF;
                 }
 
         .tab-content {
             flex: 1;
             padding: 20px;
-            background: url('assets/background-texture.png') repeat;
-            background-size: cover;
+            background-color: #2A2A2A;
             display: none;
         }
 
@@ -88,13 +83,14 @@
                 display: block;
             }
 
-        .calculator {
-            max-width: 600px;
+        .panel {
+            max-width: 800px;
             margin: 0 auto;
-            background-color: rgba(51, 51, 51, 0.8);
+            background-color: rgba(51, 51, 51, 0.9);
             padding: 20px;
             border-radius: 8px;
-            border: 1px solid #555;
+            border: 2px solid #555;
+            box-shadow: 0 0 10px rgba(255, 69, 0, 0.3);
         }
 
         label, select, input, button {
@@ -114,10 +110,7 @@
 
         button {
             padding: 10px 20px;
-            background: url('assets/button-texture.png') repeat;
-            background-size: cover;
             background-color: #FF4500;
-            background-blend-mode: overlay;
             color: white;
             border: none;
             border-radius: 4px;
@@ -138,9 +131,26 @@
             font-size: 1.1em;
         }
 
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 10px 0;
+        }
+
+        a {
+            color: #FF4500;
+            text-decoration: none;
+        }
+
+            a:hover {
+                text-decoration: underline;
+            }
+
         footer {
-            background: url('assets/background-texture.png') repeat;
-            background-size: cover;
+            background: linear-gradient(0deg, #3C3C3C, #2A2A2A);
             padding: 10px;
             text-align: center;
             border-top: 2px solid #FF4500;
@@ -177,53 +187,78 @@
     </nav>
     <main>
         <section id="home" class="tab-content active">
-            <h2>Welcome to the Captain of Industry Calculator</h2>
-            <p>This tool helps you plan production in <em>Captain of Industry</em>, including Update 3 features like trains. Use the tabs above to explore calculators, planners, and more.</p>
-            <p>Support the project on <a href="https://patreon.com/yourprofile" target="_blank">Patreon</a>!</p>
+            <div class="panel">
+                <h2>Welcome to the Captain of Industry Calculator</h2>
+                <p>Welcome to the ultimate tool for <em>Captain of Industry</em> players! This website helps you plan your production, manage resources, and enhance your gameplay experience.</p>
+                <p>Explore the tabs above to access calculators, planners, and more. Support the project on <a href="https://patreon.com/yourprofile" target="_blank">Patreon</a>!</p>
+            </div>
         </section>
         <section id="mods" class="tab-content">
-            <h2>Mods</h2>
-            <p>Enhance your <em>Captain of Industry</em> experience with these mods:</p>
-            <ul>
-                <li><a href="https://github.com/Keranik/COI-Extended/releases" target="_blank">COI-Extended</a> - Adds new features and enhancements.</li>
-            </ul>
+            <div class="panel">
+                <h2>Mods</h2>
+                <p>Enhance your <em>Captain of Industry</em> experience with these mods:</p>
+                <ul>
+                    <li><a href="https://github.com/Keranik/COI-Extended/releases" target="_blank">COI-Extended</a> - Adds new features and enhancements to the game.</li>
+                    <li>More mods coming soon!</li>
+                </ul>
+            </div>
         </section>
         <section id="calculator" class="tab-content">
-            <div class="calculator">
-                <label for="item">Select Item:</label>
-                <select id="item">
-                    <option value="">Select an item</option>
-                </select>
-                <label for="amount">Amount Needed:</label>
-                <input type="number" id="amount" placeholder="e.g., 100" min="1">
-                <button onclick="calculate()">Calculate</button>
-                <button onclick="resetForm()">Reset</button>
-                <button onclick="saveDesign()">Save Design</button>
-                <button onclick="loadDesigns()">Load Designs</button>
-                <div id="results"></div>
-                <div id="savedDesigns"></div>
+            <div class="panel">
+                <div class="calculator">
+                    <label for="item">Select Item:</label>
+                    <select id="item">
+                        <option value="">Select an item</option>
+                    </select>
+                    <label for="amount">Amount Needed:</label>
+                    <input type="number" id="amount" placeholder="e.g., 100" min="1">
+                    <button onclick="calculate()">Calculate</button>
+                    <button onclick="resetForm()">Reset</button>
+                    <button onclick="saveDesign()">Save Design</button>
+                    <button onclick="loadDesigns()">Load Designs</button>
+                    <div id="results"></div>
+                    <div id="savedDesigns"></div>
+                </div>
             </div>
         </section>
         <section id="planner" class="tab-content">
-            <h2>Planner</h2>
-            <p>Plan your entire production chain (coming soon).</p>
+            <div class="panel">
+                <h2>Production Planner</h2>
+                <p>Plan your entire production chain with this tool.</p>
+                <p><strong>Coming Soon:</strong> Input your desired outputs, and this planner will generate a complete production plan, including intermediates, resources, and machinery needed.</p>
+            </div>
         </section>
         <section id="tools" class="tab-content">
-            <h2>Tools</h2>
-            <p>Additional tools to enhance your gameplay (coming soon).</p>
+            <div class="panel">
+                <h2>Tools</h2>
+                <p>Additional tools to enhance your gameplay:</p>
+                <ul>
+                    <li><strong>Resource Tracker:</strong> Monitor your in-game resources (coming soon).</li>
+                    <li><strong>Train Planner:</strong> Plan train routes and logistics for Update 3 (coming soon).</li>
+                </ul>
+            </div>
         </section>
         <section id="settings" class="tab-content">
-            <h2>Settings</h2>
-            <p>Customize your calculator experience (coming soon).</p>
+            <div class="panel">
+                <h2>Settings</h2>
+                <p>Customize your calculator experience:</p>
+                <ul>
+                    <li><strong>Theme:</strong> Switch between light and dark themes (coming soon).</li>
+                    <li><strong>Units:</strong> Choose preferred units for calculations (coming soon).</li>
+                </ul>
+            </div>
         </section>
         <section id="help" class="tab-content">
-            <h2>Help</h2>
-            <p>Need assistance? Here are some tips:</p>
-            <ul>
-                <li>Use the Calculator tab to compute production needs.</li>
-                <li>Save designs locally using the "Save Design" button.</li>
-                <li>Contact support via <a href="https://patreon.com/yourprofile" target="_blank">Patreon</a>.</li>
-            </ul>
+            <div class="panel">
+                <h2>Help</h2>
+                <p>Need assistance? Here are some tips:</p>
+                <ul>
+                    <li>Use the Calculator tab to compute production needs.</li>
+                    <li>Save designs locally using the "Save Design" button.</li>
+                    <li>Contact support via <a href="https://patreon.com/yourprofile" target="_blank">Patreon</a>.</li>
+                    <li>Check the <a href="https://www.captain-of-industry.com/" target="_blank">official game website</a> for more resources.</li>
+                </ul>
+            </div>
         </section>
     </main>
     <footer>
