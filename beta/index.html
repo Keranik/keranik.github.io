@@ -51,10 +51,11 @@
                 padding: 0;
                 display: flex;
                 justify-content: center;
+                flex-wrap: wrap;
             }
 
             .tabs li {
-                margin: 0 10px;
+                margin: 5px 10px;
             }
 
             .tabs a {
@@ -165,13 +166,29 @@
     </header>
     <nav class="tabs">
         <ul>
-            <li><a href="#calculator" class="active" onclick="showTab('calculator')">Calculator</a></li>
-            <li><a href="#savedDesigns" onclick="showTab('savedDesigns')">Saved Designs</a></li>
+            <li><a href="#home" class="active" onclick="showTab('home')">Home/Welcome</a></li>
+            <li><a href="#mods" onclick="showTab('mods')">Mods</a></li>
+            <li><a href="#calculator" onclick="showTab('calculator')">Calculator</a></li>
+            <li><a href="#planner" onclick="showTab('planner')">Planner</a></li>
+            <li><a href="#tools" onclick="showTab('tools')">Tools</a></li>
             <li><a href="#settings" onclick="showTab('settings')">Settings</a></li>
+            <li><a href="#help" onclick="showTab('help')">Help</a></li>
         </ul>
     </nav>
     <main>
-        <section id="calculator" class="tab-content active">
+        <section id="home" class="tab-content active">
+            <h2>Welcome to the Captain of Industry Calculator</h2>
+            <p>This tool helps you plan production in <em>Captain of Industry</em>, including Update 3 features like trains. Use the tabs above to explore calculators, planners, and more.</p>
+            <p>Support the project on <a href="https://patreon.com/yourprofile" target="_blank">Patreon</a>!</p>
+        </section>
+        <section id="mods" class="tab-content">
+            <h2>Mods</h2>
+            <p>Enhance your <em>Captain of Industry</em> experience with these mods:</p>
+            <ul>
+                <li><a href="https://github.com/Keranik/COI-Extended/releases" target="_blank">COI-Extended</a> - Adds new features and enhancements.</li>
+            </ul>
+        </section>
+        <section id="calculator" class="tab-content">
             <div class="calculator">
                 <label for="item">Select Item:</label>
                 <select id="item">
@@ -187,119 +204,129 @@
                 <div id="savedDesigns"></div>
             </div>
         </section>
-        <section id="savedDesigns" class="tab-content">
-            <h2>Saved Designs</h2>
-            <p>Sign in to save and view your designs (coming soon).</p>
-            <button onclick="signIn()" disabled>Sign In (Coming Soon)</button>
+        <section id="planner" class="tab-content">
+            <h2>Planner</h2>
+            <p>Plan your entire production chain (coming soon).</p>
+        </section>
+        <section id="tools" class="tab-content">
+            <h2>Tools</h2>
+            <p>Additional tools to enhance your gameplay (coming soon).</p>
         </section>
         <section id="settings" class="tab-content">
             <h2>Settings</h2>
             <p>Customize your calculator experience (coming soon).</p>
         </section>
+        <section id="help" class="tab-content">
+            <h2>Help</h2>
+            <p>Need assistance? Here are some tips:</p>
+            <ul>
+                <li>Use the Calculator tab to compute production needs.</li>
+                <li>Save designs locally using the "Save Design" button.</li>
+                <li>Contact support via <a href="https://patreon.com/yourprofile" target="_blank">Patreon</a>.</li>
+            </ul>
+        </section>
     </main>
     <footer>
         <p>Captain of Industry Calculator © 2025 Keranik</p>
-        <p><a href="https://patreon.com/keranik" target="_blank">Support on Patreon</a> | <a href="https://github.com/Keranik/COI-Extended/releases" target="_blank">Download COI-Extended Mod</a></p>
+        <p><a href="https://patreon.com/yourprofile" target="_blank">Support on Patreon</a> | <a href="https://github.com/Keranik/COI-Extended/releases" target="_blank">Download COI-Extended Mod</a></p>
         <p>Assets used with permission from <a href="https://www.captain-of-industry.com/" target="_blank">Captain of Industry</a> developers. All images and assets are copyright their respective owners.</p>
     </footer>
     <script src="planner.js"></script>
-    <script>let planner;
-          initPlanner().then(p => {
-              planner = p;
-              populateItems();
-              loadDesigns();
-          });
+    <script>
+        let planner;
+        initPlanner().then(p => {
+            planner = p;
+            populateItems();
+            loadDesigns();
+        });
 
-          function populateItems() {
-              const itemSelect = document.getElementById('item');
-              const items = [...new Set(planner.recipes.flatMap(r => r.outputs.map(o => o.name)))];
-              items.forEach(item => {
-                  const option = document.createElement('option');
-                  option.value = item;
-                  option.textContent = item;
-                  itemSelect.appendChild(option);
-              });
-          }
+        function populateItems() {
+            const itemSelect = document.getElementById('item');
+            const items = [...new Set(planner.recipes.flatMap(r => r.outputs.map(o => o.name)))];
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                itemSelect.appendChild(option);
+            });
+        }
 
-          async function calculate() {
-              const item = document.getElementById('item').value;
-              const amount = parseFloat(document.getElementById('amount').value);
-              const resultsDiv = document.getElementById('results');
+        async function calculate() {
+            const item = document.getElementById('item').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const resultsDiv = document.getElementById('results');
 
-              if (!item || isNaN(amount) || amount <= 0) {
-                  resultsDiv.innerHTML = 'Please select an item and enter a valid amount.';
-                  return;
-              }
+            if (!item || isNaN(amount) || amount <= 0) {
+                resultsDiv.innerHTML = 'Please select an item and enter a valid amount.';
+                return;
+            }
 
-              const result = planner.calculateProduction(item, amount);
-              if (Object.keys(result).length === 0) {
-                  resultsDiv.innerHTML = `No recipe found for ${item}.`;
-                  return;
-              }
+            const result = planner.calculateProduction(item, amount);
+            if (Object.keys(result).length === 0) {
+                resultsDiv.innerHTML = `No recipe found for ${item}.`;
+                return;
+            }
 
-              let output = '<h3>Required Inputs:</h3>';
-              for (const [inputItem, inputAmount] of Object.entries(result)) {
-                  output += `${inputItem}: ${inputAmount.toFixed(2)}<br>`;
-              }
-              resultsDiv.innerHTML = output;
+            let output = '<h3>Required Inputs:</h3>';
+            for (const [inputItem, inputAmount] of Object.entries(result)) {
+                output += `${inputItem}: ${inputAmount.toFixed(2)}<br>`;
+            }
+            resultsDiv.innerHTML = output;
 
-              window.currentDesign = { item, amount, result };
-          }
+            window.currentDesign = { item, amount, result };
+        }
 
-          function resetForm() {
-              document.getElementById('item').value = '';
-              document.getElementById('amount').value = '';
-              document.getElementById('results').innerHTML = '';
-              window.currentDesign = null;
-          }
+        function resetForm() {
+            document.getElementById('item').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('results').innerHTML = '';
+            window.currentDesign = null;
+        }
 
-          function saveDesign() {
-              if (!window.currentDesign) {
-                  alert('Please calculate a design before saving.');
-                  return;
-              }
-              const savedDesigns = JSON.parse(localStorage.getItem('savedDesigns')) || [];
-              savedDesigns.push(window.currentDesign);
-              localStorage.setItem('savedDesigns', JSON.stringify(savedDesigns));
-              alert('Design saved locally!');
-              loadDesigns();
-          }
+        function saveDesign() {
+            if (!window.currentDesign) {
+                alert('Please calculate a design before saving.');
+                return;
+            }
+            const savedDesigns = JSON.parse(localStorage.getItem('savedDesigns')) || [];
+            savedDesigns.push(window.currentDesign);
+            localStorage.setItem('savedDesigns', JSON.stringify(savedDesigns));
+            alert('Design saved locally!');
+            loadDesigns();
+        }
 
-          function loadDesigns() {
-              const savedDesigns = JSON.parse(localStorage.getItem('savedDesigns')) || [];
-              const savedDesignsDiv = document.getElementById('savedDesigns');
-              if (savedDesigns.length === 0) {
-                  savedDesignsDiv.innerHTML = '<p>No saved designs found.</p>';
-                  return;
-              }
+        function loadDesigns() {
+            const savedDesigns = JSON.parse(localStorage.getItem('savedDesigns')) || [];
+            const savedDesignsDiv = document.getElementById('savedDesigns');
+            if (savedDesigns.length === 0) {
+                savedDesignsDiv.innerHTML = '<p>No saved designs found.</p>';
+                return;
+            }
 
-              let output = '<h3>Saved Designs:</h3>';
-              savedDesigns.forEach((design, index) => {
-                  output += `<p>Design ${index + 1}: ${design.item} (${design.amount})<br>`;
-                  for (const [inputItem, inputAmount] of Object.entries(design.result)) {
-                      output += `${inputItem}: ${inputAmount.toFixed(2)}<br>`;
-                  }
-                  output += '</p>';
-              });
-              savedDesignsDiv.innerHTML = output;
-          }
+            let output = '<h3>Saved Designs:</h3>';
+            savedDesigns.forEach((design, index) => {
+                output += `<p>Design ${index + 1}: ${design.item} (${design.amount})<br>`;
+                for (const [inputItem, inputAmount] of Object.entries(design.result)) {
+                    output += `${inputItem}: ${inputAmount.toFixed(2)}<br>`;
+                }
+                output += '</p>';
+            });
+            savedDesignsDiv.innerHTML = output;
+        }
 
-          function signIn() {
-              alert('Sign-in feature coming soon!');
-          }
-
-          function showTab(tabId) {
-              document.querySelectorAll('.tab-content').forEach(tab => {
-                  tab.classList.remove('active');
-              });
-              document.querySelectorAll('.tabs a').forEach(link => {
-                  link.classList.remove('active');
-              });
-              document.getElementById(tabId).classList.add('active');
-              document.querySelector(`a[href="#${tabId}"]`).classList.add('active');
-              if (tabId === 'calculator') {
-                  loadDesigns();
-              }
-          }</script>
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tabs a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`a[href="#${tabId}"]`).classList.add('active');
+            if (tabId === 'calculator') {
+                loadDesigns();
+            }
+        }
+    </script>
 </body>
 </html>
