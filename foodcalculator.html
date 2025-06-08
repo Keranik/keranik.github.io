@@ -74,17 +74,19 @@
         function updateConsumptionMultiplier() {
             const consumptionOptions = {
                 'reduced40': 0.6,
+                'reduced30': 0.7,
                 'reduced20': 0.8,
                 'standard': 1.0,
                 'increased20': 1.2,
+                'increased30': 1.3,
                 'increased40': 1.4
             };
 
             const edicts = {
                 'foodSaverI': 0.8,
                 'foodSaverII': 0.9,
-                'plentyOfFoodI': 1.25,
-                'plentyOfFoodII': 1.25
+                'plentyOfFoodI': 1.2,
+                'plentyOfFoodII': 1.2
             };
 
             let consumptionMultiplier = consumptionOptions[document.querySelector('input[name="consumptionOption"]:checked').id] || 1.0;
