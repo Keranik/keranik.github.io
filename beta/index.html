@@ -141,6 +141,16 @@
             color: #C7CED1;
         }
 
+        textarea {
+            padding: 8px;
+            width: 200px;
+            border: none;
+            border-radius: 4px;
+            background-color: #2A3032;
+            color: #C7CED1;
+            height: 100px;
+        }
+
         button {
             padding: 10px 20px;
             background-color: #FF4500;
@@ -162,6 +172,7 @@
         #results, #savedDesigns {
             margin-top: 20px;
             font-size: 1.1em;
+            white-space: pre-wrap;
         }
 
         ul {
@@ -188,6 +199,25 @@
             padding: 20px;
             text-align: center;
             border-top: 2px solid #FF4500;
+        }
+
+        #machine-list {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .machine-icon {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        #canvas {
+            border: 1px solid #4A5153;
+            background-color: #2A3032;
+            display: block;
+            margin: 20px auto;
         }
     </style>
 </head>
@@ -233,17 +263,26 @@
         <section id="calculator" class="tab-content">
             <div class="panel">
                 <div class="calculator">
+                    <h3>Production Calculator</h3>
                     <label for="item">Select Item:</label>
                     <select id="item">
                         <option value="">Select an item</option>
                     </select>
-                    <label for="amount">Amount Needed:</label>
-                    <input type="number" id="amount" placeholder="e.g., 100" min="1">
-                    <button onclick="calculate()">Calculate</button>
+                    <label for="amount">Amount Needed (/min):</label>
+                    <input type="number" id="amount" placeholder="e.g., 1" min="1" value="1">
+                    <button onclick="calculateProduction()">Calculate</button>
+                    <h3>Reverse Calculator</h3>
+                    <label for="raw-inputs">Raw Inputs (item:rate per line):</label>
+                    <textarea id="raw-inputs"></textarea>
+                    <label for="target-item">Target Item:</label>
+                    <select id="target-item">
+                        <option value="">Select an item</option>
+                    </select>
+                    <button onclick="calculateReverse()">Calculate Max</button>
                     <button onclick="resetForm()">Reset</button>
                     <button onclick="saveDesign()">Save Design</button>
                     <button onclick="loadDesigns()">Load Designs</button>
-                    <div id="results"></div>
+                    <pre id="results"></pre>
                     <div id="savedDesigns"></div>
                 </div>
             </div>
@@ -251,8 +290,10 @@
         <section id="planner" class="tab-content">
             <div class="panel">
                 <h2>Production Planner</h2>
-                <p>Plan your entire production chain with this tool.</p>
-                <p><strong>Coming Soon:</strong> Input your desired outputs, and this planner will generate a complete production plan, including intermediates, resources, and machinery needed.</p>
+                <h3>Machines</h3>
+                <div id="machine-list"></div>
+                <canvas id="canvas" width="800" height="600"></canvas>
+                <button onclick="exportLayout()">Export Layout</button>
             </div>
         </section>
         <section id="tools" class="tab-content">
@@ -295,55 +336,195 @@
             <p>Assets used with permission from <a href="https://www.captain-of-industry.com/" target="_blank">Captain of Industry</a> developers. All images and assets are copyright their respective owners.</p>
         </div>
     </footer>
-    <script src="planner.js"></script>
     <script>
+        // Data loading
+        const baseUrl = 'https://raw.githubusercontent.com/ronw23/captain-of-data/main/';
+        let items = [];
+        let recipes = [];
+        let buildings = [];
+        let productToRecipes = {};
+        let itemMap = {};
+        let buildingMap = {};
+
+        async function initPlanner() {
+            try {
+                items = await fetch(baseUrl + 'data/items.json').then(r => r.json());
+                recipes = await fetch(baseUrl + 'data/recipes.json').then(r => r.json());
+                buildings = await fetch(baseUrl + 'data/buildings.json').then(r => r.json());
+
+                itemMap = items.reduce((map, item) => { map[item.id] = item; return map; }, {});
+                buildingMap = buildings.reduce((map, b) => { map[b.id] = b; return map; }, {});
+
+                productToRecipes = recipes.reduce((map, recipe) => {
+                    recipe.outputs.forEach(out => {
+                        if (!map[out.productId]) map[out.productId] = [];
+                        map[out.productId].push(recipe);
+                    });
+                    return map;
+                }, {});
+
+                return {
+                    items,
+                    recipes,
+                    buildings,
+                    calculateProduction: (product, rate) => {
+                        const tree = buildProductionTree(product, rate);
+                        return tree; // Return tree for formatting
+                    },
+                    computeMaxProduction: (product, available) => {
+                        return computeMaxProduction(product, available);
+                    }
+                };
+            } catch (e) {
+                console.error('Error loading data', e);
+                return {};
+            }
+        }
+
         let planner;
         initPlanner().then(p => {
             planner = p;
             populateItems();
+            populateTargetItems();
+            populateMachineList();
             loadDesigns();
         });
 
         function populateItems() {
             const itemSelect = document.getElementById('item');
-            const items = [...new Set(planner.recipes.flatMap(r => r.outputs.map(o => o.name)))];
-            items.forEach(item => {
+            Object.keys(productToRecipes).sort().forEach(pId => {
                 const option = document.createElement('option');
-                option.value = item;
-                option.textContent = item;
+                option.value = pId;
+                option.textContent = itemMap[pId]?.name || pId;
                 itemSelect.appendChild(option);
             });
         }
 
-        async function calculate() {
-            const item = document.getElementById('item').value;
-            const amount = parseFloat(document.getElementById('amount').value);
+        function populateTargetItems() {
+            const targetSelect = document.getElementById('target-item');
+            Object.keys(productToRecipes).sort().forEach(pId => {
+                const option = document.createElement('option');
+                option.value = pId;
+                option.textContent = itemMap[pId]?.name || pId;
+                targetSelect.appendChild(option);
+            });
+        }
+
+        function calculateProduction() {
+            const product = document.getElementById('item').value;
+            const rate = parseFloat(document.getElementById('amount').value) || 1;
             const resultsDiv = document.getElementById('results');
 
-            if (!item || isNaN(amount) || amount <= 0) {
-                resultsDiv.innerHTML = 'Please select an item and enter a valid amount.';
+            if (!product || isNaN(rate) || rate <= 0) {
+                resultsDiv.textContent = 'Please select an item and enter a valid amount.';
                 return;
             }
 
-            const result = planner.calculateProduction(item, amount);
-            if (Object.keys(result).length === 0) {
-                resultsDiv.innerHTML = `No recipe found for ${item}.`;
+            const tree = planner.calculateProduction(product, rate);
+            resultsDiv.textContent = formatTree(tree, 0);
+
+            window.currentDesign = { product, rate, tree };
+        }
+
+        function buildProductionTree(product, rate, chosenRecipes = {}) {
+            const recipeOptions = productToRecipes[product] || [];
+            if (!recipeOptions.length) return {product: itemMap[product]?.name || product, rate: 0, machines: 0};
+
+            const recipe = recipeOptions[0]; // TODO: allow selection
+
+            const output = recipe.outputs.find(out => out.productId === product);
+            const outputAmount = output ? output.amount : 0;
+            const cycleRate = outputAmount / (recipe.duration / 60);
+            const machines = Math.ceil(rate / cycleRate);
+
+            const inputs = {};
+            recipe.inputs.forEach(inp => {
+                const inputRate = (inp.amount / outputAmount) * rate;
+                inputs[inp.productId] = buildProductionTree(inp.productId, inputRate, chosenRecipes);
+            });
+
+            const byproducts = {};
+            recipe.outputs.forEach(out => {
+                if (out.productId !== product) {
+                    const bpRate = (out.amount / outputAmount) * rate;
+                    byproducts[out.productId] = bpRate;
+                }
+            });
+
+            return {
+                product: itemMap[product]?.name || product,
+                rate,
+                machines,
+                machine: buildingMap[recipe.buildingId]?.name || recipe.buildingId,
+                inputs,
+                byproducts
+            };
+        }
+
+        function formatTree(node, depth) {
+            let str = '  '.repeat(depth) + `${node.product}: ${node.rate.toFixed(2)}/min (${node.machines} x ${node.machine})\n`;
+            for (let bp in node.byproducts || {}) {
+                str += '  '.repeat(depth + 1) + `Byproduct ${itemMap[bp]?.name || bp}: ${node.byproducts[bp].toFixed(2)}/min\n`;
+            }
+            for (let input in node.inputs || {}) {
+                str += formatTree(node.inputs[input], depth + 1);
+            }
+            return str;
+        }
+
+        function calculateReverse() {
+            const rawStr = document.getElementById('raw-inputs').value;
+            const target = document.getElementById('target-item').value;
+            const resultsDiv = document.getElementById('results');
+
+            const raws = {};
+            rawStr.split('\n').forEach(line => {
+                const [item, rateStr] = line.split(':');
+                if (item && rateStr) raws[item.trim()] = parseFloat(rateStr);
+            });
+
+            if (!target || Object.keys(raws).length === 0) {
+                resultsDiv.textContent = 'Please enter raw inputs and select a target item.';
                 return;
             }
 
-            let output = '<h3>Required Inputs:</h3>';
-            for (const [inputItem, inputAmount] of Object.entries(result)) {
-                output += `${inputItem}: ${inputAmount.toFixed(2)}<br>`;
-            }
-            resultsDiv.innerHTML = output;
+            const maxRate = planner.computeMaxProduction(target, raws);
+            resultsDiv.textContent = `Max ${itemMap[target]?.name || target}: ${maxRate.toFixed(2)}/min`;
 
-            window.currentDesign = { item, amount, result };
+            window.currentDesign = { target, raws, maxRate };
+        }
+
+        function computeMaxProduction(product, available, memo = {}) {
+            if (memo[product]) return memo[product];
+            if (available[product]) return available[product];
+
+            const recipeOptions = productToRecipes[product] || [];
+            if (!recipeOptions.length) return 0;
+
+            const recipe = recipeOptions[0];
+
+            const output = recipe.outputs.find(out => out.productId === product);
+            const outputAmount = output ? output.amount : 1;
+
+            let limiting = Infinity;
+            recipe.inputs.forEach(inp => {
+                const inpMax = computeMaxProduction(inp.productId, available, memo);
+                const inpNeeded = (inp.amount / outputAmount);
+                const inpRate = inpMax / inpNeeded;
+                limiting = Math.min(limiting, inpRate);
+            });
+
+            const rate = limiting;
+            memo[product] = rate;
+            return rate;
         }
 
         function resetForm() {
             document.getElementById('item').value = '';
-            document.getElementById('amount').value = '';
-            document.getElementById('results').innerHTML = '';
+            document.getElementById('amount').value = '1';
+            document.getElementById('raw-inputs').value = '';
+            document.getElementById('target-item').value = '';
+            document.getElementById('results').textContent = '';
             window.currentDesign = null;
         }
 
@@ -369,13 +550,105 @@
 
             let output = '<h3>Saved Designs:</h3>';
             savedDesigns.forEach((design, index) => {
-                output += `<p>Design ${index + 1}: ${design.item} (${design.amount})<br>`;
-                for (const [inputItem, inputAmount] of Object.entries(design.result)) {
-                    output += `${inputItem}: ${inputAmount.toFixed(2)}<br>`;
+                output += `<p>Design ${index + 1}:`;
+                if (design.tree) {
+                    output += `<br>Production for ${design.product} at ${design.rate}/min:<br><pre>${formatTree(design.tree, 0)}</pre>`;
+                } else if (design.maxRate) {
+                    output += `<br>Max ${design.target}: ${design.maxRate.toFixed(2)}/min from raws: ${JSON.stringify(design.raws)}`;
                 }
                 output += '</p>';
             });
             savedDesignsDiv.innerHTML = output;
+        }
+
+        // Layout Builder
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas ? canvas.getContext('2d') : null;
+        let machines = []; // {id, x, y, buildingId}
+        let connections = []; // {fromId, toId}
+        let selected = null;
+        let dragStart = null;
+
+        function populateMachineList() {
+            const machineList = document.getElementById('machine-list');
+            buildings.forEach(b => {
+                const img = document.createElement('img');
+                img.src = baseUrl + 'icons/' + (b.icon || b.id + '.png');
+                img.className = 'machine-icon';
+                img.title = b.name;
+                img.onclick = () => addMachineToLayout(b.id);
+                machineList.appendChild(img);
+            });
+        }
+
+        function initLayout() {
+            if (!canvas) return;
+            canvas.addEventListener('mousedown', onMouseDown);
+            canvas.addEventListener('mousemove', onMouseMove);
+            canvas.addEventListener('mouseup', onMouseUp);
+            drawLayout();
+        }
+
+        function addMachineToLayout(buildingId) {
+            machines.push({id: machines.length, x: 100 + machines.length * 10, y: 100 + machines.length * 10, buildingId});
+            drawLayout();
+        }
+
+        function drawLayout() {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            machines.forEach(m => {
+                const b = buildingMap[m.buildingId];
+                const icon = new Image();
+                icon.src = baseUrl + 'icons/' + (b.icon || m.buildingId + '.png');
+                icon.onload = () => ctx.drawImage(icon, m.x, m.y, 50, 50);
+                if (m.id === selected) {
+                    ctx.strokeStyle = '#FF4500';
+                    ctx.strokeRect(m.x, m.y, 50, 50);
+                }
+            });
+            connections.forEach(c => {
+                const from = machines.find(m => m.id === c.fromId);
+                const to = machines.find(m => m.id === c.toId);
+                if (from && to) {
+                    ctx.beginPath();
+                    ctx.moveTo(from.x + 25, from.y + 25);
+                    ctx.lineTo(to.x + 25, to.y + 25);
+                    ctx.strokeStyle = '#C7CED1';
+                    ctx.stroke();
+                }
+            });
+        }
+
+        function onMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            selected = machines.findIndex(m => x > m.x && x < m.x + 50 && y > m.y && y < m.y + 50);
+            if (selected !== -1) {
+                dragStart = {x: x - machines[selected].x, y: y - machines[selected].y};
+            }
+            drawLayout();
+        }
+
+        function onMouseMove(e) {
+            if (dragStart) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                machines[selected].x = x - dragStart.x;
+                machines[selected].y = y - dragStart.y;
+                drawLayout();
+            }
+        }
+
+        function onMouseUp() {
+            dragStart = null;
+        }
+
+        function exportLayout() {
+            console.log(JSON.stringify({machines, connections}));
+            alert('Layout exported to console.');
         }
 
         function showTab(tabId) {
@@ -391,6 +664,8 @@
                 loadDesigns();
             } else if (tabId === 'mods') {
                 showModDetails();
+            } else if (tabId === 'planner') {
+                initLayout();
             }
         }
 
@@ -406,17 +681,17 @@
 
             if (selectedMod === 'coiExtended') {
                 modDetails.innerHTML = `
-                          <h3>COI-Extended</h3>
-                          <p><strong>Description:</strong> This mod adds new features and enhancements to <em>Captain of Industry</em>, including extended production chains and quality-of-life improvements.</p>
-                          <p><strong>Version:</strong> 1.0.0</p>
-                          <p><a href="https://github.com/Keranik/COI-Extended/releases" target="_blank">Download Now</a></p>
-                      `;
+                    <h3>COI-Extended</h3>
+                    <p><strong>Description:</strong> This mod adds new features and enhancements to <em>Captain of Industry</em>, including extended production chains and quality-of-life improvements.</p>
+                    <p><strong>Version:</strong> 1.0.0</p>
+                    <p><a href="https://github.com/Keranik/COI-Extended/releases" target="_blank">Download Now</a></p>
+                `;
             } else if (selectedMod === 'placeholderMod') {
                 modDetails.innerHTML = `
-                          <h3>Placeholder Mod</h3>
-                          <p><strong>Description:</strong> This is a placeholder for future mods. Check back later for updates!</p>
-                          <p><strong>Version:</strong> N/A</p>
-                      `;
+                    <h3>Placeholder Mod</h3>
+                    <p><strong>Description:</strong> This is a placeholder for future mods. Check back later for updates!</p>
+                    <p><strong>Version:</strong> N/A</p>
+                `;
             }
         }
     </script>
