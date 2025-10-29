@@ -55,7 +55,6 @@ const parseLayoutPorts = (layoutString, ports) => {
     return Array.from(portMap.values());
 };
 
-// Shape/color map by type
 const getPortStyle = (portType, inferredType = 'unknown') => {
     const base = {
         width: 12, height: 12,
@@ -78,33 +77,48 @@ const getPortStyle = (portType, inferredType = 'unknown') => {
     }
 };
 
-const MachineNode = ({ data, setNodes }) => {
-    const { label, parsedPorts, rotation } = data;
+const MachineNode = ({ data, id, setNodes }) => {
+    const { label, parsedPorts, rotation = 0 } = data;
     const scale = 15;
 
     const handleRotate = () => {
         const newRotation = (rotation + 90) % 360;
         setNodes((nds) =>
-            nds.map((node) =>
-                node.id === data.id
-                    ? { ...node, data: { ...node.data, rotation: newRotation } }
-                    : node
-            )
+            nds.map((node) => {
+                if (node.id === id) {
+                    // Swap width and height on 90° and 270° rotations
+                    const shouldSwap = (newRotation === 90 || newRotation === 270);
+                    const currentWidth = node.style?.width || 100;
+                    const currentHeight = node.style?.height || 60;
+                    
+                    return {
+                        ...node,
+                        data: { ...node.data, rotation: newRotation },
+                        style: {
+                            ...node.style,
+                            width: shouldSwap ? currentHeight : currentWidth,
+                            height: shouldSwap ? currentWidth : currentHeight
+                        }
+                    };
+                }
+                return node;
+            })
         );
     };
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-            {/* Fixed Label */}
+            {/* Fixed Label - counter-rotated to stay readable */}
             <div style={{
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
-                transform: 'translate(-50%, -50%)',
+                transform: `translate(-50%, -50%) rotate(${-rotation}deg)`,
                 color: 'white',
                 fontWeight: 'bold',
                 zIndex: 10,
-                pointerEvents: 'none'
+                pointerEvents: 'none',
+                whiteSpace: 'nowrap'
             }}>
                 {label}
             </div>
@@ -116,13 +130,15 @@ const MachineNode = ({ data, setNodes }) => {
                     position: 'absolute',
                     top: '1px',
                     right: '1px',
-                    background: 'transparent',
+                    background: 'rgba(0,0,0,0.5)',
                     color: 'white',
-                    border: 'none',
+                    border: '1px solid #666',
+                    borderRadius: '3px',
                     fontSize: 14,
                     cursor: 'pointer',
                     zIndex: 10,
-                    padding: '1px'
+                    padding: '2px 4px',
+                    lineHeight: 1
                 }}
             >
                 🔄
@@ -147,7 +163,7 @@ const MachineNode = ({ data, setNodes }) => {
                         <Handle
                             key={port.id}
                             type={port.type}
-                            position="custom"
+                            position="left"
                             style={{
                                 left: `${port.pos.x * scale}px`,
                                 top: `${port.pos.y * scale}px`,
