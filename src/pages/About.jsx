@@ -1,4 +1,11 @@
+import { useEffect } from 'react';
+
 const About = () => {
+
+useEffect(() => {
+  document.title = 'About & Contact - COI Calculator Tools';
+}, []);
+
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
       <h2>About COI Calculator</h2>

@@ -5,9 +5,9 @@ const Layout = () => {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#1a1a1a', color: 'white' }}>
       {/* Header */}
       <header style={{ backgroundColor: '#2a2a2a', padding: '1rem 2rem', borderBottom: '2px solid #444' }}>
-        <h1 style={{ margin: 0, fontSize: '1.8rem' }}>COI Calculator</h1>
+        <h1 style={{ margin: 0, fontSize: '1.8rem' }}>Captain of Industry Calculator & Factory Tools</h1>
         <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: '#aaa' }}>
-          Your Ultimate Factory Game Companion
+          Your Ultimate Captain of Industry Game Resources & Companion
         </p>
       </header>
 
@@ -31,10 +31,15 @@ const Layout = () => {
       {/* Footer */}
       <footer style={{ backgroundColor: '#2a2a2a', padding: '2rem', borderTop: '2px solid #444', textAlign: 'center' }}>
         <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>
-          © {new Date().getFullYear()} COI Calculator. All rights reserved.
+          © {new Date().getFullYear()} Undiscovered Entertainment. All rights reserved.
         </p>
-        <p style={{ margin: 0, fontSize: '0.8rem', color: '#aaa' }}>
-          Contact: <a href="mailto:contact@coicalculator.com" style={{ color: '#4a90e2' }}>contact@coicalculator.com</a>
+        <p style={{ margin: '0.5rem 0', fontSize: '0.8rem', color: '#aaa', lineHeight: '1.6' }}>
+          Captain of Industry and all related game assets are © MaFi Games.<br />
+          Used with permission under the MaFi Games modding policy.<br />
+          All game images, data, and trademarks are property of their respective owners.
+        </p>
+        <p style={{ margin: '1rem 0 0 0', fontSize: '0.8rem', color: '#aaa' }}>
+          Contact: <a href="mailto:contact@coicalculator.com" style={{ color: '#4a90e2', textDecoration: 'none' }}>contact@coicalculator.com</a>
         </p>
       </footer>
     </div>

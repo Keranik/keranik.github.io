@@ -1,7 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { ReactFlow, Background, Controls, MiniMap, ReactFlowProvider, useNodesState, useEdgesState, Handle } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import GameData from '../GameData';
+
 
 const nodeTypes = {};
 
@@ -64,6 +65,10 @@ const Visualizer = () => {
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [selectedMachines, setSelectedMachines] = useState([]);
+
+useEffect(() => {
+  document.title = 'Factory Visualizer - Captain of Industry Tools';
+}, []);
 
     // Shape/color map by type
     const getPortStyle = (portType, inferredType = 'unknown') => {

@@ -1,9 +1,15 @@
+import { useEffect } from 'react';
+
 const Home = () => {
+  useEffect(() => {
+    document.title = 'Captain of Industry Calculator & Factory Tools';
+  }, []);
+
   return (
     <div style={{ padding: '3rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Welcome to COI Calculator</h2>
+      <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Welcome to Keranik's Captain of Industry - Factory Calculator</h2>
       <p style={{ fontSize: '1.2rem', lineHeight: '1.8', color: '#ccc' }}>
-        Your complete toolkit for optimizing factory games like Satisfactory, Factorio, and more!
+        Your complete toolkit for optimizing all aspects of your Captain of Industry experience!
       </p>
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem', marginTop: '3rem' }}>

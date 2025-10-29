@@ -1,4 +1,11 @@
+import { useEffect } from 'react';
+
 const Mods = () => {
+
+useEffect(() => {
+  document.title = 'Mods & Downloads - Captain of Industry Tools';
+}, []);
+
   return (
     <div style={{ padding: '2rem' }}>
       <h2>Mods</h2>
