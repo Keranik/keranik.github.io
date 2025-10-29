@@ -130,10 +130,11 @@ class ProductionCalculator {
    * @param {string} productId - Target product ID
    * @param {number} targetRate - Desired items per minute
    * @param {string} recipeId - Optional: specific recipe to use (otherwise picks first available)
+   * @param {Map} recipeOverrides - Map of productId -> recipeId for custom recipe selections
    * @param {number} depth - Current recursion depth (for cycle detection)
    * @returns {Object} - Production chain tree
    */
-  calculateProductionChain(productId, targetRate, recipeId = null, depth = 0, visited = new Set()) {
+  calculateProductionChain(productId, targetRate, recipeId = null, recipeOverrides = new Map(), depth = 0, visited = new Set()) {
     // Prevent infinite recursion
     if (depth > 20) {
       return { error: 'Max recursion depth reached', productId, targetRate };
@@ -151,10 +152,12 @@ class ProductionCalculator {
       return { error: 'Product not found', productId };
     }
 
-    // Get recipe to use
+    // Get recipe to use - check overrides first
     let recipe;
     if (recipeId) {
       recipe = this.getRecipe(recipeId);
+    } else if (recipeOverrides.has(productId)) {
+      recipe = this.getRecipe(recipeOverrides.get(productId));
     } else {
       // Auto-select first available recipe
       const recipes = this.getRecipesForProduct(productId);
@@ -181,16 +184,20 @@ class ProductionCalculator {
     // Calculate production rates
     const rates = this.calculateProductionRate(recipe, machineCalc.machineCount);
 
-    // Recursively calculate input chains
+    // Recursively calculate input chains with recipe overrides
     const inputChains = rates.inputs.map(input => {
       return this.calculateProductionChain(
         input.productId,
         input.ratePerMin,
-        null, // Auto-select recipe for inputs
+        null, // Don't force recipe, let overrides handle it
+        recipeOverrides,
         depth + 1,
         new Set(visited) // Pass copy of visited set
       );
     });
+
+    // Get available recipes for this product (for UI)
+    const availableRecipes = this.getRecipesForProduct(productId);
 
     return {
       productId,
@@ -203,6 +210,7 @@ class ProductionCalculator {
       inputs: rates.inputs,
       outputs: rates.outputs,
       inputChains,
+      availableRecipes, // Include for UI recipe selection
       depth,
       isRawMaterial: false
     };
@@ -266,9 +274,10 @@ class ProductionCalculator {
    * @param {string} productId - Product to calculate
    * @param {Map} availableResources - Map of productId -> available quantity
    * @param {string} recipeId - Optional: specific recipe to use
+   * @param {Map} recipeOverrides - Map of productId -> recipeId for custom recipe selections
    * @returns {Object} - { maxProduction, limitingFactor, chain }
    */
-  calculateMaxProduction(productId, availableResources, recipeId = null) {
+  calculateMaxProduction(productId, availableResources, recipeId = null, recipeOverrides = new Map()) {
     // Get recipe
     let recipe;
     if (recipeId) {
@@ -282,7 +291,7 @@ class ProductionCalculator {
       return { error: 'No recipe found', productId };
     }
 
-    // Find limiting input
+    // Find limiting input based on available resources
     let maxProduction = Infinity;
     let limitingFactor = null;
 
@@ -303,7 +312,7 @@ class ProductionCalculator {
     });
 
     // Calculate chain for this production rate
-    const chain = this.calculateProductionChain(productId, maxProduction, recipe.id);
+    const chain = this.calculateProductionChain(productId, maxProduction, recipe.id, recipeOverrides);
 
     return {
       maxProduction,
@@ -317,13 +326,14 @@ class ProductionCalculator {
    * Compare multiple recipes for the same product
    * @param {string} productId - Product to analyze
    * @param {number} targetRate - Target production rate
+   * @param {Map} recipeOverrides - Map of productId -> recipeId for custom recipe selections
    * @returns {Array} - Array of recipe comparisons sorted by efficiency
    */
-  compareRecipes(productId, targetRate) {
+  compareRecipes(productId, targetRate, recipeOverrides = new Map()) {
     const recipes = this.getRecipesForProduct(productId);
     
     const comparisons = recipes.map(recipe => {
-      const chain = this.calculateProductionChain(productId, targetRate, recipe.id);
+      const chain = this.calculateProductionChain(productId, targetRate, recipe.id, recipeOverrides);
       const requirements = this.calculateTotalRequirements(chain);
 
       return {
