@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
-import { getProductIcon, getMachineImage } from '../utils/AssetHelper';
+import { getProductIcon, getMachineImage, getGeneralIcon, getProductTypeIcon } from '../utils/AssetHelper';
 
 const Calculator = () => {
   useEffect(() => {
@@ -43,6 +43,9 @@ const Calculator = () => {
     const isRaw = node.isRawMaterial;
     const productIcon = getProductIcon(product);
     const machineImage = node.machine ? getMachineImage(node.machine) : null;
+    const electricityIcon = getGeneralIcon('Electricity');
+    const workerIcon = getGeneralIcon('Worker');
+    const computingIcon = getGeneralIcon('Computing');
 
     return (
       <div key={`${node.productId}-${level}`} style={{ marginLeft: `${indent}px`, marginBottom: '10px' }}>
@@ -63,10 +66,7 @@ const Calculator = () => {
                   style={{ 
                     width: '32px', 
                     height: '32px',
-                    objectFit: 'contain',
-                    backgroundColor: '#1a1a1a',
-                    padding: '4px',
-                    borderRadius: '4px'
+                    objectFit: 'contain'
                   }}
                 />
               )}
@@ -94,10 +94,7 @@ const Calculator = () => {
                     style={{ 
                       width: '40px', 
                       height: '40px',
-                      objectFit: 'contain',
-                      backgroundColor: '#1a1a1a',
-                      padding: '4px',
-                      borderRadius: '4px'
+                      objectFit: 'contain'
                     }}
                   />
                 )}
@@ -108,11 +105,23 @@ const Calculator = () => {
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '15px', marginTop: '8px', flexWrap: 'wrap' }}>
-                <span>⚡ {(node.machine.electricityKw * node.machineCount).toFixed(0)} kW</span>
-                <span>👷 {node.machine.workers * node.machineCount} workers</span>
+              <div style={{ display: 'flex', gap: '15px', marginTop: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {electricityIcon ? (
+                    <img src={electricityIcon} alt="Electricity" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                  ) : '⚡'} {(node.machine.electricityKw * node.machineCount).toFixed(0)} kW
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {workerIcon ? (
+                    <img src={workerIcon} alt="Workers" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                  ) : '👷'} {node.machine.workers * node.machineCount} workers
+                </span>
                 {node.machine.computingTFlops > 0 && (
-                  <span>💻 {(node.machine.computingTFlops * node.machineCount).toFixed(1)} TFLOPS</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {computingIcon ? (
+                      <img src={computingIcon} alt="Computing" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                    ) : '💻'} {(node.machine.computingTFlops * node.machineCount).toFixed(1)} TFLOPS
+                  </span>
                 )}
               </div>
             </div>
@@ -215,11 +224,14 @@ const Calculator = () => {
             }}
           >
             <option value="">-- Select a product --</option>
-            {producibleProducts.slice(0, 100).map(product => (
-              <option key={product.id} value={product.id}>
-                {product.name} ({product.type})
-              </option>
-            ))}
+            {producibleProducts.slice(0, 100).map(product => {
+              const typeIcon = getProductTypeIcon(product.type);
+              return (
+                <option key={product.id} value={product.id}>
+                  {product.name} {typeIcon ? '●' : `(${product.type})`}
+                </option>
+              );
+            })}
           </select>
           {producibleProducts.length > 100 && (
             <p style={{ color: '#999', fontSize: '0.85rem', marginTop: '5px' }}>
@@ -290,13 +302,21 @@ const Calculator = () => {
                 </div>
               </div>
               <div style={{ backgroundColor: '#333', padding: '1rem', borderRadius: '4px' }}>
-                <div style={{ color: '#aaa', fontSize: '0.9rem' }}>Total Power</div>
+                <div style={{ color: '#aaa', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  Total Power {getGeneralIcon('Electricity') && (
+                    <img src={getGeneralIcon('Electricity')} alt="Electricity" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                  )}
+                </div>
                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#FFD700' }}>
                   {requirements.power.toFixed(0)} kW
                 </div>
               </div>
               <div style={{ backgroundColor: '#333', padding: '1rem', borderRadius: '4px' }}>
-                <div style={{ color: '#aaa', fontSize: '0.9rem' }}>Total Workers</div>
+                <div style={{ color: '#aaa', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  Total Workers {getGeneralIcon('Worker') && (
+                    <img src={getGeneralIcon('Worker')} alt="Workers" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                  )}
+                </div>
                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#50C878' }}>
                   {requirements.workers}
                 </div>
