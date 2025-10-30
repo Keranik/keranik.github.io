@@ -7,7 +7,7 @@ const About = () => {
 
     return (
         <div style={{
-            maxWidth: '1200px',
+            maxWidth: '1920px',
             margin: '0 auto',
             minHeight: '100vh'
         }}>
@@ -17,7 +17,8 @@ const About = () => {
                 backgroundColor: '#2a2a2a',
                 borderBottom: '2px solid #4a90e2',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                marginBottom: '2rem'
+                marginBottom: '2rem',
+                maxWidth: '1920px'
             }}>
                 <h2 style={{
                     fontSize: '2rem',
