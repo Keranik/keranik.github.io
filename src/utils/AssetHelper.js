@@ -50,6 +50,16 @@ function getProductTypeIconPath(typeName) {
 }
 
 /**
+ * Convert crop ID to icon path key (in product directory)
+ * Crop IDs like "Crop_GreenManure" -> "../assets/icons/product/GreenManure.png"
+ */
+function getCropIconPath(cropId) {
+  if (!cropId) return null;
+  const filename = cropId.replace(/^Crop_/, '') + '.png';
+  return `../assets/icons/product/${filename}`;
+}
+
+/**
  * Get product icon URL
  * @param {Object} product - Product object from GameData
  * @returns {string|null} - Icon URL or null
@@ -62,6 +72,28 @@ export function getProductIcon(product) {
   
   // Return the imported image URL
   return productIcons[path] || null;
+}
+
+/**
+ * Get crop icon URL
+ * @param {Object} crop - Crop object from GameData
+ * @returns {string|null} - Icon URL or null
+ */
+export function getCropIcon(crop) {
+  if (!crop) return null;
+  
+  // First try to get icon from the crop's output product
+  if (crop.output && crop.output.productId && crop.output.productId !== '__PHANTOM__PRODUCT__') {
+    const productPath = getProductIconPath(crop.output.productId);
+    const productIcon = productIcons[productPath];
+    if (productIcon) return productIcon;
+  }
+  
+  // Fallback to crop-specific icon (also in product directory)
+  const path = getCropIconPath(crop.id);
+  if (!path) return null;
+  
+  return productIcons[path] || null; // Use productIcons (same directory)
 }
 
 /**
@@ -137,6 +169,7 @@ export function getRecipeIcon(recipe, getProduct) {
 
 export default {
   getProductIcon,
+  getCropIcon,
   getMachineImage,
   getBuildingImage,
   getRecipeIcon,

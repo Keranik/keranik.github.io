@@ -10,10 +10,22 @@ class ProductionCalculator {
     this.recipes = GameData.recipes || [];
     this.products = GameData.products || [];
     
+    // NEW: Farm-related data
+    this.farms = GameData.farms || [];
+    this.crops = GameData.crops || [];
+    this.foods = GameData.foods || [];
+    this.foodCategories = GameData.foodCategories || [];
+    this.farmResearch = GameData.farmResearch || [];
+    
     // Build lookup maps for fast access
     this.productMap = new Map(this.products.map(p => [p.id, p]));
     this.recipeMap = new Map(this.recipes.map(r => [r.id, r]));
     this.machineMap = new Map(this.machines.map(m => [m.id, m]));
+    
+    // NEW: Build farm lookup maps
+    this.farmMap = new Map(this.farms.map(f => [f.id, f]));
+    this.cropMap = new Map(this.crops.map(c => [c.id, c]));
+    this.foodMap = new Map(this.foods.map(f => [f.id, f]));
     
     // Build reverse lookup: product -> recipes that produce it
     this.productToRecipes = new Map();
@@ -24,6 +36,27 @@ class ProductionCalculator {
         }
         this.productToRecipes.get(output.productId).push(recipe.id);
       });
+    });
+    
+    // NEW: Extract fertilizers from products
+    this.fertilizers = this.products
+      .filter(p => p.fertilizer != null)
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        fertilityPerQuantity: p.fertilizer.fertilityPerQuantityPercent,
+        maxFertility: p.fertilizer.maxFertilityPercent
+      }));
+
+    // Log loaded data for debugging
+    console.log('ProductionCalculator initialized:', {
+      machines: this.machines.length,
+      recipes: this.recipes.length,
+      products: this.products.length,
+      farms: this.farms.length,
+      crops: this.crops.length,
+      foods: this.foods.length,
+      fertilizers: this.fertilizers.length
     });
   }
 
@@ -46,6 +79,27 @@ class ProductionCalculator {
    */
   getMachine(machineId) {
     return this.machineMap.get(machineId);
+  }
+
+  /**
+   * NEW: Get farm details by ID
+   */
+  getFarm(farmId) {
+    return this.farmMap.get(farmId);
+  }
+
+  /**
+   * NEW: Get crop details by ID
+   */
+  getCrop(cropId) {
+    return this.cropMap.get(cropId);
+  }
+
+  /**
+   * NEW: Get food details by ID
+   */
+  getFood(foodId) {
+    return this.foodMap.get(foodId);
   }
 
   /**
