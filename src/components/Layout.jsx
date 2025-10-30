@@ -11,13 +11,14 @@ const Layout = () => {
 
     return (
         <div style={{
-            display: 'flex',
-            flexDirection: 'column',
             minHeight: '100vh',
-            backgroundColor: '#1a1a1a',
-            color: 'white'
+            background: 'linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%)',
+            color: 'white',
+            maxWidth: '1400px',
+            margin: '0 auto',
+            width: '100%'
         }}>
-            {/* Header - Full width background, contained content */}
+            {/* Header */}
             <header style={{
                 backgroundColor: '#2a2a2a',
                 borderBottom: '2px solid #4a90e2',
@@ -27,8 +28,6 @@ const Layout = () => {
                 zIndex: 100
             }}>
                 <div style={{
-                    maxWidth: '1920px',
-                    margin: '0 auto',
                     padding: '1.25rem 2rem'
                 }}>
                     <h1 style={{
@@ -51,15 +50,13 @@ const Layout = () => {
                 </div>
             </header>
 
-            {/* Navigation - Full width background, contained content */}
+            {/* Navigation */}
             <nav style={{
                 backgroundColor: '#1a1a1a',
                 borderBottom: '1px solid #333',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
             }}>
                 <div style={{
-                    maxWidth: '1920px',
-                    margin: '0 auto',
                     padding: '0 2rem'
                 }}>
                     <ul style={{
@@ -113,12 +110,16 @@ const Layout = () => {
                 </div>
             </nav>
 
-            {/* Main Content - NO width restriction, pages control their own width */}
-            <main style={{ flex: 1 }}>
+            {/* Main Content */}
+            <main style={{
+                flex: 1,
+                padding: '0',
+                boxSizing: 'border-box'
+            }}>
                 <Outlet />
             </main>
 
-            {/* Footer - Full width background, contained content */}
+            {/* Footer */}
             <footer style={{
                 backgroundColor: '#2a2a2a',
                 borderTop: '2px solid #4a90e2',
@@ -126,8 +127,6 @@ const Layout = () => {
                 boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.3)'
             }}>
                 <div style={{
-                    maxWidth: '1920px',
-                    margin: '0 auto',
                     padding: '2rem',
                     textAlign: 'center'
                 }}>
