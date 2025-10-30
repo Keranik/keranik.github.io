@@ -1,7 +1,7 @@
 const GameData = {
   "metadataJs": {
     "version": "Update 3",
-    "lastUpdated": "10/28/2025",
+    "lastUpdated": "10/30/2025",
     "updateNotes": "Added train-related recipes for Update 3"
   },
   "machines": [
@@ -141494,6 +141494,15 @@ const GameData = {
       "supportsIrrigation": true,
       "isGreenhouse": true,
       "evaporationPerDay": 0.099609375,
+      "tiers": [
+        {
+          "id": "FarmT4",
+          "name": "Greenhouse II",
+          "tierNumber": 0,
+          "costMultiplier": null,
+          "speedMultiplier": null
+        }
+      ],
       "foodPerAnimal": {
         "productId": "",
         "quantity": 0
@@ -141545,6 +141554,22 @@ const GameData = {
       "supportsIrrigation": true,
       "isGreenhouse": true,
       "evaporationPerDay": 0.099609375,
+      "tiers": [
+        {
+          "id": "FarmT4",
+          "name": "Greenhouse II",
+          "tierNumber": 0,
+          "costMultiplier": null,
+          "speedMultiplier": null
+        },
+        {
+          "id": "FarmT3",
+          "name": "Greenhouse",
+          "tierNumber": 0,
+          "costMultiplier": null,
+          "speedMultiplier": null
+        }
+      ],
       "foodPerAnimal": {
         "productId": "",
         "quantity": 0
@@ -141592,6 +141617,29 @@ const GameData = {
       "supportsIrrigation": true,
       "isGreenhouse": false,
       "evaporationPerDay": 0.200195313,
+      "tiers": [
+        {
+          "id": "FarmT4",
+          "name": "Greenhouse II",
+          "tierNumber": 0,
+          "costMultiplier": null,
+          "speedMultiplier": null
+        },
+        {
+          "id": "FarmT3",
+          "name": "Greenhouse",
+          "tierNumber": 0,
+          "costMultiplier": null,
+          "speedMultiplier": null
+        },
+        {
+          "id": "FarmT2",
+          "name": "Irrigated Farm",
+          "tierNumber": 0,
+          "costMultiplier": null,
+          "speedMultiplier": null
+        }
+      ],
       "foodPerAnimal": {
         "productId": "",
         "quantity": 0
@@ -141639,6 +141687,36 @@ const GameData = {
       "supportsIrrigation": false,
       "isGreenhouse": false,
       "evaporationPerDay": 0.200195313,
+      "tiers": [
+        {
+          "id": "FarmT4",
+          "name": "Greenhouse II",
+          "tierNumber": 0,
+          "costMultiplier": null,
+          "speedMultiplier": null
+        },
+        {
+          "id": "FarmT3",
+          "name": "Greenhouse",
+          "tierNumber": 0,
+          "costMultiplier": null,
+          "speedMultiplier": null
+        },
+        {
+          "id": "FarmT2",
+          "name": "Irrigated Farm",
+          "tierNumber": 0,
+          "costMultiplier": null,
+          "speedMultiplier": null
+        },
+        {
+          "id": "FarmT1",
+          "name": "Farm",
+          "tierNumber": 0,
+          "costMultiplier": null,
+          "speedMultiplier": null
+        }
+      ],
       "foodPerAnimal": {
         "productId": "",
         "quantity": 0
@@ -141678,6 +141756,15 @@ const GameData = {
       "supportsIrrigation": false,
       "isGreenhouse": false,
       "evaporationPerDay": 0,
+      "tiers": [
+        {
+          "id": "ChickenFarm",
+          "name": "Chicken farm",
+          "tierNumber": 0,
+          "costMultiplier": null,
+          "speedMultiplier": null
+        }
+      ],
       "foodPerAnimal": {
         "productId": "Product_AnimalFeed",
         "quantity": 0.0302734375
@@ -141925,6 +142012,154 @@ const GameData = {
       "iconPath": "Assets/Base/Products/Icons/Flowers.svg"
     }
   ],
+  "foods": [
+    {
+      "id": "Food_Potato",
+      "productId": "Product_Potato",
+      "categoryId": "FoodCategory_Carbs",
+      "consumedPerHundredPopsPerMonth": 4.20019531,
+      "unityProvided": 0.150390625
+    },
+    {
+      "id": "Food_Corn",
+      "productId": "Product_Corn",
+      "categoryId": "FoodCategory_Carbs",
+      "consumedPerHundredPopsPerMonth": 3,
+      "unityProvided": 0.150390625
+    },
+    {
+      "id": "Food_Bread",
+      "productId": "Product_Bread",
+      "categoryId": "FoodCategory_Carbs",
+      "consumedPerHundredPopsPerMonth": 2,
+      "unityProvided": 0.299804688
+    },
+    {
+      "id": "Food_Meat",
+      "productId": "Product_Meat",
+      "categoryId": "FoodCategory_Protein",
+      "consumedPerHundredPopsPerMonth": 2.70019531,
+      "unityProvided": 0.400390625
+    },
+    {
+      "id": "Food_Eggs",
+      "productId": "Product_Eggs",
+      "categoryId": "FoodCategory_Protein",
+      "consumedPerHundredPopsPerMonth": 3,
+      "unityProvided": 0.299804688
+    },
+    {
+      "id": "Food_Tofu",
+      "productId": "Product_Tofu",
+      "categoryId": "FoodCategory_Protein",
+      "consumedPerHundredPopsPerMonth": 1.79980469,
+      "unityProvided": 0.299804688
+    },
+    {
+      "id": "Food_Sausage",
+      "productId": "Product_Sausage",
+      "categoryId": "FoodCategory_Protein",
+      "consumedPerHundredPopsPerMonth": 3.34960938,
+      "unityProvided": 0.099609375
+    },
+    {
+      "id": "Food_Vegetables",
+      "productId": "Product_Vegetables",
+      "categoryId": "FoodCategory_Vitamins",
+      "consumedPerHundredPopsPerMonth": 4.20019531,
+      "unityProvided": 0.200195313
+    },
+    {
+      "id": "Food_Fruits",
+      "productId": "Product_Fruit",
+      "categoryId": "FoodCategory_Vitamins",
+      "consumedPerHundredPopsPerMonth": 3.15039063,
+      "unityProvided": 0.299804688
+    },
+    {
+      "id": "Food_Snack",
+      "productId": "Product_Snack",
+      "categoryId": "FoodCategory_Treats",
+      "consumedPerHundredPopsPerMonth": 2.59960938,
+      "unityProvided": 0.25
+    },
+    {
+      "id": "Food_Cake",
+      "productId": "Product_Cake",
+      "categoryId": "FoodCategory_Treats",
+      "consumedPerHundredPopsPerMonth": 2.5,
+      "unityProvided": 0.549804688
+    },
+    {
+      "id": "FoodCannedFish",
+      "productId": "FoodCanFish",
+      "categoryId": "FoodCategory_Protein",
+      "consumedPerHundredPopsPerMonth": 3.54980469,
+      "unityProvided": 0.25
+    }
+  ],
+  "foodCategories": [
+    {
+      "id": "FoodCategory_Carbs",
+      "name": "Carbs",
+      "hasHealthBenefit": true
+    },
+    {
+      "id": "FoodCategory_Protein",
+      "name": "Protein",
+      "hasHealthBenefit": true
+    },
+    {
+      "id": "FoodCategory_Vitamins",
+      "name": "Vitamins",
+      "hasHealthBenefit": true
+    },
+    {
+      "id": "FoodCategory_Treats",
+      "name": "Treats",
+      "hasHealthBenefit": false
+    }
+  ],
+  "farmResearch": [
+    {
+      "id": "ResearchSettlementWaterDec",
+      "name": "- Settlement water use",
+      "description": "-2.00% to water consumption of settlements",
+      "baseCost": 0,
+      "maxLevels": 40,
+      "perLevelBonuses": {
+        "SettlementWaterConsumptionMultiplier": -0.0199999996
+      },
+      "spacePointsRequiredFrom": 10,
+      "iconPath": "Assets/Base/Icons/Edicts/WaterSaver.svg"
+    },
+    {
+      "id": "ResearchCropYieldInc",
+      "name": "\u002B Crop yield",
+      "description": "\u002B1.00% to crop yield, \u002B0.25% crop water consumption",
+      "baseCost": 0,
+      "maxLevels": 250,
+      "perLevelBonuses": {
+        "FarmYieldMultiplier": 0.00999999978,
+        "FarmWaterConsumptionMultiplier": 0.00249999994
+      },
+      "spacePointsRequiredFrom": 20,
+      "iconPath": "Assets/Base/Icons/Edicts/FarmingBoost.svg"
+    },
+    {
+      "id": "ResearchRainwaterYieldInc",
+      "name": "\u002B Rainwater yield",
+      "description": "\u002B5.00% to rainwater yield",
+      "baseCost": 0,
+      "maxLevels": 40,
+      "perLevelBonuses": {
+        "RainYieldMultiplier": 0.0500000007
+      },
+      "spacePointsRequiredFrom": 10,
+      "iconPath": "Assets/Base/Icons/Edicts/WaterSaver.svg"
+    }
+  ],
   "mods": null
 };
+
 export default GameData;
