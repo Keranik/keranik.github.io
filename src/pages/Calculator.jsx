@@ -1,40 +1,114 @@
 import { useEffect, useState } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
+import { DataLoader } from '../utils/DataLoader';
+import { useSettings } from '../contexts/SettingsContext';
 import { getProductIcon, getMachineImage, getGeneralIcon, getProductTypeIcon } from '../utils/AssetHelper';
 
 const Calculator = () => {
-  useEffect(() => {
-    document.title = 'Production Calculator - Captain of Industry Tools';
-  }, []);
+    const { settings } = useSettings();
+    const [dataLoaded, setDataLoaded] = useState(false);
 
-  // Calculator mode: 'forward' or 'reverse'
-  const [calculatorMode, setCalculatorMode] = useState('forward');
-  
-  // Forward mode states
-  const [selectedProduct, setSelectedProduct] = useState('');
-  const [selectedRecipe, setSelectedRecipe] = useState('');
-  const [targetRate, setTargetRate] = useState(60);
-  
-  // Reverse mode states
-  const [reverseProduct, setReverseProduct] = useState('');
-  const [reverseRecipe, setReverseRecipe] = useState('');
-  const [reverseSearchTerm, setReverseSearchTerm] = useState('');
-  const [availableResources, setAvailableResources] = useState(new Map());
-  const [resourceInput, setResourceInput] = useState({ productId: '', productName: '', quantity: 0 });
-  
-  // Common states
-  const [productionChain, setProductionChain] = useState(null);
-  const [requirements, setRequirements] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [availableRecipes, setAvailableRecipes] = useState([]);
-  const [recipeOverrides, setRecipeOverrides] = useState(new Map());
-  
-  // Recipe modal states
-  const [recipeModalOpen, setRecipeModalOpen] = useState(false);
-  const [recipeModalProductId, setRecipeModalProductId] = useState(null);
-  const [recipeModalRecipes, setRecipeModalRecipes] = useState([]);
+    // Load game data on mount and when mod settings change
+ 
 
-  // Get all products that can be produced (have recipes)
+    // ALL OTHER STATE HOOKS GO HERE (before the return check)
+    const [calculatorMode, setCalculatorMode] = useState('forward');
+    const [selectedProduct, setSelectedProduct] = useState('');
+    const [selectedRecipe, setSelectedRecipe] = useState('');
+    const [targetRate, setTargetRate] = useState(60);
+    const [reverseProduct, setReverseProduct] = useState('');
+    const [reverseRecipe, setReverseRecipe] = useState('');
+    const [reverseSearchTerm, setReverseSearchTerm] = useState('');
+    const [availableResources, setAvailableResources] = useState(new Map());
+    const [resourceInput, setResourceInput] = useState({ productId: '', productName: '', quantity: 0 });
+    const [productionChain, setProductionChain] = useState(null);
+    const [requirements, setRequirements] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [availableRecipes, setAvailableRecipes] = useState([]);
+    const [recipeOverrides, setRecipeOverrides] = useState(new Map());
+    const [recipeModalOpen, setRecipeModalOpen] = useState(false);
+    const [recipeModalProductId, setRecipeModalProductId] = useState(null);
+    const [recipeModalRecipes, setRecipeModalRecipes] = useState([]);
+
+    useEffect(() => {
+        document.title = 'Production Calculator - Captain of Industry Tools';
+
+        const loadData = async () => {
+            const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
+            const gameData = await DataLoader.loadGameData(enabledMods);
+            ProductionCalculator.initialize(gameData);
+            setDataLoaded(true);
+        };
+
+        loadData();
+    }, [settings.enableModdedContent, settings.enabledMods]);
+
+    // When product changes, update available recipes
+    useEffect(() => {
+        const productId = calculatorMode === 'forward' ? selectedProduct : reverseProduct;
+        if (productId) {
+            const recipes = ProductionCalculator.getRecipesForProduct(productId);
+            setAvailableRecipes(recipes);
+            // Auto-select first recipe if only one exists
+            if (recipes.length === 1) {
+                if (calculatorMode === 'forward') {
+                    setSelectedRecipe(recipes[0].id);
+                } else {
+                    setReverseRecipe(recipes[0].id);
+                }
+            } else {
+                if (calculatorMode === 'forward') {
+                    setSelectedRecipe('');
+                } else {
+                    setReverseRecipe('');
+                }
+            }
+        } else {
+            setAvailableRecipes([]);
+            setSelectedRecipe('');
+            setReverseRecipe('');
+        }
+    }, [selectedProduct, reverseProduct, calculatorMode]);
+
+    // NOW it's safe to do the early return
+    if (!dataLoaded) {
+        return (
+            <div style={{
+                padding: '2rem',
+                textAlign: 'center',
+                minHeight: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Loading game data...</h2>
+                <p style={{ color: '#888', fontSize: '1.1rem' }}>
+                    {settings.enableModdedContent && settings.enabledMods?.length > 0
+                        ? `Loading base game + ${settings.enabledMods.length} mod(s)...`
+                        : 'Loading base game data...'}
+                </p>
+                <div style={{
+                    marginTop: '2rem',
+                    width: '60px',
+                    height: '60px',
+                    border: '6px solid #333',
+                    borderTop: '6px solid #4a90e2',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                }}></div>
+                <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+            </div>
+        );
+    }
+
+
+    // Get all products that can be produced (have recipes)
   const producibleProducts = ProductionCalculator.products
     .filter(product => {
       const recipes = ProductionCalculator.getRecipesForProduct(product.id);
@@ -58,32 +132,7 @@ const Calculator = () => {
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  // When product changes, update available recipes
-  useEffect(() => {
-    const productId = calculatorMode === 'forward' ? selectedProduct : reverseProduct;
-    if (productId) {
-      const recipes = ProductionCalculator.getRecipesForProduct(productId);
-      setAvailableRecipes(recipes);
-      // Auto-select first recipe if only one exists
-      if (recipes.length === 1) {
-        if (calculatorMode === 'forward') {
-          setSelectedRecipe(recipes[0].id);
-        } else {
-          setReverseRecipe(recipes[0].id);
-        }
-      } else {
-        if (calculatorMode === 'forward') {
-          setSelectedRecipe('');
-        } else {
-          setReverseRecipe('');
-        }
-      }
-    } else {
-      setAvailableRecipes([]);
-      setSelectedRecipe('');
-      setReverseRecipe('');
-    }
-  }, [selectedProduct, reverseProduct, calculatorMode]);
+
 
   const handleCalculate = () => {
     if (calculatorMode === 'forward') {
@@ -637,24 +686,43 @@ const Calculator = () => {
     );
   };
 
-  return (
-    <div style={{ 
-      padding: '2rem', 
-      maxWidth: '1920px', 
-      margin: '0 auto',
-      minHeight: '100vh'
-    }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontWeight: '700' }}>
-          Production Calculator
-        </h2>
-        <p style={{ color: '#aaa', fontSize: '1.1rem' }}>
-          Calculate production chains, resource requirements, and optimize your factory planning
-        </p>
-      </div>
+    return (
+        <div style={{
+            maxWidth: '1920px',
+            margin: '0 auto',
+            minHeight: '100vh'
+        }}>
+            {/* Page Header */}
+            <div style={{
+                padding: '1.5rem 2rem',
+                backgroundColor: '#2a2a2a',
+                borderBottom: '2px solid #4a90e2',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                marginBottom: '2rem'
+            }}>
+                <h2 style={{
+                    fontSize: '2rem',
+                    fontWeight: '700',
+                    margin: 0,
+                    marginBottom: '0.5rem',
+                    background: 'linear-gradient(135deg, #4a90e2 0%, #5aa0f2 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                }}>
+                    Production Calculator
+                </h2>
+                <p style={{
+                    color: '#aaa',
+                    fontSize: '1rem',
+                    margin: 0
+                }}>
+                    Calculate production chains, resource requirements, and optimize your factory planning • {ProductionCalculator.products.length} products available
+                </p>
+            </div>
 
-      {/* Recipe Selection Modal */}
-      {recipeModalOpen && (
+            <div style={{ padding: '0 2rem 2rem' }}>
+                {/* Recipe Selection Modal */}
+                {recipeModalOpen && (
         <div
           style={{
             position: 'fixed',
@@ -1431,9 +1499,10 @@ const Calculator = () => {
             )}
           </div>
         </div>
-      )}
-    </div>
-  );
+                )}
+            </div>
+        </div>
+    );
 };
 
 export default Calculator;

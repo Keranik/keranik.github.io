@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "mods": [
+    {
+      "id": "coiextended-core",
+      "name": "COI Extended",
+      "version": 1,
+      "description": "Major overhaul mod adding extensive new content and rebalancing",
+      "dataFile": "GameData_COIExtended-Core.js",
+      "author": "Keranik",
+      "enabled": false,
+      "categories": ["overhaul", "content", "balance"],
+      "requiredGameVersion": "Update 3"
+    }
+  ]
+}

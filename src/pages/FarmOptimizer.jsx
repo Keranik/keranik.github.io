@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
+import { DataLoader } from '../utils/DataLoader';
+import { useSettings } from '../contexts/SettingsContext';
 import { FarmOptimizer } from '../utils/FarmOptimizer';
 import { FarmConstants } from '../utils/FarmConstants';
 import { getProductIcon, getCropIcon } from '../utils/AssetHelper';
 
 const FarmOptimizerPage = () => {
-    useEffect(() => {
-        document.title = 'Farm Optimizer - Captain of Industry Tools';
-    }, []);
+    const { settings } = useSettings();
+    const [dataLoaded, setDataLoaded] = useState(false);
 
     const [farms, setFarms] = useState([
         {
@@ -44,6 +45,57 @@ const FarmOptimizerPage = () => {
     const [foodConsumptionMult, setFoodConsumptionMult] = useState(1.0);
     const [results, setResults] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    // Load game data on mount and when mod settings change
+    useEffect(() => {
+        document.title = 'Farm Optimizer - Captain of Industry Tools';
+
+        const loadData = async () => {
+            const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
+            const gameData = await DataLoader.loadGameData(enabledMods);
+            ProductionCalculator.initialize(gameData);
+            setDataLoaded(true);
+        };
+
+        loadData();
+    }, [settings.enableModdedContent, settings.enabledMods]);
+
+    // Show loading screen if data not loaded yet
+    if (!dataLoaded) {
+        return (
+            <div style={{
+                padding: '2rem',
+                textAlign: 'center',
+                minHeight: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Loading farm data...</h2>
+                <p style={{ color: '#888', fontSize: '1.1rem' }}>
+                    {settings.enableModdedContent && settings.enabledMods?.length > 0
+                        ? `Loading base game + ${settings.enabledMods.length} mod(s)...`
+                        : 'Loading base game data...'}
+                </p>
+                <div style={{
+                    marginTop: '2rem',
+                    width: '60px',
+                    height: '60px',
+                    border: '6px solid #333',
+                    borderTop: '6px solid #4a90e2',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                }}></div>
+                <style>{`
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `}</style>
+            </div>
+        );
+    }
 
     const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
     const availableCrops = ProductionCalculator.crops || [];
@@ -524,23 +576,42 @@ const FarmOptimizerPage = () => {
     };
 
     return (
-        <div style={{
-            padding: '2rem',
-            maxWidth: '1920px',
-            margin: '0 auto',
-            minHeight: '100vh'
-        }}>
-            {/* Header */}
-            <div style={{ marginBottom: '2rem' }}>
-                <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontWeight: '700' }}>
+        <>
+            {/* Page Header */}
+            <div style={{
+                maxWidth: '1920px',
+                margin: '0 auto'
+            }}>
+                <div style={{
+                padding: '1.5rem 2rem',
+                backgroundColor: '#2a2a2a',
+                borderBottom: '2px solid #4a90e2',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                marginBottom: '2rem'
+            }}>
+                <h2 style={{
+                    fontSize: '2rem',
+                    fontWeight: '700',
+                    margin: 0,
+                    marginBottom: '0.5rem',
+                    background: 'linear-gradient(135deg, #4a90e2 0%, #5aa0f2 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                }}>
                     Farm Optimizer
                 </h2>
-                <p style={{ color: '#aaa', fontSize: '1.1rem' }}>
-                    Professional-grade crop rotation optimizer with combinatorial analysis
-                </p>
+                <p style={{
+                    color: '#aaa',
+                    fontSize: '1rem',
+                    margin: 0
+                }}>
+                    Professional-grade crop rotation optimizer with combinatorial analysis • {ProductionCalculator.crops.length} crops available
+                    </p>
+                </div>
             </div>
 
-            {/* Configuration Section */}
+            <div style={{ maxWidth: '1920px', margin: '0 auto', padding: '0 2rem 2rem', minHeight: 'calc(100vh - 300px)' }}>
+                {/* Configuration Section */}
             <div style={{
                 backgroundColor: '#2a2a2a',
                 padding: '2rem',
@@ -876,8 +947,9 @@ const FarmOptimizerPage = () => {
                     onToggle={toggleCropFilter}
                     onClose={() => setCropFilterModal(false)}
                 />
-            )}
-        </div>
+                )}
+            </div>
+        </>
     );
 };
 

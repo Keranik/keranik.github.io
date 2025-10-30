@@ -5,25 +5,43 @@ const About = () => {
     document.title = 'About & Contact - Captain of Industry Tools';
   }, []);
 
-  return (
-    <div style={{ 
-      padding: '2rem', 
-      maxWidth: '1000px', 
-      margin: '0 auto',
-      minHeight: '100vh'
-    }}>
-      {/* Page Header */}
-      <div style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontWeight: '700' }}>
-          About
-        </h2>
-        <p style={{ color: '#aaa', fontSize: '1.1rem' }}>
-          Learn more about this project and how to support it
-        </p>
-      </div>
+    return (
+        <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            minHeight: '100vh'
+        }}>
+            {/* Page Header */}
+            <div style={{
+                padding: '1.5rem 2rem',
+                backgroundColor: '#2a2a2a',
+                borderBottom: '2px solid #4a90e2',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                marginBottom: '2rem'
+            }}>
+                <h2 style={{
+                    fontSize: '2rem',
+                    fontWeight: '700',
+                    margin: 0,
+                    marginBottom: '0.5rem',
+                    background: 'linear-gradient(135deg, #4a90e2 0%, #5aa0f2 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                }}>
+                    About & Contact
+                </h2>
+                <p style={{
+                    color: '#aaa',
+                    fontSize: '1rem',
+                    margin: 0
+                }}>
+                    Learn more about this project and how to support it
+                </p>
+            </div>
 
-      {/* About Section */}
-      <section style={{
+            <div style={{ padding: '0 2rem 2rem' }}>
+                {/* About Section */}
+                <section style={{
         backgroundColor: '#2a2a2a',
         padding: '2rem',
         borderRadius: '10px',
@@ -398,9 +416,10 @@ const About = () => {
         <p style={{ fontSize: '0.8rem' }}>
           Captain of Industry is a trademark of MaFi Games. This is a fan-made project and is not affiliated with or endorsed by MaFi Games.
         </p>
-      </div>
-    </div>
-  );
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default About;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
 
 const SettingsModal = ({ isOpen, onClose }) => {
-  const { settings, updateSetting, updateNestedSetting, resetSettings, exportSettings, importSettings } = useSettings();
+  const { settings, availableMods, updateSetting, updateNestedSetting, resetSettings, exportSettings, importSettings } = useSettings();
   const [activeTab, setActiveTab] = useState('gameplay');
 
   if (!isOpen) return null;
@@ -200,80 +200,150 @@ const SettingsModal = ({ isOpen, onClose }) => {
           )}
 
           {activeTab === 'data' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                Data Sources & Mods
-              </h3>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <h3 style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+      Data Sources & Mods
+    </h3>
 
-              {/* Enable Modded Content */}
-              <div style={{
-                padding: '1rem',
-                backgroundColor: '#1a1a1a',
-                borderRadius: '8px',
-                border: '1px solid #333'
-              }}>
-                <label style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  cursor: 'pointer',
-                  justifyContent: 'space-between'
-                }}>
-                  <div>
-                    <div style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-                      Enable Modded Content
-                    </div>
-                    <div style={{ fontSize: '0.85rem', color: '#888' }}>
-                      Show recipes and items from installed mods
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.enableModdedContent}
-                    onChange={(e) => updateSetting('enableModdedContent', e.target.checked)}
-                    style={{ 
-                      width: '24px', 
-                      height: '24px',
-                      cursor: 'pointer'
-                    }}
-                  />
-                </label>
-              </div>
+    {/* Enable Modded Content */}
+    <div style={{
+      padding: '1rem',
+      backgroundColor: '#1a1a1a',
+      borderRadius: '8px',
+      border: '1px solid #333'
+    }}>
+      <label style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        cursor: 'pointer',
+        justifyContent: 'space-between'
+      }}>
+        <div>
+          <div style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+            Enable Modded Content
+          </div>
+          <div style={{ fontSize: '0.85rem', color: '#888' }}>
+            Show recipes and items from installed mods
+          </div>
+        </div>
+        <input
+          type="checkbox"
+          checked={settings.enableModdedContent}
+          onChange={(e) => {
+            updateSetting('enableModdedContent', e.target.checked);
+            // Clear enabled mods if disabling
+            if (!e.target.checked) {
+              updateSetting('enabledMods', []);
+            }
+          }}
+          style={{ 
+            width: '24px', 
+            height: '24px',
+            cursor: 'pointer'
+          }}
+        />
+      </label>
+    </div>
 
-              {/* Mod Selection (placeholder for future) */}
-              {settings.enableModdedContent && (
-                <div style={{
+    {/* Mod Selection */}
+    {settings.enableModdedContent && (
+      <div style={{
+        padding: '1rem',
+        backgroundColor: '#1a1a1a',
+        borderRadius: '8px',
+        border: '1px solid #333'
+      }}>
+        <div style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem' }}>
+          Available Mods ({availableMods.length})
+        </div>
+        
+        {availableMods.length === 0 ? (
+          <div style={{ fontSize: '0.85rem', color: '#888', fontStyle: 'italic' }}>
+            No mods detected. Check manifest.json configuration.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {availableMods.map(mod => (
+              <label
+                key={mod.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                   padding: '1rem',
-                  backgroundColor: '#1a1a1a',
-                  borderRadius: '8px',
-                  border: '1px solid #333'
-                }}>
-                  <div style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                    Installed Mods
+                  backgroundColor: '#2a2a2a',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  border: settings.enabledMods?.includes(mod.id) 
+                    ? '2px solid #4a90e2' 
+                    : '2px solid transparent',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: '600', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {mod.name} 
+                    <span style={{ color: '#888', fontSize: '0.8rem' }}>v{mod.version}</span>
+                    {mod.categories && (
+                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        {mod.categories.map(cat => (
+                          <span key={cat} style={{ 
+                            fontSize: '0.7rem', 
+                            padding: '2px 6px', 
+                            backgroundColor: '#4a90e2', 
+                            borderRadius: '3px',
+                            color: '#fff'
+                          }}>
+                            {cat}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <div style={{ fontSize: '0.85rem', color: '#888', fontStyle: 'italic' }}>
-                    No mods detected. Place your exported mod data in the data folder.
+                  <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.25rem' }}>
+                    {mod.description}
                   </div>
-                  {/* Future: List of detected mods with checkboxes */}
+                  <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                    by {mod.author} • Requires {mod.requiredGameVersion}
+                  </div>
                 </div>
-              )}
+                <input
+                  type="checkbox"
+                  checked={settings.enabledMods?.includes(mod.id) || false}
+                  onChange={(e) => {
+                    const newMods = e.target.checked
+                      ? [...(settings.enabledMods || []), mod.id]
+                      : (settings.enabledMods || []).filter(id => id !== mod.id);
+                    updateSetting('enabledMods', newMods);
+                  }}
+                  style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                />
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
 
-              <div style={{
-                padding: '1rem',
-                backgroundColor: '#2a4a2a',
-                borderRadius: '8px',
-                border: '1px solid #4a7a4a'
-              }}>
-                <div style={{ fontSize: '0.9rem', color: '#88dd88', marginBottom: '0.5rem' }}>
-                  💡 <strong>How to add mods:</strong>
-                </div>
-                <div style={{ fontSize: '0.85rem', color: '#aaddaa', lineHeight: '1.6' }}>
-                  1. Export your modded game data using the data exporter<br/>
-                  2. Place the exported JSON file in <code style={{ backgroundColor: '#1a1a1a', padding: '2px 6px', borderRadius: '3px' }}>/public/data/mods/</code><br/>
-                  3. Refresh this page to detect new mods
-                </div>
-              </div>
-            </div>
-          )}
+    {/* Info Box */}
+    <div style={{
+      padding: '1rem',
+      backgroundColor: '#2a4a2a',
+      borderRadius: '8px',
+      border: '1px solid #4a7a4a'
+    }}>
+      <div style={{ fontSize: '0.9rem', color: '#88dd88', marginBottom: '0.5rem' }}>
+        💡 <strong>How mods work:</strong>
+      </div>
+      <div style={{ fontSize: '0.85rem', color: '#aaddaa', lineHeight: '1.6' }}>
+        • Official mod support provided by Keranik<br/>
+        • Mods add new content or modify existing recipes<br/>
+        • Enable mods to see them in all calculators<br/>
+        • Changes apply after calculator page refresh
+      </div>
+    </div>
+  </div>
+)}
 
           {activeTab === 'display' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

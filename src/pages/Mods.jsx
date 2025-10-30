@@ -6,25 +6,43 @@ const Mods = () => {
     document.title = 'Mods & Downloads - Captain of Industry Tools';
   }, []);
 
-  return (
-    <div style={{ 
-      padding: '2rem', 
-      maxWidth: '1200px', 
-      margin: '0 auto',
-      minHeight: '100vh'
-    }}>
-      {/* Page Header */}
-      <div style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontWeight: '700' }}>
-          Mods
-        </h2>
-        <p style={{ color: '#aaa', fontSize: '1.1rem' }}>
-          Enhance your Captain of Industry experience with custom modifications
-        </p>
-      </div>
+    return (
+        <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            minHeight: '100vh'
+        }}>
+            {/* Page Header */}
+            <div style={{
+                padding: '1.5rem 2rem',
+                backgroundColor: '#2a2a2a',
+                borderBottom: '2px solid #4a90e2',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                marginBottom: '2rem'
+            }}>
+                <h2 style={{
+                    fontSize: '2rem',
+                    fontWeight: '700',
+                    margin: 0,
+                    marginBottom: '0.5rem',
+                    background: 'linear-gradient(135deg, #4a90e2 0%, #5aa0f2 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                }}>
+                    Mods & Extensions
+                </h2>
+                <p style={{
+                    color: '#aaa',
+                    fontSize: '1rem',
+                    margin: 0
+                }}>
+                    Enhance your Captain of Industry experience with custom modifications
+                </p>
+            </div>
 
-      {/* Featured Mod: COI Extended */}
-      <section style={{
+            <div style={{ padding: '0 2rem 2rem' }}>
+                {/* Featured Mod: COI Extended */}
+                <section style={{
         backgroundColor: '#2a2a2a',
         padding: '2.5rem',
         borderRadius: '12px',
@@ -378,9 +396,10 @@ const Mods = () => {
             💬 Contact Info on About Page
           </Link>
         </div>
-      </section>
-    </div>
-  );
+                </section>
+            </div>
+        </div>
+    );
 };
 
 export default Mods;

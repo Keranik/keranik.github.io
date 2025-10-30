@@ -1,33 +1,26 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { DataLoader } from '../utils/DataLoader';
 
 const SettingsContext = createContext();
 
 const DEFAULT_SETTINGS = {
-  // Gameplay Settings
   foodConsumptionMultiplier: 1.0,
   defaultResearch: {
     cropYield: 0,
     waterSaver: 0,
     foodBoost: 0
   },
-  
-  // Data Settings
   enableModdedContent: false,
-  enabledMods: [], // Array of mod IDs
-  
-  // Display Settings
-  theme: 'dark', // 'light', 'dark', 'auto'
+  enabledMods: [],
+  theme: 'dark',
   colorblindMode: false,
   decimalPrecision: 1,
-  
-  // Future Settings
   language: 'en',
   units: 'metric'
 };
 
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState(() => {
-    // Load from localStorage on init
     const saved = localStorage.getItem('coi-tools-settings');
     if (saved) {
       try {
@@ -40,7 +33,15 @@ export const SettingsProvider = ({ children }) => {
     return DEFAULT_SETTINGS;
   });
 
-  // Save to localStorage whenever settings change
+  const [availableMods, setAvailableMods] = useState([]);
+
+  // Load available mods on mount
+  useEffect(() => {
+    DataLoader.loadModManifest().then(manifest => {
+      setAvailableMods(manifest.mods || []);
+    });
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('coi-tools-settings', JSON.stringify(settings));
   }, [settings]);
@@ -95,6 +96,7 @@ export const SettingsProvider = ({ children }) => {
     <SettingsContext.Provider 
       value={{ 
         settings, 
+        availableMods,
         updateSetting, 
         updateNestedSetting,
         resetSettings,
