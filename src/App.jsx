@@ -1,4 +1,6 @@
-﻿import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+﻿import { SettingsProvider } from './contexts/SettingsContext';
+import FloatingSettingsButton from './components/FloatingSettingsButton';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Calculator from './pages/Calculator';
@@ -8,7 +10,8 @@ import Mods from './pages/Mods';
 import About from './pages/About';
 
 function App() {
-  return (
+    return (
+      <SettingsProvider>
     <Router>
       <Routes>
         <Route path="/" element={<Layout />}>
@@ -19,8 +22,10 @@ function App() {
           <Route path="mods" element={<Mods />} />
           <Route path="about" element={<About />} />
         </Route>
-      </Routes>
-    </Router>
+          </Routes>
+          <FloatingSettingsButton />
+            </Router>
+        </SettingsProvider>
   );
 }
 
