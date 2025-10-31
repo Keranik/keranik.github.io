@@ -1,4 +1,5 @@
 import ProductionCalculator from './ProductionCalculator';
+import { FoodChainResolver } from './FoodChainResolver';
 import { FarmConstants } from './FarmConstants';
 
 export class FarmOptimizer {
@@ -146,28 +147,7 @@ export class FarmOptimizer {
       fertilityDeficit: Math.max(0, avgFertilityPerDay - replenishRate)
     };
   }
-  
-  /**
-   * Calculate people fed from food production
-   */
-  static calculatePeopleFed(production, foodConsumptionMult = 1.0) {
-    let totalPopDays = 0;
     
-    Object.entries(production).forEach(([productId, quantityPerMonth]) => {
-      const food = ProductionCalculator.foods?.find(f => f.productId === productId);
-      if (!food) return;
-      
-      // Formula from FoodProto.GetPopDaysFromQuantity:
-      // popDays = (quantity / consumedPerHundredPopsPerMonth) * 3000
-      const consumedPerHundred = food.consumedPerHundredPopsPerMonth * foodConsumptionMult;
-      const popDays = (quantityPerMonth / consumedPerHundred) * 3000;
-      totalPopDays += popDays;
-    });
-    
-    // Convert to people (average over 30 days)
-    return Math.floor(totalPopDays / 30);
-  }
-  
   /**
    * Calculate fertilizer requirements for target fertility
    */
@@ -297,7 +277,9 @@ export class FarmOptimizer {
   static optimizeMinFertility(farms, minCalories) {
     // TODO: Implement min fertility optimization
     return this.optimizeMaxCalories(farms);
-  }
+    }
+
+
   
   /**
    * Calculate raw resource requirements (trace back to farm products)
@@ -351,5 +333,47 @@ export class FarmOptimizer {
     });
     
     return requirements;
-  }
+    }
+
+
+    static calculatePeopleFed(production, foodConsumptionMult = 1.0) {
+        let totalPeopleFed = 0;
+
+        for (const [productId, quantity] of Object.entries(production)) {
+            // Find if this product is directly edible
+            const directFood = ProductionCalculator.foods?.find(f => f.productId === productId);
+
+            if (directFood) {
+                // Direct food
+                const consumptionPer100 = directFood.consumedPerHundredPopsPerMonth * foodConsumptionMult;
+                if (consumptionPer100 > 0) {
+                    totalPeopleFed += (quantity / consumptionPer100) * 100;
+                }
+            } else {
+                // Check if it can be processed into food
+                const foodPaths = FoodChainResolver.getCropsForFood(productId);
+
+                if (foodPaths.length > 0) {
+                    // Use the best (most efficient) path
+                    let bestValue = 0;
+
+                    for (const path of foodPaths) {
+                        const food = ProductionCalculator.foods.find(f => f.productId === path.finalProductId);
+                        if (food) {
+                            const foodUnits = quantity / path.conversionRatio;
+                            const value = FoodChainResolver.calculateFoodValue(food, foodUnits, foodConsumptionMult);
+
+                            if (value > bestValue) {
+                                bestValue = value;
+                            }
+                        }
+                    }
+
+                    totalPeopleFed += bestValue;
+                }
+            }
+        }
+
+        return totalPeopleFed;
+    }
 }

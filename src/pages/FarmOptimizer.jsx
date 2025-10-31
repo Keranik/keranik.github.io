@@ -5,6 +5,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { FarmOptimizer } from '../utils/FarmOptimizer';
 import { FarmConstants } from '../utils/FarmConstants';
 import { getProductIcon, getCropIcon } from '../utils/AssetHelper';
+import { FoodChainResolver } from '../utils/FoodChainResolver';
 
 const FarmOptimizerPage = () => {
     const { settings } = useSettings();
@@ -51,10 +52,33 @@ const FarmOptimizerPage = () => {
         document.title = 'Farm Optimizer - Captain of Industry Tools';
 
         const loadData = async () => {
-            const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
-            const gameData = await DataLoader.loadGameData(enabledMods);
-            ProductionCalculator.initialize(gameData);
-            setDataLoaded(true);
+            try {
+                const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
+                const gameData = await DataLoader.loadGameData(enabledMods);
+
+                console.log('Game data loaded:', gameData);
+
+                ProductionCalculator.initialize(gameData);
+
+                console.log('ProductionCalculator initialized');
+                console.log('Recipes:', ProductionCalculator.recipes?.length);
+                console.log('Foods:', ProductionCalculator.foods?.length);
+                console.log('Crops:', ProductionCalculator.crops?.length);
+
+                // Initialize food chain resolver
+                FoodChainResolver.initialize(
+                    ProductionCalculator.recipes || [],
+                    ProductionCalculator.foods || [],
+                    ProductionCalculator.crops || []
+                );
+
+                console.log('FoodChainResolver initialized');
+
+                setDataLoaded(true);
+            } catch (error) {
+                console.error('Error loading farm data:', error);
+                alert('Failed to load farm data: ' + error.message);
+            }
         };
 
         loadData();
@@ -100,8 +124,13 @@ const FarmOptimizerPage = () => {
     const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
     const availableCrops = ProductionCalculator.crops || [];
     const availableFoodCrops = availableCrops.filter(crop => {
-        const food = ProductionCalculator.foods?.find(f => f.productId === crop.output.productId);
-        return food != null;
+        // Direct food?
+        const directFood = ProductionCalculator.foods?.find(f => f.productId === crop.output.productId);
+        if (directFood) return true;
+
+        // Can be processed into food?
+        const foodValue = FoodChainResolver.getCropFoodValue(crop);
+        return foodValue > 0;
     });
 
     const handleCalculate = () => {
