@@ -7,9 +7,12 @@ import { FarmConstants } from '../utils/FarmConstants';
 import { getProductIcon, getCropIcon } from '../utils/AssetHelper';
 import { FoodChainResolver } from '../utils/FoodChainResolver';
 
+
 const FarmOptimizerPage = () => {
     const { settings } = useSettings();
     const [dataLoaded, setDataLoaded] = useState(false);
+
+    const [selectedProcessingRecipes, setSelectedProcessingRecipes] = useState(new Map());
 
     const [farms, setFarms] = useState([
         {
@@ -36,6 +39,13 @@ const FarmOptimizerPage = () => {
     });
 
     const [cropFilterModal, setCropFilterModal] = useState(false);
+
+    const [recipeSelectionModal, setRecipeSelectionModal] = useState({
+        open: false,
+        productId: null,
+        productName: null,
+        availableRecipes: []
+    });
 
     const [research, setResearch] = useState({
         cropYield: 0,
@@ -73,6 +83,67 @@ const FarmOptimizerPage = () => {
                 );
 
                 console.log('FoodChainResolver initialized');
+
+                // PRE-COMPUTE food crops to avoid recalculation
+                console.log('Pre-computing food crop list...');
+                const start = Date.now();
+
+                // Simple approach: if a crop produces a direct food OR is used in a recipe, include it
+                const foodCropIds = new Set();
+
+                // Add direct food crops
+                ProductionCalculator.crops?.forEach(crop => {
+                    const isDirectFood = ProductionCalculator.foods?.some(f => f.productId === crop.output.productId);
+                    if (isDirectFood) {
+                        foodCropIds.add(crop.id);
+                    }
+                });
+
+                // Add crops that are inputs to recipes (might lead to food)
+                ProductionCalculator.crops?.forEach(crop => {
+                    const isUsedInRecipes = ProductionCalculator.recipes?.some(recipe =>
+                        recipe.inputs.some(input => input.productId === crop.output.productId)
+                    );
+                    if (isUsedInRecipes) {
+                        // Simple check: does ANY recipe chain lead to a food?
+                        const outputProducts = new Set([crop.output.productId]);
+                        const visited = new Set();
+                        let foundFood = false;
+
+                        // BFS through recipes (max 3 levels deep)
+                        for (let depth = 0; depth < 3 && !foundFood; depth++) {
+                            const newProducts = new Set();
+                            outputProducts.forEach(productId => {
+                                if (visited.has(productId)) return;
+                                visited.add(productId);
+
+                                // Is this product a food?
+                                if (ProductionCalculator.foods?.some(f => f.productId === productId)) {
+                                    foundFood = true;
+                                    return;
+                                }
+
+                                // Find recipes that use this product as input
+                                ProductionCalculator.recipes?.forEach(recipe => {
+                                    if (recipe.inputs.some(input => input.productId === productId)) {
+                                        recipe.outputs.forEach(output => newProducts.add(output.productId));
+                                    }
+                                });
+                            });
+
+                            newProducts.forEach(p => outputProducts.add(p));
+                        }
+
+                        if (foundFood) {
+                            foodCropIds.add(crop.id);
+                        }
+                    }
+                });
+
+                // Store in ProductionCalculator for easy access
+                ProductionCalculator.foodCropIds = foodCropIds;
+
+                console.log(`Pre-computed ${foodCropIds.size} food crops in ${Date.now() - start}ms`);
 
                 setDataLoaded(true);
             } catch (error) {
@@ -123,15 +194,9 @@ const FarmOptimizerPage = () => {
 
     const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
     const availableCrops = ProductionCalculator.crops || [];
-    const availableFoodCrops = availableCrops.filter(crop => {
-        // Direct food?
-        const directFood = ProductionCalculator.foods?.find(f => f.productId === crop.output.productId);
-        if (directFood) return true;
-
-        // Can be processed into food?
-        const foodValue = FoodChainResolver.getCropFoodValue(crop);
-        return foodValue > 0;
-    });
+    const availableFoodCrops = availableCrops.filter(crop =>
+        ProductionCalculator.foodCropIds?.has(crop.id) ?? false
+    );
 
     const handleCalculate = () => {
         setLoading(true);
@@ -160,37 +225,94 @@ const FarmOptimizerPage = () => {
                 const rotation = optimizedRotations[farmIdx] || [null, null, null, null];
 
                 const production = {};
-                let totalWaterPerDay = 0;
+                let totalFarmWaterPerDay = 0;
                 let totalRotationMonths = 0;
                 let activeCropCount = 0;
 
-                rotation.forEach(cropId => {
-                    if (!cropId) return;
-                    const crop = availableCrops.find(c => c.id === cropId);
-                    if (!crop) return;
+                // Calculate per-slot details for display
+                const slotDetails = rotation.map(cropId => {
+                    if (!cropId) return null;
 
-                    activeCropCount++;
+                    const crop = availableCrops.find(c => c.id === cropId);
+                    if (!crop) return null;
 
                     const productionPerMonth = FarmOptimizer.calculateCropYield(crop, effectiveFarm);
                     const waterPerDay = FarmOptimizer.calculateWaterPerDay(crop, effectiveFarm);
 
+                    // Accumulate total production
                     if (production[crop.output.productId]) {
                         production[crop.output.productId] += productionPerMonth;
                     } else {
                         production[crop.output.productId] = productionPerMonth;
                     }
 
-                    totalWaterPerDay += waterPerDay;
-                    totalRotationMonths += crop.growthDays / 30;
-                });
+                    totalFarmWaterPerDay += waterPerDay;
+
+                    return {
+                        cropId,
+                        cropName: crop.name,
+                        productionPerMonth,
+                        waterPerDay,
+                        productId: crop.output.productId
+                    };
+                }).filter(s => s !== null);
+
+                activeCropCount = slotDetails.length;
+                totalRotationMonths = slotDetails.reduce((sum, s) => {
+                    const crop = availableCrops.find(c => c.id === s.cropId);
+                    return sum + (crop ? crop.growthDays / 30 : 0);
+                }, 0);
 
                 const fertilityInfo = FarmOptimizer.calculateFertilityEquilibrium(
                     rotation,
                     effectiveFarm
                 );
 
-                const peopleFedTotal = FarmOptimizer.calculatePeopleFed(production, foodConsumptionMult);
-                const peopleFedPerMonth = activeCropCount > 0 ? peopleFedTotal / activeCropCount : 0;
+                // Use enhanced calculation method
+                let foodResult;
+                if (optimizationMode === 'manual') {
+                    // Manual mode - use user-selected recipes
+                    foodResult = FarmOptimizer.calculatePeopleFedManual(
+                        production,
+                        Object.fromEntries(selectedProcessingRecipes),
+                        totalFarmWaterPerDay,
+                        foodConsumptionMult
+                    );
+                } else {
+                    // Auto mode - automatically pick best recipes
+                    foodResult = FarmOptimizer.calculatePeopleFedWithChains(
+                        production,
+                        totalFarmWaterPerDay,
+                        foodConsumptionMult
+                    );
+                }
+
+                // Calculate per-slot people fed
+                const slotsWithPeopleFed = slotDetails.map(slot => {
+                    const slotProduction = { [slot.productId]: slot.productionPerMonth };
+
+                    let slotFoodResult;
+                    if (optimizationMode === 'manual') {
+                        slotFoodResult = FarmOptimizer.calculatePeopleFedManual(
+                            slotProduction,
+                            Object.fromEntries(selectedProcessingRecipes),
+                            0,
+                            foodConsumptionMult
+                        );
+                    } else {
+                        slotFoodResult = FarmOptimizer.calculatePeopleFedWithChains(
+                            slotProduction,
+                            0,
+                            foodConsumptionMult
+                        );
+                    }
+
+                    return {
+                        ...slot,
+                        peopleFed: slotFoodResult.peopleFed,
+                        processingChain: slotFoodResult.processingChains[0] || null
+                    };
+                });
 
                 return {
                     farm,
@@ -198,15 +320,22 @@ const FarmOptimizerPage = () => {
                     rotation,
                     production,
                     fertilityInfo,
-                    peopleFed: peopleFedPerMonth,
-                    totalWaterPerDay: totalWaterPerDay / 4,
+                    peopleFed: foodResult.peopleFed,
+                    totalWaterPerDay: foodResult.totalWaterPerDay,
+                    farmWaterPerDay: totalFarmWaterPerDay,
+                    processingWaterPerDay: foodResult.totalProcessingWater,
                     totalRotationMonths,
-                    activeCropCount
+                    activeCropCount,
+                    processingChains: foodResult.processingChains,
+                    foodCategories: foodResult.foodCategories,
+                    slotDetails: slotsWithPeopleFed
                 };
             });
 
             const totalPeopleFed = detailedResults.reduce((sum, r) => sum + r.peopleFed, 0);
             const totalWaterPerDay = detailedResults.reduce((sum, r) => sum + r.totalWaterPerDay, 0);
+            const totalFarmWater = detailedResults.reduce((sum, r) => sum + r.farmWaterPerDay, 0);
+            const totalProcessingWater = detailedResults.reduce((sum, r) => sum + r.processingWaterPerDay, 0);
 
             const allProduction = {};
             detailedResults.forEach(result => {
@@ -215,25 +344,198 @@ const FarmOptimizerPage = () => {
                 });
             });
 
-            const totalFertilityDeficit = detailedResults.reduce((sum, r) =>
-                sum + (r.fertilityInfo.fertilityDeficit || 0), 0
-            );
+            // FERTILIZER CALCULATION - COMPLETE REWRITE
+            let fertilizerNeeds = {
+                needed: false,
+                fertilizers: [], // Array of all 3 fertilizer types with quantities
+                totalFarmsRequiring: 0
+            };
 
-            const fertilizerNeeds = FarmOptimizer.calculateFertilizerNeeds(
-                constraints.targetFertility,
-                0,
-                totalFertilityDeficit,
-                farms.length
-            );
+            if (detailedResults.length > 0) {
+                const targetFert = constraints.targetFertility;
+
+                // Get all available fertilizers
+                const allFertilizers = ProductionCalculator.fertilizers || [];
+
+                // Calculate for each farm
+                const farmFertilizerData = detailedResults.map((result, idx) => {
+                    const naturalEq = result.fertilityInfo.naturalEquilibrium;
+
+                    if (targetFert <= naturalEq) {
+                        // This farm doesn't need fertilizer
+                        return null;
+                    }
+
+                    // Calculate extra fertility needed per day
+                    const extraFertilityNeededPercent = targetFert - naturalEq;
+
+                    // Calculate quantity needed for EACH fertilizer type
+                    const fertilizerOptions = allFertilizers.map(fertilizer => {
+                        // Check if this fertilizer can reach target
+                        if (fertilizer.maxFertility < targetFert) {
+                            return null;
+                        }
+
+                        // Calculate quantity per day
+                        // fertilityPerQuantity is how much % one unit provides per day
+                        const quantityPerDay = extraFertilityNeededPercent / fertilizer.fertilityPerQuantity;
+
+                        return {
+                            fertilizerId: fertilizer.id,
+                            fertilizerName: fertilizer.name,
+                            quantityPerDay,
+                            maxFertility: fertilizer.maxFertility,
+                            fertilityPerQuantity: fertilizer.fertilityPerQuantity
+                        };
+                    }).filter(f => f !== null);
+
+                    return {
+                        farmIndex: idx,
+                        naturalEquilibrium: naturalEq,
+                        extraFertilityNeeded: extraFertilityNeededPercent,
+                        fertilizerOptions
+                    };
+                }).filter(f => f !== null);
+
+                if (farmFertilizerData.length > 0) {
+                    fertilizerNeeds.needed = true;
+                    fertilizerNeeds.totalFarmsRequiring = farmFertilizerData.length;
+
+                    // Aggregate by fertilizer type across all farms
+                    const fertilizerTotals = new Map();
+
+                    farmFertilizerData.forEach(farmData => {
+                        farmData.fertilizerOptions.forEach(option => {
+                            const current = fertilizerTotals.get(option.fertilizerId) || {
+                                id: option.fertilizerId,
+                                name: option.fertilizerName,
+                                totalQuantityPerDay: 0,
+                                totalQuantityPerMonth: 0,
+                                totalQuantityPerYear: 0,
+                                maxFertility: option.maxFertility,
+                                fertilityPerQuantity: option.fertilityPerQuantity,
+                                farmsUsing: 0
+                            };
+
+                            current.totalQuantityPerDay += option.quantityPerDay;
+                            current.farmsUsing += 1;
+
+                            fertilizerTotals.set(option.fertilizerId, current);
+                        });
+                    });
+
+                    // Convert to array and calculate monthly/yearly totals
+                    fertilizerNeeds.fertilizers = Array.from(fertilizerTotals.values()).map(fert => ({
+                        ...fert,
+                        totalQuantityPerMonth: fert.totalQuantityPerDay * 30,
+                        totalQuantityPerYear: fert.totalQuantityPerDay * 360
+                    })).sort((a, b) => a.totalQuantityPerDay - b.totalQuantityPerDay); // Sort by efficiency (least needed first)
+                }
+            }
+
+            // Combine all food categories with CORRECTED bonus calculation
+            const allFoodCategories = new Set();
+            const categoryDetails = new Map();
+            const uniqueFoods = new Set(); // Track unique foods only
+            const foodUnityDetails = []; // Track unity per food
+            let totalUnity = 0;
+            let totalHealthBonuses = 0;
+
+            detailedResults.forEach(result => {
+                if (result.foodCategories) {
+                    result.foodCategories.categories.forEach(cat => {
+                        // Check if this is a NEW category we haven't provided yet
+                        if (!allFoodCategories.has(cat.id)) {
+                            allFoodCategories.add(cat.id);
+
+                            // First time providing this category = health bonus (if it has one)
+                            const category = ProductionCalculator.foodCategories?.find(c => c.id === cat.id);
+                            if (category && category.hasHealthBenefit) {
+                                totalHealthBonuses += 1;
+                            }
+                        }
+
+                        // Track category for display
+                        const current = categoryDetails.get(cat.id) || {
+                            name: cat.name,
+                            hasHealthBenefit: cat.hasHealthBenefit,
+                            peopleFed: 0
+                        };
+                        current.peopleFed += cat.peopleFed;
+                        categoryDetails.set(cat.id, current);
+                    });
+
+                    // Track unity provided by each UNIQUE food (only count once)
+                    result.processingChains?.forEach(chain => {
+                        const food = ProductionCalculator.foods?.find(f => f.productId === chain.finalFoodProductId);
+                        if (food && food.unityProvided > 0 && !uniqueFoods.has(food.productId)) {
+                            uniqueFoods.add(food.productId); // Mark as counted
+
+                            const unityPerMonth = food.unityProvided;
+                            totalUnity += unityPerMonth;
+
+                            foodUnityDetails.push({
+                                foodId: food.id,
+                                productId: food.productId,
+                                productName: ProductionCalculator.getProduct(food.productId)?.name,
+                                categoryId: food.categoryId,
+                                categoryName: ProductionCalculator.foodCategories?.find(c => c.id === food.categoryId)?.name,
+                                unityProvided: food.unityProvided
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Calculate processing machine requirements
+            const allProcessingMachines = new Map();
+            let totalProcessingElectricity = 0;
+            let totalProcessingWorkers = 0;
+
+            detailedResults.forEach(result => {
+                result.processingChains?.forEach(chain => {
+                    chain.machines?.forEach(machine => {
+                        const current = allProcessingMachines.get(machine.machineId) || {
+                            name: machine.machineName,
+                            count: 0,
+                            electricityKw: machine.electricityKw || 0,
+                            workers: machine.workers || 0
+                        };
+                        current.count += machine.count;
+                        allProcessingMachines.set(machine.machineId, current);
+
+                        totalProcessingElectricity += (machine.electricityKw || 0) * machine.count;
+                        totalProcessingWorkers += (machine.workers || 0) * machine.count;
+                    });
+                });
+            });
 
             setResults({
                 farms: detailedResults,
                 totals: {
                     peopleFed: totalPeopleFed,
                     waterPerDay: totalWaterPerDay,
+                    farmWaterPerDay: totalFarmWater,
+                    processingWaterPerDay: totalProcessingWater,
                     waterPerMonth: totalWaterPerDay * 30,
                     production: allProduction,
-                    fertilizerNeeds
+                    fertilizerNeeds,
+                    foodCategories: {
+                        count: allFoodCategories.size,
+                        categories: Array.from(categoryDetails.entries()).map(([id, data]) => ({
+                            id,
+                            ...data
+                        })),
+                        healthBonuses: totalHealthBonuses,
+                        totalUnity: totalUnity,
+                        unityBreakdown: foodUnityDetails
+                    },
+                    processingMachines: Array.from(allProcessingMachines.entries()).map(([id, data]) => ({
+                        id,
+                        ...data
+                    })),
+                    processingElectricity: totalProcessingElectricity,
+                    processingWorkers: totalProcessingWorkers
                 }
             });
         } catch (error) {
@@ -244,9 +546,74 @@ const FarmOptimizerPage = () => {
         }
     };
 
+    const openRecipeSelectionModal = (productId) => {
+        const product = ProductionCalculator.getProduct(productId);
+
+        // Use NEW method: Find foods that can be made FROM this crop
+        const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
+
+        if (foodPaths.length === 0) {
+            alert(`No food recipes found for ${product?.name}. This crop cannot be processed into food.`);
+            return;
+        }
+
+        console.log('Food paths found:', foodPaths);
+
+        // Get unique recipe chains
+        const uniqueRecipeChains = new Map();
+
+        foodPaths.forEach(path => {
+            if (path.processingChain.length === 0) {
+                // Direct food, no processing
+                return;
+            }
+
+            // Use the first recipe in the chain as the identifier
+            // (this is what the user will "select")
+            const firstRecipe = path.processingChain[0];
+            const chainKey = path.recipeChain.join('->');
+
+            if (!uniqueRecipeChains.has(chainKey)) {
+                const recipe = ProductionCalculator.getRecipe(firstRecipe.recipeId);
+                if (recipe) {
+                    uniqueRecipeChains.set(chainKey, {
+                        ...recipe,
+                        finalFoodProductId: path.finalFoodProductId,
+                        fullChain: path.processingChain,
+                        conversionRatio: path.conversionRatio
+                    });
+                }
+            }
+        });
+
+        const recipes = Array.from(uniqueRecipeChains.values());
+
+        if (recipes.length === 0) {
+            alert(`${product?.name} is directly edible, no processing needed!`);
+            return;
+        }
+
+        setRecipeSelectionModal({
+            open: true,
+            productId,
+            productName: product?.name,
+            availableRecipes: recipes
+        });
+    };
+
+    // Add function to select recipe
+    const selectProcessingRecipe = (productId, recipeId) => {
+        setSelectedProcessingRecipes(prev => {
+            const newMap = new Map(prev);
+            newMap.set(productId, recipeId);
+            return newMap;
+        });
+        setRecipeSelectionModal({ open: false, productId: null, productName: null, availableRecipes: [] });
+    };
+
     /**
-     * PROFESSIONAL OPTIMIZER
-     * Tests all possible crop combinations (1-4 crops) and finds the TRUE optimal setup
+     * PROFESSIONAL OPTIMIZER - UPDATED
+     * Now accounts for processing chains in calculations
      */
     const optimizeFarms = () => {
         const effectiveFarms = farms.map(f => {
@@ -265,7 +632,7 @@ const FarmOptimizerPage = () => {
             ? availableFoodCrops.filter(c => constraints.allowedCrops.includes(c.id))
             : availableFoodCrops;
 
-        // Calculate base metrics for each crop
+        // Calculate base metrics for each crop INCLUDING PROCESSING CHAINS
         const cropMetrics = cropsToUse.map(crop => {
             const farm = effectiveFarms[0];
             if (!farm) return null;
@@ -274,26 +641,39 @@ const FarmOptimizerPage = () => {
             const waterPerDay = FarmOptimizer.calculateWaterPerDay(crop, farm);
             const fertilityPerDay = crop.fertilityPerDayPercent;
 
-            const food = ProductionCalculator.foods?.find(f => f.productId === crop.output.productId);
-            if (!food) return null;
+            // Calculate people fed using processing chains
+            const production = { [crop.output.productId]: productionPerMonth };
+            const foodResult = FarmOptimizer.calculatePeopleFedWithChains(
+                production,
+                waterPerDay,
+                foodConsumptionMult
+            );
+
+            const peopleFedTotal = foodResult.peopleFed;
+
+            // Skip crops that don't produce food
+            if (peopleFedTotal === 0) return null;
 
             const monthsPerCycle = crop.growthDays / 30;
-            const peopleFedTotal = FarmOptimizer.calculatePeopleFed({
-                [crop.output.productId]: productionPerMonth
-            }, foodConsumptionMult);
-
             const peopleFedPerMonth = peopleFedTotal / monthsPerCycle;
+
+            // Get food category
+            let foodCategory = null;
+            if (foodResult.processingChains && foodResult.processingChains.length > 0) {
+                foodCategory = foodResult.processingChains[0].foodCategory;
+            }
 
             return {
                 crop,
                 productionPerMonth,
-                waterPerDay,
+                waterPerDay: foodResult.totalWaterPerDay, // Include processing water
                 fertilityPerDay,
                 peopleFedPerMonth,
-                waterPerPerson: peopleFedPerMonth > 0 ? waterPerDay / peopleFedPerMonth : 0,
-                fertilityPerPerson: peopleFedPerMonth > 0 ? Math.abs(fertilityPerDay) / peopleFedPerMonth : 0,
-                category: food.categoryId,
-                monthsPerCycle
+                waterPerPerson: peopleFedPerMonth > 0 ? foodResult.totalWaterPerDay / peopleFedPerMonth : Infinity,
+                fertilityPerPerson: peopleFedPerMonth > 0 ? Math.abs(fertilityPerDay) / peopleFedPerMonth : Infinity,
+                category: foodCategory,
+                monthsPerCycle,
+                processingChains: foodResult.processingChains
             };
         }).filter(m => m != null);
 
@@ -371,27 +751,20 @@ const FarmOptimizerPage = () => {
         cropMetrics.sort((a, b) => a.waterPerPerson - b.waterPerPerson);
 
         const rotations = [];
-        let totalPeopleFed = 0;
-        const targetPop = constraints.targetPopulation;
 
         for (let farmIdx = 0; farmIdx < farmCount; farmIdx++) {
-            if (totalPeopleFed >= targetPop) {
-                rotations.push([null, null, null, null]);
-                continue;
-            }
-
-            // Find best 2-crop combo for water efficiency
+            // Always add farms (don't leave empty)
             const rotation = [];
-            let farmPeopleFed = 0;
+            const usedInThisRotation = new Set();
 
+            // Fill with 2 best water-efficient crops
             for (let i = 0; i < cropMetrics.length && rotation.length < 2; i++) {
-                if (!rotation.includes(cropMetrics[i].crop.id)) {
-                    rotation.push(cropMetrics[i].crop.id);
-                    farmPeopleFed += cropMetrics[i].peopleFedPerMonth;
+                const cropId = cropMetrics[i].crop.id;
+                if (!usedInThisRotation.has(cropId)) {
+                    rotation.push(cropId);
+                    usedInThisRotation.add(cropId);
                 }
             }
-
-            totalPeopleFed += farmPeopleFed;
 
             while (rotation.length < 4) {
                 rotation.push(null);
@@ -402,6 +775,7 @@ const FarmOptimizerPage = () => {
         return rotations;
     };
 
+
     /**
      * Optimize for minimum fertility usage while meeting target population
      */
@@ -410,26 +784,19 @@ const FarmOptimizerPage = () => {
         cropMetrics.sort((a, b) => a.fertilityPerPerson - b.fertilityPerPerson);
 
         const rotations = [];
-        let totalPeopleFed = 0;
-        const targetPop = constraints.targetPopulation;
 
         for (let farmIdx = 0; farmIdx < farmCount; farmIdx++) {
-            if (totalPeopleFed >= targetPop) {
-                rotations.push([null, null, null, null]);
-                continue;
-            }
-
+            // Always add farms
             const rotation = [];
-            let farmPeopleFed = 0;
+            const usedInThisRotation = new Set();
 
             for (let i = 0; i < cropMetrics.length && rotation.length < 2; i++) {
-                if (!rotation.includes(cropMetrics[i].crop.id)) {
-                    rotation.push(cropMetrics[i].crop.id);
-                    farmPeopleFed += cropMetrics[i].peopleFedPerMonth;
+                const cropId = cropMetrics[i].crop.id;
+                if (!usedInThisRotation.has(cropId)) {
+                    rotation.push(cropId);
+                    usedInThisRotation.add(cropId);
                 }
             }
-
-            totalPeopleFed += farmPeopleFed;
 
             while (rotation.length < 4) {
                 rotation.push(null);
@@ -838,6 +1205,8 @@ const FarmOptimizerPage = () => {
                                     onUpdateType={updateFarmType}
                                     onOpenCropModal={openCropModal}
                                     canRemove={farms.length > 1}
+                                    openRecipeSelectionModal={openRecipeSelectionModal}
+                                    selectedProcessingRecipes={selectedProcessingRecipes}
                                 />
                             ))}
                         </div>
@@ -968,7 +1337,7 @@ const FarmOptimizerPage = () => {
                     onClose={() => setCropModal({ open: false, farmIndex: null, slotIndex: null })}
                 />
             )}
-
+                
             {cropFilterModal && (
                 <CropFilterModal
                     crops={availableFoodCrops}
@@ -977,13 +1346,20 @@ const FarmOptimizerPage = () => {
                     onClose={() => setCropFilterModal(false)}
                 />
                 )}
+
+                {/* Recipe Selection Modal for Manual Mode */}
+                <RecipeSelectionModal
+                    modal={recipeSelectionModal}
+                    onSelect={selectProcessingRecipe}
+                    onClose={() => setRecipeSelectionModal({ open: false, productId: null, productName: null, availableRecipes: [] })}
+                    selectedProcessingRecipes={selectedProcessingRecipes}
+                />
             </div>
         </>
     );
 };
 
-// Helper Components remain the same...
-const FarmConfigCard = ({ farm, farmIndex, availableFarms, availableCrops, onRemove, onUpdateType, onOpenCropModal, canRemove }) => {
+const FarmConfigCard = ({ farm, farmIndex, availableFarms, availableCrops, onRemove, onUpdateType, onOpenCropModal, canRemove, openRecipeSelectionModal, selectedProcessingRecipes }) => {
     return (
         <div style={{
             padding: '1.5rem',
@@ -1067,71 +1443,125 @@ const FarmConfigCard = ({ farm, farmIndex, availableFarms, availableCrops, onRem
                         const crop = cropId ? availableCrops.find(c => c.id === cropId) : null;
                         const icon = crop ? getCropIcon(crop) : null;
 
-                        return (
-                            <button
-                                key={slotIndex}
-                                onClick={() => onOpenCropModal(farmIndex, slotIndex)}
-                                style={{
-                                    padding: '1rem',
-                                    backgroundColor: crop ? '#2a4a6a' : '#2a2a2a',
-                                    border: crop ? '2px solid #4a90e2' : '2px dashed #555',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    minHeight: '100px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = crop ? '#3a5a7a' : '#353535';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = crop ? '#2a4a6a' : '#2a2a2a';
-                                }}
-                            >
-                                <div style={{
-                                    fontSize: '0.7rem',
-                                    color: '#888',
-                                    marginBottom: '0.5rem',
-                                    fontWeight: '600'
-                                }}>
-                                    SLOT {slotIndex + 1}
-                                </div>
+                        // Check if this crop needs processing
+                        const needsProcessing = crop ? !ProductionCalculator.foods?.find(f => f.productId === crop.output.productId) : false;
+                        const hasRecipeSelected = crop ? selectedProcessingRecipes.has(crop.output.productId) : false;
 
-                                {crop ? (
-                                    <>
-                                        {icon && (
-                                            <img
-                                                src={icon}
-                                                alt={crop.name}
-                                                style={{
-                                                    width: '28px',
-                                                    height: '28px',
-                                                    objectFit: 'contain',
-                                                    marginBottom: '0.5rem'
-                                                }}
-                                            />
-                                        )}
-                                        <div style={{
-                                            fontSize: '0.85rem',
-                                            fontWeight: '700',
-                                            color: '#fff',
-                                            textAlign: 'center'
-                                        }}>
-                                            {crop.name}
-                                        </div>
-                                        <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.25rem' }}>
-                                            {crop.growthDays / 30} {crop.growthDays / 30 === 1 ? 'month' : 'months'}
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div style={{ fontSize: '0.85rem', color: '#666' }}>
-                                        Click to select
+                        return (
+                            <div key={slotIndex} style={{ position: 'relative' }}>
+                                <button
+                                    onClick={() => onOpenCropModal(farmIndex, slotIndex)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '1rem',
+                                        backgroundColor: crop ? '#2a4a6a' : '#2a2a2a',
+                                        border: crop ? (needsProcessing && !hasRecipeSelected ? '2px solid #ff6b6b' : '2px solid #4a90e2') : '2px dashed #555',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        minHeight: '100px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = crop ? '#3a5a7a' : '#353535';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = crop ? '#2a4a6a' : '#2a2a2a';
+                                    }}
+                                >
+                                    <div style={{
+                                        fontSize: '0.7rem',
+                                        color: '#888',
+                                        marginBottom: '0.5rem',
+                                        fontWeight: '600'
+                                    }}>
+                                        SLOT {slotIndex + 1}
                                     </div>
+
+                                    {crop ? (
+                                        <>
+                                            {icon && (
+                                                <img
+                                                    src={icon}
+                                                    alt={crop.name}
+                                                    style={{
+                                                        width: '28px',
+                                                        height: '28px',
+                                                        objectFit: 'contain',
+                                                        marginBottom: '0.5rem'
+                                                    }}
+                                                />
+                                            )}
+                                            <div style={{
+                                                fontSize: '0.85rem',
+                                                fontWeight: '700',
+                                                color: '#fff',
+                                                textAlign: 'center'
+                                            }}>
+                                                {crop.name}
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.25rem' }}>
+                                                {crop.growthDays / 30} {crop.growthDays / 30 === 1 ? 'month' : 'months'}
+                                            </div>
+
+                                            {needsProcessing && (
+                                                <div style={{
+                                                    marginTop: '0.5rem',
+                                                    padding: '2px 6px',
+                                                    backgroundColor: hasRecipeSelected ? 'rgba(74, 144, 226, 0.2)' : 'rgba(255, 107, 107, 0.2)',
+                                                    border: `1px solid ${hasRecipeSelected ? '#4a90e2' : '#ff6b6b'}`,
+                                                    borderRadius: '3px',
+                                                    fontSize: '0.65rem',
+                                                    color: hasRecipeSelected ? '#4a90e2' : '#ff6b6b',
+                                                    fontWeight: '700'
+                                                }}>
+                                                    {hasRecipeSelected ? '🏭 Recipe Set' : '⚠️ Needs Recipe'}
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <div style={{ fontSize: '0.85rem', color: '#666' }}>
+                                            Click to select
+                                        </div>
+                                    )}
+                                </button>
+
+                                {/* Recipe selection button (appears when crop needs processing) */}
+                                {crop && needsProcessing && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openRecipeSelectionModal(crop.output.productId);
+                                        }}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '4px',
+                                            right: '4px',
+                                            padding: '4px 8px',
+                                            backgroundColor: hasRecipeSelected ? '#4a90e2' : '#ff6b6b',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            fontSize: '0.7rem',
+                                            cursor: 'pointer',
+                                            fontWeight: '700',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                                            zIndex: 10
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1.05)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1)';
+                                        }}
+                                    >
+                                        🏭
+                                    </button>
                                 )}
-                            </button>
+                            </div>
                         );
                     })}
                 </div>
@@ -1494,6 +1924,135 @@ const CropSelectionModal = ({ crops, onSelect, onClose }) => {
     );
 };
 
+const RecipeSelectionModal = ({ modal, onSelect, onClose, selectedProcessingRecipes }) => {
+    if (!modal.open) return null;
+
+    return (
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '2rem'
+        }}>
+            <div style={{
+                backgroundColor: '#2a2a2a',
+                borderRadius: '12px',
+                padding: '2rem',
+                maxWidth: '900px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflow: 'auto',
+                border: '2px solid #4a90e2'
+            }}>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '1.5rem'
+                }}>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>
+                        Select Processing Recipe for {modal.productName}
+                    </h3>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            backgroundColor: '#ff6b6b',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: '600'
+                        }}
+                    >
+                        ✕ Close
+                    </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {modal.availableRecipes.map(recipe => {
+                        const finalFood = ProductionCalculator.getProduct(recipe.finalFoodProductId);
+                        const isSelected = selectedProcessingRecipes.get(modal.productId) === recipe.id;
+
+                        return (
+                            <div
+                                key={recipe.id + '-' + recipe.finalFoodProductId}
+                                onClick={() => onSelect(modal.productId, recipe.id)}
+                                style={{
+                                    padding: '1rem',
+                                    backgroundColor: isSelected ? '#2a4a6a' : '#1a1a1a',
+                                    border: isSelected ? '2px solid #4a90e2' : '1px solid #444',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isSelected) {
+                                        e.currentTarget.style.backgroundColor = '#252525';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isSelected) {
+                                        e.currentTarget.style.backgroundColor = '#1a1a1a';
+                                    }
+                                }}
+                            >
+                                <div style={{ marginBottom: '0.5rem', fontSize: '1rem', fontWeight: '700', color: '#fff' }}>
+                                    {recipe.name}
+                                </div>
+                                <div style={{ fontSize: '0.85rem', color: '#FFD700', marginBottom: '0.5rem' }}>
+                                    → Produces: {finalFood?.name}
+                                </div>
+                                {recipe.fullChain && recipe.fullChain.length > 0 && (
+                                    <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.5rem' }}>
+                                        Chain: {modal.productName} → {recipe.fullChain.map(c => ProductionCalculator.getProduct(c.outputProductId)?.name).join(' → ')}
+                                    </div>
+                                )}
+                                {recipe.requiresOtherInputs && recipe.contributionNote && (
+                                    <div style={{
+                                        fontSize: '0.75rem',
+                                        color: '#ff9800',
+                                        marginBottom: '0.5rem',
+                                        padding: '4px 8px',
+                                        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                                        borderRadius: '4px',
+                                        border: '1px solid rgba(255, 152, 0, 0.3)'
+                                    }}>
+                                        ⚠️ {recipe.contributionNote}
+                                    </div>
+                                )}
+                                <div style={{ fontSize: '0.8rem', color: '#888' }}>
+                                    Duration: {recipe.durationSeconds}s • Conversion: {recipe.conversionRatio?.toFixed(2) || '1.00'} {modal.productName} per food
+                                </div>
+                                {isSelected && (
+                                    <div style={{
+                                        marginTop: '0.5rem',
+                                        padding: '4px 8px',
+                                        backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                                        borderRadius: '4px',
+                                        fontSize: '0.8rem',
+                                        color: '#4a90e2',
+                                        fontWeight: '700'
+                                    }}>
+                                        ✓ Currently Selected
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const ResultsSection = ({ results }) => {
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '2rem', alignItems: 'start' }}>
@@ -1524,6 +2083,99 @@ const ResultsSection = ({ results }) => {
                         </div>
                     </div>
 
+                    {/* Food Categories Card - UPDATED WITH BONUSES */}
+                    {results.totals.foodCategories && results.totals.foodCategories.count > 0 && (
+                        <div style={{
+                            padding: '1rem',
+                            backgroundColor: '#1a1a1a',
+                            borderRadius: '6px',
+                            marginBottom: '1rem',
+                            border: results.totals.foodCategories.healthBonuses > 0 ? '2px solid #50C878' : '1px solid #333'
+                        }}>
+                            <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem' }}>
+                                Food Variety Bonuses
+                            </div>
+
+                            {/* Main stats */}
+                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                                <div>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#FFD700' }}>
+                                        {results.totals.foodCategories.count}/4
+                                    </div>
+                                    <div style={{ fontSize: '0.7rem', color: '#888' }}>Categories</div>
+                                </div>
+
+                                {results.totals.foodCategories.healthBonuses > 0 && (
+                                    <div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#50C878' }}>
+                                            +{results.totals.foodCategories.healthBonuses}
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: '#888' }}>Health</div>
+                                    </div>
+                                )}
+
+                                {results.totals.foodCategories.totalUnity > 0 && (
+                                    <div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#9b59b6' }}>
+                                            +{results.totals.foodCategories.totalUnity.toFixed(0)}
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: '#888' }}>Unity/mo</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Category breakdown */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '0.75rem' }}>
+                                {results.totals.foodCategories.categories.map(cat => (
+                                    <div key={cat.id} style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        fontSize: '0.8rem',
+                                        padding: '4px 8px',
+                                        backgroundColor: '#2a2a2a',
+                                        borderRadius: '4px'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <span style={{ color: '#ddd' }}>{cat.name}</span>
+                                            {cat.hasHealthBenefit && (
+                                                <span style={{ fontSize: '0.7rem', color: '#50C878', backgroundColor: 'rgba(80, 200, 120, 0.15)', padding: '1px 4px', borderRadius: '2px' }}>
+                                                    +HP
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span style={{ color: '#888', fontSize: '0.75rem' }}>
+                                            {cat.peopleFed.toFixed(0)} ppl
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Unity breakdown (collapsible) */}
+                            {results.totals.foodCategories.unityBreakdown && results.totals.foodCategories.unityBreakdown.length > 0 && (
+                                <details style={{ marginTop: '0.75rem', fontSize: '0.75rem' }}>
+                                    <summary style={{ color: '#9b59b6', cursor: 'pointer', userSelect: 'none', padding: '4px' }}>
+                                        Unity Breakdown ({results.totals.foodCategories.unityBreakdown.length} foods)
+                                    </summary>
+                                    <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                        {results.totals.foodCategories.unityBreakdown.map((food, idx) => (
+                                            <div key={idx} style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                padding: '2px 6px',
+                                                backgroundColor: '#1a1a1a',
+                                                borderRadius: '3px'
+                                            }}>
+                                                <span style={{ color: '#bbb' }}>{food.productName}</span>
+                                                <span style={{ color: '#9b59b6', fontWeight: '600' }}>+{food.unityProvided}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </details>
+                            )}
+                        </div>
+                    )}
+
                     <div style={{
                         padding: '1rem',
                         backgroundColor: '#1a1a1a',
@@ -1537,10 +2189,48 @@ const ResultsSection = ({ results }) => {
                         <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#50C878' }}>
                             {results.totals.waterPerDay.toFixed(1)} /day
                         </div>
-                        <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.25rem' }}>
-                            {results.totals.waterPerMonth.toFixed(0)} /month
+                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div>Farm: {results.totals.farmWaterPerDay.toFixed(1)} /day</div>
+                            <div>Processing: {results.totals.processingWaterPerDay.toFixed(1)} /day</div>
+                            <div style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #444' }}>
+                                Total: {results.totals.waterPerMonth.toFixed(0)} /month
+                            </div>
                         </div>
                     </div>
+
+                    {/* Processing Machines Card */}
+                    {results.totals.processingMachines && results.totals.processingMachines.length > 0 && (
+                        <div style={{
+                            padding: '1rem',
+                            backgroundColor: '#1a1a1a',
+                            borderRadius: '6px',
+                            marginBottom: '1rem',
+                            border: '1px solid #333'
+                        }}>
+                            <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem' }}>
+                                🏭 Processing Machines
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                {results.totals.processingMachines.map(machine => (
+                                    <div key={machine.id} style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        fontSize: '0.8rem',
+                                        padding: '4px 8px',
+                                        backgroundColor: '#2a2a2a',
+                                        borderRadius: '4px'
+                                    }}>
+                                        <span style={{ color: '#ddd' }}>{machine.name}</span>
+                                        <span style={{ color: '#fff', fontWeight: '700' }}>×{machine.count}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #444', fontSize: '0.75rem', color: '#888' }}>
+                                <div>⚡ {results.totals.processingElectricity.toFixed(0)} kW</div>
+                                <div>👷 {results.totals.processingWorkers} workers</div>
+                            </div>
+                        </div>
+                    )}
 
                     {results.totals.fertilizerNeeds && results.totals.fertilizerNeeds.needed && (
                         <div style={{
@@ -1550,14 +2240,47 @@ const ResultsSection = ({ results }) => {
                             marginBottom: '1rem',
                             border: '1px solid #333'
                         }}>
-                            <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.25rem' }}>
-                                Fertilizer Needed
+                            <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem' }}>
+                                Fertilizer Options ({results.totals.fertilizerNeeds.totalFarmsRequiring} farm{results.totals.fertilizerNeeds.totalFarmsRequiring > 1 ? 's' : ''} need fertilizer)
                             </div>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#FFD700' }}>
-                                {results.totals.fertilizerNeeds.fertilizer?.name || 'Unknown'}
-                            </div>
-                            <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.25rem' }}>
-                                {results.totals.fertilizerNeeds.quantityPerMonth?.toFixed(1)} /month
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                {results.totals.fertilizerNeeds.fertilizers.map((fert, idx) => (
+                                    <div key={fert.id} style={{
+                                        padding: '0.75rem',
+                                        backgroundColor: idx === 0 ? 'rgba(255, 215, 0, 0.1)' : '#2a2a2a',
+                                        border: idx === 0 ? '1px solid #FFD700' : '1px solid #444',
+                                        borderRadius: '6px'
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#FFD700' }}>
+                                                {fert.name}
+                                                {idx === 0 && (
+                                                    <span style={{
+                                                        fontSize: '0.7rem',
+                                                        color: '#50C878',
+                                                        backgroundColor: 'rgba(80, 200, 120, 0.15)',
+                                                        padding: '2px 6px',
+                                                        borderRadius: '3px',
+                                                        marginLeft: '8px',
+                                                        fontWeight: '700'
+                                                    }}>
+                                                        MOST EFFICIENT
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div style={{ fontSize: '0.85rem', color: '#ddd' }}>
+                                            {fert.totalQuantityPerMonth.toFixed(1)} /month
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.25rem' }}>
+                                            {fert.totalQuantityPerDay.toFixed(2)} /day • {fert.totalQuantityPerYear.toFixed(0)} /year
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.25rem' }}>
+                                            Max fertility: {fert.maxFertility}% • +{fert.fertilityPerQuantity}% per unit
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}
@@ -1625,8 +2348,9 @@ const ResultsSection = ({ results }) => {
         </div>
     );
 };
+
 const FarmRotationCard = ({ farmNumber, farmResult }) => {
-    const { farm, effectiveFarm, rotation, production, fertilityInfo, peopleFed, totalWaterPerDay, totalRotationMonths, activeCropCount } = farmResult;
+    const { farm, effectiveFarm, rotation, production, fertilityInfo, peopleFed, totalWaterPerDay, farmWaterPerDay, processingWaterPerDay, totalRotationMonths, activeCropCount, slotDetails, processingChains } = farmResult;
 
     return (
         <div style={{
@@ -1642,6 +2366,11 @@ const FarmRotationCard = ({ farmNumber, farmResult }) => {
                 </h4>
                 <div style={{ fontSize: '0.85rem', color: '#888' }}>
                     Feeds {peopleFed.toFixed(1)} people/month • {totalWaterPerDay.toFixed(1)} water/day
+                    {processingWaterPerDay > 0 && (
+                        <span style={{ color: '#666', marginLeft: '8px' }}>
+                            (Farm: {farmWaterPerDay.toFixed(1)} + Processing: {processingWaterPerDay.toFixed(1)})
+                        </span>
+                    )}
                 </div>
             </div>
 
@@ -1654,6 +2383,7 @@ const FarmRotationCard = ({ farmNumber, farmResult }) => {
                 {rotation.map((cropId, idx) => {
                     const crop = cropId ? ProductionCalculator.crops.find(c => c.id === cropId) : null;
                     const icon = crop ? getCropIcon(crop) : null;
+                    const slotDetail = slotDetails?.find(s => s.cropId === cropId);
 
                     return (
                         <div
@@ -1679,10 +2409,64 @@ const FarmRotationCard = ({ farmNumber, farmResult }) => {
                             <div style={{ fontSize: '0.8rem', fontWeight: '600', color: crop ? '#fff' : '#666' }}>
                                 {crop ? crop.name : 'Empty'}
                             </div>
+                            {slotDetail && (
+                                <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #444', fontSize: '0.7rem' }}>
+                                    <div style={{ color: '#4a90e2', fontWeight: '700' }}>
+                                        {slotDetail.peopleFed.toFixed(0)} ppl/mo
+                                    </div>
+                                    <div style={{ color: '#50C878', marginTop: '2px' }}>
+                                        {slotDetail.waterPerDay.toFixed(1)} H₂O/day
+                                    </div>
+                                    {slotDetail.processingChain && !slotDetail.processingChain.isDirect && (
+                                        <div style={{ color: '#FFD700', marginTop: '2px', fontSize: '0.65rem' }}>
+                                            🏭 Processed
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     );
                 })}
             </div>
+
+            {/* Show processing chain details if any */}
+            {processingChains && processingChains.some(c => !c.isDirect) && (
+                <div style={{
+                    padding: '1rem',
+                    backgroundColor: '#2a2a2a',
+                    borderRadius: '6px',
+                    marginBottom: '1rem',
+                    border: '1px solid #4a90e2'
+                }}>
+                    <div style={{ fontSize: '0.9rem', color: '#4a90e2', fontWeight: '700', marginBottom: '0.5rem' }}>
+                        🏭 Processing Required
+                    </div>
+                    {processingChains.filter(c => !c.isDirect).map((chain, idx) => {
+                        const cropProduct = ProductionCalculator.getProduct(chain.cropProductId);
+                        const foodProduct = ProductionCalculator.getProduct(chain.finalFoodProductId);
+
+                        return (
+                            <div key={idx} style={{
+                                fontSize: '0.8rem',
+                                color: '#ddd',
+                                padding: '6px 8px',
+                                backgroundColor: '#1a1a1a',
+                                borderRadius: '4px',
+                                marginBottom: '4px'
+                            }}>
+                                <div style={{ marginBottom: '4px' }}>
+                                    <strong>{cropProduct?.name}</strong> → <strong style={{ color: '#FFD700' }}>{foodProduct?.name}</strong>
+                                </div>
+                                {chain.machines && chain.machines.length > 0 && (
+                                    <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                                        {chain.machines.map(m => `${m.machineName} ×${m.count}`).join(', ')}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             <div style={{
                 padding: '1rem',
