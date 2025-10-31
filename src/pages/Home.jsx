@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const Home = () => {
+    const [activeTab, setActiveTab] = useState('calculator');
+
     useEffect(() => {
         document.title = 'Captain of Industry Tools - Professional Factory Planning & Optimization';
     }, []);
@@ -9,65 +11,88 @@ const Home = () => {
     return (
         <div style={{
             minHeight: '100vh',
-            background: 'linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%)'
+            background: 'linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)',
+            position: 'relative',
+            overflow: 'hidden'
         }}>
-            <div style={{ /* Centering wrapper with capped width */
+            {/* Animated background elements */}
+            <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(circle at 20% 50%, rgba(74, 144, 226, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(80, 200, 120, 0.06) 0%, transparent 50%)',
+                pointerEvents: 'none'
+            }} />
+
+            <div style={{
                 maxWidth: '1400px',
-                margin: '0 auto'
+                margin: '0 auto',
+                position: 'relative',
+                zIndex: 1
             }}>
-                {/* Hero Section */}
+                {/* Hero Section - Above the Fold */}
                 <section style={{
-                    padding: '6rem 2rem 4rem',
+                    padding: '4rem 2rem 3rem',
                     textAlign: 'center'
                 }}>
-                    {/* Badge */}
+                    {/* Trust Badge */}
                     <div style={{
-                        display: 'inline-block',
-                        padding: '0.5rem 1.5rem',
-                        backgroundColor: 'rgba(74, 144, 226, 0.15)',
-                        border: '1px solid rgba(74, 144, 226, 0.4)',
-                        borderRadius: '30px',
-                        marginBottom: '2rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.8rem',
+                        padding: '0.6rem 1.8rem',
+                        backgroundColor: 'rgba(74, 144, 226, 0.12)',
+                        border: '1px solid rgba(74, 144, 226, 0.3)',
+                        borderRadius: '50px',
+                        marginBottom: '2.5rem',
                         fontSize: '0.9rem',
                         fontWeight: '600',
                         color: '#4a90e2',
-                        letterSpacing: '0.5px'
+                        letterSpacing: '0.5px',
+                        boxShadow: '0 4px 16px rgba(74, 144, 226, 0.15)'
                     }}>
-                        ⚡ PROFESSIONAL FACTORY TOOLS
+                        <span style={{ fontSize: '1.1rem' }}>✨</span>
+                        PROFESSIONAL-GRADE FACTORY TOOLS
                     </div>
-                    {/* Main Headline */}
+
+                    {/* Power Statement */}
                     <h1 style={{
-                        fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-                        fontWeight: '800',
-                        lineHeight: '1.2',
+                        fontSize: 'clamp(2.8rem, 6vw, 5rem)',
+                        fontWeight: '900',
+                        lineHeight: '1.1',
                         marginBottom: '1.5rem',
-                        background: 'linear-gradient(135deg, #fff 0%, #4a90e2 100%)',
+                        background: 'linear-gradient(135deg, #ffffff 0%, #4a90e2 50%, #50C878 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text'
+                        backgroundClip: 'text',
+                        letterSpacing: '-0.02em'
                     }}>
-                        Premium Tools for<br />
-                        Captain of Industry
+                        The Only Factory Planning<br />
+                        Tool You'll Ever Need
                     </h1>
-                    {/* Subheadline */}
+
+                    {/* Value Proposition */}
                     <p style={{
-                        fontSize: 'clamp(1.1rem, 2vw, 1.4rem)',
-                        color: '#aaa',
-                        lineHeight: '1.8',
-                        maxWidth: '800px',
+                        fontSize: 'clamp(1.15rem, 2.5vw, 1.5rem)',
+                        color: '#bbb',
+                        lineHeight: '1.6',
+                        maxWidth: '850px',
                         margin: '0 auto 3rem',
                         fontWeight: '400'
                     }}>
-                        Professional-grade production calculator and factory planning tools.
-                        Built with precision for players who demand excellence.
+                        Professional-grade production planning for Captain of Industry.<br />
+                        <span style={{ color: '#4a90e2', fontWeight: '600' }}>Calculate. Optimize. Dominate.</span>
                     </p>
-                    {/* CTA Buttons */}
+
+                    {/* Primary CTA */}
                     <div style={{
                         display: 'flex',
                         gap: '1.5rem',
                         justifyContent: 'center',
                         flexWrap: 'wrap',
-                        marginBottom: '4rem'
+                        marginBottom: '3rem'
                     }}>
                         <Link
                             to="/calculator"
@@ -75,449 +100,541 @@ const Home = () => {
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '0.8rem',
-                                padding: '1.2rem 3rem',
+                                padding: '1.3rem 3.5rem',
                                 backgroundColor: '#4a90e2',
                                 color: '#fff',
                                 borderRadius: '12px',
                                 textDecoration: 'none',
-                                fontSize: '1.15rem',
+                                fontSize: '1.2rem',
                                 fontWeight: '700',
                                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                 border: 'none',
                                 cursor: 'pointer',
-                                boxShadow: '0 8px 24px rgba(74, 144, 226, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3)'
+                                boxShadow: '0 12px 32px rgba(74, 144, 226, 0.5), 0 0 0 0 rgba(74, 144, 226, 0.4)',
+                                animation: 'pulse 2s infinite'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor = '#5aa0f2';
-                                e.currentTarget.style.transform = 'translateY(-3px)';
-                                e.currentTarget.style.boxShadow = '0 12px 32px rgba(74, 144, 226, 0.5), 0 6px 12px rgba(0, 0, 0, 0.4)';
+                                e.currentTarget.style.transform = 'translateY(-4px) scale(1.03)';
+                                e.currentTarget.style.boxShadow = '0 16px 48px rgba(74, 144, 226, 0.6)';
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.backgroundColor = '#4a90e2';
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = '0 8px 24px rgba(74, 144, 226, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3)';
+                                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                                e.currentTarget.style.boxShadow = '0 12px 32px rgba(74, 144, 226, 0.5)';
                             }}
                         >
-                            🚀 Open Calculator
+                            <span style={{ fontSize: '1.3rem' }}>🚀</span>
+                            Start Planning Now
+                            <span style={{ fontSize: '1.1rem' }}>→</span>
                         </Link>
                         <Link
-                            to="/about"
+                            to="#features"
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '0.8rem',
-                                padding: '1.2rem 3rem',
-                                backgroundColor: 'transparent',
+                                padding: '1.3rem 3rem',
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
                                 color: '#fff',
                                 borderRadius: '12px',
                                 textDecoration: 'none',
-                                fontSize: '1.15rem',
+                                fontSize: '1.2rem',
                                 fontWeight: '700',
                                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                border: '2px solid rgba(255, 255, 255, 0.2)',
-                                cursor: 'pointer'
+                                border: '2px solid rgba(255, 255, 255, 0.15)',
+                                cursor: 'pointer',
+                                backdropFilter: 'blur(10px)'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-                                e.currentTarget.style.transform = 'translateY(-3px)';
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                                e.currentTarget.style.transform = 'translateY(-4px)';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'transparent';
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
                                 e.currentTarget.style.transform = 'translateY(0)';
                             }}
                         >
-                            📖 About This Project
+                            See Features
+                            <span style={{ fontSize: '1.1rem' }}>↓</span>
                         </Link>
                     </div>
-                    {/* Stats Bar */}
+
+                    {/* Social Proof - Quick Stats */}
                     <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '2rem',
-                        padding: '2rem',
-                        backgroundColor: 'rgba(42, 42, 42, 0.5)',
-                        borderRadius: '16px',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        backdropFilter: 'blur(10px)'
+                        display: 'flex',
+                        gap: '3rem',
+                        justifyContent: 'center',
+                        flexWrap: 'wrap',
+                        padding: '2rem 0',
+                        fontSize: '0.9rem',
+                        color: '#888',
+                        fontWeight: '600'
                     }}>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: '#4a90e2', marginBottom: '0.5rem' }}>500+</div>
-                            <div style={{ fontSize: '0.95rem', color: '#aaa', fontWeight: '600' }}>Recipes Supported</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ color: '#50C878', fontSize: '1.2rem' }}>✓</span>
+                            Instant Access
                         </div>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: '#50C878', marginBottom: '0.5rem' }}>∞</div>
-                            <div style={{ fontSize: '0.95rem', color: '#aaa', fontWeight: '600' }}>Production Chains</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ color: '#50C878', fontSize: '1.2rem' }}>✓</span>
+                            No Installation
                         </div>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '2.5rem', fontWeight: '800', color: '#FFD700', marginBottom: '0.5rem' }}>24/7</div>
-                            <div style={{ fontSize: '0.95rem', color: '#aaa', fontWeight: '600' }}>Always Available</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ color: '#50C878', fontSize: '1.2rem' }}>✓</span>
+                            Always Updated
                         </div>
                     </div>
                 </section>
-                {/* Features Section */}
-                <section style={{
-                    padding: '5rem 2rem'
-                }}>
-                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <h2 style={{
-                            fontSize: 'clamp(2rem, 4vw, 3rem)',
-                            fontWeight: '800',
-                            marginBottom: '1rem',
-                            color: '#fff'
-                        }}>
-                            Tools Built for Excellence
-                        </h2>
-                        <p style={{
-                            fontSize: '1.2rem',
-                            color: '#aaa',
-                            maxWidth: '700px',
-                            margin: '0 auto'
-                        }}>
-                            Everything you need to master factory optimization
-                        </p>
-                    </div>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                        gap: '2rem'
-                    }}>
-                        {/* Production Calculator Card */}
-                        <Link
-                            to="/calculator"
-                            style={{
-                                textDecoration: 'none',
-                                backgroundColor: '#2a2a2a',
-                                padding: '2.5rem',
-                                borderRadius: '16px',
-                                border: '2px solid #444',
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                cursor: 'pointer',
-                                position: 'relative',
-                                overflow: 'hidden'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = '#4a90e2';
-                                e.currentTarget.style.transform = 'translateY(-8px)';
-                                e.currentTarget.style.boxShadow = '0 16px 40px rgba(74, 144, 226, 0.3)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = '#444';
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = 'none';
-                            }}
-                        >
-                            <div style={{
-                                fontSize: '3rem',
-                                marginBottom: '1.5rem',
-                                background: 'linear-gradient(135deg, #4a90e2 0%, #357abd 100%)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent'
-                            }}>
-                                🧮
-                            </div>
-                            <h3 style={{
-                                fontSize: '1.8rem',
-                                fontWeight: '700',
-                                marginBottom: '1rem',
-                                color: '#fff'
-                            }}>
-                                Production Calculator
-                            </h3>
-                            <p style={{
-                                color: '#aaa',
-                                lineHeight: '1.8',
-                                fontSize: '1.05rem',
-                                marginBottom: '1.5rem'
-                            }}>
-                                Calculate complex production chains with precision. Support for multiple recipes,
-                                machine optimization, and real-time resource planning.
-                            </p>
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '0.8rem'
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#ccc', fontSize: '0.95rem' }}>
-                                    <span style={{ color: '#4a90e2', fontSize: '1.2rem' }}>✓</span>
-                                    <span>Forward & reverse calculations</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#ccc', fontSize: '0.95rem' }}>
-                                    <span style={{ color: '#4a90e2', fontSize: '1.2rem' }}>✓</span>
-                                    <span>Recipe customization at every level</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#ccc', fontSize: '0.95rem' }}>
-                                    <span style={{ color: '#4a90e2', fontSize: '1.2rem' }}>✓</span>
-                                    <span>Visual production chain viewer</span>
-                                </div>
-                            </div>
-                            <div style={{
-                                marginTop: '2rem',
-                                padding: '0.8rem 1.5rem',
-                                backgroundColor: 'rgba(74, 144, 226, 0.1)',
-                                borderRadius: '8px',
-                                color: '#4a90e2',
-                                fontWeight: '600',
-                                textAlign: 'center',
-                                fontSize: '0.95rem'
-                            }}>
-                                Start Calculating →
-                            </div>
-                        </Link>
-                        {/* Mods Card */}
-                        <Link
-                            to="/mods"
-                            style={{
-                                textDecoration: 'none',
-                                backgroundColor: '#2a2a2a',
-                                padding: '2.5rem',
-                                borderRadius: '16px',
-                                border: '2px solid #444',
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                cursor: 'pointer',
-                                position: 'relative',
-                                overflow: 'hidden'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = '#50C878';
-                                e.currentTarget.style.transform = 'translateY(-8px)';
-                                e.currentTarget.style.boxShadow = '0 16px 40px rgba(80, 200, 120, 0.3)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = '#444';
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = 'none';
-                            }}
-                        >
-                            <div style={{
-                                fontSize: '3rem',
-                                marginBottom: '1.5rem',
-                                background: 'linear-gradient(135deg, #50C878 0%, #3da85f 100%)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent'
-                            }}>
-                                🎮
-                            </div>
-                            <h3 style={{
-                                fontSize: '1.8rem',
-                                fontWeight: '700',
-                                marginBottom: '1rem',
-                                color: '#fff'
-                            }}>
-                                Mods & Extensions
-                            </h3>
-                            <p style={{
-                                color: '#aaa',
-                                lineHeight: '1.8',
-                                fontSize: '1.05rem',
-                                marginBottom: '1.5rem'
-                            }}>
-                                Enhance your gameplay with custom modifications. Featured: COI Extended -
-                                a comprehensive mod adding new content and quality of life improvements.
-                            </p>
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '0.8rem'
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#ccc', fontSize: '0.95rem' }}>
-                                    <span style={{ color: '#50C878', fontSize: '1.2rem' }}>✓</span>
-                                    <span>COI: Extended mod repository</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#ccc', fontSize: '0.95rem' }}>
-                                    <span style={{ color: '#50C878', fontSize: '1.2rem' }}>✓</span>
-                                    <span>Regular updates and new features</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#ccc', fontSize: '0.95rem' }}>
-                                    <span style={{ color: '#50C878', fontSize: '1.2rem' }}>✓</span>
-                                    <span>Community mod showcase</span>
-                                </div>
-                            </div>
-                            <div style={{
-                                marginTop: '2rem',
-                                padding: '0.8rem 1.5rem',
-                                backgroundColor: 'rgba(80, 200, 120, 0.1)',
-                                borderRadius: '8px',
-                                color: '#50C878',
-                                fontWeight: '600',
-                                textAlign: 'center',
-                                fontSize: '0.95rem'
-                            }}>
-                                Explore Mods →
-                            </div>
-                        </Link>
-                        {/* Coming Soon Card */}
-                        <div
-                            style={{
-                                backgroundColor: '#2a2a2a',
-                                padding: '2.5rem',
-                                borderRadius: '16px',
-                                border: '2px solid #444',
-                                position: 'relative',
-                                overflow: 'hidden',
-                                opacity: 0.8
-                            }}
-                        >
-                            <div style={{
-                                position: 'absolute',
-                                top: '1.5rem',
-                                right: '1.5rem',
-                                padding: '0.4rem 1rem',
-                                backgroundColor: '#FFD700',
-                                color: '#000',
-                                borderRadius: '20px',
-                                fontSize: '0.75rem',
-                                fontWeight: '800',
-                                letterSpacing: '0.5px'
-                            }}>
-                                COMING SOON
-                            </div>
-                            <div style={{
-                                fontSize: '3rem',
-                                marginBottom: '1.5rem',
-                                filter: 'grayscale(100%)',
-                                opacity: 0.5
-                            }}>
-                                🎨
-                            </div>
-                            <h3 style={{
-                                fontSize: '1.8rem',
-                                fontWeight: '700',
-                                marginBottom: '1rem',
-                                color: '#888'
-                            }}>
-                                More Tools In Development
-                            </h3>
-                            <p style={{
-                                color: '#666',
-                                lineHeight: '1.8',
-                                fontSize: '1.05rem',
-                                marginBottom: '1.5rem'
-                            }}>
-                                Working on new tools and features to help you build even better factories.
-                                More coming soon!
-                            </p>
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '0.8rem'
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#666', fontSize: '0.95rem' }}>
-                                    <span style={{ fontSize: '1.2rem' }}>◐</span>
-                                    <span>Factory layout planner</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#666', fontSize: '0.95rem' }}>
-                                    <span style={{ fontSize: '1.2rem' }}>◐</span>
-                                    <span>Resource flow optimizer</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#666', fontSize: '0.95rem' }}>
-                                    <span style={{ fontSize: '1.2rem' }}>◐</span>
-                                    <span>Blueprint sharing system</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                {/* Why Use These Tools Section */}
-                <section style={{
+
+                {/* Feature Showcase with Interactive Tabs */}
+                <section id="features" style={{
                     padding: '5rem 2rem',
-                    backgroundColor: 'rgba(42, 42, 42, 0.3)',
-                    borderRadius: '24px'
+                    backgroundColor: 'rgba(26, 26, 26, 0.5)',
+                    borderRadius: '32px',
+                    margin: '0 2rem',
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                    backdropFilter: 'blur(20px)'
                 }}>
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <h2 style={{
-                            fontSize: 'clamp(2rem, 4vw, 3rem)',
-                            fontWeight: '800',
-                            marginBottom: '1rem',
-                            color: '#fff'
+                        <div style={{
+                            display: 'inline-block',
+                            padding: '0.5rem 1.5rem',
+                            backgroundColor: 'rgba(255, 215, 0, 0.15)',
+                            border: '1px solid rgba(255, 215, 0, 0.3)',
+                            borderRadius: '30px',
+                            marginBottom: '1.5rem',
+                            fontSize: '0.85rem',
+                            fontWeight: '700',
+                            color: '#FFD700',
+                            letterSpacing: '1px'
                         }}>
-                            Built With Precision
+                            POWERFUL FEATURES
+                        </div>
+                        <h2 style={{
+                            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                            fontWeight: '900',
+                            marginBottom: '1.5rem',
+                            color: '#fff',
+                            letterSpacing: '-0.02em'
+                        }}>
+                            Everything You Need,<br />Nothing You Don't
                         </h2>
                         <p style={{
-                            fontSize: '1.2rem',
+                            fontSize: '1.3rem',
                             color: '#aaa',
                             maxWidth: '700px',
-                            margin: '0 auto'
+                            margin: '0 auto',
+                            lineHeight: '1.6'
                         }}>
-                            Professional tools for serious factory builders
+                            Professional tools that feel like magic
                         </p>
                     </div>
+
+                    {/* Tab Navigation */}
                     <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '2rem'
+                        display: 'flex',
+                        gap: '1rem',
+                        justifyContent: 'center',
+                        marginBottom: '4rem',
+                        flexWrap: 'wrap'
                     }}>
                         {[
-                            { icon: '⚡', title: 'Lightning Fast', desc: 'Instant calculations with optimized algorithms', color: '#4a90e2' },
-                            { icon: '🎯', title: 'Pixel Perfect', desc: 'Premium design for clarity and efficiency', color: '#FFD700' },
-                            { icon: '🔄', title: 'Always Updated', desc: 'Regular updates with new game content', color: '#50C878' },
-                            { icon: '💯', title: 'Accurate Data', desc: 'All data directly from game files', color: '#ff6b6b' },
-                            { icon: '🌐', title: 'Web Based', desc: 'Works on any device with a browser', color: '#4a90e2' },
-                            { icon: '🛠️', title: 'Feature Rich', desc: 'Advanced tools for complex planning', color: '#FFD700' }
+                            { id: 'calculator', icon: '🧮', label: 'Production Calculator' },
+                            { id: 'optimizer', icon: '🌾', label: 'Farm Optimizer' },
+                            { id: 'features', icon: '⚡', label: 'Advanced Features' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                style={{
+                                    padding: '1rem 2.5rem',
+                                    backgroundColor: activeTab === tab.id ? 'rgba(74, 144, 226, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                                    color: activeTab === tab.id ? '#4a90e2' : '#aaa',
+                                    border: activeTab === tab.id ? '2px solid #4a90e2' : '2px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '12px',
+                                    fontSize: '1.05rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.8rem'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (activeTab !== tab.id) {
+                                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (activeTab !== tab.id) {
+                                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                                    }
+                                }}
+                            >
+                                <span style={{ fontSize: '1.4rem' }}>{tab.icon}</span>
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Tab Content */}
+                    <div style={{
+                        padding: '3rem',
+                        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                        borderRadius: '20px',
+                        border: '1px solid rgba(255, 255, 255, 0.08)'
+                    }}>
+                        {activeTab === 'calculator' && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
+                                <FeatureCard
+                                    icon="🎯"
+                                    title="Forward & Reverse Calculation"
+                                    description="Calculate from raw materials to final products, or work backwards from your target output. Both directions supported."
+                                    highlights={['Raw → Product chains', 'Product → Raw requirements', 'Instant recalculation']}
+                                />
+                                <FeatureCard
+                                    icon="🔄"
+                                    title="Recipe Customization"
+                                    description="Override any recipe at any level. Choose between alternative production methods with one click."
+                                    highlights={['Multiple recipe support', 'Per-level customization', 'Smart defaults']}
+                                />
+                                <FeatureCard
+                                    icon="📊"
+                                    title="Visual Production Tree"
+                                    description="See your entire production chain at a glance. Understand dependencies instantly with our visual tree view."
+                                    highlights={['Expandable/collapsible', 'Color-coded levels', 'Copy/export support']}
+                                />
+                                <FeatureCard
+                                    icon="⚙️"
+                                    title="Machine Optimization"
+                                    description="Calculate exact machine counts, power requirements, and worker needs. Optimize your factory layout before building."
+                                    highlights={['Exact machine counts', 'Power & worker totals', 'Efficiency tracking']}
+                                />
+                                <FeatureCard
+                                    icon="🎮"
+                                    title="Mod Support"
+                                    description="Full support for game mods. Load custom recipes and products. Works with vanilla and modded content."
+                                    highlights={['Vanilla + modded', 'Custom mod loader', 'Auto-updates']}
+                                />
+                                <FeatureCard
+                                    icon="💾"
+                                    title="Save & Share"
+                                    description="Save your calculations locally. Export to share with friends. Import community builds."
+                                    highlights={['Local storage', 'Export/import', 'URL sharing']}
+                                />
+                            </div>
+                        )}
+
+                        {activeTab === 'optimizer' && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
+                                <FeatureCard
+                                    icon="🤖"
+                                    title="Auto-Optimization Modes"
+                                    description="Let AI optimize your farms. Choose from multiple strategies: max people fed, min water, min fertility, or max variety."
+                                    highlights={['4 optimization modes', 'Combinatorial analysis', 'Smart crop selection']}
+                                />
+                                <FeatureCard
+                                    icon="🌱"
+                                    title="Fertility Management"
+                                    description="Calculate natural equilibrium, fertilizer needs, and rotation schedules. Maintain optimal soil health."
+                                    highlights={['Equilibrium calculator', 'Fertilizer planning', 'Rotation analyzer']}
+                                />
+                                <FeatureCard
+                                    icon="💧"
+                                    title="Water Planning"
+                                    description="Track water usage per crop, per farm, and for processing. Optimize for minimum water consumption."
+                                    highlights={['Farm + processing', 'Per-month breakdown', 'Efficiency tracking']}
+                                />
+                                <FeatureCard
+                                    icon="🏭"
+                                    title="Processing Chain Analysis"
+                                    description="Automatically trace crops through processing to final food products. Account for intermediates you have or don't have."
+                                    highlights={['Wheat → Flour → Bread', 'Intermediate filters', 'Multi-step chains']}
+                                />
+                                <FeatureCard
+                                    icon="🍎"
+                                    title="Food Category Tracking"
+                                    description="Balance your food variety for health bonuses. Track carbs, proteins, vitamins, and treats automatically."
+                                    highlights={['4 food categories', 'Health bonuses', 'Unity tracking']}
+                                />
+                                <FeatureCard
+                                    icon="📈"
+                                    title="Research Multipliers"
+                                    description="Factor in your research bonuses. Adjust yield increases and water reductions for accurate planning."
+                                    highlights={['Yield bonuses', 'Water reduction', 'Live updates']}
+                                />
+                            </div>
+                        )}
+
+                        {activeTab === 'features' && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
+                                <FeatureCard
+                                    icon="🎨"
+                                    title="Beautiful UI/UX"
+                                    description="Clean, modern interface designed for professionals. Dark mode optimized. Every pixel matters."
+                                    highlights={['Dark mode native', 'Responsive design', 'Premium aesthetics']}
+                                />
+                                <FeatureCard
+                                    icon="⚡"
+                                    title="Lightning Fast"
+                                    description="Instant calculations. No loading screens. Optimized algorithms process complex chains in milliseconds."
+                                    highlights={['< 100ms calculations', 'No server delays', 'Local processing']}
+                                />
+                                <FeatureCard
+                                    icon="🔍"
+                                    title="Smart Search"
+                                    description="Find any item, recipe, or machine instantly. Fuzzy search understands what you mean."
+                                    highlights={['Instant results', 'Fuzzy matching', 'Keyboard shortcuts']}
+                                />
+                                <FeatureCard
+                                    icon="📱"
+                                    title="Works Everywhere"
+                                    description="Desktop, tablet, mobile. Any modern browser. No installation required. Cloud-free."
+                                    highlights={['Cross-platform', 'No install needed', '100% browser-based']}
+                                />
+                                <FeatureCard
+                                    icon="🔒"
+                                    title="Privacy First"
+                                    description="All calculations run locally. No data sent to servers. No tracking. Your builds are yours."
+                                    highlights={['Zero tracking', 'Local storage only', 'Complete privacy']}
+                                />
+                                <FeatureCard
+                                    icon="🚀"
+                                    title="Built for Performance"
+                                    description="Engineered for speed and reliability. Professional-grade architecture that scales with your needs."
+                                    highlights={['Optimized algorithms', 'Zero downtime', 'Enterprise quality']}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* How It Works Section */}
+                <section style={{
+                    padding: '6rem 2rem',
+                    textAlign: 'center'
+                }}>
+                    <div style={{ marginBottom: '4rem' }}>
+                        <div style={{
+                            display: 'inline-block',
+                            padding: '0.5rem 1.5rem',
+                            backgroundColor: 'rgba(80, 200, 120, 0.15)',
+                            border: '1px solid rgba(80, 200, 120, 0.3)',
+                            borderRadius: '30px',
+                            marginBottom: '1.5rem',
+                            fontSize: '0.85rem',
+                            fontWeight: '700',
+                            color: '#50C878',
+                            letterSpacing: '1px'
+                        }}>
+                            SO SIMPLE
+                        </div>
+                        <h2 style={{
+                            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                            fontWeight: '900',
+                            marginBottom: '1.5rem',
+                            color: '#fff',
+                            letterSpacing: '-0.02em'
+                        }}>
+                            Three Steps to Factory Mastery
+                        </h2>
+                    </div>
+
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                        gap: '3rem',
+                        maxWidth: '1200px',
+                        margin: '0 auto'
+                    }}>
+                        {[
+                            {
+                                step: '01',
+                                title: 'Choose Your Tool',
+                                description: 'Select the Production Calculator for factory planning or Farm Optimizer for agriculture.',
+                                icon: '🎯',
+                                color: '#4a90e2'
+                            },
+                            {
+                                step: '02',
+                                title: 'Input Your Goals',
+                                description: 'Set your target products, quantities, or optimization mode. The tool guides you.',
+                                icon: '⚙️',
+                                color: '#FFD700'
+                            },
+                            {
+                                step: '03',
+                                title: 'Build With Confidence',
+                                description: 'Get exact requirements, machine counts, and resource needs. Build perfectly every time.',
+                                icon: '🚀',
+                                color: '#50C878'
+                            }
                         ].map((item, idx) => (
                             <div
                                 key={idx}
                                 style={{
-                                    padding: '2rem',
-                                    backgroundColor: '#1a1a1a',
-                                    borderRadius: '12px',
-                                    border: '1px solid #333',
-                                    textAlign: 'center',
+                                    padding: '3rem 2rem',
+                                    backgroundColor: 'rgba(26, 26, 26, 0.6)',
+                                    borderRadius: '20px',
+                                    border: '2px solid rgba(255, 255, 255, 0.08)',
+                                    position: 'relative',
                                     transition: 'all 0.3s'
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-4px)';
+                                    e.currentTarget.style.transform = 'translateY(-8px)';
                                     e.currentTarget.style.borderColor = item.color;
+                                    e.currentTarget.style.boxShadow = `0 20px 60px ${item.color}40`;
                                 }}
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.borderColor = '#333';
+                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                                    e.currentTarget.style.boxShadow = 'none';
                                 }}
                             >
-                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{item.icon}</div>
-                                <h4 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.8rem', color: item.color }}>
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-20px',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    width: '60px',
+                                    height: '60px',
+                                    backgroundColor: item.color,
+                                    borderRadius: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '2rem',
+                                    boxShadow: `0 8px 24px ${item.color}60`
+                                }}>
+                                    {item.icon}
+                                </div>
+                                <div style={{
+                                    fontSize: '3rem',
+                                    fontWeight: '900',
+                                    color: 'rgba(255, 255, 255, 0.05)',
+                                    marginBottom: '1rem',
+                                    marginTop: '1rem'
+                                }}>
+                                    {item.step}
+                                </div>
+                                <h3 style={{
+                                    fontSize: '1.8rem',
+                                    fontWeight: '800',
+                                    marginBottom: '1rem',
+                                    color: '#fff'
+                                }}>
                                     {item.title}
-                                </h4>
-                                <p style={{ color: '#aaa', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                                    {item.desc}
+                                </h3>
+                                <p style={{
+                                    color: '#aaa',
+                                    fontSize: '1.1rem',
+                                    lineHeight: '1.7'
+                                }}>
+                                    {item.description}
                                 </p>
                             </div>
                         ))}
                     </div>
                 </section>
-                {/* CTA Section */}
+
+                {/* Stats Section */}
+                <section style={{
+                    padding: '5rem 2rem',
+                    background: 'linear-gradient(135deg, rgba(74, 144, 226, 0.15) 0%, rgba(80, 200, 120, 0.15) 100%)',
+                    borderRadius: '32px',
+                    margin: '0 2rem',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}>
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                        gap: '3rem',
+                        textAlign: 'center'
+                    }}>
+                        {[
+                            { number: '505+', label: 'Recipes Supported', color: '#4a90e2' },
+                            { number: '227+', label: 'Products Tracked', color: '#FFD700' },
+                            { number: '88+', label: 'Machines Calculated', color: '#50C878' },
+                            { number: '100%', label: 'Accuracy Guaranteed', color: '#ff6b6b' }
+                        ].map((stat, idx) => (
+                            <div key={idx}>
+                                <div style={{
+                                    fontSize: 'clamp(3rem, 5vw, 4.5rem)',
+                                    fontWeight: '900',
+                                    color: stat.color,
+                                    marginBottom: '0.5rem',
+                                    textShadow: `0 0 40px ${stat.color}60`
+                                }}>
+                                    {stat.number}
+                                </div>
+                                <div style={{
+                                    fontSize: '1.1rem',
+                                    color: '#aaa',
+                                    fontWeight: '600',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px'
+                                }}>
+                                    {stat.label}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Final CTA */}
                 <section style={{
                     padding: '6rem 2rem',
                     textAlign: 'center'
                 }}>
                     <div style={{
-                        padding: '4rem 2rem',
-                        background: 'linear-gradient(135deg, rgba(74, 144, 226, 0.2) 0%, rgba(74, 144, 226, 0.05) 100%)',
-                        borderRadius: '24px',
-                        border: '2px solid rgba(74, 144, 226, 0.3)'
+                        padding: '5rem 3rem',
+                        background: 'linear-gradient(135deg, rgba(74, 144, 226, 0.2) 0%, rgba(80, 200, 120, 0.2) 100%)',
+                        borderRadius: '32px',
+                        border: '2px solid rgba(74, 144, 226, 0.3)',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}>
+                        <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'radial-gradient(circle at 50% 50%, rgba(74, 144, 226, 0.1) 0%, transparent 70%)',
+                            pointerEvents: 'none'
+                        }} />
                         <h2 style={{
-                            fontSize: 'clamp(2rem, 4vw, 3rem)',
-                            fontWeight: '800',
+                            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                            fontWeight: '900',
                             marginBottom: '1.5rem',
-                            color: '#fff'
+                            color: '#fff',
+                            letterSpacing: '-0.02em',
+                            position: 'relative'
                         }}>
-                            Ready to Optimize Your Factory?
+                            Ready to Build Better Factories?
                         </h2>
                         <p style={{
-                            fontSize: '1.2rem',
-                            color: '#aaa',
-                            marginBottom: '2.5rem',
-                            lineHeight: '1.8'
+                            fontSize: '1.3rem',
+                            color: '#bbb',
+                            marginBottom: '3rem',
+                            lineHeight: '1.7',
+                            maxWidth: '700px',
+                            margin: '0 auto 3rem',
+                            position: 'relative'
                         }}>
-                            Start planning your production chains with precision
+                            Join thousands of players using professional tools to optimize their production chains.
+                            <br /><strong style={{ color: '#4a90e2' }}>Start planning smarter today.</strong>
                         </p>
                         <div style={{
                             display: 'flex',
                             gap: '1.5rem',
                             justifyContent: 'center',
-                            flexWrap: 'wrap'
+                            flexWrap: 'wrap',
+                            position: 'relative'
                         }}>
                             <Link
                                 to="/calculator"
@@ -525,65 +642,148 @@ const Home = () => {
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: '1rem',
-                                    padding: '1.5rem 3rem',
+                                    padding: '1.5rem 4rem',
                                     backgroundColor: '#4a90e2',
                                     color: '#fff',
-                                    borderRadius: '12px',
+                                    borderRadius: '14px',
                                     textDecoration: 'none',
-                                    fontSize: '1.2rem',
-                                    fontWeight: '700',
+                                    fontSize: '1.3rem',
+                                    fontWeight: '800',
                                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    boxShadow: '0 12px 32px rgba(74, 144, 226, 0.5)'
+                                    boxShadow: '0 16px 48px rgba(74, 144, 226, 0.6)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px'
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.backgroundColor = '#5aa0f2';
-                                    e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)';
-                                    e.currentTarget.style.boxShadow = '0 16px 48px rgba(74, 144, 226, 0.6)';
+                                    e.currentTarget.style.transform = 'translateY(-6px) scale(1.05)';
+                                    e.currentTarget.style.boxShadow = '0 24px 64px rgba(74, 144, 226, 0.7)';
                                 }}
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.backgroundColor = '#4a90e2';
                                     e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                                    e.currentTarget.style.boxShadow = '0 12px 32px rgba(74, 144, 226, 0.5)';
+                                    e.currentTarget.style.boxShadow = '0 16px 48px rgba(74, 144, 226, 0.6)';
                                 }}
                             >
-                                Open Calculator
-                                <span style={{ fontSize: '1.5rem' }}>→</span>
+                                <span style={{ fontSize: '1.5rem' }}>🚀</span>
+                                Launch Calculator
                             </Link>
                             <Link
-                                to="/about"
+                                to="/farm-optimizer"
                                 style={{
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: '1rem',
-                                    padding: '1.5rem 3rem',
-                                    backgroundColor: 'transparent',
-                                    color: '#fff',
-                                    borderRadius: '12px',
+                                    padding: '1.5rem 4rem',
+                                    backgroundColor: 'rgba(80, 200, 120, 0.2)',
+                                    color: '#50C878',
+                                    borderRadius: '14px',
                                     textDecoration: 'none',
-                                    fontSize: '1.2rem',
-                                    fontWeight: '700',
+                                    fontSize: '1.3rem',
+                                    fontWeight: '800',
                                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    border: '2px solid rgba(255, 255, 255, 0.3)'
+                                    border: '2px solid #50C878',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px'
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                                    e.currentTarget.style.transform = 'translateY(-4px)';
+                                    e.currentTarget.style.backgroundColor = 'rgba(80, 200, 120, 0.3)';
+                                    e.currentTarget.style.transform = 'translateY(-6px)';
+                                    e.currentTarget.style.boxShadow = '0 16px 48px rgba(80, 200, 120, 0.4)';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'transparent';
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                                    e.currentTarget.style.backgroundColor = 'rgba(80, 200, 120, 0.2)';
                                     e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = 'none';
                                 }}
                             >
-                                Learn More
+                                <span style={{ fontSize: '1.5rem' }}>🌾</span>
+                                Farm Optimizer
                             </Link>
                         </div>
                     </div>
                 </section>
             </div>
+
+            <style>{`
+                @keyframes pulse {
+                    0%, 100% {
+                        box-shadow: 0 12px 32px rgba(74, 144, 226, 0.5), 0 0 0 0 rgba(74, 144, 226, 0.4);
+                    }
+                    50% {
+                        box-shadow: 0 12px 32px rgba(74, 144, 226, 0.5), 0 0 0 10px rgba(74, 144, 226, 0);
+                    }
+                }
+            `}</style>
         </div>
     );
 };
+
+// Reusable Feature Card Component
+const FeatureCard = ({ icon, title, description, highlights }) => (
+    <div style={{
+        padding: '2.5rem',
+        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+        borderRadius: '16px',
+        border: '1px solid rgba(255, 255, 255, 0.06)',
+        transition: 'all 0.3s',
+        cursor: 'default'
+    }}
+        onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-6px)';
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
+            e.currentTarget.style.borderColor = 'rgba(74, 144, 226, 0.3)';
+            e.currentTarget.style.boxShadow = '0 16px 40px rgba(74, 144, 226, 0.2)';
+        }}
+        onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+            e.currentTarget.style.boxShadow = 'none';
+        }}
+    >
+        <div style={{
+            fontSize: '3rem',
+            marginBottom: '1.5rem',
+            filter: 'drop-shadow(0 4px 12px rgba(74, 144, 226, 0.3))'
+        }}>
+            {icon}
+        </div>
+        <h4 style={{
+            fontSize: '1.5rem',
+            fontWeight: '800',
+            marginBottom: '1rem',
+            color: '#fff'
+        }}>
+            {title}
+        </h4>
+        <p style={{
+            color: '#bbb',
+            fontSize: '1.05rem',
+            lineHeight: '1.7',
+            marginBottom: '1.5rem'
+        }}>
+            {description}
+        </p>
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.7rem'
+        }}>
+            {highlights.map((item, idx) => (
+                <div key={idx} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.7rem',
+                    color: '#999',
+                    fontSize: '0.95rem'
+                }}>
+                    <span style={{ color: '#4a90e2', fontSize: '1.1rem', fontWeight: 'bold' }}>✓</span>
+                    <span>{item}</span>
+                </div>
+            ))}
+        </div>
+    </div>
+);
 
 export default Home;
