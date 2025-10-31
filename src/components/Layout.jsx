@@ -1,4 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import headerImage from '../assets/images/header.png';
 
 const Layout = () => {
     const location = useLocation();
@@ -28,25 +29,21 @@ const Layout = () => {
                 zIndex: 100
             }}>
                 <div style={{
-                    padding: '1.25rem 2rem'
+                    padding: '1.25rem 2rem',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
                 }}>
-                    <h1 style={{
-                        margin: 0,
-                        fontSize: '1.8rem',
-                        fontWeight: '700',
-                        background: 'linear-gradient(135deg, #4a90e2 0%, #5aa0f2 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
-                    }}>
-                        Captain of Industry Calculator & Factory Tools
-                    </h1>
-                    <p style={{
-                        margin: '0.5rem 0 0 0',
-                        fontSize: '0.9rem',
-                        color: '#aaa'
-                    }}>
-                        Your Ultimate Captain of Industry Game Resources & Companion
-                    </p>
+                    <img
+                        src={headerImage}
+                        alt="Captain of Industry Calculator & Factory Tools"
+                        style={{
+                            maxWidth: '100%',
+                            height: 'auto',
+                            maxHeight: '120px', // Adjust this to control header height
+                            objectFit: 'contain'
+                        }}
+                    />
                 </div>
             </header>
 
