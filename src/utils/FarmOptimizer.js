@@ -1,4 +1,4 @@
-import ProductionCalculator from './ProductionCalculator';
+﻿import ProductionCalculator from './ProductionCalculator';
 import { FoodChainResolver } from './FoodChainResolver';
 import { FarmConstants } from './FarmConstants';
 
@@ -58,7 +58,7 @@ export class FarmOptimizer {
                     let bestValue = 0;
 
                     for (const path of foodPaths) {
-                        if (allowedIntermediates !== null) {  // Changed from length > 0
+                        if (allowedIntermediates !== null) {
                             const usesDisallowedIntermediate = path.processingChain?.some(step => {
                                 const isFood = ProductionCalculator.foods?.some(f => f.productId === step.outputProductId);
 
@@ -422,12 +422,60 @@ export class FarmOptimizer {
 
     /**
      * Calculate crop production per month for a farm
+     * CHANGED: Now accepts targetFertility parameter for fertility-based yield calculation
      */
-    static calculateCropYield(crop, farm) {
-        const baseProduction = crop.output.quantity;
-        const daysPerMonth = 30;
-        const productionPerMonth = (baseProduction / crop.growthDays) * daysPerMonth;
-        return productionPerMonth * farm.effectiveYieldMult;
+    static calculateCropYield(crop, farm, targetFertility = 100) {
+        // Use fertility-adjusted yield calculation
+        return this.calculateActualYield(crop, farm, targetFertility);
+    }
+
+    /**
+     * NEW METHOD: Calculate actual yield based on fertility simulation
+     * Simulates day-by-day fertility changes during crop growth
+     */
+    static calculateActualYield(crop, farm, startingFertility) {
+        const baseProduction = crop.output.quantity * farm.effectiveYieldMult;
+
+        let currentFertility = startingFertility;
+        let yieldPercentSum = 0;
+
+        // Simulate each day of growth
+        for (let day = 0; day < crop.growthDays; day++) {
+            // Accumulate yield based on current fertility percentage
+            yieldPercentSum += currentFertility;
+
+            // Apply fertility consumption
+            let fertilityChange = -crop.fertilityPerDayPercent;
+
+            // Extra consumption if fertility > 100% (from FarmData.cs: CROP_FERTILITY_DEMAND_MULT = 2.0)
+            if (currentFertility > 100 && fertilityChange < 0) {
+                const extraConsumption = fertilityChange * ((currentFertility - 100) / 100) * 2.0;
+                fertilityChange += extraConsumption; // Makes it more negative
+            }
+
+            currentFertility += fertilityChange;
+
+            // Natural replenishment: 1% of missing fertility per day
+            let replenish = (100 - currentFertility) * farm.effectiveFertilityReplenish;
+
+            // Slower replenishment above 100% (OVER_100_REPLENISH_MULT = 0.2)
+            if (currentFertility > 100) {
+                replenish *= 0.2;
+            }
+
+            currentFertility += replenish;
+        }
+
+        // Calculate average fertility over growth period
+        const avgFertility = yieldPercentSum / crop.growthDays;
+
+        // Final yield based on average fertility
+        const actualYield = baseProduction * (avgFertility / 100);
+
+        // Convert to per-month basis (30 days)
+        const productionPerMonth = (actualYield / crop.growthDays) * 30;
+
+        return productionPerMonth;
     }
 
     /**
@@ -438,40 +486,72 @@ export class FarmOptimizer {
     }
 
     /**
-     * Calculate fertility equilibrium for a rotation
+     * ✅ CORRECT: Calculate fertility equilibrium for a rotation
+     * Matches Farm.cs recomputeRotationStats() exactly
      */
     static calculateFertilityEquilibrium(rotation, farm) {
-        let totalFertilityUsed = 0;
+        // Filter out empty slots
+        const nonEmptyCrops = rotation
+            .map(cropId => cropId ? ProductionCalculator.crops.find(c => c.id === cropId) : null)
+            .filter(crop => crop !== null);
+
+        if (nonEmptyCrops.length === 0) {
+            return {
+                naturalEquilibrium: 100,
+                avgFertilityPerDay: 0,
+                totalRotationDays: 0,
+                fertilityDeficit: 0
+            };
+        }
+
+        let totalFertilityConsumed = 0; // Accumulated fertility consumption
         let totalDays = 0;
+
+        // For steady-state: the "previous crop" before slot 0 is the LAST crop in rotation
         let prevCrop = null;
+        for (let i = nonEmptyCrops.length - 1; i >= 0; i--) {
+            if (!nonEmptyCrops[i].isEmptyCrop) {
+                prevCrop = nonEmptyCrops[i];
+                break;
+            }
+        }
 
-        rotation.forEach((cropId, index) => {
-            if (!cropId) return; // Empty slot
+        nonEmptyCrops.forEach((crop) => {
+            // Get base consumption (already positive for consuming crops)
+            let consumedFertilityPerDay = crop.fertilityPerDayPercent;
 
-            const crop = ProductionCalculator.crops.find(c => c.id === cropId);
-            if (!crop) return;
-
-            let fertilityPerDay = crop.fertilityPerDayPercent;
-
-            // Apply same-crop penalty (50% extra if same crop follows itself)
-            if (prevCrop && prevCrop.id === crop.id && fertilityPerDay > 0) {
-                fertilityPerDay *= (1 + FarmConstants.FERTILITY_PENALTY_FOR_SAME_CROP / 100);
+            // ✅ Apply 50% monoculture penalty for CONSUMING crops
+            // From Farm.cs line 771: if (consumedFertilityPerDay.IsPositive && flag)
+            const isSameCropAsPrevious = prevCrop && prevCrop.id === crop.id;
+            if (consumedFertilityPerDay > 0 && isSameCropAsPrevious) {
+                // From Farm.cs line 773:
+                // consumedFertilityPerDay += consumedFertilityPerDay * FERTILITY_PENALTY_FOR_SAME_CROP
+                // Which is: consumedFertilityPerDay *= (1 + 0.5) = 1.5
+                consumedFertilityPerDay *= 1.5;
             }
 
-            totalFertilityUsed += fertilityPerDay * crop.growthDays;
+            // Accumulate total consumption
+            totalFertilityConsumed += consumedFertilityPerDay * crop.growthDays;
             totalDays += crop.growthDays;
-            prevCrop = crop;
+
+            // Update previous crop (skip "empty" crops like green manure for tracking)
+            if (!crop.isEmptyCrop) {
+                prevCrop = crop;
+            }
         });
 
-        if (totalDays === 0) return { naturalEquilibrium: 100, avgFertilityPerDay: 0 };
+        const avgFertilityPerDay = totalFertilityConsumed / totalDays;
+        const replenishRate = farm.effectiveFertilityReplenish; // 1.0%
 
-        const avgFertilityPerDay = totalFertilityUsed / totalDays;
-        const replenishRate = farm.effectiveFertilityReplenish;
-        const naturalEquilibrium = Math.max(0, 100 - (avgFertilityPerDay / replenishRate) * 100);
+        // ✅ From Farm.cs line 777:
+        // NaturalFertilityEquilibrium = (Percent.Hundred - m_avgFertilityUsedPerDay / Prototype.FertilityReplenishPerDay).Max(Percent.Zero)
+        const naturalEquilibrium = Math.max(0, Math.min(200,
+            100 - (avgFertilityPerDay / replenishRate)
+        ));
 
         return {
             naturalEquilibrium,
-            avgFertilityPerDay,
+            avgFertilityPerDay, // This is the CONSUMPTION rate (positive)
             totalRotationDays: totalDays,
             fertilityDeficit: Math.max(0, avgFertilityPerDay - replenishRate)
         };

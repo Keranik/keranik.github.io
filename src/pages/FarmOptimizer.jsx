@@ -30,7 +30,8 @@ const FarmOptimizerPage = () => {
         allowedIntermediates: null,
         maxWaterPerDay: null,
         maxFertilityPerDay: null,
-        targetFertility: 100
+        targetFertility: 100,
+        useFertilizer: false
     });
 
     const [cropModal, setCropModal] = useState({
@@ -148,13 +149,20 @@ const FarmOptimizerPage = () => {
                 console.log(`Pre-computed ${foodCropIds.size} food crops in ${Date.now() - start}ms`);
 
                 setDataLoaded(true);
+
+                console.log(`Pre-computed ${foodCropIds.size} food crops in ${Date.now() - start}ms`);
+
+                setDataLoaded(true);              
+
+                
             } catch (error) {
                 console.error('Error loading farm data:', error);
                 alert('Failed to load farm data: ' + error.message);
             }
         };
 
-        loadData();
+        loadData();        
+            
     }, [settings.enableModdedContent, settings.enabledMods]);
 
     // Show loading screen if data not loaded yet
@@ -226,11 +234,6 @@ const FarmOptimizerPage = () => {
 
                 const rotation = optimizedRotations[farmIdx] || [null, null, null, null];
 
-                const production = {};
-                let totalFarmWaterPerDay = 0;
-                let totalRotationMonths = 0;
-                let activeCropCount = 0;
-
                 // Calculate per-slot details for display
                 const slotDetails = rotation.map(cropId => {
                     if (!cropId) return null;
@@ -238,42 +241,59 @@ const FarmOptimizerPage = () => {
                     const crop = availableCrops.find(c => c.id === cropId);
                     if (!crop) return null;
 
-                    const productionPerMonth = FarmOptimizer.calculateCropYield(crop, effectiveFarm);
+                    // ✅ FIXED: Pass targetFertility for calculations
+                    const targetFert = optimizationMode === 'manual' ? constraints.targetFertility : null;
+                    const productionPerMonth = FarmOptimizer.calculateCropYield(crop, effectiveFarm, targetFert);
                     const waterPerDay = FarmOptimizer.calculateWaterPerDay(crop, effectiveFarm);
-
-                    // Accumulate total production
-                    if (production[crop.output.productId]) {
-                        production[crop.output.productId] += productionPerMonth;
-                    } else {
-                        production[crop.output.productId] = productionPerMonth;
-                    }
-
-                    totalFarmWaterPerDay += waterPerDay;
 
                     return {
                         cropId,
                         cropName: crop.name,
                         productionPerMonth,
                         waterPerDay,
-                        productId: crop.output.productId
+                        productId: crop.output.productId,
+                        growthDays: crop.growthDays
                     };
                 }).filter(s => s !== null);
 
-                activeCropCount = slotDetails.length;
-                totalRotationMonths = slotDetails.reduce((sum, s) => {
-                    const crop = availableCrops.find(c => c.id === s.cropId);
-                    return sum + (crop ? crop.growthDays / 30 : 0);
-                }, 0);
+                // Calculate weighted averages
+                const totalRotationDays = slotDetails.reduce((sum, s) => sum + s.growthDays, 0);
+                const production = {};
+                let totalFarmWaterPerDay = 0;
 
+                slotDetails.forEach(slot => {
+                    const weight = totalRotationDays > 0 ? slot.growthDays / totalRotationDays : 0;
+                    const avgProductionPerMonth = slot.productionPerMonth * weight;
+                    production[slot.productId] = (production[slot.productId] || 0) + avgProductionPerMonth;
+                    totalFarmWaterPerDay += slot.waterPerDay * weight;
+                });
+
+                const activeCropCount = slotDetails.length;
+                const totalRotationMonths = totalRotationDays / 30;
+
+                // ✅ FIXED: Calculate fertility with monoculture penalty
                 const fertilityInfo = FarmOptimizer.calculateFertilityEquilibrium(
                     rotation,
                     effectiveFarm
                 );
 
+                // ✅ FIXED: Determine actual fertility to use
+                let actualFertility;
+                let usedFertilizer = false;
+
+                if (constraints.useFertilizer) {
+                    // User wants to use fertilizer
+                    actualFertility = constraints.targetFertility;
+                    usedFertilizer = constraints.targetFertility > fertilityInfo.naturalEquilibrium;
+                } else {
+                    // No fertilizer: use natural equilibrium
+                    actualFertility = fertilityInfo.naturalEquilibrium;
+                    usedFertilizer = false;
+                }
+
                 // Use enhanced calculation method
                 let foodResult;
                 if (optimizationMode === 'manual') {
-                    // Manual mode - use user-selected recipes
                     foodResult = FarmOptimizer.calculatePeopleFedManual(
                         production,
                         Object.fromEntries(selectedProcessingRecipes),
@@ -281,17 +301,18 @@ const FarmOptimizerPage = () => {
                         foodConsumptionMult
                     );
                 } else {
-                    // Auto mode - automatically pick best recipes
                     foodResult = FarmOptimizer.calculatePeopleFedWithChains(
                         production,
                         totalFarmWaterPerDay,
-                        foodConsumptionMult
+                        foodConsumptionMult,
+                        constraints.allowedIntermediates
                     );
                 }
 
-                // Calculate per-slot people fed
                 const slotsWithPeopleFed = slotDetails.map(slot => {
-                    const slotProduction = { [slot.productId]: slot.productionPerMonth };
+                    const weight = totalRotationDays > 0 ? slot.growthDays / totalRotationDays : 0;
+                    const weightedProduction = slot.productionPerMonth * weight;
+                    const slotProduction = { [slot.productId]: weightedProduction };
 
                     let slotFoodResult;
                     if (optimizationMode === 'manual') {
@@ -305,14 +326,17 @@ const FarmOptimizerPage = () => {
                         slotFoodResult = FarmOptimizer.calculatePeopleFedWithChains(
                             slotProduction,
                             0,
-                            foodConsumptionMult
+                            foodConsumptionMult,
+                            constraints.allowedIntermediates
                         );
                     }
 
                     return {
                         ...slot,
                         peopleFed: slotFoodResult.peopleFed,
-                        processingChain: slotFoodResult.processingChains[0] || null
+                        processingChain: slotFoodResult.processingChains[0] || null,
+                        weight: weight,
+                        weightedProduction: weightedProduction
                     };
                 });
 
@@ -322,6 +346,8 @@ const FarmOptimizerPage = () => {
                     rotation,
                     production,
                     fertilityInfo,
+                    actualFertility, // ✅ NEW: Show what fertility was used
+                    usedFertilizer, // ✅ NEW: Did we use fertilizer?
                     peopleFed: foodResult.peopleFed,
                     totalWaterPerDay: foodResult.totalWaterPerDay,
                     farmWaterPerDay: totalFarmWaterPerDay,
@@ -346,40 +372,31 @@ const FarmOptimizerPage = () => {
                 });
             });
 
-            // FERTILIZER CALCULATION - COMPLETE REWRITE
+            // ✅ UPDATED: FERTILIZER CALCULATION - Only if user wants to use fertilizer
             let fertilizerNeeds = {
                 needed: false,
-                fertilizers: [], // Array of all 3 fertilizer types with quantities
+                fertilizers: [],
                 totalFarmsRequiring: 0
             };
 
-            if (detailedResults.length > 0) {
+            if (constraints.useFertilizer && detailedResults.length > 0) {
                 const targetFert = constraints.targetFertility;
-
-                // Get all available fertilizers
                 const allFertilizers = ProductionCalculator.fertilizers || [];
 
-                // Calculate for each farm
                 const farmFertilizerData = detailedResults.map((result, idx) => {
                     const naturalEq = result.fertilityInfo.naturalEquilibrium;
 
                     if (targetFert <= naturalEq) {
-                        // This farm doesn't need fertilizer
                         return null;
                     }
 
-                    // Calculate extra fertility needed per day
                     const extraFertilityNeededPercent = targetFert - naturalEq;
 
-                    // Calculate quantity needed for EACH fertilizer type
                     const fertilizerOptions = allFertilizers.map(fertilizer => {
-                        // Check if this fertilizer can reach target
                         if (fertilizer.maxFertility < targetFert) {
                             return null;
                         }
 
-                        // Calculate quantity per day
-                        // fertilityPerQuantity is how much % one unit provides per day
                         const quantityPerDay = extraFertilityNeededPercent / fertilizer.fertilityPerQuantity;
 
                         return {
@@ -403,7 +420,6 @@ const FarmOptimizerPage = () => {
                     fertilizerNeeds.needed = true;
                     fertilizerNeeds.totalFarmsRequiring = farmFertilizerData.length;
 
-                    // Aggregate by fertilizer type across all farms
                     const fertilizerTotals = new Map();
 
                     farmFertilizerData.forEach(farmData => {
@@ -426,38 +442,34 @@ const FarmOptimizerPage = () => {
                         });
                     });
 
-                    // Convert to array and calculate monthly/yearly totals
                     fertilizerNeeds.fertilizers = Array.from(fertilizerTotals.values()).map(fert => ({
                         ...fert,
                         totalQuantityPerMonth: fert.totalQuantityPerDay * 30,
                         totalQuantityPerYear: fert.totalQuantityPerDay * 360
-                    })).sort((a, b) => a.totalQuantityPerDay - b.totalQuantityPerDay); // Sort by efficiency (least needed first)
+                    })).sort((a, b) => a.totalQuantityPerDay - b.totalQuantityPerDay);
                 }
             }
 
             // Combine all food categories with CORRECTED bonus calculation
             const allFoodCategories = new Set();
             const categoryDetails = new Map();
-            const uniqueFoods = new Set(); // Track unique foods only
-            const foodUnityDetails = []; // Track unity per food
+            const uniqueFoods = new Set();
+            const foodUnityDetails = [];
             let totalUnity = 0;
             let totalHealthBonuses = 0;
 
             detailedResults.forEach(result => {
                 if (result.foodCategories) {
                     result.foodCategories.categories.forEach(cat => {
-                        // Check if this is a NEW category we haven't provided yet
                         if (!allFoodCategories.has(cat.id)) {
                             allFoodCategories.add(cat.id);
 
-                            // First time providing this category = health bonus (if it has one)
                             const category = ProductionCalculator.foodCategories?.find(c => c.id === cat.id);
                             if (category && category.hasHealthBenefit) {
                                 totalHealthBonuses += 1;
                             }
                         }
 
-                        // Track category for display
                         const current = categoryDetails.get(cat.id) || {
                             name: cat.name,
                             hasHealthBenefit: cat.hasHealthBenefit,
@@ -467,11 +479,10 @@ const FarmOptimizerPage = () => {
                         categoryDetails.set(cat.id, current);
                     });
 
-                    // Track unity provided by each UNIQUE food (only count once)
                     result.processingChains?.forEach(chain => {
                         const food = ProductionCalculator.foods?.find(f => f.productId === chain.finalFoodProductId);
                         if (food && food.unityProvided > 0 && !uniqueFoods.has(food.productId)) {
-                            uniqueFoods.add(food.productId); // Mark as counted
+                            uniqueFoods.add(food.productId);
 
                             const unityPerMonth = food.unityProvided;
                             totalUnity += unityPerMonth;
@@ -630,12 +641,17 @@ const FarmOptimizerPage = () => {
             ? availableFoodCrops.filter(c => constraints.allowedCrops.includes(c.id))
             : availableFoodCrops;
 
-        // Calculate base metrics for each crop INCLUDING PROCESSING CHAINS
+        // ✅ FIXED: Calculate base metrics for each crop INCLUDING PROCESSING CHAINS
         const cropMetrics = cropsToUse.map(crop => {
             const farm = effectiveFarms[0];
             if (!farm) return null;
 
-            const productionPerMonth = FarmOptimizer.calculateCropYield(crop, farm);
+            const productionPerMonth = FarmOptimizer.calculateCropYield(
+                crop,
+                farm,
+                constraints.targetFertility,
+                false
+            );
             const waterPerDay = FarmOptimizer.calculateWaterPerDay(crop, farm);
             const fertilityPerDay = crop.fertilityPerDayPercent;
 
@@ -657,6 +673,9 @@ const FarmOptimizerPage = () => {
             }
 
             const monthsPerCycle = crop.growthDays / 30;
+
+            // ✅ FIXED: peopleFedPerMonth is WHILE GROWING (not averaged)
+            // The averaging happens in generateFarmConfigurations
             const peopleFedPerMonth = peopleFedTotal / monthsPerCycle;
 
             // Get food category
@@ -670,11 +689,11 @@ const FarmOptimizerPage = () => {
                 productionPerMonth,
                 waterPerDay: foodResult.totalWaterPerDay,
                 fertilityPerDay,
-                peopleFedPerMonth,
+                peopleFedPerMonth, // ✅ This is per month WHILE GROWING
                 waterPerPerson: peopleFedPerMonth > 0 ? foodResult.totalWaterPerDay / peopleFedPerMonth : Infinity,
                 fertilityPerPerson: peopleFedPerMonth > 0 ? Math.abs(fertilityPerDay) / peopleFedPerMonth : Infinity,
                 category: foodCategory,
-                monthsPerCycle,
+                monthsPerCycle, // ✅ ADD THIS for weighted calculations
                 processingChains: foodResult.processingChains
             };
         }).filter(m => m != null);
@@ -865,27 +884,31 @@ const FarmOptimizerPage = () => {
     };
 
     /**
-     * Generate all possible farm configurations (1-4 crops)
-     * and calculate their efficiency
-     */
+ * ✅ FIXED: Generate all possible farm configurations (1-4 crops)
+ * and calculate their efficiency with proper monoculture penalty
+ */
     const generateFarmConfigurations = (cropMetrics) => {
         const configs = [];
-
-        // Test single crop (with rotation penalty)
+                
         for (const crop of cropMetrics) {
             configs.push({
                 crops: [crop],
-                efficiency: crop.peopleFedPerMonth * 0.75, // 25% penalty for monoculture
+                efficiency: crop.peopleFedPerMonth, 
                 type: 'mono'
             });
         }
 
-        // Test two-crop combinations (optimal - no penalty)
+        // Two-crop combinations (optimal - no penalty)
         for (let i = 0; i < cropMetrics.length; i++) {
             for (let j = i + 1; j < cropMetrics.length; j++) {
                 const crop1 = cropMetrics[i];
                 const crop2 = cropMetrics[j];
-                const avgEfficiency = (crop1.peopleFedPerMonth + crop2.peopleFedPerMonth) / 2;
+
+                // ✅ FIXED: Weighted average based on growth time
+                const totalDays = crop1.monthsPerCycle * 30 + crop2.monthsPerCycle * 30;
+                const weight1 = (crop1.monthsPerCycle * 30) / totalDays;
+                const weight2 = (crop2.monthsPerCycle * 30) / totalDays;
+                const avgEfficiency = (crop1.peopleFedPerMonth * weight1) + (crop2.peopleFedPerMonth * weight2);
 
                 configs.push({
                     crops: [crop1, crop2],
@@ -895,14 +918,22 @@ const FarmOptimizerPage = () => {
             }
         }
 
-        // Test three-crop combinations
+        // Three-crop combinations
         for (let i = 0; i < Math.min(cropMetrics.length, 10); i++) {
             for (let j = i + 1; j < Math.min(cropMetrics.length, 10); j++) {
                 for (let k = j + 1; k < Math.min(cropMetrics.length, 10); k++) {
                     const crop1 = cropMetrics[i];
                     const crop2 = cropMetrics[j];
                     const crop3 = cropMetrics[k];
-                    const avgEfficiency = (crop1.peopleFedPerMonth + crop2.peopleFedPerMonth + crop3.peopleFedPerMonth) / 3;
+
+                    // ✅ FIXED: Weighted average
+                    const totalDays = (crop1.monthsPerCycle + crop2.monthsPerCycle + crop3.monthsPerCycle) * 30;
+                    const weight1 = (crop1.monthsPerCycle * 30) / totalDays;
+                    const weight2 = (crop2.monthsPerCycle * 30) / totalDays;
+                    const weight3 = (crop3.monthsPerCycle * 30) / totalDays;
+                    const avgEfficiency = (crop1.peopleFedPerMonth * weight1) +
+                        (crop2.peopleFedPerMonth * weight2) +
+                        (crop3.peopleFedPerMonth * weight3);
 
                     configs.push({
                         crops: [crop1, crop2, crop3],
@@ -913,7 +944,7 @@ const FarmOptimizerPage = () => {
             }
         }
 
-        // Test four-crop combinations (only top combos due to computational cost)
+        // Four-crop combinations (only top combos)
         const topCrops = cropMetrics.slice(0, 6);
         for (let i = 0; i < topCrops.length; i++) {
             for (let j = i + 1; j < topCrops.length; j++) {
@@ -923,8 +954,18 @@ const FarmOptimizerPage = () => {
                         const crop2 = topCrops[j];
                         const crop3 = topCrops[k];
                         const crop4 = topCrops[l];
-                        const avgEfficiency = (crop1.peopleFedPerMonth + crop2.peopleFedPerMonth +
-                            crop3.peopleFedPerMonth + crop4.peopleFedPerMonth) / 4;
+
+                        // ✅ FIXED: Weighted average
+                        const totalDays = (crop1.monthsPerCycle + crop2.monthsPerCycle +
+                            crop3.monthsPerCycle + crop4.monthsPerCycle) * 30;
+                        const weight1 = (crop1.monthsPerCycle * 30) / totalDays;
+                        const weight2 = (crop2.monthsPerCycle * 30) / totalDays;
+                        const weight3 = (crop3.monthsPerCycle * 30) / totalDays;
+                        const weight4 = (crop4.monthsPerCycle * 30) / totalDays;
+                        const avgEfficiency = (crop1.peopleFedPerMonth * weight1) +
+                            (crop2.peopleFedPerMonth * weight2) +
+                            (crop3.peopleFedPerMonth * weight3) +
+                            (crop4.peopleFedPerMonth * weight4);
 
                         configs.push({
                             crops: [crop1, crop2, crop3, crop4],
@@ -1138,13 +1179,54 @@ const FarmOptimizerPage = () => {
                         borderRadius: '8px',
                         border: '1px solid #333'
                     }}>
-                        <h4 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#ddd', marginBottom: '1rem' }}>
-                            Constraints
-                        </h4>
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#ddd', marginBottom: '1rem' }}>
+                                Constraints
+                            </h4>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-                            {(optimizationMode === 'minWater' || optimizationMode === 'minFertility') && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                                {/* Use Fertilizer Toggle */}
                                 <div>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={constraints.useFertilizer}
+                                            onChange={(e) => setConstraints({ ...constraints, useFertilizer: e.target.checked })}
+                                            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                                        />
+                                        <span style={{ fontSize: '0.9rem', color: '#ddd' }}>Use Fertilizer</span>
+                                    </label>
+                                    <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem', marginLeft: '28px' }}>
+                                        {constraints.useFertilizer
+                                            ? 'Optimizer can use fertilizer'
+                                            : 'Natural fertility only'}
+                                    </div>
+                                </div>
+
+                                {/* Target Fertility (only if using fertilizer) */}
+                                {constraints.useFertilizer && (
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
+                                            Target Fertility: {constraints.targetFertility}%
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="140"
+                                            step="10"
+                                            value={constraints.targetFertility}
+                                            onChange={(e) => setConstraints({ ...constraints, targetFertility: parseInt(e.target.value) })}
+                                            style={{ width: '100%' }}
+                                        />
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#666', marginTop: '0.25rem' }}>
+                                            <span>0%</span>
+                                            <span>140%</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Target Population (only for minWater/minFertility modes) */}
+                                {(optimizationMode === 'minWater' || optimizationMode === 'minFertility') && (
+                                    <div>
                                     <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
                                         Target Population
                                     </label>
@@ -1162,30 +1244,11 @@ const FarmOptimizerPage = () => {
                                             fontSize: '1rem'
                                         }}
                                     />
-                                </div>
-                            )}
+                                    </div>
+                                )}
 
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                                    Target Fertility (%)
-                                </label>
-                                <input
-                                    type="number"
-                                    value={constraints.targetFertility}
-                                    onChange={(e) => setConstraints({ ...constraints, targetFertility: parseInt(e.target.value) || 100 })}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.75rem',
-                                        backgroundColor: '#2a2a2a',
-                                        color: '#fff',
-                                        border: '2px solid #555',
-                                        borderRadius: '6px',
-                                        fontSize: '1rem'
-                                    }}
-                                />
-                            </div>
-
-                            <div>
+                                {/* Allowed Crops */}
+                                <div>
                                 <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
                                     Allowed Crops
                                 </label>
@@ -1286,7 +1349,62 @@ const FarmOptimizerPage = () => {
                             ))}
                         </div>
                     </div>
-                )}
+                    )}
+
+                    {/* Manual mode - Fertility Settings */}
+                    {optimizationMode === 'manual' && (
+                        <div style={{
+                            marginBottom: '2rem',
+                            padding: '1.5rem',
+                            backgroundColor: '#1a1a1a',
+                            borderRadius: '8px',
+                            border: '1px solid #333'
+                        }}>
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#ddd', marginBottom: '1rem' }}>
+                                Fertility Settings
+                            </h4>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                {/* Use Fertilizer Toggle */}
+                                <div>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={constraints.useFertilizer}
+                                            onChange={(e) => setConstraints({ ...constraints, useFertilizer: e.target.checked })}
+                                            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                                        />
+                                        <span style={{ fontSize: '0.9rem', color: '#ddd' }}>Use Fertilizer</span>
+                                    </label>
+                                    <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem', marginLeft: '28px' }}>
+                                        {constraints.useFertilizer
+                                            ? '✅ Calculations include fertilizer usage'
+                                            : '⚠️ Using natural fertility only'}
+                                    </div>
+                                </div>
+
+                                {/* Target Fertility Slider */}
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
+                                        Target Fertility: {constraints.targetFertility}%
+                                    </label>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="140"
+                                        step="10"
+                                        value={constraints.targetFertility}
+                                        onChange={(e) => setConstraints({ ...constraints, targetFertility: parseInt(e.target.value) })}
+                                        style={{ width: '100%' }}
+                                    />
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#666', marginTop: '0.25rem' }}>
+                                        <span>0%</span>
+                                        <span>140%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                 {/* Farm count selector for optimization modes */}
                 {optimizationMode !== 'manual' && (
@@ -1363,7 +1481,7 @@ const FarmOptimizerPage = () => {
                             onChange={(val) => setResearch({ ...research, waterReduction: val })}
                         />
                     </div>
-                </div>
+                    </div>
 
                 {/* Calculate Button */}
                 <button
@@ -2787,10 +2905,27 @@ const FarmRotationCard = ({ farmNumber, farmResult }) => {
                         </div>
                     </div>
                     <div>
-                        <div style={{ color: '#888', marginBottom: '0.25rem' }}>Avg Fertility/Day</div>
-                        <div style={{ color: '#ff6b6b', fontWeight: '700', fontSize: '1rem' }}>
-                            {fertilityInfo.avgFertilityPerDay.toFixed(2)}%
+                        <div style={{ color: '#888', marginBottom: '0.25rem' }}>
+                            {farmResult.usedFertilizer ? 'Target Fertility' : 'Actual Fertility'}
                         </div>
+                        <div style={{
+                            color: farmResult.usedFertilizer ? '#4a90e2' : '#50C878',
+                            fontWeight: '700',
+                            fontSize: '1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                        }}>
+                            {farmResult.actualFertility.toFixed(1)}%
+                            {farmResult.usedFertilizer && (
+                                <span style={{ fontSize: '0.8rem', color: '#FFD700' }}>🏭</span>
+                            )}
+                        </div>
+                        {farmResult.usedFertilizer && (
+                            <div style={{ fontSize: '0.65rem', color: '#4a90e2', marginTop: '2px' }}>
+                                Using fertilizer
+                            </div>
+                        )}
                     </div>
                     <div>
                         <div style={{ color: '#888', marginBottom: '0.25rem' }}>Rotation Length</div>
