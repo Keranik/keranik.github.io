@@ -234,16 +234,35 @@ const FarmOptimizerPage = () => {
 
                 const rotation = optimizedRotations[farmIdx] || [null, null, null, null];
 
-                // Calculate per-slot details for display
+                // ✅ FIXED: Calculate fertility equilibrium FIRST to know what fertility to use for yields
+                const fertilityInfo = FarmOptimizer.calculateFertilityEquilibrium(
+                    rotation,
+                    effectiveFarm
+                );
+
+                // ✅ FIXED: Determine actual fertility to use for yield calculations
+                let actualFertility;
+                let usedFertilizer = false;
+
+                if (constraints.useFertilizer) {
+                    // User wants to use fertilizer: use their target fertility
+                    actualFertility = constraints.targetFertility;
+                    usedFertilizer = constraints.targetFertility > fertilityInfo.naturalEquilibrium;
+                } else {
+                    // No fertilizer: use natural equilibrium (what the farm can sustain naturally)
+                    actualFertility = fertilityInfo.naturalEquilibrium;
+                    usedFertilizer = false;
+                }
+
+                // ✅ FIXED: Calculate per-slot details with CORRECT fertility
                 const slotDetails = rotation.map(cropId => {
                     if (!cropId) return null;
 
                     const crop = availableCrops.find(c => c.id === cropId);
                     if (!crop) return null;
 
-                    // ✅ FIXED: Pass targetFertility for calculations
-                    const targetFert = optimizationMode === 'manual' ? constraints.targetFertility : null;
-                    const productionPerMonth = FarmOptimizer.calculateCropYield(crop, effectiveFarm, targetFert);
+                    // ✅ Use actualFertility (either natural equilibrium or target with fertilizer)
+                    const productionPerMonth = FarmOptimizer.calculateCropYield(crop, effectiveFarm, actualFertility);
                     const waterPerDay = FarmOptimizer.calculateWaterPerDay(crop, effectiveFarm);
 
                     return {
@@ -270,26 +289,6 @@ const FarmOptimizerPage = () => {
 
                 const activeCropCount = slotDetails.length;
                 const totalRotationMonths = totalRotationDays / 30;
-
-                // ✅ FIXED: Calculate fertility with monoculture penalty
-                const fertilityInfo = FarmOptimizer.calculateFertilityEquilibrium(
-                    rotation,
-                    effectiveFarm
-                );
-
-                // ✅ FIXED: Determine actual fertility to use
-                let actualFertility;
-                let usedFertilizer = false;
-
-                if (constraints.useFertilizer) {
-                    // User wants to use fertilizer
-                    actualFertility = constraints.targetFertility;
-                    usedFertilizer = constraints.targetFertility > fertilityInfo.naturalEquilibrium;
-                } else {
-                    // No fertilizer: use natural equilibrium
-                    actualFertility = fertilityInfo.naturalEquilibrium;
-                    usedFertilizer = false;
-                }
 
                 // Use enhanced calculation method
                 let foodResult;
@@ -346,8 +345,8 @@ const FarmOptimizerPage = () => {
                     rotation,
                     production,
                     fertilityInfo,
-                    actualFertility, // ✅ NEW: Show what fertility was used
-                    usedFertilizer, // ✅ NEW: Did we use fertilizer?
+                    actualFertility, // ✅ Show what fertility was used for yield calculations
+                    usedFertilizer, // ✅ Did we use fertilizer?
                     peopleFed: foodResult.peopleFed,
                     totalWaterPerDay: foodResult.totalWaterPerDay,
                     farmWaterPerDay: totalFarmWaterPerDay,
@@ -372,7 +371,7 @@ const FarmOptimizerPage = () => {
                 });
             });
 
-            // ✅ UPDATED: FERTILIZER CALCULATION - Only if user wants to use fertilizer
+            // ✅ FERTILIZER CALCULATION - Only if user wants to use fertilizer
             let fertilizerNeeds = {
                 needed: false,
                 fertilizers: [],
@@ -450,7 +449,7 @@ const FarmOptimizerPage = () => {
                 }
             }
 
-            // Combine all food categories with CORRECTED bonus calculation
+            // Combine all food categories
             const allFoodCategories = new Set();
             const categoryDetails = new Map();
             const uniqueFoods = new Set();

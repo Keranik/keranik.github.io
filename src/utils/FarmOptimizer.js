@@ -430,52 +430,28 @@ export class FarmOptimizer {
     }
 
     /**
-     * NEW METHOD: Calculate actual yield based on fertility simulation
-     * Simulates day-by-day fertility changes during crop growth
+     * Calculate actual yield based on fertility
+     * Formula from Farm.cs recomputeYieldEstimates():
+     * YieldPerYear = baseYield × (360 / growthDays) × (fertility / 100) × yieldMult
+     * YieldPerMonth = YieldPerYear / 12
      */
-    static calculateActualYield(crop, farm, startingFertility) {
+    static calculateActualYield(crop, farm, fertility) {
+        // Base production: crop output × farm yield multiplier
         const baseProduction = crop.output.quantity * farm.effectiveYieldMult;
 
-        let currentFertility = startingFertility;
-        let yieldPercentSum = 0;
+        // Convert to per-year basis (360 days per year in game)
+        const perYearMultiplier = 360 / crop.growthDays;
 
-        // Simulate each day of growth
-        for (let day = 0; day < crop.growthDays; day++) {
-            // Accumulate yield based on current fertility percentage
-            yieldPercentSum += currentFertility;
+        // Apply fertility (convert percentage to decimal)
+        const fertilityMultiplier = fertility / 100;
 
-            // Apply fertility consumption
-            let fertilityChange = -crop.fertilityPerDayPercent;
+        // Calculate yield per year
+        const yieldPerYear = baseProduction * perYearMultiplier * fertilityMultiplier;
 
-            // Extra consumption if fertility > 100% (from FarmData.cs: CROP_FERTILITY_DEMAND_MULT = 2.0)
-            if (currentFertility > 100 && fertilityChange < 0) {
-                const extraConsumption = fertilityChange * ((currentFertility - 100) / 100) * 2.0;
-                fertilityChange += extraConsumption; // Makes it more negative
-            }
+        // Convert to per-month (12 months per year)
+        const yieldPerMonth = yieldPerYear / 12;
 
-            currentFertility += fertilityChange;
-
-            // Natural replenishment: 1% of missing fertility per day
-            let replenish = (100 - currentFertility) * farm.effectiveFertilityReplenish;
-
-            // Slower replenishment above 100% (OVER_100_REPLENISH_MULT = 0.2)
-            if (currentFertility > 100) {
-                replenish *= 0.2;
-            }
-
-            currentFertility += replenish;
-        }
-
-        // Calculate average fertility over growth period
-        const avgFertility = yieldPercentSum / crop.growthDays;
-
-        // Final yield based on average fertility
-        const actualYield = baseProduction * (avgFertility / 100);
-
-        // Convert to per-month basis (30 days)
-        const productionPerMonth = (actualYield / crop.growthDays) * 30;
-
-        return productionPerMonth;
+        return yieldPerMonth;
     }
 
     /**
@@ -546,7 +522,7 @@ export class FarmOptimizer {
         // ✅ From Farm.cs line 777:
         // NaturalFertilityEquilibrium = (Percent.Hundred - m_avgFertilityUsedPerDay / Prototype.FertilityReplenishPerDay).Max(Percent.Zero)
         const naturalEquilibrium = Math.max(0, Math.min(200,
-            100 - (avgFertilityPerDay / replenishRate)
+            100 - ((avgFertilityPerDay / replenishRate) *100)
         ));
 
         return {
