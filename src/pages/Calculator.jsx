@@ -29,6 +29,9 @@ const Calculator = () => {
     const [recipeModalOpen, setRecipeModalOpen] = useState(false);
     const [recipeModalProductId, setRecipeModalProductId] = useState(null);
     const [recipeModalRecipes, setRecipeModalRecipes] = useState([]);
+    const [powerUnit, setPowerUnit] = useState('kW'); // 'kW', 'MW', or 'GW'
+    const [collapsedNodes, setCollapsedNodes] = useState(new Set());
+
 
     useEffect(() => {
         document.title = 'Production Calculator - Captain of Industry Tools';
@@ -132,7 +135,29 @@ const Calculator = () => {
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
+    const formatPower = (kw, unit) => {
+        switch (unit) {
+            case 'MW':
+                return (kw / 1000).toFixed(2);
+            case 'GW':
+                return (kw / 1000000).toFixed(3);
+            default: // kW
+                return kw.toFixed(0);
+        }
+    };
 
+    // Helper function to toggle collapse
+    const toggleNodeCollapse = (nodeId) => {
+        setCollapsedNodes(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(nodeId)) {
+                newSet.delete(nodeId);
+            } else {
+                newSet.add(nodeId);
+            }
+            return newSet;
+        });
+    };
 
   const handleCalculate = () => {
     if (calculatorMode === 'forward') {
@@ -226,13 +251,49 @@ const Calculator = () => {
     setRecipeModalRecipes([]);
   };
 
-  const selectRecipeFromModal = (recipeId) => {
-    if (recipeModalProductId) {
-      // This will trigger handleRecipeOverride which does the full recalculation
-      handleRecipeOverride(recipeModalProductId, recipeId);
-    }
-    closeRecipeModal();
-  };
+    const selectRecipeFromModal = (recipeId) => {
+        if (recipeModalProductId) {
+            // Check if this is the ROOT product (main selected product)
+            if (calculatorMode === 'forward' && recipeModalProductId === selectedProduct) {
+                // Update the main recipe selection
+                setSelectedRecipe(recipeId);
+
+                // Also trigger recalculation
+                if (targetRate) {
+                    const newChain = ProductionCalculator.calculateProductionChain(
+                        selectedProduct,
+                        targetRate,
+                        recipeId, // Use the NEW recipe
+                        recipeOverrides
+                    );
+                    const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
+                    setProductionChain(newChain);
+                    setRequirements(newReqs);
+                }
+            } else if (calculatorMode === 'reverse' && recipeModalProductId === reverseProduct) {
+                // Update reverse mode main recipe
+                setReverseRecipe(recipeId);
+
+                // Trigger recalculation
+                if (availableResources.size > 0) {
+                    const result = ProductionCalculator.calculateMaxProduction(
+                        reverseProduct,
+                        availableResources,
+                        recipeId, // Use the NEW recipe
+                        recipeOverrides
+                    );
+                    if (result.chain) {
+                        setProductionChain(result.chain);
+                        setRequirements(ProductionCalculator.calculateTotalRequirements(result.chain));
+                    }
+                }
+            } else {
+                // This is a child node - use the override system
+                handleRecipeOverride(recipeModalProductId, recipeId);
+            }
+        }
+        closeRecipeModal();
+    };
 
   const addResource = () => {
     if (!resourceInput.productId || resourceInput.quantity <= 0) return;
@@ -464,227 +525,339 @@ const Calculator = () => {
     };
   };
 
-  const renderProductionNode = (node, level = 0) => {
-    if (!node) return null;
+    const renderProductionNode = (node, level = 0, parentPath = '') => {
+        if (!node) return null;
 
-    const indent = level * 20;
-    const product = node.product;
-    const isRaw = node.isRawMaterial;
-    const productIcon = getProductIcon(product);
-    const machineImage = node.machine ? getMachineImage(node.machine) : null;
-    const electricityIcon = getGeneralIcon('Electricity');
-    const workerIcon = getGeneralIcon('Worker');
-    const computingIcon = getGeneralIcon('Computing');
-    
-    const hasMultipleRecipes = node.availableRecipes && node.availableRecipes.length > 1;
-    
-    // Get the CURRENT recipe being used (from overrides or default)
-    const currentRecipeId = recipeOverrides.get(node.productId) || node.recipe?.id;
-    const currentRecipe = node.availableRecipes?.find(r => r.id === currentRecipeId) || node.recipe;
+        // Create unique node ID based on path in tree
+        const nodeId = `${parentPath}-${node.productId}-${level}`;
+        const isCollapsed = collapsedNodes.has(nodeId);
+        const hasChildren = node.inputChains && node.inputChains.length > 0;
 
-    return (
-      <div key={`${node.productId}-${level}-${currentRecipeId}`} style={{ marginLeft: `${indent}px`, marginBottom: '10px' }}>
-        <div style={{
-          backgroundColor: isRaw ? '#3a3a3a' : '#2a2a2a',
-          padding: '14px',
-          borderRadius: '8px',
-          border: isRaw ? '2px solid #666' : hasMultipleRecipes ? '2px solid #4a90e2' : '1px solid #444',
-          transition: 'all 0.2s ease'
-        }}>
-          {/* Product Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', flex: 1 }}>
-              {productIcon && (
-                <img 
-                  src={productIcon} 
-                  alt={product?.name}
-                  style={{ 
-                    width: '40px', 
-                    height: '40px',
-                    objectFit: 'contain',
-                    marginTop: '2px'
-                  }}
-                />
-              )}
-              <div style={{ flex: 1 }}>
-                <strong style={{ color: isRaw ? '#FFD700' : '#4a90e2', fontSize: '1.2rem', lineHeight: 1.3 }}>
-                  {product?.name || node.productId}
-                </strong>
-                {isRaw && <span style={{ color: '#FFD700', marginLeft: '10px', fontSize: '0.85rem' }}>(Raw Material)</span>}
-                
-                {/* Recipe Card - Clickable to open modal */}
-                {hasMultipleRecipes && currentRecipe && (
-                  <div style={{ marginTop: '12px' }}>
-                    <div
-                      onClick={() => openRecipeModal(node.productId, node.availableRecipes)}
-                      style={{
-                        padding: '0',
-                        backgroundColor: '#1a1a1a',
-                        border: '2px solid #4a90e2',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        overflow: 'hidden'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#252525';
-                        e.currentTarget.style.borderColor = '#5aa0f2';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(74, 144, 226, 0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#1a1a1a';
-                        e.currentTarget.style.borderColor = '#4a90e2';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    >
-                      <div style={{ padding: '4px 8px' }}>
-                        {renderRecipeCard(currentRecipe, 'normal', false)}
-                      </div>
-                      <div style={{ 
-                        padding: '6px 12px',
-                        backgroundColor: 'rgba(74, 144, 226, 0.1)',
-                        borderTop: '1px solid rgba(74, 144, 226, 0.2)',
-                        fontSize: '0.7rem', 
-                        color: '#888', 
-                        textAlign: 'center',
-                        fontWeight: '500',
-                        letterSpacing: '0.3px'
-                      }}>
-                        ✨ Click to view {node.availableRecipes.length} available recipes
-                      </div>
+        const indent = level * 20;
+        const product = node.product;
+        const isRaw = node.isRawMaterial;
+        const productIcon = getProductIcon(product);
+        const machineImage = node.machine ? getMachineImage(node.machine) : null;
+        const electricityIcon = getGeneralIcon('Electricity');
+        const workerIcon = getGeneralIcon('Worker');
+        const computingIcon = getGeneralIcon('Computing');
+
+        const hasMultipleRecipes = node.availableRecipes && node.availableRecipes.length > 1;
+
+        const currentRecipeId = recipeOverrides.get(node.productId) || node.recipe?.id;
+        const currentRecipe = node.availableRecipes?.find(r => r.id === currentRecipeId) || node.recipe;
+
+        return (
+            <div key={nodeId} style={{ marginLeft: `${indent}px`, marginBottom: '10px' }}>
+                {/* Tree line connector */}
+                {level > 0 && (
+                    <div style={{
+                        position: 'absolute',
+                        left: `${indent - 15}px`,
+                        top: '20px',
+                        width: '10px',
+                        height: '2px',
+                        backgroundColor: '#555',
+                        pointerEvents: 'none'
+                    }} />
+                )}
+
+                <div style={{
+                    backgroundColor: isRaw ? '#3a3a3a' : '#2a2a2a',
+                    padding: '14px',
+                    borderRadius: '8px',
+                    border: isRaw ? '2px solid #666' : hasMultipleRecipes ? '2px solid #4a90e2' : '1px solid #444',
+                    transition: 'all 0.2s ease',
+                    position: 'relative'
+                }}>
+                    {/* Collapse/Expand Button */}
+                    {hasChildren && (
+                        <button
+                            onClick={() => toggleNodeCollapse(nodeId)}
+                            style={{
+                                position: 'absolute',
+                                top: '14px',
+                                left: '-30px',
+                                width: '24px',
+                                height: '24px',
+                                backgroundColor: '#4a90e2',
+                                border: '2px solid #5aa0f2',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold',
+                                color: '#fff',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 2px 6px rgba(74, 144, 226, 0.4)',
+                                zIndex: 10
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#5aa0f2';
+                                e.currentTarget.style.transform = 'scale(1.1)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#4a90e2';
+                                e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                            title={isCollapsed ? 'Expand inputs' : 'Collapse inputs'}
+                        >
+                            {isCollapsed ? '▶' : '▼'}
+                        </button>
+                    )}
+
+                    {/* Depth indicator badge */}
+                    {level > 0 && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '8px',
+                            right: '8px',
+                            padding: '2px 6px',
+                            backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                            border: '1px solid rgba(74, 144, 226, 0.4)',
+                            borderRadius: '4px',
+                            fontSize: '0.7rem',
+                            color: '#4a90e2',
+                            fontWeight: '700',
+                            letterSpacing: '0.5px'
+                        }}>
+                            L{level}
+                        </div>
+                    )}
+
+                    {/* Product Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', flex: 1 }}>
+                            {productIcon && (
+                                <img
+                                    src={productIcon}
+                                    alt={product?.name}
+                                    style={{
+                                        width: '40px',
+                                        height: '40px',
+                                        objectFit: 'contain',
+                                        marginTop: '2px'
+                                    }}
+                                />
+                            )}
+                            <div style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                    <strong style={{ color: isRaw ? '#FFD700' : '#4a90e2', fontSize: '1.2rem', lineHeight: 1.3 }}>
+                                        {product?.name || node.productId}
+                                    </strong>
+                                    {isRaw && <span style={{ color: '#FFD700', fontSize: '0.75rem', backgroundColor: 'rgba(255, 215, 0, 0.15)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(255, 215, 0, 0.3)' }}>RAW</span>}
+                                    {hasChildren && (
+                                        <span style={{
+                                            fontSize: '0.75rem',
+                                            color: '#888',
+                                            backgroundColor: '#1a1a1a',
+                                            padding: '2px 8px',
+                                            borderRadius: '4px',
+                                            border: '1px solid #333'
+                                        }}>
+                                            {node.inputChains.length} input{node.inputChains.length > 1 ? 's' : ''}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Recipe Card - Clickable to open modal */}
+                                {hasMultipleRecipes && currentRecipe && (
+                                    <div style={{ marginTop: '8px' }}>
+                                        <div
+                                            onClick={() => openRecipeModal(node.productId, node.availableRecipes)}
+                                            style={{
+                                                padding: '0',
+                                                backgroundColor: '#1a1a1a',
+                                                border: '2px solid #4a90e2',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                overflow: 'hidden'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = '#252525';
+                                                e.currentTarget.style.borderColor = '#5aa0f2';
+                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(74, 144, 226, 0.3)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = '#1a1a1a';
+                                                e.currentTarget.style.borderColor = '#4a90e2';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = 'none';
+                                            }}
+                                        >
+                                            <div style={{ padding: '4px 8px' }}>
+                                                {renderRecipeCard(currentRecipe, 'normal', false)}
+                                            </div>
+                                            <div style={{
+                                                padding: '6px 12px',
+                                                backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                                                borderTop: '1px solid rgba(74, 144, 226, 0.2)',
+                                                fontSize: '0.7rem',
+                                                color: '#888',
+                                                textAlign: 'center',
+                                                fontWeight: '500',
+                                                letterSpacing: '0.3px'
+                                            }}>
+                                                ✨ Click to view {node.availableRecipes.length} available recipes
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div style={{
+                            color: '#fff',
+                            fontSize: '1.1rem',
+                            fontWeight: 'bold',
+                            backgroundColor: '#1a1a1a',
+                            padding: '8px 14px',
+                            borderRadius: '6px',
+                            whiteSpace: 'nowrap',
+                            marginLeft: '14px'
+                        }}>
+                            {node.targetRate?.toFixed(2)} /min
+                        </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div style={{ 
-              color: '#fff', 
-              fontSize: '1.1rem',
-              fontWeight: 'bold',
-              backgroundColor: '#1a1a1a',
-              padding: '8px 14px',
-              borderRadius: '6px',
-              whiteSpace: 'nowrap',
-              marginLeft: '14px'
-            }}>
-              {node.targetRate?.toFixed(2)} /min
-            </div>
-          </div>
 
-          {/* Machine Info */}
-          {!isRaw && node.machine && (
-            <div style={{ marginTop: '14px', color: '#aaa', fontSize: '0.9rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
-                {machineImage && (
-                  <img 
-                    src={machineImage} 
-                    alt={node.machine.name}
-                    style={{ 
-                      width: '52px', 
-                      height: '52px',
-                      objectFit: 'contain'
-                    }}
-                  />
-                )}
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '1.05rem', color: '#fff', lineHeight: 1.3 }}>
-                    <strong>{node.machine.name}</strong> × {node.machineCount}
-                  </div>
-                  <div style={{ marginTop: '4px', color: '#999', fontSize: '0.85rem', lineHeight: 1.3 }}>
-                    {node.recipe?.name} ({node.recipe?.durationSeconds}s cycle)
-                  </div>
+                    {/* Machine Info */}
+                    {!isRaw && node.machine && (
+                        <div style={{ marginTop: '14px', color: '#aaa', fontSize: '0.9rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
+                                {machineImage && (
+                                    <img
+                                        src={machineImage}
+                                        alt={node.machine.name}
+                                        style={{
+                                            width: '52px',
+                                            height: '52px',
+                                            objectFit: 'contain'
+                                        }}
+                                    />
+                                )}
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '1.05rem', color: '#fff', lineHeight: 1.3 }}>
+                                        <strong>{node.machine.name}</strong> × {node.machineCount}
+                                    </div>
+                                    <div style={{ marginTop: '4px', color: '#999', fontSize: '0.85rem', lineHeight: 1.3 }}>
+                                        {node.recipe?.name} ({node.recipe?.durationSeconds}s cycle)
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Resource Requirements Icons */}
+                            <div style={{
+                                display: 'flex',
+                                gap: '20px',
+                                marginTop: '10px',
+                                flexWrap: 'wrap',
+                                backgroundColor: '#1a1a1a',
+                                padding: '10px 14px',
+                                borderRadius: '6px'
+                            }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#FFD700' }}>
+                                    {electricityIcon ? (
+                                        <img src={electricityIcon} alt="Electricity" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                                    ) : '⚡'}
+                                    <strong style={{ fontSize: '1rem' }}>{(node.machine.electricityKw * node.machineCount).toFixed(0)}</strong>
+                                    <span style={{ fontSize: '0.9rem', color: '#ccc' }}>kW</span>
+                                </span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#50C878' }}>
+                                    {workerIcon ? (
+                                        <img src={workerIcon} alt="Workers" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                                    ) : '👷'}
+                                    <strong style={{ fontSize: '1rem' }}>{node.machine.workers * node.machineCount}</strong>
+                                    <span style={{ fontSize: '0.9rem', color: '#ccc' }}>workers</span>
+                                </span>
+                                {node.machine.computingTFlops > 0 && (
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#4a90e2' }}>
+                                        {computingIcon ? (
+                                            <img src={computingIcon} alt="Computing" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                                        ) : '💻'}
+                                        <strong style={{ fontSize: '1rem' }}>{(node.machine.computingTFlops * node.machineCount).toFixed(1)}</strong>
+                                        <span style={{ fontSize: '0.9rem', color: '#ccc' }}>TFLOPS</span>
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Inputs List */}
+                    {!isRaw && node.inputs && node.inputs.length > 0 && (
+                        <div style={{ marginTop: '12px', fontSize: '0.9rem', color: '#999' }}>
+                            <div style={{ marginBottom: '8px', color: '#ccc', fontWeight: 'bold', fontSize: '0.95rem' }}>Inputs:</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                {node.inputs.map((input, idx) => {
+                                    const inputIcon = getProductIcon(input.product);
+                                    return (
+                                        <div key={idx} style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '10px',
+                                            backgroundColor: '#1a1a1a',
+                                            padding: '8px 12px',
+                                            borderRadius: '5px'
+                                        }}>
+                                            {inputIcon && (
+                                                <img
+                                                    src={inputIcon}
+                                                    alt={input.product?.name}
+                                                    style={{
+                                                        width: '22px',
+                                                        height: '22px',
+                                                        objectFit: 'contain'
+                                                    }}
+                                                />
+                                            )}
+                                            <span style={{ flex: 1, color: '#ddd', fontSize: '0.95rem' }}>
+                                                {input.product?.name || input.productId}
+                                            </span>
+                                            <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.95rem' }}>
+                                                {input.ratePerMin.toFixed(2)} /min
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
-              </div>
-              
-              {/* Resource Requirements Icons */}
-              <div style={{ 
-                display: 'flex', 
-                gap: '20px', 
-                marginTop: '10px', 
-                flexWrap: 'wrap',
-                backgroundColor: '#1a1a1a',
-                padding: '10px 14px',
-                borderRadius: '6px'
-              }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#FFD700' }}>
-                  {electricityIcon ? (
-                    <img src={electricityIcon} alt="Electricity" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
-                  ) : '⚡'}
-                  <strong style={{ fontSize: '1rem' }}>{(node.machine.electricityKw * node.machineCount).toFixed(0)}</strong> 
-                  <span style={{ fontSize: '0.9rem', color: '#ccc' }}>kW</span>
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#50C878' }}>
-                  {workerIcon ? (
-                    <img src={workerIcon} alt="Workers" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
-                  ) : '👷'}
-                  <strong style={{ fontSize: '1rem' }}>{node.machine.workers * node.machineCount}</strong> 
-                  <span style={{ fontSize: '0.9rem', color: '#ccc' }}>workers</span>
-                </span>
-                {node.machine.computingTFlops > 0 && (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#4a90e2' }}>
-                    {computingIcon ? (
-                      <img src={computingIcon} alt="Computing" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
-                    ) : '💻'}
-                    <strong style={{ fontSize: '1rem' }}>{(node.machine.computingTFlops * node.machineCount).toFixed(1)}</strong> 
-                    <span style={{ fontSize: '0.9rem', color: '#ccc' }}>TFLOPS</span>
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
 
-          {/* Inputs List */}
-          {!isRaw && node.inputs && node.inputs.length > 0 && (
-            <div style={{ marginTop: '12px', fontSize: '0.9rem', color: '#999' }}>
-              <div style={{ marginBottom: '8px', color: '#ccc', fontWeight: 'bold', fontSize: '0.95rem' }}>Inputs:</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {node.inputs.map((input, idx) => {
-                  const inputIcon = getProductIcon(input.product);
-                  return (
-                    <div key={idx} style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '10px',
-                      backgroundColor: '#1a1a1a',
-                      padding: '8px 12px',
-                      borderRadius: '5px'
+                {/* Render child chains (only if not collapsed) */}
+                {hasChildren && !isCollapsed && (
+                    <div style={{
+                        marginTop: '14px',
+                        marginLeft: '20px',
+                        borderLeft: '2px solid #555',
+                        paddingLeft: '10px',
+                        position: 'relative'
                     }}>
-                      {inputIcon && (
-                        <img 
-                          src={inputIcon} 
-                          alt={input.product?.name}
-                          style={{ 
-                            width: '22px', 
-                            height: '22px',
-                            objectFit: 'contain'
-                          }}
-                        />
-                      )}
-                      <span style={{ flex: 1, color: '#ddd', fontSize: '0.95rem' }}>
-                        {input.product?.name || input.productId}
-                      </span>
-                      <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.95rem' }}>
-                        {input.ratePerMin.toFixed(2)} /min
-                      </span>
+                        {node.inputChains.map((childNode, idx) => renderProductionNode(childNode, level + 1, nodeId))}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+                )}
 
-        {/* Render child chains */}
-        {node.inputChains && node.inputChains.length > 0 && (
-          <div style={{ marginTop: '14px' }}>
-            {node.inputChains.map((childNode, idx) => renderProductionNode(childNode, level + 1))}
-          </div>
-        )}
-      </div>
-    );
-  };
+                {/* Collapsed indicator */}
+                {hasChildren && isCollapsed && (
+                    <div style={{
+                        marginTop: '8px',
+                        marginLeft: '20px',
+                        padding: '8px 12px',
+                        backgroundColor: '#1a1a1a',
+                        border: '1px solid #444',
+                        borderRadius: '6px',
+                        fontSize: '0.85rem',
+                        color: '#888',
+                        fontStyle: 'italic'
+                    }}>
+                        🔽 {node.inputChains.length} collapsed input chain{node.inputChains.length > 1 ? 's' : ''} - click ▶ to expand
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <div style={{
@@ -843,50 +1016,106 @@ const Calculator = () => {
         </div>
       )}
 
-      {/* Mode Toggle */}
-      <div style={{ 
-        marginBottom: '1.5rem',
-        display: 'flex',
-        gap: '1rem',
-        backgroundColor: '#2a2a2a',
-        padding: '0.5rem',
-        borderRadius: '8px',
-        width: 'fit-content',
-        border: '1px solid #444'
-      }}>
-        <button
-          onClick={() => setCalculatorMode('forward')}
-          style={{
-            padding: '10px 24px',
-            backgroundColor: calculatorMode === 'forward' ? '#4a90e2' : 'transparent',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '1rem',
-            cursor: 'pointer',
-            fontWeight: '600',
-            transition: 'all 0.2s'
-          }}
-        >
-          Forward Mode
-        </button>
-        <button
-          onClick={() => setCalculatorMode('reverse')}
-          style={{
-            padding: '10px 24px',
-            backgroundColor: calculatorMode === 'reverse' ? '#4a90e2' : 'transparent',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            fontSize: '1rem',
-            cursor: 'pointer',
-            fontWeight: '600',
-            transition: 'all 0.2s'
-          }}
-        >
-          Reverse Mode
-        </button>
-      </div>
+                {/* Mode Toggle */}
+                <div style={{
+                    marginBottom: '1.5rem',
+                    display: 'flex',
+                    gap: '1rem',
+                    alignItems: 'center',
+                    flexWrap: 'wrap'
+                }}>
+                    {/* Mode buttons */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '1rem',
+                        backgroundColor: '#2a2a2a',
+                        padding: '0.5rem',
+                        borderRadius: '8px',
+                        border: '1px solid #444'
+                    }}>
+                        <button
+                            onClick={() => setCalculatorMode('forward')}
+                            style={{
+                                padding: '10px 24px',
+                                backgroundColor: calculatorMode === 'forward' ? '#4a90e2' : 'transparent',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontSize: '1rem',
+                                cursor: 'pointer',
+                                fontWeight: '600',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            Forward Mode
+                        </button>
+                        <button
+                            onClick={() => setCalculatorMode('reverse')}
+                            style={{
+                                padding: '10px 24px',
+                                backgroundColor: calculatorMode === 'reverse' ? '#4a90e2' : 'transparent',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontSize: '1rem',
+                                cursor: 'pointer',
+                                fontWeight: '600',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            Reverse Mode
+                        </button>
+                    </div>
+
+                    {/* Clear/Reset Button */}
+                    <button
+                        onClick={() => {
+                            // Reset all state
+                            setSelectedProduct('');
+                            setSelectedRecipe('');
+                            setTargetRate(60);
+                            setReverseProduct('');
+                            setReverseRecipe('');
+                            setReverseSearchTerm('');
+                            setSearchTerm('');
+                            setAvailableResources(new Map());
+                            setResourceInput({ productId: '', productName: '', quantity: 0 });
+                            setProductionChain(null);
+                            setRequirements(null);
+                            setRecipeOverrides(new Map());
+                            setCollapsedNodes(new Set());
+                        }}
+                        style={{
+                            padding: '10px 24px',
+                            backgroundColor: '#ff6b6b',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '1rem',
+                            cursor: 'pointer',
+                            fontWeight: '700',
+                            transition: 'all 0.2s',
+                            boxShadow: '0 2px 8px rgba(255, 107, 107, 0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#ff5252';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 107, 107, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#ff6b6b';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 107, 107, 0.3)';
+                        }}
+                    >
+                        🗑️ Clear All
+                    </button>
+                </div> {/* ← This closes the OUTER wrapper div */}
+
+
 
       {/* Input Section */}
       {calculatorMode === 'forward' ? (
@@ -1311,7 +1540,7 @@ const Calculator = () => {
 
       {/* Results Section - Side by Side Layout */}
       {productionChain && requirements && (
-        <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '2rem', alignItems: 'start' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '2rem', alignItems: 'start', paddingBottom: '3rem' }}>
           
           {/* Left Column: Total Requirements (Sticky) */}
           <div style={{ position: 'sticky', top: '2rem' }}>
@@ -1335,17 +1564,69 @@ const Calculator = () => {
                   </div>
                 </div>
                 
-                <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
-                  <div style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    Total Power
-                    {getGeneralIcon('Electricity') && (
-                      <img src={getGeneralIcon('Electricity')} alt="Electricity" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
-                    )}
-                  </div>
-                  <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#FFD700' }}>
-                    {requirements.power.toFixed(0)} <span style={{ fontSize: '1rem', color: '#aaa' }}>kW</span>
-                  </div>
-                </div>
+                                    <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
+                                        <div style={{
+                                            color: '#aaa',
+                                            fontSize: '0.85rem',
+                                            marginBottom: '4px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                Total Power
+                                                {getGeneralIcon('Electricity') && (
+                                                    <img src={getGeneralIcon('Electricity')} alt="Electricity" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                                                )}
+                                            </div>
+
+                                            {/* Unit Toggle */}
+                                            <div style={{
+                                                display: 'flex',
+                                                gap: '4px',
+                                                backgroundColor: '#2a2a2a',
+                                                padding: '2px',
+                                                borderRadius: '4px',
+                                                border: '1px solid #444'
+                                            }}>
+                                                {['kW', 'MW', 'GW'].map(unit => (
+                                                    <button
+                                                        key={unit}
+                                                        onClick={() => setPowerUnit(unit)}
+                                                        style={{
+                                                            padding: '2px 6px',
+                                                            fontSize: '0.7rem',
+                                                            fontWeight: '700',
+                                                            backgroundColor: powerUnit === unit ? '#4a90e2' : 'transparent',
+                                                            color: powerUnit === unit ? '#fff' : '#888',
+                                                            border: 'none',
+                                                            borderRadius: '3px',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.15s',
+                                                            letterSpacing: '0.3px'
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            if (powerUnit !== unit) {
+                                                                e.currentTarget.style.backgroundColor = '#333';
+                                                                e.currentTarget.style.color = '#aaa';
+                                                            }
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            if (powerUnit !== unit) {
+                                                                e.currentTarget.style.backgroundColor = 'transparent';
+                                                                e.currentTarget.style.color = '#888';
+                                                            }
+                                                        }}
+                                                    >
+                                                        {unit}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#FFD700' }}>
+                                            {formatPower(requirements.power, powerUnit)} <span style={{ fontSize: '1rem', color: '#aaa' }}>{powerUnit}</span>
+                                        </div>
+                                    </div>
                 
                 <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
                   <div style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
