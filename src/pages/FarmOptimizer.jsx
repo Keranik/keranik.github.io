@@ -4,7 +4,7 @@ import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
 import { FarmOptimizer } from '../utils/FarmOptimizer';
 import { FarmConstants } from '../utils/FarmConstants';
-import { getProductIcon, getCropIcon } from '../utils/AssetHelper';
+import { getProductIcon, getCropIcon, getGeneralIcon } from '../utils/AssetHelper';
 import { FoodChainResolver } from '../utils/FoodChainResolver';
 
 
@@ -27,6 +27,7 @@ const FarmOptimizerPage = () => {
     const [constraints, setConstraints] = useState({
         targetPopulation: 1000,
         allowedCrops: [],
+        allowedIntermediates: null,
         maxWaterPerDay: null,
         maxFertilityPerDay: null,
         targetFertility: 100
@@ -39,6 +40,7 @@ const FarmOptimizerPage = () => {
     });
 
     const [cropFilterModal, setCropFilterModal] = useState(false);
+    const [intermediateFilterModal, setIntermediateFilterModal] = useState(false);
 
     const [recipeSelectionModal, setRecipeSelectionModal] = useState({
         open: false,
@@ -611,10 +613,6 @@ const FarmOptimizerPage = () => {
         setRecipeSelectionModal({ open: false, productId: null, productName: null, availableRecipes: [] });
     };
 
-    /**
-     * PROFESSIONAL OPTIMIZER - UPDATED
-     * Now accounts for processing chains in calculations
-     */
     const optimizeFarms = () => {
         const effectiveFarms = farms.map(f => {
             const farmProto = availableFarms.find(fp => fp.id === f.farmId);
@@ -646,13 +644,17 @@ const FarmOptimizerPage = () => {
             const foodResult = FarmOptimizer.calculatePeopleFedWithChains(
                 production,
                 waterPerDay,
-                foodConsumptionMult
+                foodConsumptionMult,
+                constraints.allowedIntermediates
             );
 
             const peopleFedTotal = foodResult.peopleFed;
 
-            // Skip crops that don't produce food
-            if (peopleFedTotal === 0) return null;
+            // Skip crops that don't produce food with current settings
+            if (peopleFedTotal === 0) {
+                console.log(`Skipping ${crop.name} - produces 0 food with current intermediate filter`);
+                return null;
+            }
 
             const monthsPerCycle = crop.growthDays / 30;
             const peopleFedPerMonth = peopleFedTotal / monthsPerCycle;
@@ -666,7 +668,7 @@ const FarmOptimizerPage = () => {
             return {
                 crop,
                 productionPerMonth,
-                waterPerDay: foodResult.totalWaterPerDay, // Include processing water
+                waterPerDay: foodResult.totalWaterPerDay,
                 fertilityPerDay,
                 peopleFedPerMonth,
                 waterPerPerson: peopleFedPerMonth > 0 ? foodResult.totalWaterPerDay / peopleFedPerMonth : Infinity,
@@ -676,6 +678,14 @@ const FarmOptimizerPage = () => {
                 processingChains: foodResult.processingChains
             };
         }).filter(m => m != null);
+
+        // Check if we have any valid crops
+        if (cropMetrics.length === 0) {
+            alert('No crops can produce food with current settings.\n\nSuggestion: Allow some intermediates OR select crops that produce direct food (Potato, Corn, Vegetables, Fruit).');
+            return farms.map(() => [null, null, null, null]);
+        }
+
+        console.log(`Found ${cropMetrics.length} valid crops after filtering:`, cropMetrics.map(m => m.crop.name));
 
         // Handle different optimization modes
         switch (optimizationMode) {
@@ -938,6 +948,47 @@ const FarmOptimizerPage = () => {
         }));
     };
 
+    const toggleIntermediate = (productId) => {
+        setConstraints(prev => {
+            // If null (no filter), first click sets to all IDs except this one
+            if (prev.allowedIntermediates === null) {
+                // Need to get all intermediate IDs
+                const allIds = new Set();
+                availableFoodCrops.forEach(crop => {
+                    const paths = FoodChainResolver.getFoodsFromCrop(crop.output.productId);
+                    paths.forEach(path => {
+                        path.processingChain?.forEach(step => {
+                            const isFood = ProductionCalculator.foods?.some(f => f.productId === step.outputProductId);
+                            if (!isFood) {
+                                allIds.add(step.outputProductId);
+                            }
+                        });
+                    });
+                });
+
+                return {
+                    ...prev,
+                    allowedIntermediates: Array.from(allIds).filter(id => id !== productId)
+                };
+            }
+
+            // Normal toggle
+            if (prev.allowedIntermediates.includes(productId)) {
+                // Remove it
+                return {
+                    ...prev,
+                    allowedIntermediates: prev.allowedIntermediates.filter(id => id !== productId)
+                };
+            } else {
+                // Add it
+                return {
+                    ...prev,
+                    allowedIntermediates: [...prev.allowedIntermediates, productId]
+                };
+            }
+        });
+    };
+
     const addFarm = () => {
         setFarms([...farms, {
             id: Date.now(),
@@ -1156,7 +1207,31 @@ const FarmOptimizerPage = () => {
                                         ? 'All Crops'
                                         : `${constraints.allowedCrops.length} Selected`}
                                 </button>
-                            </div>
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
+                                        Allowed Intermediates
+                                    </label>
+                                    <button
+                                        onClick={() => setIntermediateFilterModal(true)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            backgroundColor: '#2a2a2a',
+                                            color: constraints.allowedIntermediates === null ? '#888' : '#4a90e2',
+                                            border: '2px solid #555',
+                                            borderRadius: '6px',
+                                            fontSize: '1rem',
+                                            cursor: 'pointer',
+                                            fontWeight: '600'
+                                        }}
+                                    >
+                                        {constraints.allowedIntermediates === null
+                                            ? 'All Intermediates'
+                                            : `${constraints.allowedIntermediates.length} Selected`}
+                                    </button>
+                                </div>
                         </div>
                     </div>
                 )}
@@ -1336,15 +1411,24 @@ const FarmOptimizerPage = () => {
                     onSelect={selectCrop}
                     onClose={() => setCropModal({ open: false, farmIndex: null, slotIndex: null })}
                 />
-            )}
-                
-            {cropFilterModal && (
-                <CropFilterModal
-                    crops={availableFoodCrops}
-                    selectedCrops={constraints.allowedCrops}
-                    onToggle={toggleCropFilter}
-                    onClose={() => setCropFilterModal(false)}
-                />
+                )}
+
+                {cropFilterModal && (
+                    <CropFilterModal
+                        crops={availableFoodCrops}
+                        selectedCrops={constraints.allowedCrops}
+                        onToggle={toggleCropFilter}
+                        onClose={() => setCropFilterModal(false)}
+                    />
+                )}
+
+                {intermediateFilterModal && (
+                    <IntermediateFilterModal
+                        onClose={() => setIntermediateFilterModal(false)}
+                        availableFoodCrops={availableFoodCrops}
+                        constraints={constraints}
+                        onToggle={toggleIntermediate}
+                    />
                 )}
 
                 {/* Recipe Selection Modal for Manual Mode */}
@@ -1356,6 +1440,184 @@ const FarmOptimizerPage = () => {
                 />
             </div>
         </>
+    );
+};
+
+const IntermediateFilterModal = ({ onClose, availableFoodCrops, constraints, onToggle }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const allIntermediates = new Set();
+    availableFoodCrops.forEach(crop => {
+        const paths = FoodChainResolver.getFoodsFromCrop(crop.output.productId);
+        paths.forEach(path => {
+            path.processingChain?.forEach(step => {
+                const product = ProductionCalculator.getProduct(step.outputProductId);
+                const isFood = ProductionCalculator.foods?.some(f => f.productId === step.outputProductId);
+                if (!isFood && product) {
+                    allIntermediates.add(product);
+                }
+            });
+        });
+    });
+
+    const intermediatesList = Array.from(allIntermediates).sort((a, b) => a.name.localeCompare(b.name));
+
+    const filteredIntermediates = intermediatesList.filter(product => {
+        if (!searchTerm) return true;
+        return product.name.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+
+    const isAllowed = (productId) => {
+        // null = no filter, all allowed
+        if (constraints.allowedIntermediates === null) return true;
+        // Empty array = none allowed
+        if (constraints.allowedIntermediates.length === 0) return false;
+        // Otherwise check if it's in the list
+        return constraints.allowedIntermediates.includes(productId);
+    };
+
+    return (
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '2rem'
+        }}>
+            <div style={{
+                backgroundColor: '#2a2a2a',
+                borderRadius: '12px',
+                padding: '2rem',
+                maxWidth: '800px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflow: 'auto',
+                border: '2px solid #444'
+            }}>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '1.5rem'
+                }}>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>
+                        Filter Allowed Intermediates
+                    </h3>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            backgroundColor: '#4a90e2',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: '600'
+                        }}
+                    >
+                        Done
+                    </button>
+                </div>
+
+                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#1a1a1a', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem' }}>
+                        💡 Click to exclude ingredients you don't have (e.g., Meat, Eggs)
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                        {constraints.allowedIntermediates === null
+                            ? `All ${intermediatesList.length} intermediates allowed (no filter)`
+                            : constraints.allowedIntermediates.length === 0
+                                ? `All ${intermediatesList.length} intermediates excluded (none allowed)`
+                                : `${constraints.allowedIntermediates.length} allowed • ${intermediatesList.length - constraints.allowedIntermediates.length} excluded`
+                        }
+                    </div>
+                </div>
+
+                <input
+                    type="text"
+                    placeholder="Search intermediates..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{
+                        width: '100%',
+                        padding: '0.75rem',
+                        backgroundColor: '#1a1a1a',
+                        color: '#fff',
+                        border: '2px solid #555',
+                        borderRadius: '6px',
+                        fontSize: '1rem',
+                        marginBottom: '1.5rem'
+                    }}
+                />
+
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                    gap: '1rem'
+                }}>
+                    {filteredIntermediates.map(product => {
+                        const allowed = isAllowed(product.id);
+                        const icon = getProductIcon(product);
+
+                        return (
+                            <button
+                                key={product.id}
+                                onClick={() => onToggle(product.id)}
+                                style={{
+                                    padding: '1rem',
+                                    backgroundColor: allowed ? '#2a4a6a' : '#1a1a1a',
+                                    border: allowed ? '2px solid #4a90e2' : '2px solid #444',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    transition: 'all 0.2s',
+                                    position: 'relative',
+                                    opacity: allowed ? 1 : 0.5
+                                }}
+                            >
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '0.5rem',
+                                    right: '0.5rem',
+                                    fontSize: '1.2rem',
+                                    color: allowed ? '#4a90e2' : '#ff6b6b'
+                                }}>
+                                    {allowed ? '✓' : '✕'}
+                                </div>
+                                {icon && (
+                                    <img
+                                        src={icon}
+                                        alt={product.name}
+                                        style={{
+                                            width: '40px',
+                                            height: '40px',
+                                            objectFit: 'contain'
+                                        }}
+                                    />
+                                )}
+                                <div style={{
+                                    fontSize: '0.9rem',
+                                    fontWeight: '700',
+                                    color: '#fff',
+                                    textAlign: 'center'
+                                }}>
+                                    {product.name}
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
     );
 };
 
@@ -1618,6 +1880,11 @@ const CropFilterModal = ({ crops, selectedCrops, onToggle, onClose }) => {
         crop.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const isAllowed = (cropId) => {
+        if (selectedCrops.length === 0) return true;
+        return selectedCrops.includes(cropId);
+    };
+
     return (
         <div style={{
             position: 'fixed',
@@ -1667,6 +1934,18 @@ const CropFilterModal = ({ crops, selectedCrops, onToggle, onClose }) => {
                     </button>
                 </div>
 
+                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#1a1a1a', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem' }}>
+                        💡 Click to exclude crops you don't want to use
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                        {selectedCrops.length === 0
+                            ? `All ${crops.length} crops allowed`
+                            : `${selectedCrops.length} allowed • ${crops.length - selectedCrops.length} excluded`
+                        }
+                    </div>
+                </div>
+
                 <input
                     type="text"
                     placeholder="Search crops..."
@@ -1690,7 +1969,7 @@ const CropFilterModal = ({ crops, selectedCrops, onToggle, onClose }) => {
                     gap: '1rem'
                 }}>
                     {filteredCrops.map(crop => {
-                        const isSelected = selectedCrops.includes(crop.id);
+                        const allowed = isAllowed(crop.id);
                         const icon = getCropIcon(crop);
 
                         return (
@@ -1699,8 +1978,8 @@ const CropFilterModal = ({ crops, selectedCrops, onToggle, onClose }) => {
                                 onClick={() => onToggle(crop.id)}
                                 style={{
                                     padding: '1rem',
-                                    backgroundColor: isSelected ? '#2a4a6a' : '#1a1a1a',
-                                    border: isSelected ? '2px solid #4a90e2' : '2px solid #444',
+                                    backgroundColor: allowed ? '#2a4a6a' : '#1a1a1a',
+                                    border: allowed ? '2px solid #4a90e2' : '2px solid #444',
                                     borderRadius: '8px',
                                     cursor: 'pointer',
                                     display: 'flex',
@@ -1708,19 +1987,19 @@ const CropFilterModal = ({ crops, selectedCrops, onToggle, onClose }) => {
                                     alignItems: 'center',
                                     gap: '0.5rem',
                                     transition: 'all 0.2s',
-                                    position: 'relative'
+                                    position: 'relative',
+                                    opacity: allowed ? 1 : 0.5
                                 }}
                             >
-                                {isSelected && (
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '0.5rem',
-                                        right: '0.5rem',
-                                        fontSize: '1.2rem'
-                                    }}>
-                                        ✓
-                                    </div>
-                                )}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '0.5rem',
+                                    right: '0.5rem',
+                                    fontSize: '1.2rem',
+                                    color: allowed ? '#4a90e2' : '#ff6b6b'
+                                }}>
+                                    {allowed ? '✓' : '✕'}
+                                </div>
                                 {icon && (
                                     <img
                                         src={icon}
@@ -2176,6 +2455,7 @@ const ResultsSection = ({ results }) => {
                         </div>
                     )}
 
+                    {/* Water Usage Card - UPDATED TO PER MONTH WITH ICONS */}
                     <div style={{
                         padding: '1rem',
                         backgroundColor: '#1a1a1a',
@@ -2183,18 +2463,22 @@ const ResultsSection = ({ results }) => {
                         marginBottom: '1rem',
                         border: '1px solid #333'
                     }}>
-                        <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.25rem' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             Water Usage
+                            {getProductIcon(ProductionCalculator.products?.find(p => p.name?.toLowerCase() === 'water')) && (
+                                <img
+                                    src={getProductIcon(ProductionCalculator.products?.find(p => p.name?.toLowerCase() === 'water'))}
+                                    alt="Water"
+                                    style={{ width: '16px', height: '16px', objectFit: 'contain' }}
+                                />
+                            )}
                         </div>
                         <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#50C878' }}>
-                            {results.totals.waterPerDay.toFixed(1)} /day
+                            {results.totals.waterPerMonth.toFixed(0)} /month
                         </div>
                         <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <div>Farm: {results.totals.farmWaterPerDay.toFixed(1)} /day</div>
-                            <div>Processing: {results.totals.processingWaterPerDay.toFixed(1)} /day</div>
-                            <div style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #444' }}>
-                                Total: {results.totals.waterPerMonth.toFixed(0)} /month
-                            </div>
+                            <div>Farm: {(results.totals.farmWaterPerDay * 30).toFixed(0)} /month</div>
+                            <div>Processing: {(results.totals.processingWaterPerDay * 30).toFixed(0)} /month</div>
                         </div>
                     </div>
 
@@ -2411,11 +2695,27 @@ const FarmRotationCard = ({ farmNumber, farmResult }) => {
                             </div>
                             {slotDetail && (
                                 <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #444', fontSize: '0.7rem' }}>
-                                    <div style={{ color: '#4a90e2', fontWeight: '700' }}>
-                                        {slotDetail.peopleFed.toFixed(0)} ppl/mo
+                                    {/* People fed with worker icon */}
+                                    <div style={{ color: '#4a90e2', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                        {getGeneralIcon('Worker') && (
+                                            <img
+                                                src={getGeneralIcon('Worker')}
+                                                alt="People"
+                                                style={{ width: '12px', height: '12px', objectFit: 'contain' }}
+                                            />
+                                        )}
+                                        {slotDetail.peopleFed.toFixed(0)} /mo
                                     </div>
-                                    <div style={{ color: '#50C878', marginTop: '2px' }}>
-                                        {slotDetail.waterPerDay.toFixed(1)} H₂O/day
+                                    {/* Water with icon */}
+                                    <div style={{ color: '#50C878', marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                        {getProductIcon(ProductionCalculator.products?.find(p => p.name?.toLowerCase() === 'water')) && (
+                                            <img
+                                                src={getProductIcon(ProductionCalculator.products?.find(p => p.name?.toLowerCase() === 'water'))}
+                                                alt="Water"
+                                                style={{ width: '12px', height: '12px', objectFit: 'contain' }}
+                                            />
+                                        )}
+                                        {(slotDetail.waterPerDay * 30).toFixed(0)} /mo
                                     </div>
                                     {slotDetail.processingChain && !slotDetail.processingChain.isDirect && (
                                         <div style={{ color: '#FFD700', marginTop: '2px', fontSize: '0.65rem' }}>

@@ -8,7 +8,7 @@ export class FarmOptimizer {
      * Calculate people fed WITH full processing chain details
      * Returns: { peopleFed, processingChains, totalProcessingWater, foodCategories }
      */
-    static calculatePeopleFedWithChains(production, farmWaterUsage = 0, foodConsumptionMult = 1.0) {
+    static calculatePeopleFedWithChains(production, farmWaterUsage = 0, foodConsumptionMult = 1.0, allowedIntermediates = []) {
         let totalPeopleFed = 0;
         const processingChains = [];
         let totalProcessingWater = 0;
@@ -50,7 +50,7 @@ export class FarmOptimizer {
                     });
                 }
             } else {
-                // UPDATED: Use forward search instead of backward
+                // Use forward search
                 const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
 
                 if (foodPaths.length > 0) {
@@ -58,6 +58,22 @@ export class FarmOptimizer {
                     let bestValue = 0;
 
                     for (const path of foodPaths) {
+                        if (allowedIntermediates !== null) {  // Changed from length > 0
+                            const usesDisallowedIntermediate = path.processingChain?.some(step => {
+                                const isFood = ProductionCalculator.foods?.some(f => f.productId === step.outputProductId);
+
+                                if (!isFood) {
+                                    return !allowedIntermediates.includes(step.outputProductId);
+                                }
+
+                                return false;
+                            });
+
+                            if (usesDisallowedIntermediate) {
+                                continue; // Skip this path
+                            }
+                        }
+
                         const food = ProductionCalculator.foods?.find(f => f.productId === path.finalFoodProductId);
                         if (!food) continue;
 
