@@ -3,24 +3,16 @@ import ProductionCalculator from '../utils/ProductionCalculator';
 import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
 import { getProductIcon, getMachineImage, getGeneralIcon, getProductTypeIcon } from '../utils/AssetHelper';
+import OptimizationEngine from '../utils/OptimizationEngine';
 
 const Calculator = () => {
     const { settings } = useSettings();
     const [dataLoaded, setDataLoaded] = useState(false);
 
-    // Load game data on mount and when mod settings change
- 
-
-    // ALL OTHER STATE HOOKS GO HERE (before the return check)
-    const [calculatorMode, setCalculatorMode] = useState('forward');
+    // Core calculator state
     const [selectedProduct, setSelectedProduct] = useState('');
     const [selectedRecipe, setSelectedRecipe] = useState('');
     const [targetRate, setTargetRate] = useState(60);
-    const [reverseProduct, setReverseProduct] = useState('');
-    const [reverseRecipe, setReverseRecipe] = useState('');
-    const [reverseSearchTerm, setReverseSearchTerm] = useState('');
-    const [availableResources, setAvailableResources] = useState(new Map());
-    const [resourceInput, setResourceInput] = useState({ productId: '', productName: '', quantity: 0 });
     const [productionChain, setProductionChain] = useState(null);
     const [requirements, setRequirements] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -29,10 +21,34 @@ const Calculator = () => {
     const [recipeModalOpen, setRecipeModalOpen] = useState(false);
     const [recipeModalProductId, setRecipeModalProductId] = useState(null);
     const [recipeModalRecipes, setRecipeModalRecipes] = useState([]);
-    const [powerUnit, setPowerUnit] = useState('kW'); // 'kW', 'MW', or 'GW'
+    const [powerUnit, setPowerUnit] = useState('kW');
     const [collapsedNodes, setCollapsedNodes] = useState(new Set());
 
+    // NEW: Resource constraints (replaces reverse mode)
+    const [resourceConstraints, setResourceConstraints] = useState(new Map()); // Map<productId, maxRate>
+    const [resourceInput, setResourceInput] = useState({ productId: '', productName: '', quantity: 0 });
 
+    // View mode and optimization state
+    const [viewMode, setViewMode] = useState('compact'); // DEFAULT: compact
+    const [selectedNode, setSelectedNode] = useState(null);
+    const [optimizationMode, setOptimizationMode] = useState(false);
+    const [optimizationGoal, setOptimizationGoal] = useState('minimizeWorkers');
+    const [optimizationConstraints, setOptimizationConstraints] = useState({
+        maxPower: null,
+        maxWorkers: null,
+        maxMachines: null,
+        maxMaintenance: null,
+        maxComputing: null,
+        excludedRecipes: [],
+        tierRestrictions: null
+    });
+    const [optimizationResult, setOptimizationResult] = useState(null);
+    const [optimizer, setOptimizer] = useState(null);
+
+    // NEW: Recipe selection modal (for main product dropdown replacement)
+    const [recipeSelectionModalOpen, setRecipeSelectionModalOpen] = useState(false);
+
+    // Load game data and initialize optimizer
     useEffect(() => {
         document.title = 'Production Calculator - Captain of Industry Tools';
 
@@ -40,6 +56,10 @@ const Calculator = () => {
             const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
             const gameData = await DataLoader.loadGameData(enabledMods);
             ProductionCalculator.initialize(gameData);
+
+            const engine = new OptimizationEngine(ProductionCalculator);
+            setOptimizer(engine);
+
             setDataLoaded(true);
         };
 
@@ -48,32 +68,20 @@ const Calculator = () => {
 
     // When product changes, update available recipes
     useEffect(() => {
-        const productId = calculatorMode === 'forward' ? selectedProduct : reverseProduct;
-        if (productId) {
-            const recipes = ProductionCalculator.getRecipesForProduct(productId);
+        if (selectedProduct) {
+            const recipes = ProductionCalculator.getRecipesForProduct(selectedProduct);
             setAvailableRecipes(recipes);
-            // Auto-select first recipe if only one exists
             if (recipes.length === 1) {
-                if (calculatorMode === 'forward') {
-                    setSelectedRecipe(recipes[0].id);
-                } else {
-                    setReverseRecipe(recipes[0].id);
-                }
+                setSelectedRecipe(recipes[0].id);
             } else {
-                if (calculatorMode === 'forward') {
-                    setSelectedRecipe('');
-                } else {
-                    setReverseRecipe('');
-                }
+                setSelectedRecipe('');
             }
         } else {
             setAvailableRecipes([]);
             setSelectedRecipe('');
-            setReverseRecipe('');
         }
-    }, [selectedProduct, reverseProduct, calculatorMode]);
+    }, [selectedProduct]);
 
-    // NOW it's safe to do the early return
     if (!dataLoaded) {
         return (
             <div style={{
@@ -101,39 +109,25 @@ const Calculator = () => {
                     animation: 'spin 1s linear infinite'
                 }}></div>
                 <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `}</style>
             </div>
         );
     }
 
-
-    // Get all products that can be produced (have recipes)
-  const producibleProducts = ProductionCalculator.products
-    .filter(product => {
-      const recipes = ProductionCalculator.getRecipesForProduct(product.id);
-      return recipes.length > 0;
-    })
-    .filter(product => {
-      if (!searchTerm) return true;
-      return product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  // Get producible products for reverse mode (filtered by search)
-  const reverseProducibleProducts = ProductionCalculator.products
-    .filter(product => {
-      const recipes = ProductionCalculator.getRecipesForProduct(product.id);
-      return recipes.length > 0;
-    })
-    .filter(product => {
-      if (!reverseSearchTerm) return true;
-      return product.name.toLowerCase().includes(reverseSearchTerm.toLowerCase());
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+    const producibleProducts = ProductionCalculator.products
+        .filter(product => {
+            const recipes = ProductionCalculator.getRecipesForProduct(product.id);
+            return recipes.length > 0;
+        })
+        .filter(product => {
+            if (!searchTerm) return true;
+            return product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
 
     const formatPower = (kw, unit) => {
         switch (unit) {
@@ -141,12 +135,11 @@ const Calculator = () => {
                 return (kw / 1000).toFixed(2);
             case 'GW':
                 return (kw / 1000000).toFixed(3);
-            default: // kW
+            default:
                 return kw.toFixed(0);
         }
     };
 
-    // Helper function to toggle collapse
     const toggleNodeCollapse = (nodeId) => {
         setCollapsedNodes(prev => {
             const newSet = new Set(prev);
@@ -159,376 +152,465 @@ const Calculator = () => {
         });
     };
 
-  const handleCalculate = () => {
-    if (calculatorMode === 'forward') {
-      if (!selectedProduct || !targetRate) return;
+    const calculateSubtreeMetrics = (node) => {
+        const metrics = { workers: 0, powerKw: 0, machines: 0, computing: 0, maintenance: 0 };
 
-      const recipeToUse = selectedRecipe || null;
-      const chain = ProductionCalculator.calculateProductionChain(
-        selectedProduct, 
-        targetRate, 
-        recipeToUse,
-        recipeOverrides
-      );
-      const reqs = ProductionCalculator.calculateTotalRequirements(chain);
+        const traverse = (n) => {
+            if (!n) return;
+            if (n.machine && !n.isRawMaterial) {
+                const count = n.machineCount || 0;
+                metrics.workers += (n.machine.workers || 0) * count;
+                metrics.powerKw += (n.machine.electricityKw || 0) * count;
+                metrics.machines += count;
+                metrics.computing += (n.machine.computingTFlops || 0) * count;
+                if (n.machine.maintenance?.perMonth) {
+                    metrics.maintenance += n.machine.maintenance.perMonth * count;
+                }
+            }
+            if (n.inputChains) {
+                n.inputChains.forEach(traverse);
+            }
+        };
 
-      setProductionChain(chain);
-      setRequirements(reqs);
-    } else {
-      // Reverse mode
-      if (!reverseProduct || availableResources.size === 0) return;
+        traverse(node);
+        return metrics;
+    };
 
-      const result = ProductionCalculator.calculateMaxProduction(
-        reverseProduct,
-        availableResources,
-        reverseRecipe || null,
-        recipeOverrides
-      );
+    const handleCalculate = () => {
+        if (optimizationMode && optimizer) {
+            // Merge resource constraints into optimization constraints
+            const mergedConstraints = {
+                ...optimizationConstraints,
+                resourceLimits: resourceConstraints
+            };
 
-      if (result.chain) {
-        setProductionChain(result.chain);
-        setRequirements(ProductionCalculator.calculateTotalRequirements(result.chain));
-      }
-    }
-  };
+            const result = optimizer.optimize({
+                targetProductId: selectedProduct,
+                targetRate: targetRate,
+                optimizationGoal,
+                availableResources: resourceConstraints,
+                constraints: mergedConstraints
+            });
 
-  const handleRecipeOverride = (productId, newRecipeId) => {
-    // Create new overrides map with the update
-    const newOverrides = new Map(recipeOverrides);
-    if (newRecipeId) {
-      newOverrides.set(productId, newRecipeId);
-    } else {
-      newOverrides.delete(productId);
-    }
-    
-    // Update the state
-    setRecipeOverrides(newOverrides);
-    
-    // IMMEDIATELY recalculate the ENTIRE chain with the new overrides
-    if (calculatorMode === 'forward') {
-      if (selectedProduct && targetRate) {
-        const recipeToUse = selectedRecipe || null;
-        
-        // Force recalculation with the new overrides map
-        const newChain = ProductionCalculator.calculateProductionChain(
-          selectedProduct, 
-          targetRate, 
-          recipeToUse,
-          newOverrides // Use the UPDATED overrides
-        );
-        const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
-        
-        // Update both chain and requirements
-        setProductionChain(newChain);
-        setRequirements(newReqs);
-      }
-    } else {
-      if (reverseProduct && availableResources.size > 0) {
-        const result = ProductionCalculator.calculateMaxProduction(
-          reverseProduct,
-          availableResources,
-          reverseRecipe || null,
-          newOverrides // Use the UPDATED overrides
-        );
-        
-        if (result.chain) {
-          setProductionChain(result.chain);
-          setRequirements(ProductionCalculator.calculateTotalRequirements(result.chain));
+            setOptimizationResult(result);
+
+            if (result.chain) {
+                setProductionChain(result.chain);
+                setRequirements(ProductionCalculator.calculateTotalRequirements(result.chain));
+                setRecipeOverrides(result.recipeOverrides || new Map());
+            }
+        } else {
+            // Normal calculation
+            if (!selectedProduct || !targetRate) return;
+
+            const recipeToUse = selectedRecipe || null;
+            const chain = ProductionCalculator.calculateProductionChain(
+                selectedProduct,
+                targetRate,
+                recipeToUse,
+                recipeOverrides
+            );
+            const reqs = ProductionCalculator.calculateTotalRequirements(chain);
+
+            setProductionChain(chain);
+            setRequirements(reqs);
+            setOptimizationResult(null);
         }
-      }
-    }
-  };
+    };
 
-  const openRecipeModal = (productId, recipes) => {
-    setRecipeModalProductId(productId);
-    setRecipeModalRecipes(recipes);
-    setRecipeModalOpen(true);
-  };
+    const handleRecipeOverride = (productId, newRecipeId) => {
+        const newOverrides = new Map(recipeOverrides);
+        if (newRecipeId) {
+            newOverrides.set(productId, newRecipeId);
+        } else {
+            newOverrides.delete(productId);
+        }
 
-  const closeRecipeModal = () => {
-    setRecipeModalOpen(false);
-    setRecipeModalProductId(null);
-    setRecipeModalRecipes([]);
-  };
+        setRecipeOverrides(newOverrides);
+
+        if (selectedProduct && targetRate) {
+            const recipeToUse = selectedRecipe || null;
+            const newChain = ProductionCalculator.calculateProductionChain(
+                selectedProduct,
+                targetRate,
+                recipeToUse,
+                newOverrides
+            );
+            const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
+            setProductionChain(newChain);
+            setRequirements(newReqs);
+        }
+    };
+
+    const openRecipeModal = (productId, recipes) => {
+        setRecipeModalProductId(productId);
+        setRecipeModalRecipes(recipes);
+        setRecipeModalOpen(true);
+    };
+
+    const closeRecipeModal = () => {
+        setRecipeModalOpen(false);
+        setRecipeModalProductId(null);
+        setRecipeModalRecipes([]);
+    };
 
     const selectRecipeFromModal = (recipeId) => {
         if (recipeModalProductId) {
-            // Check if this is the ROOT product (main selected product)
-            if (calculatorMode === 'forward' && recipeModalProductId === selectedProduct) {
-                // Update the main recipe selection
+            if (recipeModalProductId === selectedProduct) {
                 setSelectedRecipe(recipeId);
-
-                // Also trigger recalculation
                 if (targetRate) {
                     const newChain = ProductionCalculator.calculateProductionChain(
                         selectedProduct,
                         targetRate,
-                        recipeId, // Use the NEW recipe
+                        recipeId,
                         recipeOverrides
                     );
                     const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
                     setProductionChain(newChain);
                     setRequirements(newReqs);
                 }
-            } else if (calculatorMode === 'reverse' && recipeModalProductId === reverseProduct) {
-                // Update reverse mode main recipe
-                setReverseRecipe(recipeId);
-
-                // Trigger recalculation
-                if (availableResources.size > 0) {
-                    const result = ProductionCalculator.calculateMaxProduction(
-                        reverseProduct,
-                        availableResources,
-                        recipeId, // Use the NEW recipe
-                        recipeOverrides
-                    );
-                    if (result.chain) {
-                        setProductionChain(result.chain);
-                        setRequirements(ProductionCalculator.calculateTotalRequirements(result.chain));
-                    }
-                }
             } else {
-                // This is a child node - use the override system
                 handleRecipeOverride(recipeModalProductId, recipeId);
             }
         }
         closeRecipeModal();
     };
 
-  const addResource = () => {
-    if (!resourceInput.productId || resourceInput.quantity <= 0) return;
-    
-    const newResources = new Map(availableResources);
-    newResources.set(resourceInput.productId, resourceInput.quantity);
-    setAvailableResources(newResources);
-    setResourceInput({ productId: '', productName: '', quantity: 0 });
-  };
+    // NEW: Resource constraint management
+    const addResourceConstraint = () => {
+        if (!resourceInput.productId || resourceInput.quantity <= 0) return;
 
-  const removeResource = (productId) => {
-    const newResources = new Map(availableResources);
-    newResources.delete(productId);
-    setAvailableResources(newResources);
-  };
-
-  // Enhanced recipe card renderer - with sizing parameters for different contexts
-  const renderRecipeCard = (recipe, size = 'normal', isClickable = false, onClick = null) => {
-    const machines = ProductionCalculator.getMachinesForRecipe(recipe.id);
-    const machine = machines[0];
-    const machineIcon = machine ? getMachineImage(machine) : null;
-
-    // Size configurations for premium readability
-    const sizes = {
-      compact: {
-        machineIcon: 32,
-        productIcon: 20,
-        quantityFont: '0.85rem',
-        arrowFont: '1.1rem',
-        padding: '10px',
-        gap: '8px',
-        showMachineName: false
-      },
-      normal: {
-        machineIcon: 40,
-        productIcon: 26,
-        quantityFont: '1rem',
-        arrowFont: '1.4rem',
-        padding: '12px',
-        gap: '10px',
-        showMachineName: true
-      },
-      large: {
-        machineIcon: 48,
-        productIcon: 30,
-        quantityFont: '1.1rem',
-        arrowFont: '1.6rem',
-        padding: '16px',
-        gap: '12px',
-        showMachineName: true
-      }
+        const newConstraints = new Map(resourceConstraints);
+        newConstraints.set(resourceInput.productId, resourceInput.quantity);
+        setResourceConstraints(newConstraints);
+        setResourceInput({ productId: '', productName: '', quantity: 0 });
     };
 
-    const config = sizes[size];
-
-    // Get ALL inputs with their icons
-    const inputs = recipe.inputs.map(input => {
-      const product = ProductionCalculator.getProduct(input.productId);
-      return {
-        product,
-        quantity: input.quantity,
-        icon: getProductIcon(product)
-      };
-    });
-
-    // Get ALL outputs with their icons
-    const outputs = recipe.outputs.map(output => {
-      const product = ProductionCalculator.getProduct(output.productId);
-      return {
-        product,
-        quantity: output.quantity,
-        icon: getProductIcon(product)
-      };
-    });
-
-    return (
-      <div 
-        key={recipe.id} 
-        onClick={onClick}
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: config.gap,
-          padding: config.padding,
-          cursor: isClickable ? 'pointer' : 'default',
-          transition: 'all 0.2s',
-          borderRadius: '6px',
-          backgroundColor: 'transparent'
-        }}
-        onMouseEnter={(e) => {
-          if (isClickable) {
-            e.currentTarget.style.backgroundColor = '#1a1a1a';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (isClickable) {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }
-        }}
-      >
-        {/* Machine Icon */}
-        {machineIcon && (
-          <img 
-            src={machineIcon} 
-            alt={machine?.name} 
-            title={machine?.name}
-            style={{ 
-              width: `${config.machineIcon}px`, 
-              height: `${config.machineIcon}px`, 
-              objectFit: 'contain', 
-              flexShrink: 0 
-            }} 
-          />
-        )}
-        
-        {/* All Inputs */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          {inputs.map((input, idx) => (
-            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ 
-                color: '#bbb', 
-                fontSize: config.quantityFont, 
-                fontWeight: '700',
-                lineHeight: 1
-              }}>
-                {input.quantity}×
-              </span>
-              {input.icon && (
-                <img 
-                  src={input.icon} 
-                  alt={input.product?.name}
-                  title={input.product?.name}
-                  style={{ 
-                    width: `${config.productIcon}px`, 
-                    height: `${config.productIcon}px`, 
-                    objectFit: 'contain' 
-                  }} 
-                />
-              )}
-              {idx < inputs.length - 1 && (
-                <span style={{ color: '#555', margin: '0 2px', fontSize: config.quantityFont }}>+</span>
-              )}
-            </div>
-          ))}
-        </div>
-        
-        <span style={{ 
-          color: '#888', 
-          fontSize: config.arrowFont, 
-          margin: '0 6px',
-          fontWeight: '300'
-        }}>
-          →
-        </span>
-        
-        {/* All Outputs */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          {outputs.map((output, idx) => (
-            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ 
-                color: '#5aa0f2', 
-                fontSize: config.quantityFont, 
-                fontWeight: '700',
-                lineHeight: 1
-              }}>
-                {output.quantity}×
-              </span>
-              {output.icon && (
-                <img 
-                  src={output.icon} 
-                  alt={output.product?.name}
-                  title={output.product?.name}
-                  style={{ 
-                    width: `${config.productIcon}px`, 
-                    height: `${config.productIcon}px`, 
-                    objectFit: 'contain' 
-                  }} 
-                />
-              )}
-              {idx < outputs.length - 1 && (
-                <span style={{ color: '#555', margin: '0 2px', fontSize: config.quantityFont }}>+</span>
-              )}
-            </div>
-          ))}
-        </div>
-        
-        {/* Machine Name (conditional) */}
-        {config.showMachineName && (
-          <div style={{ flex: 1, marginLeft: '12px', minWidth: '140px' }}>
-            <div style={{ fontSize: '0.95rem', color: '#ddd', fontWeight: '600', lineHeight: 1.3 }}>
-              {machine?.name || 'Unknown'}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '3px', lineHeight: 1.2 }}>
-              {recipe.name}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Enhanced recipe dropdown option renderer
-  const renderRecipeDropdownOption = (recipe, productId) => {
-    const machines = ProductionCalculator.getMachinesForRecipe(recipe.id);
-    const machine = machines[0];
-
-    const inputs = recipe.inputs.map(input => ({
-      product: ProductionCalculator.getProduct(input.productId),
-      quantity: input.quantity,
-      icon: getProductIcon(ProductionCalculator.getProduct(input.productId))
-    }));
-
-    const outputs = recipe.outputs.map(output => ({
-      product: ProductionCalculator.getProduct(output.productId),
-      quantity: output.quantity,
-      icon: getProductIcon(ProductionCalculator.getProduct(output.productId))
-    }));
-
-    const inputText = inputs.map(i => `${i.quantity}× ${i.product?.name}`).join(' + ');
-    const outputText = outputs.map(o => `${o.quantity}× ${o.product?.name}`).join(' + ');
-    const displayText = `${machine?.name || 'Unknown'}: ${inputText} → ${outputText}`;
-
-    return {
-      recipe,
-      machine,
-      inputs,
-      outputs,
-      displayText
+    const removeResourceConstraint = (productId) => {
+        const newConstraints = new Map(resourceConstraints);
+        newConstraints.delete(productId);
+        setResourceConstraints(newConstraints);
     };
-  };
+
+    const renderRecipeCard = (recipe, size = 'normal', isClickable = false, onClick = null) => {
+        const machines = ProductionCalculator.getMachinesForRecipe(recipe.id);
+        const machine = machines[0];
+        const machineIcon = machine ? getMachineImage(machine) : null;
+
+        const sizes = {
+            compact: {
+                machineIcon: 32,
+                productIcon: 20,
+                quantityFont: '0.85rem',
+                arrowFont: '1.1rem',
+                padding: '10px',
+                gap: '8px',
+                showMachineName: false
+            },
+            normal: {
+                machineIcon: 40,
+                productIcon: 26,
+                quantityFont: '1rem',
+                arrowFont: '1.4rem',
+                padding: '12px',
+                gap: '10px',
+                showMachineName: true
+            },
+            large: {
+                machineIcon: 48,
+                productIcon: 30,
+                quantityFont: '1.1rem',
+                arrowFont: '1.6rem',
+                padding: '16px',
+                gap: '12px',
+                showMachineName: true
+            }
+        };
+
+        const config = sizes[size];
+
+        const inputs = recipe.inputs.map(input => {
+            const product = ProductionCalculator.getProduct(input.productId);
+            return {
+                product,
+                quantity: input.quantity,
+                icon: getProductIcon(product)
+            };
+        });
+
+        const outputs = recipe.outputs.map(output => {
+            const product = ProductionCalculator.getProduct(output.productId);
+            return {
+                product,
+                quantity: output.quantity,
+                icon: getProductIcon(product)
+            };
+        });
+
+        return (
+            <div
+                key={recipe.id}
+                onClick={onClick}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: config.gap,
+                    padding: config.padding,
+                    cursor: isClickable ? 'pointer' : 'default',
+                    transition: 'all 0.2s',
+                    borderRadius: '6px',
+                    backgroundColor: 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                    if (isClickable) {
+                        e.currentTarget.style.backgroundColor = '#1a1a1a';
+                    }
+                }}
+                onMouseLeave={(e) => {
+                    if (isClickable) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                    }
+                }}
+            >
+                {machineIcon && (
+                    <img
+                        src={machineIcon}
+                        alt={machine?.name}
+                        title={machine?.name}
+                        style={{
+                            width: `${config.machineIcon}px`,
+                            height: `${config.machineIcon}px`,
+                            objectFit: 'contain',
+                            flexShrink: 0
+                        }}
+                    />
+                )}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {inputs.map((input, idx) => (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{
+                                color: '#bbb',
+                                fontSize: config.quantityFont,
+                                fontWeight: '700',
+                                lineHeight: 1
+                            }}>
+                                {input.quantity}×
+                            </span>
+                            {input.icon && (
+                                <img
+                                    src={input.icon}
+                                    alt={input.product?.name}
+                                    title={input.product?.name}
+                                    style={{
+                                        width: `${config.productIcon}px`,
+                                        height: `${config.productIcon}px`,
+                                        objectFit: 'contain'
+                                    }}
+                                />
+                            )}
+                            {idx < inputs.length - 1 && (
+                                <span style={{ color: '#555', margin: '0 2px', fontSize: config.quantityFont }}>+</span>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                <span style={{
+                    color: '#888',
+                    fontSize: config.arrowFont,
+                    margin: '0 6px',
+                    fontWeight: '300'
+                }}>
+                    →
+                </span>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {outputs.map((output, idx) => (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{
+                                color: '#5aa0f2',
+                                fontSize: config.quantityFont,
+                                fontWeight: '700',
+                                lineHeight: 1
+                            }}>
+                                {output.quantity}×
+                            </span>
+                            {output.icon && (
+                                <img
+                                    src={output.icon}
+                                    alt={output.product?.name}
+                                    title={output.product?.name}
+                                    style={{
+                                        width: `${config.productIcon}px`,
+                                        height: `${config.productIcon}px`,
+                                        objectFit: 'contain'
+                                    }}
+                                />
+                            )}
+                            {idx < outputs.length - 1 && (
+                                <span style={{ color: '#555', margin: '0 2px', fontSize: config.quantityFont }}>+</span>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                {config.showMachineName && (
+                    <div style={{ flex: 1, marginLeft: '12px', minWidth: '140px' }}>
+                        <div style={{ fontSize: '0.95rem', color: '#ddd', fontWeight: '600', lineHeight: 1.3 }}>
+                            {machine?.name || 'Unknown'}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '3px', lineHeight: 1.2 }}>
+                            {recipe.name}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // NEW: Compact node with separate click handlers
+    const renderCompactNode = (node, level = 0, parentPath = '') => {
+        if (!node) return null;
+
+        const nodeId = `${parentPath}-${node.productId}-${level}`;
+        const isCollapsed = collapsedNodes.has(nodeId);
+        const hasChildren = node.inputChains && node.inputChains.length > 0;
+        const product = node.product;
+        const productIcon = getProductIcon(product);
+
+        const subtreeMetrics = calculateSubtreeMetrics(node);
+        const isSelected = selectedNode?.productId === node.productId && selectedNode?.targetRate === node.targetRate;
+
+        return (
+            <div key={nodeId} style={{ marginBottom: '4px' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '8px 12px',
+                        backgroundColor: isSelected ? '#2a4a6a' : '#1a1a1a',
+                        border: isSelected ? '2px solid #4a90e2' : '1px solid #333',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        marginLeft: `${level * 20}px`
+                    }}
+                    onMouseEnter={(e) => {
+                        if (!isSelected) {
+                            e.currentTarget.style.backgroundColor = '#252525';
+                            e.currentTarget.style.borderColor = '#555';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (!isSelected) {
+                            e.currentTarget.style.backgroundColor = '#1a1a1a';
+                            e.currentTarget.style.borderColor = '#333';
+                        }
+                    }}
+                >
+                    {/* NEW: Separate expand/collapse button */}
+                    <span
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (hasChildren) toggleNodeCollapse(nodeId);
+                        }}
+                        style={{
+                            width: '20px',
+                            color: '#888',
+                            fontSize: '0.9rem',
+                            flexShrink: 0,
+                            cursor: hasChildren ? 'pointer' : 'default',
+                            userSelect: 'none'
+                        }}
+                    >
+                        {hasChildren ? (isCollapsed ? '▶' : '▼') : ''}
+                    </span>
+
+                    {/* Node content - click to select */}
+                    <div
+                        onClick={() => setSelectedNode(node)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            flex: 1,
+                            gap: '8px'
+                        }}
+                    >
+                        {productIcon && (
+                            <img src={productIcon} alt={product?.name} style={{ width: '24px', height: '24px', flexShrink: 0 }} />
+                        )}
+
+                        <span style={{ fontWeight: '600', color: '#fff', fontSize: '0.95rem', minWidth: '180px' }}>
+                            {product?.name || node.productId}
+                            {node.isRawMaterial && <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: '#FFD700', backgroundColor: 'rgba(255,215,0,0.15)', padding: '2px 6px', borderRadius: '3px' }}>RAW</span>}
+                        </span>
+
+                        <span style={{ color: '#4a90e2', fontWeight: '700', fontSize: '0.9rem', marginLeft: '12px', minWidth: '80px' }}>
+                            {node.targetRate?.toFixed(1)}/min
+                        </span>
+
+                        {!node.isRawMaterial && node.machine && (
+                            <span style={{ color: '#888', fontSize: '0.85rem', marginLeft: '12px', flex: 1 }}>
+                                {node.machineCount}× {node.machine.name}
+                            </span>
+                        )}
+
+                        <span style={{ marginLeft: 'auto', color: '#777', fontSize: '0.8rem', display: 'flex', gap: '12px', flexShrink: 0 }}>
+                            {subtreeMetrics.powerKw > 0 && (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {getGeneralIcon('Electricity') && <img src={getGeneralIcon('Electricity')} alt="Power" style={{ width: '14px', height: '14px' }} />}
+                                    {(subtreeMetrics.powerKw / 1000).toFixed(1)}MW
+                                </span>
+                            )}
+                            {subtreeMetrics.workers > 0 && (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {getGeneralIcon('Worker') && <img src={getGeneralIcon('Worker')} alt="Workers" style={{ width: '14px', height: '14px' }} />}
+                                    {subtreeMetrics.workers}
+                                </span>
+                            )}
+                            {subtreeMetrics.machines > 0 && (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    🏭{subtreeMetrics.machines}
+                                </span>
+                            )}
+                            {hasChildren && (
+                                <span style={{ color: '#555' }}>
+                                    📦{node.inputChains.length}
+                                </span>
+                            )}
+                        </span>
+                    </div>
+                </div>
+
+                {hasChildren && !isCollapsed && (
+                    <div style={{ marginTop: '4px' }}>
+                        {node.inputChains.map((child, idx) => renderCompactNode(child, level + 1, nodeId))}
+                    </div>
+                )}
+
+                {hasChildren && isCollapsed && (
+                    <div style={{
+                        marginTop: '4px',
+                        marginLeft: `${(level + 1) * 20}px`,
+                        padding: '6px 12px',
+                        backgroundColor: '#1a1a1a',
+                        border: '1px solid #444',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        color: '#777',
+                        fontStyle: 'italic'
+                    }}>
+                        🔽 {node.inputChains.length} collapsed input{node.inputChains.length > 1 ? 's' : ''} - click ▶ to expand
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     const renderProductionNode = (node, level = 0, parentPath = '') => {
         if (!node) return null;
 
-        // Create unique node ID based on path in tree
         const nodeId = `${parentPath}-${node.productId}-${level}`;
         const isCollapsed = collapsedNodes.has(nodeId);
         const hasChildren = node.inputChains && node.inputChains.length > 0;
@@ -549,7 +631,6 @@ const Calculator = () => {
 
         return (
             <div key={nodeId} style={{ marginLeft: `${indent}px`, marginBottom: '10px' }}>
-                {/* Tree line connector */}
                 {level > 0 && (
                     <div style={{
                         position: 'absolute',
@@ -570,7 +651,6 @@ const Calculator = () => {
                     transition: 'all 0.2s ease',
                     position: 'relative'
                 }}>
-                    {/* Collapse/Expand Button */}
                     {hasChildren && (
                         <button
                             onClick={() => toggleNodeCollapse(nodeId)}
@@ -608,7 +688,6 @@ const Calculator = () => {
                         </button>
                     )}
 
-                    {/* Depth indicator badge */}
                     {level > 0 && (
                         <div style={{
                             position: 'absolute',
@@ -627,7 +706,6 @@ const Calculator = () => {
                         </div>
                     )}
 
-                    {/* Product Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', flex: 1 }}>
                             {productIcon && (
@@ -662,7 +740,6 @@ const Calculator = () => {
                                     )}
                                 </div>
 
-                                {/* Recipe Card - Clickable to open modal */}
                                 {hasMultipleRecipes && currentRecipe && (
                                     <div style={{ marginTop: '8px' }}>
                                         <div
@@ -723,7 +800,6 @@ const Calculator = () => {
                         </div>
                     </div>
 
-                    {/* Machine Info */}
                     {!isRaw && node.machine && (
                         <div style={{ marginTop: '14px', color: '#aaa', fontSize: '0.9rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
@@ -748,7 +824,6 @@ const Calculator = () => {
                                 </div>
                             </div>
 
-                            {/* Resource Requirements Icons */}
                             <div style={{
                                 display: 'flex',
                                 gap: '20px',
@@ -785,7 +860,6 @@ const Calculator = () => {
                         </div>
                     )}
 
-                    {/* Inputs List */}
                     {!isRaw && node.inputs && node.inputs.length > 0 && (
                         <div style={{ marginTop: '12px', fontSize: '0.9rem', color: '#999' }}>
                             <div style={{ marginBottom: '8px', color: '#ccc', fontWeight: 'bold', fontSize: '0.95rem' }}>Inputs:</div>
@@ -826,7 +900,6 @@ const Calculator = () => {
                     )}
                 </div>
 
-                {/* Render child chains (only if not collapsed) */}
                 {hasChildren && !isCollapsed && (
                     <div style={{
                         marginTop: '14px',
@@ -839,7 +912,6 @@ const Calculator = () => {
                     </div>
                 )}
 
-                {/* Collapsed indicator */}
                 {hasChildren && isCollapsed && (
                     <div style={{
                         marginTop: '8px',
@@ -859,13 +931,197 @@ const Calculator = () => {
         );
     };
 
+    // Details panel (ALWAYS on left)
+    const renderDetailsPanel = () => {
+        if (!selectedNode) {
+            return (
+                <div style={{
+                    padding: '2rem',
+                    textAlign: 'center',
+                    color: '#888',
+                    fontSize: '0.95rem',
+                    fontStyle: 'italic'
+                }}>
+                    Click on a node to view details
+                </div>
+            );
+        }
+
+        const product = selectedNode.product;
+        const productIcon = getProductIcon(product);
+        const machineImage = selectedNode.machine ? getMachineImage(selectedNode.machine) : null;
+        const hasMultipleRecipes = selectedNode.availableRecipes && selectedNode.availableRecipes.length > 1;
+        const currentRecipeId = recipeOverrides.get(selectedNode.productId) || selectedNode.recipe?.id;
+        const currentRecipe = selectedNode.availableRecipes?.find(r => r.id === currentRecipeId) || selectedNode.recipe;
+
+        return (
+            <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '2px solid #444' }}>
+                    {productIcon && (
+                        <img src={productIcon} alt={product?.name} style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+                    )}
+                    <div style={{ flex: 1 }}>
+                        <h4 style={{ fontSize: '1.3rem', fontWeight: '700', color: '#fff', marginBottom: '4px' }}>
+                            {product?.name || selectedNode.productId}
+                        </h4>
+                        <div style={{ color: '#4a90e2', fontSize: '1rem', fontWeight: '600' }}>
+                            {selectedNode.targetRate?.toFixed(2)} /min
+                        </div>
+                    </div>
+                    {selectedNode.isRawMaterial && (
+                        <span style={{
+                            padding: '6px 12px',
+                            backgroundColor: 'rgba(255, 215, 0, 0.15)',
+                            color: '#FFD700',
+                            borderRadius: '6px',
+                            fontSize: '0.85rem',
+                            fontWeight: '700',
+                            border: '1px solid rgba(255, 215, 0, 0.3)'
+                        }}>
+                            RAW MATERIAL
+                        </span>
+                    )}
+                </div>
+
+                {currentRecipe && !selectedNode.isRawMaterial && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '8px', fontWeight: '600' }}>
+                            Current Recipe:
+                        </div>
+                        <div style={{
+                            backgroundColor: '#1a1a1a',
+                            border: '2px solid #4a90e2',
+                            borderRadius: '8px',
+                            padding: '8px',
+                            marginBottom: '8px'
+                        }}>
+                            {renderRecipeCard(currentRecipe, 'normal', false)}
+                        </div>
+
+                        {hasMultipleRecipes && (
+                            <button
+                                onClick={() => openRecipeModal(selectedNode.productId, selectedNode.availableRecipes)}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    backgroundColor: '#4a90e2',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#5aa0f2';
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#4a90e2';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                }}
+                            >
+                                View {selectedNode.availableRecipes.length} Available Recipes
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {selectedNode.machine && !selectedNode.isRawMaterial && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '8px', fontWeight: '600' }}>
+                            Machine:
+                        </div>
+                        <div style={{
+                            backgroundColor: '#1a1a1a',
+                            padding: '12px',
+                            borderRadius: '6px',
+                            border: '1px solid #444'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                                {machineImage && (
+                                    <img src={machineImage} alt={selectedNode.machine.name} style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+                                )}
+                                <div>
+                                    <div style={{ fontSize: '1.05rem', fontWeight: '700', color: '#fff' }}>
+                                        {selectedNode.machine.name}
+                                    </div>
+                                    <div style={{ fontSize: '0.9rem', color: '#4a90e2', fontWeight: '600' }}>
+                                        × {selectedNode.machineCount}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FFD700' }}>
+                                    {getGeneralIcon('Electricity') && <img src={getGeneralIcon('Electricity')} style={{ width: '18px', height: '18px' }} />}
+                                    <span style={{ fontWeight: '700' }}>
+                                        {(selectedNode.machine.electricityKw * selectedNode.machineCount).toFixed(0)} kW
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#50C878' }}>
+                                    {getGeneralIcon('Worker') && <img src={getGeneralIcon('Worker')} style={{ width: '18px', height: '18px' }} />}
+                                    <span style={{ fontWeight: '700' }}>
+                                        {selectedNode.machine.workers * selectedNode.machineCount} workers
+                                    </span>
+                                </div>
+                                {selectedNode.machine.computingTFlops > 0 && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4a90e2' }}>
+                                        {getGeneralIcon('Computing') && <img src={getGeneralIcon('Computing')} style={{ width: '18px', height: '18px' }} />}
+                                        <span style={{ fontWeight: '700' }}>
+                                            {(selectedNode.machine.computingTFlops * selectedNode.machineCount).toFixed(1)} TF
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {selectedNode.inputs && selectedNode.inputs.length > 0 && (
+                    <div>
+                        <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '8px', fontWeight: '600' }}>
+                            Inputs Required:
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {selectedNode.inputs.map((input, idx) => {
+                                const inputIcon = getProductIcon(input.product);
+                                return (
+                                    <div key={idx} style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                        backgroundColor: '#1a1a1a',
+                                        padding: '10px',
+                                        borderRadius: '6px',
+                                        border: '1px solid #444'
+                                    }}>
+                                        {inputIcon && (
+                                            <img src={inputIcon} alt={input.product?.name} style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
+                                        )}
+                                        <span style={{ flex: 1, color: '#ddd', fontSize: '0.95rem', fontWeight: '600' }}>
+                                            {input.product?.name || input.productId}
+                                        </span>
+                                        <span style={{ color: '#4a90e2', fontWeight: '700', fontSize: '0.95rem' }}>
+                                            {input.ratePerMin.toFixed(2)} /min
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div style={{
             maxWidth: '1920px',
             margin: '0 auto',
             minHeight: '100vh'
         }}>
-            {/* Page Header */}
             <div style={{
                 padding: '1.5rem 2rem',
                 backgroundColor: '#2a2a2a',
@@ -894,129 +1150,252 @@ const Calculator = () => {
             </div>
 
             <div style={{ padding: '0 2rem 2rem' }}>
-                {/* Recipe Selection Modal */}
+                {/* Recipe Selection Modal (for node recipes) */}
                 {recipeModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.85)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '2rem'
-          }}
-          onClick={closeRecipeModal}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: '#2a2a2a',
-              borderRadius: '16px',
-              padding: '2.5rem',
-              maxWidth: '1100px',
-              width: '100%',
-              maxHeight: '85vh',
-              overflow: 'auto',
-              border: '2px solid #4a90e2',
-              boxShadow: '0 12px 48px rgba(0, 0, 0, 0.6)'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-              <h3 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#fff', lineHeight: 1.2 }}>
-                Select Recipe
-                <span style={{ fontSize: '1.1rem', color: '#888', fontWeight: '400', marginLeft: '12px' }}>
-                  ({recipeModalRecipes.length} available)
-                </span>
-              </h3>
-              <button
-                onClick={closeRecipeModal}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#555',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#666';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = '#555';
-                }}
-              >
-                ✕ Close
-              </button>
-            </div>
+                    <div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            backdropFilter: 'blur(4px)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 1000,
+                            padding: '2rem'
+                        }}
+                        onClick={closeRecipeModal}
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                                backgroundColor: '#2a2a2a',
+                                borderRadius: '16px',
+                                padding: '2.5rem',
+                                maxWidth: '1100px',
+                                width: '100%',
+                                maxHeight: '85vh',
+                                overflow: 'auto',
+                                border: '2px solid #4a90e2',
+                                boxShadow: '0 12px 48px rgba(0, 0, 0, 0.6)'
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                <h3 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#fff', lineHeight: 1.2 }}>
+                                    Select Recipe
+                                    <span style={{ fontSize: '1.1rem', color: '#888', fontWeight: '400', marginLeft: '12px' }}>
+                                        ({recipeModalRecipes.length} available)
+                                    </span>
+                                </h3>
+                                <button
+                                    onClick={closeRecipeModal}
+                                    style={{
+                                        padding: '10px 20px',
+                                        backgroundColor: '#555',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        fontSize: '1rem',
+                                        fontWeight: '600',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.backgroundColor = '#666';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.backgroundColor = '#555';
+                                    }}
+                                >
+                                    ✕ Close
+                                </button>
+                            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {recipeModalRecipes.map(recipe => {
-                const currentRecipeId = recipeOverrides.get(recipeModalProductId) || recipeModalRecipes[0]?.id;
-                const isSelected = recipe.id === currentRecipeId;
-                
-                return (
-                  <div
-                    key={recipe.id}
-                    onClick={() => selectRecipeFromModal(recipe.id)}
-                    style={{
-                      backgroundColor: isSelected ? '#2a4a6a' : '#1a1a1a',
-                      border: isSelected ? '3px solid #4a90e2' : '2px solid #444',
-                      borderRadius: '10px',
-                      padding: '6px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      position: 'relative'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) {
-                        e.currentTarget.style.backgroundColor = '#252525';
-                        e.currentTarget.style.borderColor = '#666';
-                        e.currentTarget.style.transform = 'translateX(4px)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) {
-                        e.currentTarget.style.backgroundColor = '#1a1a1a';
-                        e.currentTarget.style.borderColor = '#444';
-                        e.currentTarget.style.transform = 'translateX(0)';
-                      }
-                    }}
-                  >
-                    {renderRecipeCard(recipe, 'large', false)}
-                    {isSelected && (
-                      <div style={{ 
-                        marginTop: '10px',
-                        padding: '8px 16px', 
-                        backgroundColor: 'rgba(74, 144, 226, 0.2)',
-                        borderRadius: '6px',
-                        textAlign: 'center',
-                        fontSize: '0.9rem',
-                        color: '#5aa0f2',
-                        fontWeight: '700',
-                        letterSpacing: '0.5px',
-                        border: '1px solid rgba(74, 144, 226, 0.3)'
-                      }}>
-                        ✓ CURRENTLY SELECTED
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                {recipeModalRecipes.map(recipe => {
+                                    const currentRecipeId = recipeOverrides.get(recipeModalProductId) || recipeModalRecipes[0]?.id;
+                                    const isSelected = recipe.id === currentRecipeId;
 
-                {/* Mode Toggle */}
+                                    return (
+                                        <div
+                                            key={recipe.id}
+                                            onClick={() => selectRecipeFromModal(recipe.id)}
+                                            style={{
+                                                backgroundColor: isSelected ? '#2a4a6a' : '#1a1a1a',
+                                                border: isSelected ? '3px solid #4a90e2' : '2px solid #444',
+                                                borderRadius: '10px',
+                                                padding: '6px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                position: 'relative'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isSelected) {
+                                                    e.currentTarget.style.backgroundColor = '#252525';
+                                                    e.currentTarget.style.borderColor = '#666';
+                                                    e.currentTarget.style.transform = 'translateX(4px)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isSelected) {
+                                                    e.currentTarget.style.backgroundColor = '#1a1a1a';
+                                                    e.currentTarget.style.borderColor = '#444';
+                                                    e.currentTarget.style.transform = 'translateX(0)';
+                                                }
+                                            }}
+                                        >
+                                            {renderRecipeCard(recipe, 'large', false)}
+                                            {isSelected && (
+                                                <div style={{
+                                                    marginTop: '10px',
+                                                    padding: '8px 16px',
+                                                    backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                                                    borderRadius: '6px',
+                                                    textAlign: 'center',
+                                                    fontSize: '0.9rem',
+                                                    color: '#5aa0f2',
+                                                    fontWeight: '700',
+                                                    letterSpacing: '0.5px',
+                                                    border: '1px solid rgba(74, 144, 226, 0.3)'
+                                                }}>
+                                                    ✓ CURRENTLY SELECTED
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* NEW: Main Product Recipe Selection Modal (replaces dropdown) */}
+                {recipeSelectionModalOpen && availableRecipes.length > 1 && (
+                    <div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            backdropFilter: 'blur(4px)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 1000,
+                            padding: '2rem'
+                        }}
+                        onClick={() => setRecipeSelectionModalOpen(false)}
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                                backgroundColor: '#2a2a2a',
+                                borderRadius: '16px',
+                                padding: '2.5rem',
+                                maxWidth: '1100px',
+                                width: '100%',
+                                maxHeight: '85vh',
+                                overflow: 'auto',
+                                border: '2px solid #4a90e2',
+                                boxShadow: '0 12px 48px rgba(0, 0, 0, 0.6)'
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                <h3 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#fff', lineHeight: 1.2 }}>
+                                    Select Recipe
+                                    <span style={{ fontSize: '1.1rem', color: '#888', fontWeight: '400', marginLeft: '12px' }}>
+                                        ({availableRecipes.length} available)
+                                    </span>
+                                </h3>
+                                <button
+                                    onClick={() => setRecipeSelectionModalOpen(false)}
+                                    style={{
+                                        padding: '10px 20px',
+                                        backgroundColor: '#555',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        fontSize: '1rem',
+                                        fontWeight: '600',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.backgroundColor = '#666';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.backgroundColor = '#555';
+                                    }}
+                                >
+                                    ✕ Close
+                                </button>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                {availableRecipes.map(recipe => {
+                                    const isSelected = recipe.id === selectedRecipe;
+
+                                    return (
+                                        <div
+                                            key={recipe.id}
+                                            onClick={() => {
+                                                setSelectedRecipe(recipe.id);
+                                                setRecipeSelectionModalOpen(false);
+                                            }}
+                                            style={{
+                                                backgroundColor: isSelected ? '#2a4a6a' : '#1a1a1a',
+                                                border: isSelected ? '3px solid #4a90e2' : '2px solid #444',
+                                                borderRadius: '10px',
+                                                padding: '6px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isSelected) {
+                                                    e.currentTarget.style.backgroundColor = '#252525';
+                                                    e.currentTarget.style.borderColor = '#666';
+                                                    e.currentTarget.style.transform = 'translateX(4px)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isSelected) {
+                                                    e.currentTarget.style.backgroundColor = '#1a1a1a';
+                                                    e.currentTarget.style.borderColor = '#444';
+                                                    e.currentTarget.style.transform = 'translateX(0)';
+                                                }
+                                            }}
+                                        >
+                                            {renderRecipeCard(recipe, 'large', false)}
+                                            {isSelected && (
+                                                <div style={{
+                                                    marginTop: '10px',
+                                                    padding: '8px 16px',
+                                                    backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                                                    borderRadius: '6px',
+                                                    textAlign: 'center',
+                                                    fontSize: '0.9rem',
+                                                    color: '#5aa0f2',
+                                                    fontWeight: '700',
+                                                    letterSpacing: '0.5px',
+                                                    border: '1px solid rgba(74, 144, 226, 0.3)'
+                                                }}>
+                                                    ✓ CURRENTLY SELECTED
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Mode Toggle and Controls */}
                 <div style={{
                     marginBottom: '1.5rem',
                     display: 'flex',
@@ -1024,66 +1403,56 @@ const Calculator = () => {
                     alignItems: 'center',
                     flexWrap: 'wrap'
                 }}>
-                    {/* Mode buttons */}
-                    <div style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        backgroundColor: '#2a2a2a',
-                        padding: '0.5rem',
-                        borderRadius: '8px',
-                        border: '1px solid #444'
-                    }}>
-                        <button
-                            onClick={() => setCalculatorMode('forward')}
-                            style={{
-                                padding: '10px 24px',
-                                backgroundColor: calculatorMode === 'forward' ? '#4a90e2' : 'transparent',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '6px',
-                                fontSize: '1rem',
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            Forward Mode
-                        </button>
-                        <button
-                            onClick={() => setCalculatorMode('reverse')}
-                            style={{
-                                padding: '10px 24px',
-                                backgroundColor: calculatorMode === 'reverse' ? '#4a90e2' : 'transparent',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '6px',
-                                fontSize: '1rem',
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            Reverse Mode
-                        </button>
-                    </div>
+                    {/* Optimization toggle */}
+                    <button
+                        onClick={() => setOptimizationMode(!optimizationMode)}
+                        style={{
+                            padding: '10px 24px',
+                            backgroundColor: optimizationMode ? '#50C878' : '#555',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '1rem',
+                            cursor: 'pointer',
+                            fontWeight: '700',
+                            transition: 'all 0.2s',
+                            boxShadow: optimizationMode ? '0 2px 8px rgba(80, 200, 120, 0.3)' : 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        {optimizationMode ? '✓ Optimization ON' : '⚙️ Enable Optimization'}
+                    </button>
 
                     {/* Clear/Reset Button */}
                     <button
                         onClick={() => {
-                            // Reset all state
                             setSelectedProduct('');
                             setSelectedRecipe('');
                             setTargetRate(60);
-                            setReverseProduct('');
-                            setReverseRecipe('');
-                            setReverseSearchTerm('');
                             setSearchTerm('');
-                            setAvailableResources(new Map());
+                            setResourceConstraints(new Map());
                             setResourceInput({ productId: '', productName: '', quantity: 0 });
                             setProductionChain(null);
                             setRequirements(null);
                             setRecipeOverrides(new Map());
                             setCollapsedNodes(new Set());
+                            setOptimizationMode(false);
+                            setOptimizationResult(null);
+                            setSelectedNode(null);
+                            setOptimizationConstraints({
+                                maxPower: null,
+                                maxWorkers: null,
+                                maxMachines: null,
+                                maxMaintenance: null,
+                                maxComputing: null,
+                                excludedRecipes: [],
+                                tierRestrictions: null
+                            });
                         }}
                         style={{
                             padding: '10px 24px',
@@ -1113,673 +1482,717 @@ const Calculator = () => {
                     >
                         🗑️ Clear All
                     </button>
-                </div> {/* ← This closes the OUTER wrapper div */}
+                </div>
 
-
-
-      {/* Input Section */}
-      {calculatorMode === 'forward' ? (
-        // FORWARD MODE
-        <div style={{
-          backgroundColor: '#2a2a2a',
-          padding: '2rem',
-          borderRadius: '10px',
-          marginBottom: '2rem',
-          border: '1px solid #444',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
-        }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 200px auto', gap: '1.5rem', alignItems: 'end' }}>
-            
-            {/* Product Search/Select */}
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
-                Target Product
-              </label>
-              <input
-                type="text"
-                list="products-list"
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  const match = producibleProducts.find(p => p.name.toLowerCase() === e.target.value.toLowerCase());
-                  if (match) {
-                    setSelectedProduct(match.id);
-                  }
-                }}
-                onBlur={(e) => {
-                  const match = producibleProducts.find(p => p.name.toLowerCase() === e.target.value.toLowerCase());
-                  if (match) {
-                    setSelectedProduct(match.id);
-                    setSearchTerm(match.name);
-                  }
-                }}
-                placeholder="Search and select product..."
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: '#333',
-                  color: 'white',
-                  border: '2px solid #555',
-                  borderRadius: '6px',
-                  fontSize: '1rem'
-                }}
-              />
-              <datalist id="products-list">
-                {producibleProducts.slice(0, 200).map(product => (
-                  <option key={product.id} value={product.name}>
-                    {product.name} ({product.type})
-                  </option>
-                ))}
-              </datalist>
-            </div>
-
-            {/* Recipe Selection */}
-            <div style={{ opacity: availableRecipes.length > 1 ? 1 : 0.5 }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
-                Recipe {availableRecipes.length > 1 && <span style={{ color: '#4a90e2' }}>({availableRecipes.length} available)</span>}
-              </label>
-              <select
-                value={selectedRecipe}
-                onChange={(e) => setSelectedRecipe(e.target.value)}
-                disabled={availableRecipes.length <= 1}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: availableRecipes.length > 1 ? '#333' : '#2a2a2a',
-                  color: 'white',
-                  border: '2px solid #555',
-                  borderRadius: '6px',
-                  fontSize: '1rem',
-                  cursor: availableRecipes.length > 1 ? 'pointer' : 'not-allowed'
-                }}
-              >
-                <option value="">
-                  {availableRecipes.length === 0 ? 'Select product first' : 
-                   availableRecipes.length === 1 ? availableRecipes[0].name : 
-                   'Select recipe...'}
-                </option>
-                {availableRecipes.length > 1 && availableRecipes.map(recipe => {
-                  const option = renderRecipeDropdownOption(recipe, selectedProduct);
-                  return (
-                    <option key={recipe.id} value={recipe.id}>
-                      {option.displayText}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            {/* Target Rate */}
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
-                Rate (/min)
-              </label>
-              <input
-                type="number"
-                value={targetRate}
-                onChange={(e) => setTargetRate(parseFloat(e.target.value))}
-                min="0.1"
-                step="1"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: '#333',
-                  color: 'white',
-                  border: '2px solid #555',
-                  borderRadius: '6px',
-                  fontSize: '1rem'
-                }}
-              />
-            </div>
-
-            {/* Calculate Button */}
-            <button
-              onClick={handleCalculate}
-              disabled={!selectedProduct || !targetRate}
-              style={{
-                padding: '12px 32px',
-                backgroundColor: selectedProduct && targetRate ? '#4a90e2' : '#555',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '1rem',
-                cursor: selectedProduct && targetRate ? 'pointer' : 'not-allowed',
-                fontWeight: '700',
-                transition: 'all 0.2s',
-                boxShadow: selectedProduct && targetRate ? '0 2px 8px rgba(74, 144, 226, 0.4)' : 'none',
-                height: '48px'
-              }}
-            >
-              Calculate
-            </button>
-          </div>
-
-          {/* Recipe Preview */}
-          {availableRecipes.length > 1 && (
-            <div style={{ 
-              marginTop: '1.5rem', 
-              padding: '1rem',
-              backgroundColor: '#1a1a1a',
-              borderRadius: '6px',
-              border: '1px solid #333'
-            }}>
-              <div style={{ fontSize: '0.9rem', color: '#888', marginBottom: '10px' }}>Available Recipes:</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(500px, 1fr))', gap: '10px' }}>
-                {availableRecipes.map(recipe => (
-                  <div
-                    key={recipe.id}
-                    onClick={() => setSelectedRecipe(recipe.id)}
-                    style={{
-                      backgroundColor: selectedRecipe === recipe.id ? '#2a4a6a' : '#252525',
-                      border: selectedRecipe === recipe.id ? '2px solid #4a90e2' : '1px solid #333',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {renderRecipeCard(recipe, 'normal', true)}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        // REVERSE MODE
-        <div style={{
-          backgroundColor: '#2a2a2a',
-          padding: '2rem',
-          borderRadius: '10px',
-          marginBottom: '2rem',
-          border: '1px solid #444',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
-        }}>
-          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.3rem', fontWeight: '600' }}>
-            What can I make with my resources?
-          </h3>
-
-          {/* Resource Input */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
-              Add Available Resources
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px auto', gap: '1rem', alignItems: 'end' }}>
-              <div>
-                <input
-                  type="text"
-                  list="all-products-list"
-                  placeholder="Select resource..."
-                  value={resourceInput.productName}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    setResourceInput({ ...resourceInput, productName: inputValue });
-                    const match = ProductionCalculator.products.find(p => p.name.toLowerCase() === inputValue.toLowerCase());
-                    if (match) {
-                      setResourceInput({ ...resourceInput, productId: match.id, productName: match.name });
-                    }
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    backgroundColor: '#333',
-                    color: 'white',
-                    border: '2px solid #555',
-                    borderRadius: '6px',
-                    fontSize: '1rem'
-                  }}
-                />
-                <datalist id="all-products-list">
-                  {ProductionCalculator.products.map(product => (
-                    <option key={product.id} value={product.name} />
-                  ))}
-                </datalist>
-              </div>
-              <input
-                type="number"
-                placeholder="Quantity"
-                value={resourceInput.quantity || ''}
-                onChange={(e) => setResourceInput({ ...resourceInput, quantity: parseFloat(e.target.value) })}
-                min="0"
-                step="1"
-                style={{
-                  padding: '12px',
-                  backgroundColor: '#333',
-                  color: 'white',
-                  border: '2px solid #555',
-                  borderRadius: '6px',
-                  fontSize: '1rem'
-                }}
-              />
-              <button
-                onClick={addResource}
-                disabled={!resourceInput.productId || !resourceInput.quantity}
-                style={{
-                  padding: '12px 24px',
-                  backgroundColor: resourceInput.productId && resourceInput.quantity ? '#4a90e2' : '#555',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '1rem',
-                  cursor: resourceInput.productId && resourceInput.quantity ? 'pointer' : 'not-allowed',
-                  fontWeight: '600'
-                }}
-              >
-                Add
-              </button>
-            </div>
-          </div>
-
-          {/* Resource List */}
-          {availableResources.size > 0 && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
-                Available Resources:
-              </label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                {Array.from(availableResources.entries()).map(([productId, quantity]) => {
-                  const product = ProductionCalculator.getProduct(productId);
-                  const icon = getProductIcon(product);
-                  return (
-                    <div key={productId} style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      backgroundColor: '#1a1a1a',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid #444'
+                {/* Optimization Controls */}
+                {optimizationMode && (
+                    <div style={{
+                        backgroundColor: '#2a4a2a',
+                        padding: '1.5rem',
+                        borderRadius: '10px',
+                        marginBottom: '1.5rem',
+                        border: '2px solid #50C878',
+                        boxShadow: '0 4px 12px rgba(80, 200, 120, 0.2)'
                     }}>
-                      {icon && <img src={icon} alt={product?.name} style={{ width: '24px', height: '24px', objectFit: 'contain' }} />}
-                      <span style={{ color: '#fff', fontWeight: '600' }}>{product?.name}</span>
-                      <span style={{ color: '#888' }}>×</span>
-                      <span style={{ color: '#4a90e2', fontWeight: 'bold' }}>{quantity}</span>
-                      <button
-                        onClick={() => removeResource(productId)}
-                        style={{
-                          marginLeft: '8px',
-                          padding: '2px 8px',
-                          backgroundColor: '#ff6b6b',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.85rem'
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                        <h3 style={{ marginBottom: '1rem', fontSize: '1.2rem', fontWeight: '700', color: '#50C878' }}>
+                            ⚙️ Optimization Settings
+                        </h3>
 
-          {/* Product and Recipe Selection */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1.5rem', alignItems: 'end' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
-                What do you want to make?
-              </label>
-              <input
-                type="text"
-                list="reverse-products-list"
-                placeholder="Select product..."
-                value={reverseSearchTerm}
-                onChange={(e) => {
-                  const inputValue = e.target.value;
-                  setReverseSearchTerm(inputValue);
-                  const match = reverseProducibleProducts.find(p => p.name.toLowerCase() === inputValue.toLowerCase());
-                  if (match) {
-                    setReverseProduct(match.id);
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: '#333',
-                  color: 'white',
-                  border: '2px solid #555',
-                  borderRadius: '6px',
-                  fontSize: '1rem'
-                }}
-              />
-              <datalist id="reverse-products-list">
-                {reverseProducibleProducts.length > 0 ? (
-                  reverseProducibleProducts.slice(0, 200).map(product => (
-                    <option key={product.id} value={product.name}>
-                      {product.name} ({product.type})
-                    </option>
-                  ))
-                ) : (
-                  <option value="">No producible products found</option>
-                )}
-              </datalist>
-              {reverseSearchTerm && reverseProducibleProducts.length === 0 && (
-                <div style={{ 
-                  marginTop: '8px', 
-                  padding: '8px 12px', 
-                  backgroundColor: '#3a2a2a', 
-                  borderRadius: '4px',
-                  fontSize: '0.85rem',
-                  color: '#ff6b6b',
-                  border: '1px solid #ff6b6b'
-                }}>
-                  ⚠️ No recipes available for products matching "{reverseSearchTerm}"
-                </div>
-              )}
-              {!reverseSearchTerm && availableResources.size > 0 && (
-                <div style={{ 
-                  marginTop: '8px', 
-                  padding: '8px 12px', 
-                  backgroundColor: '#1a4a2a', 
-                  borderRadius: '4px',
-                  fontSize: '0.85rem',
-                  color: '#50C878'
-                }}>
-                  ✓ Resources ready - Type to search for products you can make
-                </div>
-              )}
-            </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                            {/* Optimization Goal */}
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
+                                    Optimization Goal
+                                </label>
+                                <select
+                                    value={optimizationGoal}
+                                    onChange={(e) => setOptimizationGoal(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        backgroundColor: '#333',
+                                        color: 'white',
+                                        border: '2px solid #50C878',
+                                        borderRadius: '6px',
+                                        fontSize: '1rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <option value="minimizeWorkers">Minimize Workers</option>
+                                    <option value="minimizePower">Minimize Power (kW)</option>
+                                    <option value="minimizeMachines">Minimize Machines</option>
+                                    <option value="minimizeMaintenance">Minimize Maintenance</option>
+                                    <option value="minimizeComputing">Minimize Computing</option>
+                                    <option value="maximizeProduction">Maximize Production</option>
+                                </select>
+                            </div>
 
-            <div style={{ opacity: availableRecipes.length > 1 ? 1 : 0.5 }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
-                Recipe {availableRecipes.length > 1 && <span style={{ color: '#4a90e2' }}>({availableRecipes.length} available)</span>}
-              </label>
-              <select
-                value={reverseRecipe}
-                onChange={(e) => setReverseRecipe(e.target.value)}
-                disabled={availableRecipes.length <= 1}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: availableRecipes.length > 1 ? '#333' : '#2a2a2a',
-                  color: 'white',
-                  border: '2px solid #555',
-                  borderRadius: '6px',
-                  fontSize: '1rem',
-                  cursor: availableRecipes.length > 1 ? 'pointer' : 'not-allowed'
-                }}
-              >
-                <option value="">
-                  {availableRecipes.length === 0 ? 'Select product first' : 
-                   availableRecipes.length === 1 ? availableRecipes[0].name : 
-                   'Select recipe...'}
-                </option>
-                {availableRecipes.map(recipe => {
-                  const option = renderRecipeDropdownOption(recipe, reverseProduct);
-                  return (
-                    <option key={recipe.id} value={recipe.id}>
-                      {option.displayText}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
+                            {/* Constraints */}
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
+                                    Constraints (Optional)
+                                </label>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <input
+                                        type="number"
+                                        placeholder="Max Power (kW)"
+                                        value={optimizationConstraints.maxPower || ''}
+                                        onChange={(e) => setOptimizationConstraints({
+                                            ...optimizationConstraints,
+                                            maxPower: e.target.value ? parseFloat(e.target.value) : null
+                                        })}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px',
+                                            backgroundColor: '#333',
+                                            color: 'white',
+                                            border: '2px solid #555',
+                                            borderRadius: '6px',
+                                            fontSize: '0.95rem'
+                                        }}
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Max Workers"
+                                        value={optimizationConstraints.maxWorkers || ''}
+                                        onChange={(e) => setOptimizationConstraints({
+                                            ...optimizationConstraints,
+                                            maxWorkers: e.target.value ? parseFloat(e.target.value) : null
+                                        })}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px',
+                                            backgroundColor: '#333',
+                                            color: 'white',
+                                            border: '2px solid #555',
+                                            borderRadius: '6px',
+                                            fontSize: '0.95rem'
+                                        }}
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Max Machines"
+                                        value={optimizationConstraints.maxMachines || ''}
+                                        onChange={(e) => setOptimizationConstraints({
+                                            ...optimizationConstraints,
+                                            maxMachines: e.target.value ? parseFloat(e.target.value) : null
+                                        })}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px',
+                                            backgroundColor: '#333',
+                                            color: 'white',
+                                            border: '2px solid #555',
+                                            borderRadius: '6px',
+                                            fontSize: '0.95rem'
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
-            <button
-              onClick={handleCalculate}
-              disabled={!reverseProduct || availableResources.size === 0}
-              style={{
-                padding: '12px 32px',
-                backgroundColor: reverseProduct && availableResources.size > 0 ? '#4a90e2' : '#555',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '1rem',
-                cursor: reverseProduct && availableResources.size > 0 ? 'pointer' : 'not-allowed',
-                fontWeight: '700',
-                height: '48px'
-              }}
-            >
-              Calculate
-            </button>
-          </div>
-        </div>
-      )}
+                        {/* Resource Constraints Section */}
+                        <div style={{ marginTop: '1.5rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
+                                Resource Limits (Optional)
+                            </label>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px auto', gap: '1rem', alignItems: 'end', marginBottom: '1rem' }}>
+                                <div>
+                                    <input
+                                        type="text"
+                                        list="all-products-list"
+                                        placeholder="Select resource..."
+                                        value={resourceInput.productName}
+                                        onChange={(e) => {
+                                            const inputValue = e.target.value;
+                                            setResourceInput({ ...resourceInput, productName: inputValue });
+                                            const match = ProductionCalculator.products.find(p => p.name.toLowerCase() === inputValue.toLowerCase());
+                                            if (match) {
+                                                setResourceInput({ ...resourceInput, productId: match.id, productName: match.name });
+                                            }
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            backgroundColor: '#333',
+                                            color: 'white',
+                                            border: '2px solid #555',
+                                            borderRadius: '6px',
+                                            fontSize: '1rem'
+                                        }}
+                                    />
+                                    <datalist id="all-products-list">
+                                        {ProductionCalculator.products.map(product => (
+                                            <option key={product.id} value={product.name} />
+                                        ))}
+                                    </datalist>
+                                </div>
+                                <input
+                                    type="number"
+                                    placeholder="Max /min"
+                                    value={resourceInput.quantity || ''}
+                                    onChange={(e) => setResourceInput({ ...resourceInput, quantity: parseFloat(e.target.value) })}
+                                    min="0"
+                                    step="1"
+                                    style={{
+                                        padding: '12px',
+                                        backgroundColor: '#333',
+                                        color: 'white',
+                                        border: '2px solid #555',
+                                        borderRadius: '6px',
+                                        fontSize: '1rem'
+                                    }}
+                                />
+                                <button
+                                    onClick={addResourceConstraint}
+                                    disabled={!resourceInput.productId || !resourceInput.quantity}
+                                    style={{
+                                        padding: '12px 24px',
+                                        backgroundColor: resourceInput.productId && resourceInput.quantity ? '#4a90e2' : '#555',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        fontSize: '1rem',
+                                        cursor: resourceInput.productId && resourceInput.quantity ? 'pointer' : 'not-allowed',
+                                        fontWeight: '600'
+                                    }}
+                                >
+                                    Add Limit
+                                </button>
+                            </div>
 
-      {/* Results Section - Side by Side Layout */}
-      {productionChain && requirements && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '2rem', alignItems: 'start', paddingBottom: '3rem' }}>
-          
-          {/* Left Column: Total Requirements (Sticky) */}
-          <div style={{ position: 'sticky', top: '2rem' }}>
-            <div style={{
-              backgroundColor: '#2a2a2a',
-              padding: '1.5rem',
-              borderRadius: '10px',
-              border: '1px solid #444',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
-            }}>
-              <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
-                Total Requirements
-              </h3>
-              
-              {/* Summary Cards */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
-                  <div style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '4px' }}>Total Machines</div>
-                  <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4a90e2' }}>
-                    {Array.from(requirements.machines.values()).reduce((a, b) => a + b, 0)}
-                  </div>
-                </div>
-                
-                                    <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
-                                        <div style={{
-                                            color: '#aaa',
-                                            fontSize: '0.85rem',
-                                            marginBottom: '4px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'space-between'
-                                        }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                Total Power
-                                                {getGeneralIcon('Electricity') && (
-                                                    <img src={getGeneralIcon('Electricity')} alt="Electricity" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
-                                                )}
-                                            </div>
-
-                                            {/* Unit Toggle */}
-                                            <div style={{
+                            {/* Resource Constraint List */}
+                            {resourceConstraints.size > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                                    {Array.from(resourceConstraints.entries()).map(([productId, maxRate]) => {
+                                        const product = ProductionCalculator.getProduct(productId);
+                                        const icon = getProductIcon(product);
+                                        return (
+                                            <div key={productId} style={{
                                                 display: 'flex',
-                                                gap: '4px',
-                                                backgroundColor: '#2a2a2a',
-                                                padding: '2px',
-                                                borderRadius: '4px',
-                                                border: '1px solid #444'
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                backgroundColor: '#1a1a1a',
+                                                padding: '8px 12px',
+                                                borderRadius: '6px',
+                                                border: '1px solid #50C878'
                                             }}>
-                                                {['kW', 'MW', 'GW'].map(unit => (
-                                                    <button
-                                                        key={unit}
-                                                        onClick={() => setPowerUnit(unit)}
-                                                        style={{
-                                                            padding: '2px 6px',
-                                                            fontSize: '0.7rem',
-                                                            fontWeight: '700',
-                                                            backgroundColor: powerUnit === unit ? '#4a90e2' : 'transparent',
-                                                            color: powerUnit === unit ? '#fff' : '#888',
-                                                            border: 'none',
-                                                            borderRadius: '3px',
-                                                            cursor: 'pointer',
-                                                            transition: 'all 0.15s',
-                                                            letterSpacing: '0.3px'
-                                                        }}
-                                                        onMouseEnter={(e) => {
-                                                            if (powerUnit !== unit) {
-                                                                e.currentTarget.style.backgroundColor = '#333';
-                                                                e.currentTarget.style.color = '#aaa';
-                                                            }
-                                                        }}
-                                                        onMouseLeave={(e) => {
-                                                            if (powerUnit !== unit) {
-                                                                e.currentTarget.style.backgroundColor = 'transparent';
-                                                                e.currentTarget.style.color = '#888';
-                                                            }
-                                                        }}
-                                                    >
-                                                        {unit}
-                                                    </button>
-                                                ))}
+                                                {icon && <img src={icon} alt={product?.name} style={{ width: '24px', height: '24px', objectFit: 'contain' }} />}
+                                                <span style={{ color: '#fff', fontWeight: '600' }}>{product?.name}</span>
+                                                <span style={{ color: '#888' }}>≤</span>
+                                                <span style={{ color: '#50C878', fontWeight: 'bold' }}>{maxRate}/min</span>
+                                                <button
+                                                    onClick={() => removeResourceConstraint(productId)}
+                                                    style={{
+                                                        marginLeft: '8px',
+                                                        padding: '2px 8px',
+                                                        backgroundColor: '#ff6b6b',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        borderRadius: '4px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '0.85rem'
+                                                    }}
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Optimization Result Summary */}
+                        {optimizationResult && !optimizationResult.error && (
+                            <div style={{
+                                marginTop: '1rem',
+                                padding: '12px',
+                                backgroundColor: 'rgba(80, 200, 120, 0.1)',
+                                border: '1px solid rgba(80, 200, 120, 0.3)',
+                                borderRadius: '6px',
+                                fontSize: '0.9rem',
+                                color: '#50C878'
+                            }}>
+                                ✓ {optimizationResult.explanation}
+                                {optimizationResult.alternatives?.length > 0 && (
+                                    <span style={{ color: '#888', marginLeft: '8px' }}>
+                                        ({optimizationResult.alternatives.length} alternative{optimizationResult.alternatives.length > 1 ? 's' : ''} found)
+                                    </span>
+                                )}
+                            </div>
+                        )}
+
+                        {optimizationResult?.error && (
+                            <div style={{
+                                marginTop: '1rem',
+                                padding: '12px',
+                                backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                                border: '1px solid rgba(255, 107, 107, 0.3)',
+                                borderRadius: '6px',
+                                fontSize: '0.9rem',
+                                color: '#ff6b6b'
+                            }}>
+                                ⚠️ {optimizationResult.error}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Input Section */}
+                <div style={{
+                    backgroundColor: '#2a2a2a',
+                    padding: '2rem',
+                    borderRadius: '10px',
+                    marginBottom: '2rem',
+                    border: '1px solid #444',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+                }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 200px auto', gap: '1.5rem', alignItems: 'end' }}>
+                        {/* Product Search/Select */}
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
+                                Target Product
+                            </label>
+                            <input
+                                type="text"
+                                list="products-list"
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    const match = producibleProducts.find(p => p.name.toLowerCase() === e.target.value.toLowerCase());
+                                    if (match) {
+                                        setSelectedProduct(match.id);
+                                    }
+                                }}
+                                onBlur={(e) => {
+                                    const match = producibleProducts.find(p => p.name.toLowerCase() === e.target.value.toLowerCase());
+                                    if (match) {
+                                        setSelectedProduct(match.id);
+                                        setSearchTerm(match.name);
+                                    }
+                                }}
+                                placeholder="Search and select product..."
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    backgroundColor: '#333',
+                                    color: 'white',
+                                    border: '2px solid #555',
+                                    borderRadius: '6px',
+                                    fontSize: '1rem'
+                                }}
+                            />
+                            <datalist id="products-list">
+                                {producibleProducts.slice(0, 200).map(product => (
+                                    <option key={product.id} value={product.name}>
+                                        {product.name} ({product.type})
+                                    </option>
+                                ))}
+                            </datalist>
+                        </div>
+
+                        {/* Recipe Selection - BUTTON instead of dropdown */}
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
+                                Recipe {availableRecipes.length > 1 && <span style={{ color: '#4a90e2' }}>({availableRecipes.length} available)</span>}
+                            </label>
+                            <button
+                                onClick={() => {
+                                    if (availableRecipes.length > 1) {
+                                        setRecipeSelectionModalOpen(true);
+                                    }
+                                }}
+                                disabled={availableRecipes.length <= 1}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    backgroundColor: availableRecipes.length > 1 ? '#333' : '#2a2a2a',
+                                    color: 'white',
+                                    border: '2px solid #555',
+                                    borderRadius: '6px',
+                                    fontSize: '1rem',
+                                    cursor: availableRecipes.length > 1 ? 'pointer' : 'not-allowed',
+                                    textAlign: 'left',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (availableRecipes.length > 1) {
+                                        e.currentTarget.style.backgroundColor = '#3a3a3a';
+                                        e.currentTarget.style.borderColor = '#4a90e2';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (availableRecipes.length > 1) {
+                                        e.currentTarget.style.backgroundColor = '#333';
+                                        e.currentTarget.style.borderColor = '#555';
+                                    }
+                                }}
+                            >
+                                <span>
+                                    {availableRecipes.length === 0 ? 'Select product first' :
+                                        availableRecipes.length === 1 ? availableRecipes[0].name :
+                                            selectedRecipe ? availableRecipes.find(r => r.id === selectedRecipe)?.name : 'Select recipe...'}
+                                </span>
+                                {availableRecipes.length > 1 && <span style={{ color: '#4a90e2' }}>▼</span>}
+                            </button>
+                        </div>
+
+                        {/* Target Rate */}
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
+                                Rate (/min)
+                            </label>
+                            <input
+                                type="number"
+                                value={targetRate}
+                                onChange={(e) => setTargetRate(parseFloat(e.target.value))}
+                                min="0.1"
+                                step="1"
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    backgroundColor: '#333',
+                                    color: 'white',
+                                    border: '2px solid #555',
+                                    borderRadius: '6px',
+                                    fontSize: '1rem'
+                                }}
+                            />
+                        </div>
+
+                        {/* Calculate Button */}
+                        <button
+                            onClick={handleCalculate}
+                            disabled={!selectedProduct || !targetRate}
+                            style={{
+                                padding: '12px 32px',
+                                backgroundColor: selectedProduct && targetRate ? '#4a90e2' : '#555',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontSize: '1rem',
+                                cursor: selectedProduct && targetRate ? 'pointer' : 'not-allowed',
+                                fontWeight: '700',
+                                transition: 'all 0.2s',
+                                boxShadow: selectedProduct && targetRate ? '0 2px 8px rgba(74, 144, 226, 0.4)' : 'none',
+                                height: '48px'
+                            }}
+                        >
+                            Calculate
+                        </button>
+                    </div>
+                </div>
+
+                {/* Results Section */}
+                {productionChain && requirements && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '2rem', alignItems: 'start', paddingBottom: '3rem' }}>
+                        {/* LEFT: Details Panel (ALWAYS - compact or total requirements) */}
+                        <div style={{ position: 'sticky', top: '2rem' }}>
+                            <div style={{
+                                backgroundColor: '#2a2a2a',
+                                padding: '1.5rem',
+                                borderRadius: '10px',
+                                border: '1px solid #444',
+                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+                            }}>
+                                <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
+                                    {viewMode === 'compact' && selectedNode ? 'Node Details' : 'Total Requirements'}
+                                </h3>
+
+                                {viewMode === 'compact' ? (
+                                    renderDetailsPanel()
+                                ) : (
+                                    <>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+                                            <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
+                                                <div style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '4px' }}>Total Machines</div>
+                                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4a90e2' }}>
+                                                    {Array.from(requirements.machines.values()).reduce((a, b) => a + b, 0)}
+                                                </div>
+                                            </div>
+
+                                            <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
+                                                <div style={{
+                                                    color: '#aaa',
+                                                    fontSize: '0.85rem',
+                                                    marginBottom: '4px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between'
+                                                }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        Total Power
+                                                        {getGeneralIcon('Electricity') && (
+                                                            <img src={getGeneralIcon('Electricity')} alt="Electricity" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                                                        )}
+                                                    </div>
+
+                                                    <div style={{
+                                                        display: 'flex',
+                                                        gap: '4px',
+                                                        backgroundColor: '#2a2a2a',
+                                                        padding: '2px',
+                                                        borderRadius: '4px',
+                                                        border: '1px solid #444'
+                                                    }}>
+                                                        {['kW', 'MW', 'GW'].map(unit => (
+                                                            <button
+                                                                key={unit}
+                                                                onClick={() => setPowerUnit(unit)}
+                                                                style={{
+                                                                    padding: '2px 6px',
+                                                                    fontSize: '0.7rem',
+                                                                    fontWeight: '700',
+                                                                    backgroundColor: powerUnit === unit ? '#4a90e2' : 'transparent',
+                                                                    color: powerUnit === unit ? '#fff' : '#888',
+                                                                    border: 'none',
+                                                                    borderRadius: '3px',
+                                                                    cursor: 'pointer',
+                                                                    transition: 'all 0.15s',
+                                                                    letterSpacing: '0.3px'
+                                                                }}
+                                                                onMouseEnter={(e) => {
+                                                                    if (powerUnit !== unit) {
+                                                                        e.currentTarget.style.backgroundColor = '#333';
+                                                                        e.currentTarget.style.color = '#aaa';
+                                                                    }
+                                                                }}
+                                                                onMouseLeave={(e) => {
+                                                                    if (powerUnit !== unit) {
+                                                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                                                        e.currentTarget.style.color = '#888';
+                                                                    }
+                                                                }}
+                                                            >
+                                                                {unit}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#FFD700' }}>
+                                                    {formatPower(requirements.power, powerUnit)} <span style={{ fontSize: '1rem', color: '#aaa' }}>{powerUnit}</span>
+                                                </div>
+                                            </div>
+
+                                            <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
+                                                <div style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    Total Workers
+                                                    {getGeneralIcon('Worker') && (
+                                                        <img src={getGeneralIcon('Worker')} alt="Workers" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                                                    )}
+                                                </div>
+                                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#50C878' }}>
+                                                    {requirements.workers}
+                                                </div>
                                             </div>
                                         </div>
-                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#FFD700' }}>
-                                            {formatPower(requirements.power, powerUnit)} <span style={{ fontSize: '1rem', color: '#aaa' }}>{powerUnit}</span>
-                                        </div>
-                                    </div>
-                
-                <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
-                  <div style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    Total Workers
-                    {getGeneralIcon('Worker') && (
-                      <img src={getGeneralIcon('Worker')} alt="Workers" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
-                    )}
-                  </div>
-                  <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#50C878' }}>
-                    {requirements.workers}
-                  </div>
-                </div>
-              </div>
 
-              {/* Machines Breakdown */}
-              {requirements.machines.size > 0 && (
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h4 style={{ marginBottom: '0.75rem', color: '#ccc', fontSize: '1.1rem', fontWeight: '600' }}>
-                    Machines:
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {Array.from(requirements.machines.entries()).map(([machineId, count]) => {
-                      const machine = ProductionCalculator.getMachine(machineId);
-                      return (
-                        <div key={machineId} style={{ 
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          backgroundColor: '#1a1a1a',
-                          padding: '8px 12px',
-                          borderRadius: '4px',
-                          fontSize: '0.9rem'
-                        }}>
-                          <span style={{ color: '#ddd' }}>{machine?.name || machineId}</span>
-                          <span style={{ color: '#fff', fontWeight: 'bold' }}>×{count}</span>
+                                        {requirements.machines.size > 0 && (
+                                            <div style={{ marginBottom: '1.5rem' }}>
+                                                <h4 style={{ marginBottom: '0.75rem', color: '#ccc', fontSize: '1.1rem', fontWeight: '600' }}>
+                                                    Machines:
+                                                </h4>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                    {Array.from(requirements.machines.entries()).map(([machineId, count]) => {
+                                                        const machine = ProductionCalculator.getMachine(machineId);
+                                                        return (
+                                                            <div key={machineId} style={{
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between',
+                                                                alignItems: 'center',
+                                                                backgroundColor: '#1a1a1a',
+                                                                padding: '8px 12px',
+                                                                borderRadius: '4px',
+                                                                fontSize: '0.9rem'
+                                                            }}>
+                                                                <span style={{ color: '#ddd' }}>{machine?.name || machineId}</span>
+                                                                <span style={{ color: '#fff', fontWeight: 'bold' }}>×{count}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {requirements.rawMaterials.size > 0 && (
+                                            <div style={{ marginBottom: '1.5rem' }}>
+                                                <h4 style={{ marginBottom: '0.75rem', color: '#FFD700', fontSize: '1.1rem', fontWeight: '600' }}>
+                                                    Raw Materials:
+                                                </h4>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                    {Array.from(requirements.rawMaterials.entries()).map(([productId, rate]) => {
+                                                        const product = ProductionCalculator.getProduct(productId);
+                                                        const rawIcon = getProductIcon(product);
+                                                        return (
+                                                            <div key={productId} style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '8px',
+                                                                backgroundColor: '#1a1a1a',
+                                                                padding: '8px 12px',
+                                                                borderRadius: '4px',
+                                                                fontSize: '0.9rem'
+                                                            }}>
+                                                                {rawIcon && (
+                                                                    <img
+                                                                        src={rawIcon}
+                                                                        alt={product?.name}
+                                                                        style={{ width: '20px', height: '20px', objectFit: 'contain' }}
+                                                                    />
+                                                                )}
+                                                                <span style={{ flex: 1, color: '#ddd' }}>{product?.name || productId}</span>
+                                                                <span style={{ color: '#FFD700', fontWeight: 'bold' }}>{rate.toFixed(2)}/min</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {requirements.maintenance.size > 0 && (
+                                            <div>
+                                                <h4 style={{ marginBottom: '0.75rem', color: '#ccc', fontSize: '1.1rem', fontWeight: '600' }}>
+                                                    Maintenance:
+                                                </h4>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                    {Array.from(requirements.maintenance.entries()).map(([productId, perMonth]) => {
+                                                        const product = ProductionCalculator.getProduct(productId);
+                                                        return (
+                                                            <div key={productId} style={{
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between',
+                                                                alignItems: 'center',
+                                                                backgroundColor: '#1a1a1a',
+                                                                padding: '8px 12px',
+                                                                borderRadius: '4px',
+                                                                fontSize: '0.9rem'
+                                                            }}>
+                                                                <span style={{ color: '#ddd' }}>{product?.name || productId}</span>
+                                                                <span style={{ color: '#fff', fontWeight: 'bold' }}>{perMonth.toFixed(2)}/mo</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
 
-              {/* Raw Materials */}
-              {requirements.rawMaterials.size > 0 && (
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h4 style={{ marginBottom: '0.75rem', color: '#FFD700', fontSize: '1.1rem', fontWeight: '600' }}>
-                    Raw Materials:
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {Array.from(requirements.rawMaterials.entries()).map(([productId, rate]) => {
-                      const product = ProductionCalculator.getProduct(productId);
-                      const rawIcon = getProductIcon(product);
-                      return (
-                        <div key={productId} style={{ 
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          backgroundColor: '#1a1a1a',
-                          padding: '8px 12px',
-                          borderRadius: '4px',
-                          fontSize: '0.9rem'
+                        {/* RIGHT: Production Chain */}
+                        <div style={{
+                            backgroundColor: '#2a2a2a',
+                            padding: '1.5rem',
+                            borderRadius: '10px',
+                            border: '1px solid #444',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
                         }}>
-                          {rawIcon && (
-                            <img 
-                              src={rawIcon} 
-                              alt={product?.name}
-                              style={{ width: '20px', height: '20px', objectFit: 'contain' }}
-                            />
-                          )}
-                          <span style={{ flex: 1, color: '#ddd' }}>{product?.name || productId}</span>
-                          <span style={{ color: '#FFD700', fontWeight: 'bold' }}>{rate.toFixed(2)}/min</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>
+                                    Production Chain
+                                    {recipeOverrides.size > 0 && (
+                                        <span style={{ fontSize: '0.9rem', color: '#4a90e2', marginLeft: '12px', fontWeight: '400' }}>
+                                            ({recipeOverrides.size} custom recipe{recipeOverrides.size > 1 ? 's' : ''})
+                                        </span>
+                                    )}
+                                </h3>
 
-              {/* Maintenance */}
-              {requirements.maintenance.size > 0 && (
-                <div>
-                  <h4 style={{ marginBottom: '0.75rem', color: '#ccc', fontSize: '1.1rem', fontWeight: '600' }}>
-                    Maintenance:
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {Array.from(requirements.maintenance.entries()).map(([productId, perMonth]) => {
-                      const product = ProductionCalculator.getProduct(productId);
-                      return (
-                        <div key={productId} style={{ 
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          backgroundColor: '#1a1a1a',
-                          padding: '8px 12px',
-                          borderRadius: '4px',
-                          fontSize: '0.9rem'
-                        }}>
-                          <span style={{ color: '#ddd' }}>{product?.name || productId}</span>
-                          <span style={{ color: '#fff', fontWeight: 'bold' }}>{perMonth.toFixed(2)}/mo</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+                                <div style={{
+                                    display: 'flex',
+                                    gap: '0.5rem',
+                                    backgroundColor: '#1a1a1a',
+                                    padding: '0.3rem',
+                                    borderRadius: '6px',
+                                    border: '1px solid #444'
+                                }}>
+                                    <button
+                                        onClick={() => setViewMode('compact')}
+                                        style={{
+                                            padding: '6px 16px',
+                                            backgroundColor: viewMode === 'compact' ? '#4a90e2' : 'transparent',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            fontSize: '0.85rem',
+                                            cursor: 'pointer',
+                                            fontWeight: '600',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        Compact
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('detailed')}
+                                        style={{
+                                            padding: '6px 16px',
+                                            backgroundColor: viewMode === 'detailed' ? '#4a90e2' : 'transparent',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            fontSize: '0.85rem',
+                                            cursor: 'pointer',
+                                            fontWeight: '600',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        Detailed
+                                    </button>
+                                </div>
+                            </div>
 
-          {/* Right Column: Production Chain */}
-          <div style={{
-            backgroundColor: '#2a2a2a',
-            padding: '1.5rem',
-            borderRadius: '10px',
-            border: '1px solid #444',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
-          }}>
-            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
-              Production Chain
-              {recipeOverrides.size > 0 && (
-                <span style={{ fontSize: '0.9rem', color: '#4a90e2', marginLeft: '12px', fontWeight: '400' }}>
-                  ({recipeOverrides.size} custom recipe{recipeOverrides.size > 1 ? 's' : ''})
-                </span>
-              )}
-            </h3>
-            {productionChain.error ? (
-              <div style={{ 
-                color: '#ff6b6b', 
-                padding: '1.5rem', 
-                backgroundColor: '#3a2a2a', 
-                borderRadius: '6px',
-                border: '1px solid #ff6b6b'
-              }}>
-                <strong>Error:</strong> {productionChain.error}
-              </div>
-            ) : (
-              <div>
-                <div style={{ 
-                  marginBottom: '1rem',
-                  padding: '10px',
-                  backgroundColor: '#1a1a1a',
-                  borderRadius: '6px',
-                  fontSize: '0.85rem',
-                  color: '#888',
-                  border: '1px solid #333'
-                }}>
-                  💡 <strong style={{ color: '#4a90e2' }}>Tip:</strong> Nodes with a blue border have multiple recipes available. 
-                  Click the recipe card to view and select alternatives!
-                </div>
-                {renderProductionNode(productionChain)}
-              </div>
-            )}
-          </div>
-        </div>
+                            {productionChain.error ? (
+                                <div style={{
+                                    color: '#ff6b6b',
+                                    padding: '1.5rem',
+                                    backgroundColor: '#3a2a2a',
+                                    borderRadius: '6px',
+                                    border: '1px solid #ff6b6b'
+                                }}>
+                                    <strong>Error:</strong> {productionChain.error}
+                                </div>
+                            ) : (
+                                <div>
+                                    {viewMode === 'detailed' ? (
+                                        <>
+                                            <div style={{
+                                                marginBottom: '1rem',
+                                                padding: '10px',
+                                                backgroundColor: '#1a1a1a',
+                                                borderRadius: '6px',
+                                                fontSize: '0.85rem',
+                                                color: '#888',
+                                                border: '1px solid #333'
+                                            }}>
+                                                💡 <strong style={{ color: '#4a90e2' }}>Tip:</strong> Nodes with a blue border have multiple recipes available.
+                                                Click the recipe card to view and select alternatives!
+                                            </div>
+                                            {renderProductionNode(productionChain)}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div style={{
+                                                marginBottom: '1rem',
+                                                padding: '10px',
+                                                backgroundColor: '#1a1a1a',
+                                                borderRadius: '6px',
+                                                fontSize: '0.85rem',
+                                                color: '#888',
+                                                border: '1px solid #333'
+                                            }}>
+                                                💡 <strong style={{ color: '#4a90e2' }}>Compact Mode:</strong> Click ▶/▼ to expand/collapse. Click anywhere else on a node to view details.
+                                            </div>
+                                            {renderCompactNode(productionChain)}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
