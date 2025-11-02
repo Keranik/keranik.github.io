@@ -490,10 +490,10 @@ const MachineNode = ({ data, id }) => {
             {isHovered && (
                 <div style={{
                     position: 'absolute',
-                    bottom: '100%',
+                    bottom: '100%',  // ← Unchanged: Keeps it pinned above the node
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    marginBottom: `${8 * globalScale}px`,
+                    marginBottom: `${globalScale}px`,  // ← CHANGED: Reduced from 8 to 4 (halves the gap; adjust to 0 for flush/tighter)
                     display: 'flex',
                     gap: `${8 * globalScale}px`,
                     pointerEvents: 'auto',

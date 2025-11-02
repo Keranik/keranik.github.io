@@ -571,12 +571,14 @@ const Calculator = () => {
                             )}
                             {subtreeMetrics.machines > 0 && (
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    🏭{subtreeMetrics.machines}
+                                    {getGeneralIcon('Machines') && <img src={getGeneralIcon('Machines')} alt="Machines" style={{ width: '14px', height: '14px' }} />}
+                                    {subtreeMetrics.machines}
                                 </span>
                             )}
                             {hasChildren && (
                                 <span style={{ color: '#555' }}>
-                                    📦{node.inputChains.length}
+                                    {getGeneralIcon('Chains') && <img src={getGeneralIcon('Chains')} alt="Chains" style={{ width: '14px', height: '14px' }} />}
+                                    {node.inputChains.length}
                                 </span>
                             )}
                         </span>
