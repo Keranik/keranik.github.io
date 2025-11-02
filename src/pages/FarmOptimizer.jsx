@@ -4,16 +4,13 @@ import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
 import { FarmOptimizer } from '../utils/FarmOptimizer';
 import { FarmConstants } from '../utils/FarmConstants';
-import { getProductIcon, getCropIcon, getGeneralIcon } from '../utils/AssetHelper';
+import { getProductIcon, getCropIcon, getGeneralIcon, getMachineImage, getEntityIcon } from '../utils/AssetHelper';
 import { FoodChainResolver } from '../utils/FoodChainResolver';
-
 
 const FarmOptimizerPage = () => {
     const { settings } = useSettings();
     const [dataLoaded, setDataLoaded] = useState(false);
-
     const [selectedProcessingRecipes, setSelectedProcessingRecipes] = useState(new Map());
-
     const [farms, setFarms] = useState([
         {
             id: 1,
@@ -21,13 +18,17 @@ const FarmOptimizerPage = () => {
             rotation: [null, null, null, null]
         }
     ]);
-
     const [optimizationMode, setOptimizationMode] = useState('manual');
+    const [pendingMode, setPendingMode] = useState(null);
+    const [showModeConfirm, setShowModeConfirm] = useState(false);
+    const [constraintsExpanded, setConstraintsExpanded] = useState(false);
+    const [activeConstraintTab, setActiveConstraintTab] = useState('farms');
 
     const [constraints, setConstraints] = useState({
         targetPopulation: 1000,
         allowedCrops: [],
         allowedIntermediates: null,
+        allowedFarmTypes: [],
         maxWaterPerDay: null,
         maxFertilityPerDay: null,
         targetFertility: 100,
@@ -39,9 +40,6 @@ const FarmOptimizerPage = () => {
         farmIndex: null,
         slotIndex: null
     });
-
-    const [cropFilterModal, setCropFilterModal] = useState(false);
-    const [intermediateFilterModal, setIntermediateFilterModal] = useState(false);
 
     const [recipeSelectionModal, setRecipeSelectionModal] = useState({
         open: false,
@@ -60,7 +58,6 @@ const FarmOptimizerPage = () => {
     const [results, setResults] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // Load game data on mount and when mod settings change
     useEffect(() => {
         document.title = 'Farm Optimizer - Captain of Industry Tools';
 
@@ -69,32 +66,14 @@ const FarmOptimizerPage = () => {
                 const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
                 const gameData = await DataLoader.loadGameData(enabledMods);
 
-                console.log('Game data loaded:', gameData);
-
                 ProductionCalculator.initialize(gameData);
-
-                console.log('ProductionCalculator initialized');
-                console.log('Recipes:', ProductionCalculator.recipes?.length);
-                console.log('Foods:', ProductionCalculator.foods?.length);
-                console.log('Crops:', ProductionCalculator.crops?.length);
-
-                // Initialize food chain resolver
                 FoodChainResolver.initialize(
                     ProductionCalculator.recipes || [],
                     ProductionCalculator.foods || [],
                     ProductionCalculator.crops || []
                 );
 
-                console.log('FoodChainResolver initialized');
-
-                // PRE-COMPUTE food crops to avoid recalculation
-                console.log('Pre-computing food crop list...');
-                const start = Date.now();
-
-                // Simple approach: if a crop produces a direct food OR is used in a recipe, include it
                 const foodCropIds = new Set();
-
-                // Add direct food crops
                 ProductionCalculator.crops?.forEach(crop => {
                     const isDirectFood = ProductionCalculator.foods?.some(f => f.productId === crop.output.productId);
                     if (isDirectFood) {
@@ -102,31 +81,26 @@ const FarmOptimizerPage = () => {
                     }
                 });
 
-                // Add crops that are inputs to recipes (might lead to food)
                 ProductionCalculator.crops?.forEach(crop => {
                     const isUsedInRecipes = ProductionCalculator.recipes?.some(recipe =>
                         recipe.inputs.some(input => input.productId === crop.output.productId)
                     );
                     if (isUsedInRecipes) {
-                        // Simple check: does ANY recipe chain lead to a food?
                         const outputProducts = new Set([crop.output.productId]);
                         const visited = new Set();
                         let foundFood = false;
 
-                        // BFS through recipes (max 3 levels deep)
                         for (let depth = 0; depth < 3 && !foundFood; depth++) {
                             const newProducts = new Set();
                             outputProducts.forEach(productId => {
                                 if (visited.has(productId)) return;
                                 visited.add(productId);
 
-                                // Is this product a food?
                                 if (ProductionCalculator.foods?.some(f => f.productId === productId)) {
                                     foundFood = true;
                                     return;
                                 }
 
-                                // Find recipes that use this product as input
                                 ProductionCalculator.recipes?.forEach(recipe => {
                                     if (recipe.inputs.some(input => input.productId === productId)) {
                                         recipe.outputs.forEach(output => newProducts.add(output.productId));
@@ -143,29 +117,17 @@ const FarmOptimizerPage = () => {
                     }
                 });
 
-                // Store in ProductionCalculator for easy access
                 ProductionCalculator.foodCropIds = foodCropIds;
-
-                console.log(`Pre-computed ${foodCropIds.size} food crops in ${Date.now() - start}ms`);
-
                 setDataLoaded(true);
-
-                console.log(`Pre-computed ${foodCropIds.size} food crops in ${Date.now() - start}ms`);
-
-                setDataLoaded(true);              
-
-                
             } catch (error) {
                 console.error('Error loading farm data:', error);
                 alert('Failed to load farm data: ' + error.message);
             }
         };
 
-        loadData();        
-            
+        loadData();
     }, [settings.enableModdedContent, settings.enabledMods]);
 
-    // Show loading screen if data not loaded yet
     if (!dataLoaded) {
         return (
             <div style={{
@@ -208,6 +170,87 @@ const FarmOptimizerPage = () => {
         ProductionCalculator.foodCropIds?.has(crop.id) ?? false
     );
 
+    const allIntermediates = (() => {
+        const intermediateSet = new Set();
+        availableFoodCrops.forEach(crop => {
+            const paths = FoodChainResolver.getFoodsFromCrop(crop.output.productId);
+            paths.forEach(path => {
+                path.processingChain?.forEach(step => {
+                    const isFood = ProductionCalculator.foods?.some(f => f.productId === step.outputProductId);
+                    if (!isFood) {
+                        const product = ProductionCalculator.getProduct(step.outputProductId);
+                        if (product) {
+                            intermediateSet.add(product);
+                        }
+                    }
+                });
+            });
+        });
+        return Array.from(intermediateSet).sort((a, b) => a.name.localeCompare(b.name));
+    })();
+
+    const handleModeChange = (newMode) => {
+        if (optimizationMode === 'manual' && newMode !== 'manual' && farms.some(f => f.rotation.some(r => r !== null))) {
+            setPendingMode(newMode);
+            setShowModeConfirm(true);
+        } else {
+            setOptimizationMode(newMode);
+        }
+    };
+
+    const confirmModeChange = () => {
+        setOptimizationMode(pendingMode);
+        setShowModeConfirm(false);
+        setPendingMode(null);
+    };
+
+    const cancelModeChange = () => {
+        setShowModeConfirm(false);
+        setPendingMode(null);
+    };
+
+    const toggleFarmType = (farmId) => {
+        setConstraints(prev => ({
+            ...prev,
+            allowedFarmTypes: prev.allowedFarmTypes.includes(farmId)
+                ? prev.allowedFarmTypes.filter(id => id !== farmId)
+                : [...prev.allowedFarmTypes, farmId]
+        }));
+    };
+
+    const toggleCropFilter = (cropId) => {
+        setConstraints(prev => ({
+            ...prev,
+            allowedCrops: prev.allowedCrops.includes(cropId)
+                ? prev.allowedCrops.filter(id => id !== cropId)
+                : [...prev.allowedCrops, cropId]
+        }));
+    };
+
+    const toggleIntermediate = (productId) => {
+        setConstraints(prev => {
+            if (prev.allowedIntermediates === null) {
+                const allIntermediateIds = allIntermediates.map(p => p.id);
+                return {
+                    ...prev,
+                    allowedIntermediates: allIntermediateIds.filter(id => id !== productId)
+                };
+            }
+
+            if (prev.allowedIntermediates.includes(productId)) {
+                return {
+                    ...prev,
+                    allowedIntermediates: prev.allowedIntermediates.filter(id => id !== productId)
+                };
+            }
+
+            return {
+                ...prev,
+                allowedIntermediates: [...prev.allowedIntermediates, productId]
+            };
+        });
+    };
+
     const handleCalculate = () => {
         setLoading(true);
 
@@ -234,34 +277,28 @@ const FarmOptimizerPage = () => {
 
                 const rotation = optimizedRotations[farmIdx] || [null, null, null, null];
 
-                // ✅ FIXED: Calculate fertility equilibrium FIRST to know what fertility to use for yields
                 const fertilityInfo = FarmOptimizer.calculateFertilityEquilibrium(
                     rotation,
                     effectiveFarm
                 );
 
-                // ✅ FIXED: Determine actual fertility to use for yield calculations
                 let actualFertility;
                 let usedFertilizer = false;
 
                 if (constraints.useFertilizer) {
-                    // User wants to use fertilizer: use their target fertility
                     actualFertility = constraints.targetFertility;
                     usedFertilizer = constraints.targetFertility > fertilityInfo.naturalEquilibrium;
                 } else {
-                    // No fertilizer: use natural equilibrium (what the farm can sustain naturally)
                     actualFertility = fertilityInfo.naturalEquilibrium;
                     usedFertilizer = false;
                 }
 
-                // ✅ FIXED: Calculate per-slot details with CORRECT fertility
                 const slotDetails = rotation.map(cropId => {
                     if (!cropId) return null;
 
                     const crop = availableCrops.find(c => c.id === cropId);
                     if (!crop) return null;
 
-                    // ✅ Use actualFertility (either natural equilibrium or target with fertilizer)
                     const productionPerMonth = FarmOptimizer.calculateCropYield(crop, effectiveFarm, actualFertility);
                     const waterPerDay = FarmOptimizer.calculateWaterPerDay(crop, effectiveFarm);
 
@@ -275,7 +312,6 @@ const FarmOptimizerPage = () => {
                     };
                 }).filter(s => s !== null);
 
-                // Calculate weighted averages
                 const totalRotationDays = slotDetails.reduce((sum, s) => sum + s.growthDays, 0);
                 const production = {};
                 let totalFarmWaterPerDay = 0;
@@ -290,7 +326,8 @@ const FarmOptimizerPage = () => {
                 const activeCropCount = slotDetails.length;
                 const totalRotationMonths = totalRotationDays / 30;
 
-                // Use enhanced calculation method
+                const allowedIntermediatesForCalc = constraints.allowedIntermediates;
+
                 let foodResult;
                 if (optimizationMode === 'manual') {
                     foodResult = FarmOptimizer.calculatePeopleFedManual(
@@ -304,7 +341,7 @@ const FarmOptimizerPage = () => {
                         production,
                         totalFarmWaterPerDay,
                         foodConsumptionMult,
-                        constraints.allowedIntermediates
+                        allowedIntermediatesForCalc
                     );
                 }
 
@@ -326,7 +363,7 @@ const FarmOptimizerPage = () => {
                             slotProduction,
                             0,
                             foodConsumptionMult,
-                            constraints.allowedIntermediates
+                            allowedIntermediatesForCalc
                         );
                     }
 
@@ -345,8 +382,8 @@ const FarmOptimizerPage = () => {
                     rotation,
                     production,
                     fertilityInfo,
-                    actualFertility, // ✅ Show what fertility was used for yield calculations
-                    usedFertilizer, // ✅ Did we use fertilizer?
+                    actualFertility,
+                    usedFertilizer,
                     peopleFed: foodResult.peopleFed,
                     totalWaterPerDay: foodResult.totalWaterPerDay,
                     farmWaterPerDay: totalFarmWaterPerDay,
@@ -371,7 +408,6 @@ const FarmOptimizerPage = () => {
                 });
             });
 
-            // ✅ FERTILIZER CALCULATION - Only if user wants to use fertilizer
             let fertilizerNeeds = {
                 needed: false,
                 fertilizers: [],
@@ -449,7 +485,6 @@ const FarmOptimizerPage = () => {
                 }
             }
 
-            // Combine all food categories
             const allFoodCategories = new Set();
             const categoryDetails = new Map();
             const uniqueFoods = new Set();
@@ -499,7 +534,6 @@ const FarmOptimizerPage = () => {
                 }
             });
 
-            // Calculate processing machine requirements
             const allProcessingMachines = new Map();
             let totalProcessingElectricity = 0;
             let totalProcessingWorkers = 0;
@@ -560,8 +594,6 @@ const FarmOptimizerPage = () => {
 
     const openRecipeSelectionModal = (productId) => {
         const product = ProductionCalculator.getProduct(productId);
-
-        // Use NEW method: Find foods that can be made FROM this crop
         const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
 
         if (foodPaths.length === 0) {
@@ -569,19 +601,13 @@ const FarmOptimizerPage = () => {
             return;
         }
 
-        console.log('Food paths found:', foodPaths);
-
-        // Get unique recipe chains
         const uniqueRecipeChains = new Map();
 
         foodPaths.forEach(path => {
             if (path.processingChain.length === 0) {
-                // Direct food, no processing
                 return;
             }
 
-            // Use the first recipe in the chain as the identifier
-            // (this is what the user will "select")
             const firstRecipe = path.processingChain[0];
             const chainKey = path.recipeChain.join('->');
 
@@ -613,7 +639,6 @@ const FarmOptimizerPage = () => {
         });
     };
 
-    // Add function to select recipe
     const selectProcessingRecipe = (productId, recipeId) => {
         setSelectedProcessingRecipes(prev => {
             const newMap = new Map(prev);
@@ -640,7 +665,8 @@ const FarmOptimizerPage = () => {
             ? availableFoodCrops.filter(c => constraints.allowedCrops.includes(c.id))
             : availableFoodCrops;
 
-        // ✅ FIXED: Calculate base metrics for each crop INCLUDING PROCESSING CHAINS
+        const allowedIntermediatesForCalc = constraints.allowedIntermediates;
+
         const cropMetrics = cropsToUse.map(crop => {
             const farm = effectiveFarms[0];
             if (!farm) return null;
@@ -654,30 +680,23 @@ const FarmOptimizerPage = () => {
             const waterPerDay = FarmOptimizer.calculateWaterPerDay(crop, farm);
             const fertilityPerDay = crop.fertilityPerDayPercent;
 
-            // Calculate people fed using processing chains
             const production = { [crop.output.productId]: productionPerMonth };
             const foodResult = FarmOptimizer.calculatePeopleFedWithChains(
                 production,
                 waterPerDay,
                 foodConsumptionMult,
-                constraints.allowedIntermediates
+                allowedIntermediatesForCalc
             );
 
             const peopleFedTotal = foodResult.peopleFed;
 
-            // Skip crops that don't produce food with current settings
             if (peopleFedTotal === 0) {
-                console.log(`Skipping ${crop.name} - produces 0 food with current intermediate filter`);
                 return null;
             }
 
             const monthsPerCycle = crop.growthDays / 30;
-
-            // ✅ FIXED: peopleFedPerMonth is WHILE GROWING (not averaged)
-            // The averaging happens in generateFarmConfigurations
             const peopleFedPerMonth = peopleFedTotal / monthsPerCycle;
 
-            // Get food category
             let foodCategory = null;
             if (foodResult.processingChains && foodResult.processingChains.length > 0) {
                 foodCategory = foodResult.processingChains[0].foodCategory;
@@ -688,24 +707,20 @@ const FarmOptimizerPage = () => {
                 productionPerMonth,
                 waterPerDay: foodResult.totalWaterPerDay,
                 fertilityPerDay,
-                peopleFedPerMonth, // ✅ This is per month WHILE GROWING
+                peopleFedPerMonth,
                 waterPerPerson: peopleFedPerMonth > 0 ? foodResult.totalWaterPerDay / peopleFedPerMonth : Infinity,
                 fertilityPerPerson: peopleFedPerMonth > 0 ? Math.abs(fertilityPerDay) / peopleFedPerMonth : Infinity,
                 category: foodCategory,
-                monthsPerCycle, // ✅ ADD THIS for weighted calculations
+                monthsPerCycle,
                 processingChains: foodResult.processingChains
             };
         }).filter(m => m != null);
 
-        // Check if we have any valid crops
         if (cropMetrics.length === 0) {
-            alert('No crops can produce food with current settings.\n\nSuggestion: Allow some intermediates OR select crops that produce direct food (Potato, Corn, Vegetables, Fruit).');
+            alert('No crops can produce food with current settings.\n\nSuggestion: Allow some intermediates OR select crops that produce direct food.');
             return farms.map(() => [null, null, null, null]);
         }
 
-        console.log(`Found ${cropMetrics.length} valid crops after filtering:`, cropMetrics.map(m => m.crop.name));
-
-        // Handle different optimization modes
         switch (optimizationMode) {
             case 'maxPeople':
                 return optimizeMaxPeople(cropMetrics, farms.length);
@@ -720,25 +735,16 @@ const FarmOptimizerPage = () => {
         }
     };
 
-    /**
-     * Optimize for maximum people fed
-     * Tests all combinations and finds the best setup for each farm
-     */
     const optimizeMaxPeople = (cropMetrics, farmCount) => {
-        // Generate all possible farm configurations (1-4 crops)
         const farmConfigs = generateFarmConfigurations(cropMetrics);
-
-        // Sort by efficiency (people fed per month considering rotation)
         farmConfigs.sort((a, b) => b.efficiency - a.efficiency);
 
         const rotations = [];
         const usedCrops = new Set();
 
         for (let farmIdx = 0; farmIdx < farmCount; farmIdx++) {
-            // Find best config that doesn't reuse crops (unless necessary)
             let bestConfig = null;
 
-            // First try: find config with no crop overlap
             for (const config of farmConfigs) {
                 const hasOverlap = config.crops.some(c => usedCrops.has(c.crop.id));
                 if (!hasOverlap) {
@@ -747,23 +753,19 @@ const FarmOptimizerPage = () => {
                 }
             }
 
-            // If all have overlap, just take the best
             if (!bestConfig && farmConfigs.length > 0) {
                 bestConfig = farmConfigs[0];
             }
 
             if (bestConfig) {
-                // Mark crops as used
                 bestConfig.crops.forEach(c => usedCrops.add(c.crop.id));
 
-                // Build rotation (pad with nulls to 4 slots)
                 const rotation = bestConfig.crops.map(c => c.crop.id);
                 while (rotation.length < 4) {
                     rotation.push(null);
                 }
                 rotations.push(rotation);
             } else {
-                // No crops available
                 rotations.push([null, null, null, null]);
             }
         }
@@ -771,21 +773,15 @@ const FarmOptimizerPage = () => {
         return rotations;
     };
 
-    /**
-     * Optimize for minimum water usage while meeting target population
-     */
     const optimizeMinWater = (cropMetrics, farmCount) => {
-        // Sort by water efficiency (least water per person)
         cropMetrics.sort((a, b) => a.waterPerPerson - b.waterPerPerson);
 
         const rotations = [];
 
         for (let farmIdx = 0; farmIdx < farmCount; farmIdx++) {
-            // Always add farms (don't leave empty)
             const rotation = [];
             const usedInThisRotation = new Set();
 
-            // Fill with 2 best water-efficient crops
             for (let i = 0; i < cropMetrics.length && rotation.length < 2; i++) {
                 const cropId = cropMetrics[i].crop.id;
                 if (!usedInThisRotation.has(cropId)) {
@@ -803,18 +799,12 @@ const FarmOptimizerPage = () => {
         return rotations;
     };
 
-
-    /**
-     * Optimize for minimum fertility usage while meeting target population
-     */
     const optimizeMinFertility = (cropMetrics, farmCount) => {
-        // Sort by fertility efficiency (least fertility loss per person)
         cropMetrics.sort((a, b) => a.fertilityPerPerson - b.fertilityPerPerson);
 
         const rotations = [];
 
         for (let farmIdx = 0; farmIdx < farmCount; farmIdx++) {
-            // Always add farms
             const rotation = [];
             const usedInThisRotation = new Set();
 
@@ -835,9 +825,6 @@ const FarmOptimizerPage = () => {
         return rotations;
     };
 
-    /**
-     * Optimize for maximum variety (all food categories)
-     */
     const optimizeForVariety = (cropMetrics, farmCount) => {
         const categories = ['FoodCategory_Carbs', 'FoodCategory_Protein', 'FoodCategory_Vitamins', 'FoodCategory_Treats'];
         const rotations = [];
@@ -846,9 +833,8 @@ const FarmOptimizerPage = () => {
         for (let farmIdx = 0; farmIdx < farmCount; farmIdx++) {
             const rotation = [];
 
-            // Try to fill with one crop from each category
             for (const category of categories) {
-                if (rotation.length >= 2) break; // Limit to 2 for efficiency
+                if (rotation.length >= 2) break;
 
                 const cropInCategory = cropMetrics.find(m =>
                     m.category === category &&
@@ -862,7 +848,6 @@ const FarmOptimizerPage = () => {
                 }
             }
 
-            // Fill remaining with best available
             if (rotation.length < 2) {
                 for (const metric of cropMetrics) {
                     if (rotation.length >= 2) break;
@@ -882,28 +867,22 @@ const FarmOptimizerPage = () => {
         return rotations;
     };
 
-    /**
- * ✅ FIXED: Generate all possible farm configurations (1-4 crops)
- * and calculate their efficiency with proper monoculture penalty
- */
     const generateFarmConfigurations = (cropMetrics) => {
         const configs = [];
-                
+
         for (const crop of cropMetrics) {
             configs.push({
                 crops: [crop],
-                efficiency: crop.peopleFedPerMonth, 
+                efficiency: crop.peopleFedPerMonth,
                 type: 'mono'
             });
         }
 
-        // Two-crop combinations (optimal - no penalty)
         for (let i = 0; i < cropMetrics.length; i++) {
             for (let j = i + 1; j < cropMetrics.length; j++) {
                 const crop1 = cropMetrics[i];
                 const crop2 = cropMetrics[j];
 
-                // ✅ FIXED: Weighted average based on growth time
                 const totalDays = crop1.monthsPerCycle * 30 + crop2.monthsPerCycle * 30;
                 const weight1 = (crop1.monthsPerCycle * 30) / totalDays;
                 const weight2 = (crop2.monthsPerCycle * 30) / totalDays;
@@ -917,7 +896,6 @@ const FarmOptimizerPage = () => {
             }
         }
 
-        // Three-crop combinations
         for (let i = 0; i < Math.min(cropMetrics.length, 10); i++) {
             for (let j = i + 1; j < Math.min(cropMetrics.length, 10); j++) {
                 for (let k = j + 1; k < Math.min(cropMetrics.length, 10); k++) {
@@ -925,7 +903,6 @@ const FarmOptimizerPage = () => {
                     const crop2 = cropMetrics[j];
                     const crop3 = cropMetrics[k];
 
-                    // ✅ FIXED: Weighted average
                     const totalDays = (crop1.monthsPerCycle + crop2.monthsPerCycle + crop3.monthsPerCycle) * 30;
                     const weight1 = (crop1.monthsPerCycle * 30) / totalDays;
                     const weight2 = (crop2.monthsPerCycle * 30) / totalDays;
@@ -943,7 +920,6 @@ const FarmOptimizerPage = () => {
             }
         }
 
-        // Four-crop combinations (only top combos)
         const topCrops = cropMetrics.slice(0, 6);
         for (let i = 0; i < topCrops.length; i++) {
             for (let j = i + 1; j < topCrops.length; j++) {
@@ -954,7 +930,6 @@ const FarmOptimizerPage = () => {
                         const crop3 = topCrops[k];
                         const crop4 = topCrops[l];
 
-                        // ✅ FIXED: Weighted average
                         const totalDays = (crop1.monthsPerCycle + crop2.monthsPerCycle +
                             crop3.monthsPerCycle + crop4.monthsPerCycle) * 30;
                         const weight1 = (crop1.monthsPerCycle * 30) / totalDays;
@@ -979,60 +954,13 @@ const FarmOptimizerPage = () => {
         return configs;
     };
 
-    const toggleCropFilter = (cropId) => {
-        setConstraints(prev => ({
-            ...prev,
-            allowedCrops: prev.allowedCrops.includes(cropId)
-                ? prev.allowedCrops.filter(id => id !== cropId)
-                : [...prev.allowedCrops, cropId]
-        }));
-    };
-
-    const toggleIntermediate = (productId) => {
-        setConstraints(prev => {
-            // If null (no filter), first click sets to all IDs except this one
-            if (prev.allowedIntermediates === null) {
-                // Need to get all intermediate IDs
-                const allIds = new Set();
-                availableFoodCrops.forEach(crop => {
-                    const paths = FoodChainResolver.getFoodsFromCrop(crop.output.productId);
-                    paths.forEach(path => {
-                        path.processingChain?.forEach(step => {
-                            const isFood = ProductionCalculator.foods?.some(f => f.productId === step.outputProductId);
-                            if (!isFood) {
-                                allIds.add(step.outputProductId);
-                            }
-                        });
-                    });
-                });
-
-                return {
-                    ...prev,
-                    allowedIntermediates: Array.from(allIds).filter(id => id !== productId)
-                };
-            }
-
-            // Normal toggle
-            if (prev.allowedIntermediates.includes(productId)) {
-                // Remove it
-                return {
-                    ...prev,
-                    allowedIntermediates: prev.allowedIntermediates.filter(id => id !== productId)
-                };
-            } else {
-                // Add it
-                return {
-                    ...prev,
-                    allowedIntermediates: [...prev.allowedIntermediates, productId]
-                };
-            }
-        });
-    };
-
     const addFarm = () => {
+        // Use the last farm's type, or default to first available
+        const lastFarmType = farms.length > 0 ? farms[farms.length - 1].farmId : (availableFarms[0]?.id || 'FarmT1');
+
         setFarms([...farms, {
             id: Date.now(),
-            farmId: availableFarms[0]?.id || 'FarmT1',
+            farmId: lastFarmType,
             rotation: [null, null, null, null]
         }]);
     };
@@ -1064,149 +992,494 @@ const FarmOptimizerPage = () => {
 
     return (
         <>
-            {/* Page Header */}
-            <div style={{
-                maxWidth: '1920px',
-                margin: '0 auto'
-            }}>
+            {/* Header */}
+            <div style={{ maxWidth: '1920px', margin: '0 auto' }}>
                 <div style={{
-                padding: '1.5rem 2rem',
-                backgroundColor: '#2a2a2a',
-                borderBottom: '2px solid #4a90e2',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                marginBottom: '2rem'
-            }}>
-                <h2 style={{
-                    fontSize: '2rem',
-                    fontWeight: '700',
-                    margin: 0,
-                    marginBottom: '0.5rem',
-                    background: 'linear-gradient(135deg, #4a90e2 0%, #5aa0f2 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
+                    padding: '1.5rem 2rem',
+                    backgroundColor: '#2a2a2a',
+                    borderBottom: '2px solid #4a90e2',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                    marginBottom: '2rem'
                 }}>
-                    Farm Optimizer
-                </h2>
-                <p style={{
-                    color: '#aaa',
-                    fontSize: '1rem',
-                    margin: 0
-                }}>
-                    Professional-grade crop rotation optimizer with combinatorial analysis • {ProductionCalculator.crops.length} crops available
+                    <h2 style={{
+                        fontSize: '2rem',
+                        fontWeight: '700',
+                        margin: 0,
+                        marginBottom: '0.5rem',
+                        background: 'linear-gradient(135deg, #4a90e2 0%, #5aa0f2 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                    }}>
+                        Farm Optimizer
+                    </h2>
+                    <p style={{ color: '#aaa', fontSize: '1rem', margin: 0 }}>
+                        Professional crop rotation optimizer • {ProductionCalculator.crops.length} crops • {availableFarms.length} farm types
                     </p>
                 </div>
             </div>
 
+            {/* Main Content */}
             <div style={{ maxWidth: '1920px', margin: '0 auto', padding: '0 2rem 2rem', minHeight: 'calc(100vh - 300px)' }}>
-                {/* Configuration Section */}
-            <div style={{
-                backgroundColor: '#2a2a2a',
-                padding: '2rem',
-                borderRadius: '10px',
-                marginBottom: '2rem',
-                border: '1px solid #444',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
-            }}>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', fontWeight: '700' }}>
-                    Configuration
-                </h3>
+                <div style={{
+                    backgroundColor: '#2a2a2a',
+                    padding: '1.5rem',
+                    borderRadius: '8px',
+                    marginBottom: '2rem',
+                    border: '1px solid #444',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                }}>
+                    {/* Mode Selector */}
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label style={{
+                            display: 'block',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            color: '#aaa',
+                            marginBottom: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                        }}>
+                            Optimization Mode
+                        </label>
 
-                {/* Optimization Mode Selector */}
-                <div style={{ marginBottom: '2rem' }}>
-                    <label style={{
-                        display: 'block',
-                        fontSize: '1.1rem',
-                        fontWeight: '600',
-                        color: '#ddd',
-                        marginBottom: '1rem'
-                    }}>
-                        Optimization Mode
-                    </label>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                            gap: '0.75rem'
+                        }}>
+                            {[
+                                { mode: 'manual', icon: 'AllCategory', label: 'Manual' },
+                                { mode: 'maxPeople', icon: 'Population', label: 'Max People' },
+                                { mode: 'minWater', icon: 'SoilMoisture', label: 'Min Water' },
+                                { mode: 'minFertility', icon: 'Fertility', label: 'Min Fertility' },
+                                { mode: 'maxVariety', icon: 'DoNotCopy', label: 'Max Variety' }
+                            ].map(opt => {
+                                const iconSrc = getGeneralIcon(opt.icon);
 
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '1rem'
-                    }}>
-                        {[
-                            { mode: 'manual', label: '✋ Manual', desc: 'Pick crops yourself' },
-                            { mode: 'maxPeople', label: '👥 Max People', desc: 'Most people fed per month' },
-                            { mode: 'minWater', label: '💧 Min Water', desc: 'Least water for target' },
-                            { mode: 'minFertility', label: '🌱 Min Fertility', desc: 'Least fertility for target' },
-                            { mode: 'maxVariety', label: '🌈 Max Variety', desc: 'All food categories' }
-                        ].map(opt => (
-                            <button
-                                key={opt.mode}
-                                onClick={() => setOptimizationMode(opt.mode)}
-                                style={{
-                                    padding: '1rem',
-                                    backgroundColor: optimizationMode === opt.mode ? '#2a4a6a' : '#1a1a1a',
-                                    border: optimizationMode === opt.mode ? '2px solid #4a90e2' : '1px solid #333',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                    textAlign: 'left'
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (optimizationMode !== opt.mode) {
-                                        e.currentTarget.style.backgroundColor = '#252525';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (optimizationMode !== opt.mode) {
-                                        e.currentTarget.style.backgroundColor = '#1a1a1a';
-                                    }
-                                }}
-                            >
-                                <div style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '0.25rem', color: '#fff' }}>
-                                    {opt.label}
-                                </div>
-                                <div style={{ fontSize: '0.8rem', color: '#888' }}>
-                                    {opt.desc}
-                                </div>
-                            </button>
-                        ))}
+                                return (
+                                    <button
+                                        key={opt.mode}
+                                        onClick={() => handleModeChange(opt.mode)}
+                                        style={{
+                                            padding: '0.75rem',
+                                            backgroundColor: optimizationMode === opt.mode ? '#4a90e2' : '#1a1a1a',
+                                            border: optimizationMode === opt.mode ? '2px solid #4a90e2' : '2px solid #333',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s ease',
+                                            fontWeight: '600',
+                                            fontSize: '0.9rem',
+                                            color: optimizationMode === opt.mode ? '#fff' : '#ddd',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '0.5rem'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (optimizationMode !== opt.mode) {
+                                                e.currentTarget.style.backgroundColor = '#252525';
+                                                e.currentTarget.style.borderColor = '#4a90e2';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (optimizationMode !== opt.mode) {
+                                                e.currentTarget.style.backgroundColor = '#1a1a1a';
+                                                e.currentTarget.style.borderColor = '#333';
+                                            }
+                                        }}
+                                    >
+                                        {iconSrc && (
+                                            <img
+                                                src={iconSrc}
+                                                alt={opt.label}
+                                                style={{
+                                                    width: '18px',
+                                                    height: '18px',
+                                                    objectFit: 'contain',
+                                                    filter: optimizationMode === opt.mode ? 'brightness(1.2)' : 'brightness(0.9)'
+                                                }}
+                                            />
+                                        )}
+                                        <span>{opt.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
 
-                {/* Constraints */}
-                {optimizationMode !== 'manual' && (
+                    {/* Collapsible Constraints Section */}
                     <div style={{
-                        marginBottom: '2rem',
-                        padding: '1.5rem',
+                        marginBottom: '1.5rem',
                         backgroundColor: '#1a1a1a',
-                        borderRadius: '8px',
-                        border: '1px solid #333'
+                        borderRadius: '6px',
+                        border: '1px solid #333',
+                        overflow: 'hidden'
                     }}>
-                            <h4 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#ddd', marginBottom: '1rem' }}>
-                                Constraints
-                            </h4>
+                        <button
+                            onClick={() => setConstraintsExpanded(!constraintsExpanded)}
+                            style={{
+                                width: '100%',
+                                padding: '1rem 1.25rem',
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                transition: 'background-color 0.15s ease'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#252525'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <span style={{
+                                    fontSize: '1.2rem',
+                                    transform: constraintsExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.2s ease',
+                                    color: '#4a90e2'
+                                }}>
+                                    ▶
+                                </span>
+                                <span style={{ fontSize: '0.95rem', fontWeight: '600', color: '#ddd' }}>
+                                    Constraints
+                                </span>
+                                <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                                    {constraints.allowedFarmTypes.length === 0 && constraints.allowedCrops.length === 0 && constraints.allowedIntermediates === null
+                                        ? '(All enabled)'
+                                        : '(Filters active)'}
+                                </span>
+                            </div>
+                            <span style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                {constraintsExpanded ? 'Collapse' : 'Expand'}
+                            </span>
+                        </button>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-                                {/* Use Fertilizer Toggle */}
+                        {constraintsExpanded && (
+                            <div style={{
+                                padding: '1.25rem',
+                                borderTop: '1px solid #333',
+                                animation: 'slideDown 0.2s ease'
+                            }}>
+                                {/* Tab Navigation */}
+                                <div style={{
+                                    display: 'flex',
+                                    gap: '0.5rem',
+                                    marginBottom: '1rem',
+                                    borderBottom: '1px solid #333',
+                                    paddingBottom: '0.5rem'
+                                }}>
+                                    {[
+                                        { id: 'farms', label: 'Farm Types', count: constraints.allowedFarmTypes.length === 0 ? availableFarms.length : constraints.allowedFarmTypes.length },
+                                        { id: 'intermediates', label: 'Intermediates', count: constraints.allowedIntermediates === null ? allIntermediates.length : constraints.allowedIntermediates.length },
+                                        { id: 'crops', label: 'Crops', count: constraints.allowedCrops.length === 0 ? availableFoodCrops.length : constraints.allowedCrops.length }
+                                    ].map(tab => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveConstraintTab(tab.id)}
+                                            style={{
+                                                padding: '0.5rem 1rem',
+                                                backgroundColor: activeConstraintTab === tab.id ? '#4a90e2' : 'transparent',
+                                                border: activeConstraintTab === tab.id ? '1px solid #4a90e2' : '1px solid #444',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.85rem',
+                                                fontWeight: '600',
+                                                color: activeConstraintTab === tab.id ? '#fff' : '#aaa',
+                                                transition: 'all 0.15s ease',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.5rem'
+                                            }}
+                                        >
+                                            <span>{tab.label}</span>
+                                            <span style={{
+                                                padding: '0.125rem 0.5rem',
+                                                backgroundColor: activeConstraintTab === tab.id ? 'rgba(255,255,255,0.2)' : '#333',
+                                                borderRadius: '10px',
+                                                fontSize: '0.75rem'
+                                            }}>
+                                                {tab.count}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Tab Content */}
+                                <div style={{
+                                    maxHeight: '250px',
+                                    overflowY: 'auto',
+                                    padding: '0.5rem',
+                                    backgroundColor: '#2a2a2a',
+                                    borderRadius: '4px'
+                                }}>
+                                    {activeConstraintTab === 'farms' && (
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                            {availableFarms.slice().sort((a, b) => {
+                                                const getTier = (farm) => {
+                                                    const match = farm.id.match(/T(\d+)/);
+                                                    return match ? parseInt(match[1]) : 0;
+                                                };
+                                                return getTier(a) - getTier(b);
+                                            }).map(farm => {
+                                                const farmIcon = getEntityIcon(farm);
+                                                const isAllowed = constraints.allowedFarmTypes.length === 0 || constraints.allowedFarmTypes.includes(farm.id);
+
+                                                return (
+                                                    <button
+                                                        key={farm.id}
+                                                        onClick={() => toggleFarmType(farm.id)}
+                                                        title={farm.name}
+                                                        style={{
+                                                            padding: '0.5rem',
+                                                            backgroundColor: isAllowed ? 'rgba(74, 144, 226, 0.15)' : 'transparent',
+                                                            border: isAllowed ? '2px solid #4a90e2' : '2px solid #444',
+                                                            borderRadius: '4px',
+                                                            cursor: 'pointer',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            transition: 'all 0.15s ease',
+                                                            opacity: isAllowed ? 1 : 0.5,
+                                                            width: '56px',
+                                                            height: '56px'
+                                                        }}
+                                                    >
+                                                        {farmIcon && (
+                                                            <img
+                                                                src={farmIcon}
+                                                                alt={farm.name}
+                                                                style={{
+                                                                    width: '40px',
+                                                                    height: '40px',
+                                                                    objectFit: 'contain',
+                                                                    filter: isAllowed ? 'none' : 'grayscale(100%)'
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
+                                    {activeConstraintTab === 'intermediates' && (
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                            {allIntermediates.map(product => {
+                                                const productIcon = getProductIcon(product);
+                                                const isAllowed = constraints.allowedIntermediates === null || (constraints.allowedIntermediates.length > 0 && constraints.allowedIntermediates.includes(product.id));
+
+                                                return (
+                                                    <button
+                                                        key={product.id}
+                                                        onClick={() => toggleIntermediate(product.id)}
+                                                        title={product.name}
+                                                        style={{
+                                                            padding: '0.5rem',
+                                                            backgroundColor: isAllowed ? 'rgba(255, 215, 0, 0.15)' : 'transparent',
+                                                            border: isAllowed ? '2px solid #FFD700' : '2px solid #444',
+                                                            borderRadius: '4px',
+                                                            cursor: 'pointer',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            transition: 'all 0.15s ease',
+                                                            opacity: isAllowed ? 1 : 0.5,
+                                                            width: '56px',
+                                                            height: '56px'
+                                                        }}
+                                                    >
+                                                        {productIcon && (
+                                                            <img
+                                                                src={productIcon}
+                                                                alt={product.name}
+                                                                style={{
+                                                                    width: '40px',
+                                                                    height: '40px',
+                                                                    objectFit: 'contain',
+                                                                    filter: isAllowed ? 'none' : 'grayscale(100%)'
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
+                                    {activeConstraintTab === 'crops' && (
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                            {availableFoodCrops.map(crop => {
+                                                const cropIcon = getCropIcon(crop);
+                                                const isAllowed = constraints.allowedCrops.length === 0 || constraints.allowedCrops.includes(crop.id);
+
+                                                return (
+                                                    <button
+                                                        key={crop.id}
+                                                        onClick={() => toggleCropFilter(crop.id)}
+                                                        title={crop.name}
+                                                        style={{
+                                                            padding: '0.5rem',
+                                                            backgroundColor: isAllowed ? 'rgba(80, 200, 120, 0.15)' : 'transparent',
+                                                            border: isAllowed ? '2px solid #50C878' : '2px solid #444',
+                                                            borderRadius: '4px',
+                                                            cursor: 'pointer',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            transition: 'all 0.15s ease',
+                                                            opacity: isAllowed ? 1 : 0.5,
+                                                            width: '56px',
+                                                            height: '56px'
+                                                        }}
+                                                    >
+                                                        {cropIcon && (
+                                                            <img
+                                                                src={cropIcon}
+                                                                alt={crop.name}
+                                                                style={{
+                                                                    width: '40px',
+                                                                    height: '40px',
+                                                                    objectFit: 'contain',
+                                                                    filter: isAllowed ? 'none' : 'grayscale(100%)'
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Contextual Settings (Inline Pills) */}
+                    {optimizationMode !== 'manual' && (
+                        <div style={{
+                            marginBottom: '1.5rem',
+                            padding: '1rem',
+                            backgroundColor: '#1a1a1a',
+                            borderRadius: '6px',
+                            border: '1px solid #333'
+                        }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                                 <div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                    <label style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>
+                                        Farms
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="20"
+                                        value={farms.length}
+                                        onChange={(e) => {
+                                            const count = parseInt(e.target.value) || 1;
+                                            const newFarms = [];
+                                            for (let i = 0; i < count; i++) {
+                                                newFarms.push(farms[i] || {
+                                                    id: Date.now() + i,
+                                                    farmId: availableFarms[0]?.id || 'FarmT1',
+                                                    rotation: [null, null, null, null]
+                                                });
+                                            }
+                                            setFarms(newFarms);
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.6rem',
+                                            backgroundColor: '#2a2a2a',
+                                            color: '#fff',
+                                            border: '1px solid #444',
+                                            borderRadius: '4px',
+                                            fontSize: '0.9rem'
+                                        }}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <input
                                             type="checkbox"
                                             checked={constraints.useFertilizer}
                                             onChange={(e) => setConstraints({ ...constraints, useFertilizer: e.target.checked })}
-                                            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                                            style={{ width: '16px', height: '16px' }}
                                         />
-                                        <span style={{ fontSize: '0.9rem', color: '#ddd' }}>Use Fertilizer</span>
+                                        Use Fertilizer
                                     </label>
-                                    <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem', marginLeft: '28px' }}>
-                                        {constraints.useFertilizer
-                                            ? 'Optimizer can use fertilizer'
-                                            : 'Natural fertility only'}
-                                    </div>
+                                    {constraints.useFertilizer && (
+                                        <div>
+                                            <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.25rem' }}>
+                                                Target: {constraints.targetFertility}%
+                                            </div>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="140"
+                                                step="10"
+                                                value={constraints.targetFertility}
+                                                onChange={(e) => setConstraints({ ...constraints, targetFertility: parseInt(e.target.value) })}
+                                                style={{ width: '100%' }}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* Target Fertility (only if using fertilizer) */}
-                                {constraints.useFertilizer && (
+                                {(optimizationMode === 'minWater' || optimizationMode === 'minFertility') && (
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                                            Target Fertility: {constraints.targetFertility}%
+                                        <label style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>
+                                            Target Population
                                         </label>
+                                        <input
+                                            type="number"
+                                            value={constraints.targetPopulation}
+                                            onChange={(e) => setConstraints({ ...constraints, targetPopulation: parseInt(e.target.value) || 0 })}
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.6rem',
+                                                backgroundColor: '#2a2a2a',
+                                                color: '#fff',
+                                                border: '1px solid #444',
+                                                borderRadius: '4px',
+                                                fontSize: '0.9rem'
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Manual Mode - Fertility & Farms */}
+                    {optimizationMode === 'manual' && (
+                        <>
+                            <div style={{
+                                marginBottom: '1.5rem',
+                                padding: '1rem',
+                                backgroundColor: '#1a1a1a',
+                                borderRadius: '6px',
+                                border: '1px solid #333'
+                            }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={constraints.useFertilizer}
+                                                onChange={(e) => setConstraints({ ...constraints, useFertilizer: e.target.checked })}
+                                                style={{ width: '16px', height: '16px' }}
+                                            />
+                                            Use Fertilizer
+                                        </label>
+                                        <div style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.25rem', marginLeft: '22px' }}>
+                                            {constraints.useFertilizer ? '✅ Enabled' : '⚠️ Natural only'}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>
+                                            Target Fertility: {constraints.targetFertility}%
+                                        </div>
                                         <input
                                             type="range"
                                             min="0"
@@ -1216,339 +1489,278 @@ const FarmOptimizerPage = () => {
                                             onChange={(e) => setConstraints({ ...constraints, targetFertility: parseInt(e.target.value) })}
                                             style={{ width: '100%' }}
                                         />
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#666', marginTop: '0.25rem' }}>
-                                            <span>0%</span>
-                                            <span>140%</span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Target Population (only for minWater/minFertility modes) */}
-                                {(optimizationMode === 'minWater' || optimizationMode === 'minFertility') && (
-                                    <div>
-                                    <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                                        Target Population
-                                    </label>
-                                    <input
-                                        type="number"
-                                        value={constraints.targetPopulation}
-                                        onChange={(e) => setConstraints({ ...constraints, targetPopulation: parseInt(e.target.value) || 0 })}
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.75rem',
-                                            backgroundColor: '#2a2a2a',
-                                            color: '#fff',
-                                            border: '2px solid #555',
-                                            borderRadius: '6px',
-                                            fontSize: '1rem'
-                                        }}
-                                    />
-                                    </div>
-                                )}
-
-                                {/* Allowed Crops */}
-                                <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                                    Allowed Crops
-                                </label>
-                                <button
-                                    onClick={() => setCropFilterModal(true)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.75rem',
-                                        backgroundColor: '#2a2a2a',
-                                        color: constraints.allowedCrops.length === 0 ? '#888' : '#4a90e2',
-                                        border: '2px solid #555',
-                                        borderRadius: '6px',
-                                        fontSize: '1rem',
-                                        cursor: 'pointer',
-                                        fontWeight: '600'
-                                    }}
-                                >
-                                    {constraints.allowedCrops.length === 0
-                                        ? 'All Crops'
-                                        : `${constraints.allowedCrops.length} Selected`}
-                                </button>
-                                </div>
-
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                                        Allowed Intermediates
-                                    </label>
-                                    <button
-                                        onClick={() => setIntermediateFilterModal(true)}
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.75rem',
-                                            backgroundColor: '#2a2a2a',
-                                            color: constraints.allowedIntermediates === null ? '#888' : '#4a90e2',
-                                            border: '2px solid #555',
-                                            borderRadius: '6px',
-                                            fontSize: '1rem',
-                                            cursor: 'pointer',
-                                            fontWeight: '600'
-                                        }}
-                                    >
-                                        {constraints.allowedIntermediates === null
-                                            ? 'All Intermediates'
-                                            : `${constraints.allowedIntermediates.length} Selected`}
-                                    </button>
-                                </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Farm Selection (manual mode) */}
-                {optimizationMode === 'manual' && (
-                    <div style={{ marginBottom: '2rem' }}>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '1rem'
-                        }}>
-                            <label style={{ fontSize: '1.1rem', fontWeight: '600', color: '#ddd' }}>
-                                Farms ({farms.length})
-                            </label>
-                            <button
-                                onClick={addFarm}
-                                style={{
-                                    padding: '0.5rem 1.5rem',
-                                    backgroundColor: '#4a90e2',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    fontSize: '0.95rem',
-                                    cursor: 'pointer',
-                                    fontWeight: '600',
-                                    transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5aa0f2'}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
-                            >
-                                + Add Farm
-                            </button>
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            {farms.map((farm, farmIndex) => (
-                                <FarmConfigCard
-                                    key={farm.id}
-                                    farm={farm}
-                                    farmIndex={farmIndex}
-                                    availableFarms={availableFarms}
-                                    availableCrops={availableCrops}
-                                    onRemove={removeFarm}
-                                    onUpdateType={updateFarmType}
-                                    onOpenCropModal={openCropModal}
-                                    canRemove={farms.length > 1}
-                                    openRecipeSelectionModal={openRecipeSelectionModal}
-                                    selectedProcessingRecipes={selectedProcessingRecipes}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                    )}
-
-                    {/* Manual mode - Fertility Settings */}
-                    {optimizationMode === 'manual' && (
-                        <div style={{
-                            marginBottom: '2rem',
-                            padding: '1.5rem',
-                            backgroundColor: '#1a1a1a',
-                            borderRadius: '8px',
-                            border: '1px solid #333'
-                        }}>
-                            <h4 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#ddd', marginBottom: '1rem' }}>
-                                Fertility Settings
-                            </h4>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                {/* Use Fertilizer Toggle */}
-                                <div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={constraints.useFertilizer}
-                                            onChange={(e) => setConstraints({ ...constraints, useFertilizer: e.target.checked })}
-                                            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-                                        />
-                                        <span style={{ fontSize: '0.9rem', color: '#ddd' }}>Use Fertilizer</span>
-                                    </label>
-                                    <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem', marginLeft: '28px' }}>
-                                        {constraints.useFertilizer
-                                            ? '✅ Calculations include fertilizer usage'
-                                            : '⚠️ Using natural fertility only'}
-                                    </div>
-                                </div>
-
-                                {/* Target Fertility Slider */}
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                                        Target Fertility: {constraints.targetFertility}%
-                                    </label>
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="140"
-                                        step="10"
-                                        value={constraints.targetFertility}
-                                        onChange={(e) => setConstraints({ ...constraints, targetFertility: parseInt(e.target.value) })}
-                                        style={{ width: '100%' }}
-                                    />
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#666', marginTop: '0.25rem' }}>
-                                        <span>0%</span>
-                                        <span>140%</span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginBottom: '0.75rem'
+                                }}>
+                                    <label style={{ fontSize: '0.9rem', fontWeight: '600', color: '#ddd' }}>
+                                        Farms ({farms.length})
+                                    </label>
+                                    <button
+                                        onClick={addFarm}
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            backgroundColor: '#4a90e2',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            fontSize: '0.85rem',
+                                            cursor: 'pointer',
+                                            fontWeight: '600',
+                                            transition: 'all 0.15s'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5aa0f2'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
+                                    >
+                                        + Add Farm
+                                    </button>
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {farms.map((farm, farmIndex) => (
+                                        <FarmConfigCard
+                                            key={farm.id}
+                                            farm={farm}
+                                            farmIndex={farmIndex}
+                                            availableFarms={availableFarms}
+                                            availableCrops={availableCrops}
+                                            onRemove={removeFarm}
+                                            onUpdateType={updateFarmType}
+                                            onOpenCropModal={openCropModal}
+                                            canRemove={farms.length > 1}
+                                            openRecipeSelectionModal={openRecipeSelectionModal}
+                                            selectedProcessingRecipes={selectedProcessingRecipes}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </>
                     )}
 
-                {/* Farm count selector for optimization modes */}
-                {optimizationMode !== 'manual' && (
-                    <div style={{ marginBottom: '2rem' }}>
+                    {/* Research - Always Visible, Compact Horizontal */}
+                    <div style={{ marginBottom: '1.5rem' }}>
                         <label style={{
                             display: 'block',
-                            fontSize: '1.1rem',
+                            fontSize: '0.9rem',
                             fontWeight: '600',
-                            color: '#ddd',
-                            marginBottom: '1rem'
+                            color: '#aaa',
+                            marginBottom: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
                         }}>
-                            Number of Farms
+                            Research Bonuses
                         </label>
-                        <input
-                            type="number"
-                            min="1"
-                            max="20"
-                            value={farms.length}
-                            onChange={(e) => {
-                                const count = parseInt(e.target.value) || 1;
-                                const newFarms = [];
-                                for (let i = 0; i < count; i++) {
-                                    newFarms.push(farms[i] || {
-                                        id: Date.now() + i,
-                                        farmId: availableFarms[0]?.id || 'FarmT1',
-                                        rotation: [null, null, null, null]
-                                    });
-                                }
-                                setFarms(newFarms);
-                            }}
-                            style={{
-                                width: '200px',
-                                padding: '0.75rem',
+
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                            gap: '1rem'
+                        }}>
+                            <div style={{
+                                padding: '0.75rem 1rem',
                                 backgroundColor: '#1a1a1a',
-                                color: '#fff',
-                                border: '2px solid #555',
                                 borderRadius: '6px',
-                                fontSize: '1rem'
-                            }}
-                        />
+                                border: '1px solid #333'
+                            }}>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    marginBottom: '0.5rem'
+                                }}>
+                                    <span style={{ color: '#ddd', fontSize: '0.85rem' }}>Crop Yield</span>
+                                    <span style={{ color: '#4a90e2', fontWeight: '700', fontSize: '0.85rem' }}>
+                                        +{research.cropYield}%
+                                    </span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="250"
+                                    value={research.cropYield}
+                                    onChange={(e) => setResearch({ ...research, cropYield: parseInt(e.target.value) })}
+                                    style={{ width: '100%' }}
+                                />
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    fontSize: '0.7rem',
+                                    color: '#666',
+                                    marginTop: '0.25rem'
+                                }}>
+                                    <span>0</span>
+                                    <span>250</span>
+                                </div>
+                            </div>
+
+                            <div style={{
+                                padding: '0.75rem 1rem',
+                                backgroundColor: '#1a1a1a',
+                                borderRadius: '6px',
+                                border: '1px solid #333'
+                            }}>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    marginBottom: '0.5rem'
+                                }}>
+                                    <span style={{ color: '#ddd', fontSize: '0.85rem' }}>Water Saver</span>
+                                    <span style={{ color: '#50C878', fontWeight: '700', fontSize: '0.85rem' }}>
+                                        -{research.waterReduction}%
+                                    </span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="40"
+                                    value={research.waterReduction}
+                                    onChange={(e) => setResearch({ ...research, waterReduction: parseInt(e.target.value) })}
+                                    style={{ width: '100%' }}
+                                />
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    fontSize: '0.7rem',
+                                    color: '#666',
+                                    marginTop: '0.25rem'
+                                }}>
+                                    <span>0</span>
+                                    <span>40</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Calculate Button */}
+                    <button
+                        onClick={handleCalculate}
+                        disabled={loading || farms.length === 0}
+                        style={{
+                            width: '100%',
+                            padding: '1rem',
+                            backgroundColor: loading || farms.length === 0 ? '#555' : '#4a90e2',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '1.1rem',
+                            cursor: loading || farms.length === 0 ? 'not-allowed' : 'pointer',
+                            fontWeight: '700',
+                            transition: 'all 0.2s',
+                            boxShadow: loading || farms.length === 0 ? 'none' : '0 4px 12px rgba(74, 144, 226, 0.4)'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (!loading && farms.length > 0) {
+                                e.currentTarget.style.backgroundColor = '#5aa0f2';
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (!loading && farms.length > 0) {
+                                e.currentTarget.style.backgroundColor = '#4a90e2';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }
+                        }}
+                    >
+                        {loading ? '⏳ Analyzing...' : optimizationMode === 'manual' ? '🚀 Calculate Production' : '🎯 Optimize & Calculate'}
+                    </button>
+                </div>
+
+                {/* Results Section */}
+                {results && (
+                    <ResultsSection results={results} />
                 )}
 
-                {/* Research Sliders */}
-                <div style={{ marginBottom: '2rem' }}>
-                    <label style={{
-                        display: 'block',
-                        fontSize: '1.1rem',
-                        fontWeight: '600',
-                        color: '#ddd',
-                        marginBottom: '1rem'
-                    }}>
-                        Incremental Research
-                    </label>
-
+                {/* Mode Change Confirmation Modal */}
+                {showModeConfirm && (
                     <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '1.5rem'
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 2000,
+                        padding: '2rem'
                     }}>
-                        <ResearchSlider
-                            label="Crop Yield Increase"
-                            value={research.cropYield}
-                            max={250}
-                            color="#4a90e2"
-                            onChange={(val) => setResearch({ ...research, cropYield: val })}
-                        />
-                        <ResearchSlider
-                            label="Water Saver"
-                            value={research.waterReduction}
-                            max={40}
-                            color="#50C878"
-                            isNegative
-                            onChange={(val) => setResearch({ ...research, waterReduction: val })}
-                        />
+                        <div style={{
+                            backgroundColor: '#2a2a2a',
+                            borderRadius: '8px',
+                            padding: '2rem',
+                            maxWidth: '500px',
+                            width: '100%',
+                            border: '2px solid #4a90e2',
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
+                        }}>
+                            <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '1rem', color: '#fff' }}>
+                                ⚠️ Switch Mode?
+                            </h3>
+                            <p style={{ fontSize: '0.95rem', color: '#ddd', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+                                You have crops configured in manual mode. Switching to optimization mode will use the optimizer's crop selection instead.
+                            </p>
+                            <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>
+                                Your manual configuration will be preserved if you switch back.
+                            </p>
+                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                                <button
+                                    onClick={cancelModeChange}
+                                    style={{
+                                        padding: '0.75rem 1.5rem',
+                                        backgroundColor: '#444',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        fontSize: '0.9rem',
+                                        cursor: 'pointer',
+                                        fontWeight: '600',
+                                        transition: 'all 0.15s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#555'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#444'}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmModeChange}
+                                    style={{
+                                        padding: '0.75rem 1.5rem',
+                                        backgroundColor: '#4a90e2',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        fontSize: '0.9rem',
+                                        cursor: 'pointer',
+                                        fontWeight: '600',
+                                        transition: 'all 0.15s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5aa0f2'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
+                                >
+                                    Switch Mode
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    </div>
-
-                {/* Calculate Button */}
-                <button
-                    onClick={handleCalculate}
-                    disabled={loading || farms.length === 0}
-                    style={{
-                        width: '100%',
-                        padding: '1.2rem',
-                        backgroundColor: loading || farms.length === 0 ? '#555' : '#4a90e2',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '1.2rem',
-                        cursor: loading || farms.length === 0 ? 'not-allowed' : 'pointer',
-                        fontWeight: '700',
-                        transition: 'all 0.3s',
-                        boxShadow: loading || farms.length === 0 ? 'none' : '0 4px 12px rgba(74, 144, 226, 0.4)'
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!loading && farms.length > 0) {
-                            e.currentTarget.style.backgroundColor = '#5aa0f2';
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!loading && farms.length > 0) {
-                            e.currentTarget.style.backgroundColor = '#4a90e2';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                        }
-                    }}
-                >
-                    {loading ? '⏳ Analyzing combinations...' : optimizationMode === 'manual' ? '🚀 Calculate Production' : '🎯 Optimize & Calculate'}
-                </button>
-            </div>
-
-            {/* Results Section */}
-            {results && (
-                <ResultsSection results={results} />
-            )}
-
-            {/* Modals */}
-            {cropModal.open && (
-                <CropSelectionModal
-                    crops={availableCrops}
-                    onSelect={selectCrop}
-                    onClose={() => setCropModal({ open: false, farmIndex: null, slotIndex: null })}
-                />
                 )}
 
-                {cropFilterModal && (
-                    <CropFilterModal
-                        crops={availableFoodCrops}
-                        selectedCrops={constraints.allowedCrops}
-                        onToggle={toggleCropFilter}
-                        onClose={() => setCropFilterModal(false)}
+                {/* Crop Selection Modal */}
+                {cropModal.open && (
+                    <CropSelectionModal
+                        crops={availableCrops}
+                        onSelect={selectCrop}
+                        onClose={() => setCropModal({ open: false, farmIndex: null, slotIndex: null })}
                     />
                 )}
 
-                {intermediateFilterModal && (
-                    <IntermediateFilterModal
-                        onClose={() => setIntermediateFilterModal(false)}
-                        availableFoodCrops={availableFoodCrops}
-                        constraints={constraints}
-                        onToggle={toggleIntermediate}
-                    />
-                )}
-
-                {/* Recipe Selection Modal for Manual Mode */}
+                {/* Recipe Selection Modal */}
                 <RecipeSelectionModal
                     modal={recipeSelectionModal}
                     onSelect={selectProcessingRecipe}
@@ -1556,400 +1768,24 @@ const FarmOptimizerPage = () => {
                     selectedProcessingRecipes={selectedProcessingRecipes}
                 />
             </div>
+
+            <style>{`
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            `}</style>
         </>
     );
 };
 
-const IntermediateFilterModal = ({ onClose, availableFoodCrops, constraints, onToggle }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-
-    const allIntermediates = new Set();
-    availableFoodCrops.forEach(crop => {
-        const paths = FoodChainResolver.getFoodsFromCrop(crop.output.productId);
-        paths.forEach(path => {
-            path.processingChain?.forEach(step => {
-                const product = ProductionCalculator.getProduct(step.outputProductId);
-                const isFood = ProductionCalculator.foods?.some(f => f.productId === step.outputProductId);
-                if (!isFood && product) {
-                    allIntermediates.add(product);
-                }
-            });
-        });
-    });
-
-    const intermediatesList = Array.from(allIntermediates).sort((a, b) => a.name.localeCompare(b.name));
-
-    const filteredIntermediates = intermediatesList.filter(product => {
-        if (!searchTerm) return true;
-        return product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    });
-
-    const isAllowed = (productId) => {
-        // null = no filter, all allowed
-        if (constraints.allowedIntermediates === null) return true;
-        // Empty array = none allowed
-        if (constraints.allowedIntermediates.length === 0) return false;
-        // Otherwise check if it's in the list
-        return constraints.allowedIntermediates.includes(productId);
-    };
-
-    return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '2rem'
-        }}>
-            <div style={{
-                backgroundColor: '#2a2a2a',
-                borderRadius: '12px',
-                padding: '2rem',
-                maxWidth: '800px',
-                width: '100%',
-                maxHeight: '80vh',
-                overflow: 'auto',
-                border: '2px solid #444'
-            }}>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '1.5rem'
-                }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>
-                        Filter Allowed Intermediates
-                    </h3>
-                    <button
-                        onClick={onClose}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            backgroundColor: '#4a90e2',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontWeight: '600'
-                        }}
-                    >
-                        Done
-                    </button>
-                </div>
-
-                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#1a1a1a', borderRadius: '6px' }}>
-                    <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                        💡 Click to exclude ingredients you don't have (e.g., Meat, Eggs)
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: '#666' }}>
-                        {constraints.allowedIntermediates === null
-                            ? `All ${intermediatesList.length} intermediates allowed (no filter)`
-                            : constraints.allowedIntermediates.length === 0
-                                ? `All ${intermediatesList.length} intermediates excluded (none allowed)`
-                                : `${constraints.allowedIntermediates.length} allowed • ${intermediatesList.length - constraints.allowedIntermediates.length} excluded`
-                        }
-                    </div>
-                </div>
-
-                <input
-                    type="text"
-                    placeholder="Search intermediates..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        backgroundColor: '#1a1a1a',
-                        color: '#fff',
-                        border: '2px solid #555',
-                        borderRadius: '6px',
-                        fontSize: '1rem',
-                        marginBottom: '1.5rem'
-                    }}
-                />
-
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                    gap: '1rem'
-                }}>
-                    {filteredIntermediates.map(product => {
-                        const allowed = isAllowed(product.id);
-                        const icon = getProductIcon(product);
-
-                        return (
-                            <button
-                                key={product.id}
-                                onClick={() => onToggle(product.id)}
-                                style={{
-                                    padding: '1rem',
-                                    backgroundColor: allowed ? '#2a4a6a' : '#1a1a1a',
-                                    border: allowed ? '2px solid #4a90e2' : '2px solid #444',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
-                                    transition: 'all 0.2s',
-                                    position: 'relative',
-                                    opacity: allowed ? 1 : 0.5
-                                }}
-                            >
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '0.5rem',
-                                    right: '0.5rem',
-                                    fontSize: '1.2rem',
-                                    color: allowed ? '#4a90e2' : '#ff6b6b'
-                                }}>
-                                    {allowed ? '✓' : '✕'}
-                                </div>
-                                {icon && (
-                                    <img
-                                        src={icon}
-                                        alt={product.name}
-                                        style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            objectFit: 'contain'
-                                        }}
-                                    />
-                                )}
-                                <div style={{
-                                    fontSize: '0.9rem',
-                                    fontWeight: '700',
-                                    color: '#fff',
-                                    textAlign: 'center'
-                                }}>
-                                    {product.name}
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-        </div>
-    );
-};
-
 const FarmConfigCard = ({ farm, farmIndex, availableFarms, availableCrops, onRemove, onUpdateType, onOpenCropModal, canRemove, openRecipeSelectionModal, selectedProcessingRecipes }) => {
-    return (
-        <div style={{
-            padding: '1.5rem',
-            backgroundColor: '#1a1a1a',
-            borderRadius: '8px',
-            border: '1px solid #333'
-        }}>
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '1rem'
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{
-                        fontSize: '1rem',
-                        fontWeight: '700',
-                        color: '#4a90e2'
-                    }}>
-                        Farm #{farmIndex + 1}
-                    </div>
-
-                    <select
-                        value={farm.farmId}
-                        onChange={(e) => onUpdateType(farm.id, e.target.value)}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            backgroundColor: '#333',
-                            color: 'white',
-                            border: '2px solid #555',
-                            borderRadius: '6px',
-                            fontSize: '0.95rem',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        {availableFarms.length > 0 ? (
-                            availableFarms.map(f => (
-                                <option key={f.id} value={f.id}>
-                                    {f.name}
-                                </option>
-                            ))
-                        ) : (
-                            <option value="">No farms available</option>
-                        )}
-                    </select>
-                </div>
-
-                <button
-                    onClick={() => onRemove(farm.id)}
-                    disabled={!canRemove}
-                    style={{
-                        padding: '0.5rem 1rem',
-                        backgroundColor: !canRemove ? '#555' : '#ff6b6b',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '0.9rem',
-                        cursor: !canRemove ? 'not-allowed' : 'pointer',
-                        fontWeight: '600'
-                    }}
-                >
-                    Remove
-                </button>
-            </div>
-
-            <div>
-                <div style={{
-                    fontSize: '0.9rem',
-                    color: '#aaa',
-                    marginBottom: '0.75rem',
-                    fontWeight: '600'
-                }}>
-                    Crop Rotation (4 slots):
-                </div>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: '1rem'
-                }}>
-                    {farm.rotation.map((cropId, slotIndex) => {
-                        const crop = cropId ? availableCrops.find(c => c.id === cropId) : null;
-                        const icon = crop ? getCropIcon(crop) : null;
-
-                        // Check if this crop needs processing
-                        const needsProcessing = crop ? !ProductionCalculator.foods?.find(f => f.productId === crop.output.productId) : false;
-                        const hasRecipeSelected = crop ? selectedProcessingRecipes.has(crop.output.productId) : false;
-
-                        return (
-                            <div key={slotIndex} style={{ position: 'relative' }}>
-                                <button
-                                    onClick={() => onOpenCropModal(farmIndex, slotIndex)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '1rem',
-                                        backgroundColor: crop ? '#2a4a6a' : '#2a2a2a',
-                                        border: crop ? (needsProcessing && !hasRecipeSelected ? '2px solid #ff6b6b' : '2px solid #4a90e2') : '2px dashed #555',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        minHeight: '100px',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        transition: 'all 0.2s'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = crop ? '#3a5a7a' : '#353535';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = crop ? '#2a4a6a' : '#2a2a2a';
-                                    }}
-                                >
-                                    <div style={{
-                                        fontSize: '0.7rem',
-                                        color: '#888',
-                                        marginBottom: '0.5rem',
-                                        fontWeight: '600'
-                                    }}>
-                                        SLOT {slotIndex + 1}
-                                    </div>
-
-                                    {crop ? (
-                                        <>
-                                            {icon && (
-                                                <img
-                                                    src={icon}
-                                                    alt={crop.name}
-                                                    style={{
-                                                        width: '28px',
-                                                        height: '28px',
-                                                        objectFit: 'contain',
-                                                        marginBottom: '0.5rem'
-                                                    }}
-                                                />
-                                            )}
-                                            <div style={{
-                                                fontSize: '0.85rem',
-                                                fontWeight: '700',
-                                                color: '#fff',
-                                                textAlign: 'center'
-                                            }}>
-                                                {crop.name}
-                                            </div>
-                                            <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.25rem' }}>
-                                                {crop.growthDays / 30} {crop.growthDays / 30 === 1 ? 'month' : 'months'}
-                                            </div>
-
-                                            {needsProcessing && (
-                                                <div style={{
-                                                    marginTop: '0.5rem',
-                                                    padding: '2px 6px',
-                                                    backgroundColor: hasRecipeSelected ? 'rgba(74, 144, 226, 0.2)' : 'rgba(255, 107, 107, 0.2)',
-                                                    border: `1px solid ${hasRecipeSelected ? '#4a90e2' : '#ff6b6b'}`,
-                                                    borderRadius: '3px',
-                                                    fontSize: '0.65rem',
-                                                    color: hasRecipeSelected ? '#4a90e2' : '#ff6b6b',
-                                                    fontWeight: '700'
-                                                }}>
-                                                    {hasRecipeSelected ? '🏭 Recipe Set' : '⚠️ Needs Recipe'}
-                                                </div>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <div style={{ fontSize: '0.85rem', color: '#666' }}>
-                                            Click to select
-                                        </div>
-                                    )}
-                                </button>
-
-                                {/* Recipe selection button (appears when crop needs processing) */}
-                                {crop && needsProcessing && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            openRecipeSelectionModal(crop.output.productId);
-                                        }}
-                                        style={{
-                                            position: 'absolute',
-                                            top: '4px',
-                                            right: '4px',
-                                            padding: '4px 8px',
-                                            backgroundColor: hasRecipeSelected ? '#4a90e2' : '#ff6b6b',
-                                            color: '#fff',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            fontSize: '0.7rem',
-                                            cursor: 'pointer',
-                                            fontWeight: '700',
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                                            zIndex: 10
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = 'scale(1.05)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = 'scale(1)';
-                                        }}
-                                    >
-                                        🏭
-                                    </button>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const ResearchSlider = ({ label, value, max, color, isNegative, onChange }) => {
     return (
         <div style={{
             padding: '1rem',
@@ -1960,186 +1796,213 @@ const ResearchSlider = ({ label, value, max, color, isNegative, onChange }) => {
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                marginBottom: '0.5rem'
+                alignItems: 'center',
+                marginBottom: '0.75rem'
             }}>
-                <span style={{ color: '#ddd', fontSize: '0.95rem' }}>{label}</span>
-                <span style={{ color, fontWeight: '700' }}>
-                    {isNegative ? '-' : '+'}{value}%
-                </span>
-            </div>
-            <input
-                type="range"
-                min="0"
-                max={max}
-                value={value}
-                onChange={(e) => onChange(parseInt(e.target.value))}
-                style={{ width: '100%' }}
-            />
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: '0.75rem',
-                color: '#666',
-                marginTop: '0.25rem'
-            }}>
-                <span>0</span>
-                <span>Lvl {value}</span>
-                <span>{max}</span>
-            </div>
-        </div>
-    );
-};
-
-const CropFilterModal = ({ crops, selectedCrops, onToggle, onClose }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-
-    const filteredCrops = crops.filter(crop =>
-        crop.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const isAllowed = (cropId) => {
-        if (selectedCrops.length === 0) return true;
-        return selectedCrops.includes(cropId);
-    };
-
-    return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '2rem'
-        }}>
-            <div style={{
-                backgroundColor: '#2a2a2a',
-                borderRadius: '12px',
-                padding: '2rem',
-                maxWidth: '800px',
-                width: '100%',
-                maxHeight: '80vh',
-                overflow: 'auto',
-                border: '2px solid #444'
-            }}>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '1.5rem'
-                }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>
-                        Filter Allowed Crops
-                    </h3>
-                    <button
-                        onClick={onClose}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            backgroundColor: '#4a90e2',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontWeight: '600'
-                        }}
-                    >
-                        Done
-                    </button>
-                </div>
-
-                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#1a1a1a', borderRadius: '6px' }}>
-                    <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                        💡 Click to exclude crops you don't want to use
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+                    <div style={{
+                        fontSize: '0.9rem',
+                        fontWeight: '700',
+                        color: '#4a90e2'
+                    }}>
+                        Farm #{farmIndex + 1}
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#666' }}>
-                        {selectedCrops.length === 0
-                            ? `All ${crops.length} crops allowed`
-                            : `${selectedCrops.length} allowed • ${crops.length - selectedCrops.length} excluded`
-                        }
+
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {availableFarms.slice().sort((a, b) => {
+                            const getTier = (farm) => {
+                                const match = farm.id.match(/T(\d+)/);
+                                return match ? parseInt(match[1]) : 0;
+                            };
+                            return getTier(a) - getTier(b);
+                        }).map(f => {
+                            const farmIcon = getEntityIcon(f);
+                            const isSelected = farm.farmId === f.id;
+
+                            return (
+                                <button
+                                    key={f.id}
+                                    onClick={() => onUpdateType(farm.id, f.id)}
+                                    title={f.name}
+                                    style={{
+                                        padding: '0.5rem',
+                                        backgroundColor: isSelected ? 'rgba(74, 144, 226, 0.2)' : 'transparent',
+                                        border: isSelected ? '2px solid #4a90e2' : '2px solid #444',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'all 0.15s',
+                                        width: '48px',
+                                        height: '48px'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!isSelected) {
+                                            e.currentTarget.style.borderColor = '#4a90e2';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!isSelected) {
+                                            e.currentTarget.style.borderColor = '#444';
+                                        }
+                                    }}
+                                >
+                                    {farmIcon && (
+                                        <img
+                                            src={farmIcon}
+                                            alt={f.name}
+                                            style={{
+                                                width: '36px',
+                                                height: '36px',
+                                                objectFit: 'contain'
+                                            }}
+                                        />
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 
-                <input
-                    type="text"
-                    placeholder="Search crops..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                <button
+                    onClick={() => onRemove(farm.id)}
+                    disabled={!canRemove}
                     style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        backgroundColor: '#1a1a1a',
+                        padding: '0.4rem 0.75rem',
+                        backgroundColor: !canRemove ? '#555' : '#ff6b6b',
                         color: '#fff',
-                        border: '2px solid #555',
-                        borderRadius: '6px',
-                        fontSize: '1rem',
-                        marginBottom: '1.5rem'
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        cursor: !canRemove ? 'not-allowed' : 'pointer',
+                        fontWeight: '600'
                     }}
-                />
+                >
+                    Remove
+                </button>
+            </div>
 
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                    gap: '1rem'
-                }}>
-                    {filteredCrops.map(crop => {
-                        const allowed = isAllowed(crop.id);
-                        const icon = getCropIcon(crop);
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '0.5rem'
+            }}>
+                {farm.rotation.map((cropId, slotIndex) => {
+                    const crop = cropId ? availableCrops.find(c => c.id === cropId) : null;
+                    const icon = crop ? getCropIcon(crop) : null;
 
-                        return (
+                    const needsProcessing = crop ? !ProductionCalculator.foods?.find(f => f.productId === crop.output.productId) : false;
+                    const hasRecipeSelected = crop ? selectedProcessingRecipes.has(crop.output.productId) : false;
+
+                    return (
+                        <div key={slotIndex} style={{ position: 'relative' }}>
                             <button
-                                key={crop.id}
-                                onClick={() => onToggle(crop.id)}
+                                onClick={() => onOpenCropModal(farmIndex, slotIndex)}
                                 style={{
-                                    padding: '1rem',
-                                    backgroundColor: allowed ? '#2a4a6a' : '#1a1a1a',
-                                    border: allowed ? '2px solid #4a90e2' : '2px solid #444',
-                                    borderRadius: '8px',
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    backgroundColor: crop ? '#2a4a6a' : '#2a2a2a',
+                                    border: crop ? (needsProcessing && !hasRecipeSelected ? '2px solid #ff6b6b' : '2px solid #4a90e2') : '2px dashed #444',
+                                    borderRadius: '6px',
                                     cursor: 'pointer',
+                                    minHeight: '90px',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    gap: '0.5rem',
-                                    transition: 'all 0.2s',
-                                    position: 'relative',
-                                    opacity: allowed ? 1 : 0.5
+                                    justifyContent: 'center',
+                                    transition: 'all 0.15s'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = crop ? '#3a5a7a' : '#353535';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = crop ? '#2a4a6a' : '#2a2a2a';
                                 }}
                             >
                                 <div style={{
-                                    position: 'absolute',
-                                    top: '0.5rem',
-                                    right: '0.5rem',
-                                    fontSize: '1.2rem',
-                                    color: allowed ? '#4a90e2' : '#ff6b6b'
+                                    fontSize: '0.65rem',
+                                    color: '#888',
+                                    marginBottom: '0.25rem',
+                                    fontWeight: '600'
                                 }}>
-                                    {allowed ? '✓' : '✕'}
+                                    SLOT {slotIndex + 1}
                                 </div>
-                                {icon && (
-                                    <img
-                                        src={icon}
-                                        alt={crop.name}
-                                        style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            objectFit: 'contain'
-                                        }}
-                                    />
+
+                                {crop ? (
+                                    <>
+                                        {icon && (
+                                            <img
+                                                src={icon}
+                                                alt={crop.name}
+                                                style={{
+                                                    width: '24px',
+                                                    height: '24px',
+                                                    objectFit: 'contain',
+                                                    marginBottom: '0.25rem'
+                                                }}
+                                            />
+                                        )}
+                                        <div style={{
+                                            fontSize: '0.75rem',
+                                            fontWeight: '700',
+                                            color: '#fff',
+                                            textAlign: 'center',
+                                            lineHeight: '1.2'
+                                        }}>
+                                            {crop.name}
+                                        </div>
+
+                                        {needsProcessing && (
+                                            <div style={{
+                                                marginTop: '0.25rem',
+                                                padding: '1px 4px',
+                                                backgroundColor: hasRecipeSelected ? 'rgba(74, 144, 226, 0.2)' : 'rgba(255, 107, 107, 0.2)',
+                                                border: `1px solid ${hasRecipeSelected ? '#4a90e2' : '#ff6b6b'}`,
+                                                borderRadius: '3px',
+                                                fontSize: '0.6rem',
+                                                color: hasRecipeSelected ? '#4a90e2' : '#ff6b6b',
+                                                fontWeight: '700'
+                                            }}>
+                                                {hasRecipeSelected ? '🏭' : '⚠️'}
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                                        Click
+                                    </div>
                                 )}
-                                <div style={{
-                                    fontSize: '0.9rem',
-                                    fontWeight: '700',
-                                    color: '#fff',
-                                    textAlign: 'center'
-                                }}>
-                                    {crop.name}
-                                </div>
                             </button>
-                        );
-                    })}
-                </div>
+
+                            {crop && needsProcessing && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openRecipeSelectionModal(crop.output.productId);
+                                    }}
+                                    style={{
+                                        position: 'absolute',
+                                        top: '3px',
+                                        right: '3px',
+                                        padding: '3px 6px',
+                                        backgroundColor: hasRecipeSelected ? '#4a90e2' : '#ff6b6b',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '3px',
+                                        fontSize: '0.65rem',
+                                        cursor: 'pointer',
+                                        fontWeight: '700',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                                        zIndex: 10
+                                    }}
+                                >
+                                    🏭
+                                </button>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
@@ -2159,7 +2022,7 @@ const CropSelectionModal = ({ crops, onSelect, onClose }) => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -2168,8 +2031,8 @@ const CropSelectionModal = ({ crops, onSelect, onClose }) => {
         }}>
             <div style={{
                 backgroundColor: '#2a2a2a',
-                borderRadius: '12px',
-                padding: '2rem',
+                borderRadius: '8px',
+                padding: '1.5rem',
                 maxWidth: '800px',
                 width: '100%',
                 maxHeight: '80vh',
@@ -2180,9 +2043,9 @@ const CropSelectionModal = ({ crops, onSelect, onClose }) => {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '1.5rem'
+                    marginBottom: '1rem'
                 }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>
+                    <h3 style={{ fontSize: '1.3rem', fontWeight: '700' }}>
                         Select Crop
                     </h3>
                     <button
@@ -2192,12 +2055,12 @@ const CropSelectionModal = ({ crops, onSelect, onClose }) => {
                             backgroundColor: '#ff6b6b',
                             color: '#fff',
                             border: 'none',
-                            borderRadius: '6px',
+                            borderRadius: '4px',
                             cursor: 'pointer',
                             fontWeight: '600'
                         }}
                     >
-                        ✕ Close
+                        ✕
                     </button>
                 </div>
 
@@ -2213,30 +2076,29 @@ const CropSelectionModal = ({ crops, onSelect, onClose }) => {
                         color: '#fff',
                         border: '2px solid #555',
                         borderRadius: '6px',
-                        fontSize: '1rem',
-                        marginBottom: '1.5rem'
+                        fontSize: '0.9rem',
+                        marginBottom: '1rem'
                     }}
                 />
 
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                    gap: '1rem',
-                    marginBottom: '1rem'
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                    gap: '0.75rem'
                 }}>
                     <button
                         onClick={() => onSelect(null)}
                         style={{
-                            padding: '1rem',
+                            padding: '0.75rem',
                             backgroundColor: '#1a1a1a',
                             border: '2px dashed #555',
-                            borderRadius: '8px',
+                            borderRadius: '6px',
                             cursor: 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            gap: '0.5rem',
-                            transition: 'all 0.2s'
+                            gap: '0.25rem',
+                            transition: 'all 0.15s'
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = '#252525';
@@ -2247,17 +2109,13 @@ const CropSelectionModal = ({ crops, onSelect, onClose }) => {
                             e.currentTarget.style.borderColor = '#555';
                         }}
                     >
-                        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🚫</div>
+                        <div style={{ fontSize: '1.5rem' }}>🚫</div>
                         <div style={{
-                            fontSize: '0.9rem',
+                            fontSize: '0.8rem',
                             fontWeight: '700',
-                            color: '#888',
-                            textAlign: 'center'
+                            color: '#888'
                         }}>
                             Empty
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#666' }}>
-                            0 months
                         </div>
                     </button>
 
@@ -2269,16 +2127,16 @@ const CropSelectionModal = ({ crops, onSelect, onClose }) => {
                                 key={crop.id}
                                 onClick={() => onSelect(crop.id)}
                                 style={{
-                                    padding: '1rem',
+                                    padding: '0.75rem',
                                     backgroundColor: '#1a1a1a',
                                     border: '2px solid #444',
-                                    borderRadius: '8px',
+                                    borderRadius: '6px',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    gap: '0.5rem',
-                                    transition: 'all 0.2s'
+                                    gap: '0.25rem',
+                                    transition: 'all 0.15s'
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.backgroundColor = '#2a4a6a';
@@ -2294,22 +2152,22 @@ const CropSelectionModal = ({ crops, onSelect, onClose }) => {
                                         src={icon}
                                         alt={crop.name}
                                         style={{
-                                            width: '40px',
-                                            height: '40px',
+                                            width: '32px',
+                                            height: '32px',
                                             objectFit: 'contain'
                                         }}
                                     />
                                 )}
                                 <div style={{
-                                    fontSize: '0.9rem',
+                                    fontSize: '0.8rem',
                                     fontWeight: '700',
                                     color: '#fff',
                                     textAlign: 'center'
                                 }}>
                                     {crop.name}
                                 </div>
-                                <div style={{ fontSize: '0.75rem', color: '#888' }}>
-                                    {crop.growthDays / 30} {crop.growthDays / 30 === 1 ? 'month' : 'months'}
+                                <div style={{ fontSize: '0.7rem', color: '#888' }}>
+                                    {crop.growthDays / 30}mo
                                 </div>
                             </button>
                         );
@@ -2330,7 +2188,7 @@ const RecipeSelectionModal = ({ modal, onSelect, onClose, selectedProcessingReci
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -2339,9 +2197,9 @@ const RecipeSelectionModal = ({ modal, onSelect, onClose, selectedProcessingReci
         }}>
             <div style={{
                 backgroundColor: '#2a2a2a',
-                borderRadius: '12px',
-                padding: '2rem',
-                maxWidth: '900px',
+                borderRadius: '8px',
+                padding: '1.5rem',
+                maxWidth: '800px',
                 width: '100%',
                 maxHeight: '80vh',
                 overflow: 'auto',
@@ -2351,10 +2209,10 @@ const RecipeSelectionModal = ({ modal, onSelect, onClose, selectedProcessingReci
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '1.5rem'
+                    marginBottom: '1rem'
                 }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>
-                        Select Processing Recipe for {modal.productName}
+                    <h3 style={{ fontSize: '1.3rem', fontWeight: '700' }}>
+                        Process {modal.productName}
                     </h3>
                     <button
                         onClick={onClose}
@@ -2363,16 +2221,16 @@ const RecipeSelectionModal = ({ modal, onSelect, onClose, selectedProcessingReci
                             backgroundColor: '#ff6b6b',
                             color: '#fff',
                             border: 'none',
-                            borderRadius: '6px',
+                            borderRadius: '4px',
                             cursor: 'pointer',
                             fontWeight: '600'
                         }}
                     >
-                        ✕ Close
+                        ✕
                     </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {modal.availableRecipes.map(recipe => {
                         const finalFood = ProductionCalculator.getProduct(recipe.finalFoodProductId);
                         const isSelected = selectedProcessingRecipes.get(modal.productId) === recipe.id;
@@ -2385,9 +2243,9 @@ const RecipeSelectionModal = ({ modal, onSelect, onClose, selectedProcessingReci
                                     padding: '1rem',
                                     backgroundColor: isSelected ? '#2a4a6a' : '#1a1a1a',
                                     border: isSelected ? '2px solid #4a90e2' : '1px solid #444',
-                                    borderRadius: '8px',
+                                    borderRadius: '6px',
                                     cursor: 'pointer',
-                                    transition: 'all 0.2s'
+                                    transition: 'all 0.15s'
                                 }}
                                 onMouseEnter={(e) => {
                                     if (!isSelected) {
@@ -2400,44 +2258,29 @@ const RecipeSelectionModal = ({ modal, onSelect, onClose, selectedProcessingReci
                                     }
                                 }}
                             >
-                                <div style={{ marginBottom: '0.5rem', fontSize: '1rem', fontWeight: '700', color: '#fff' }}>
+                                <div style={{ marginBottom: '0.5rem', fontSize: '0.95rem', fontWeight: '700', color: '#fff' }}>
                                     {recipe.name}
                                 </div>
-                                <div style={{ fontSize: '0.85rem', color: '#FFD700', marginBottom: '0.5rem' }}>
-                                    → Produces: {finalFood?.name}
+                                <div style={{ fontSize: '0.8rem', color: '#FFD700', marginBottom: '0.25rem' }}>
+                                    → {finalFood?.name}
                                 </div>
                                 {recipe.fullChain && recipe.fullChain.length > 0 && (
-                                    <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.5rem' }}>
-                                        Chain: {modal.productName} → {recipe.fullChain.map(c => ProductionCalculator.getProduct(c.outputProductId)?.name).join(' → ')}
+                                    <div style={{ fontSize: '0.7rem', color: '#888' }}>
+                                        {modal.productName} → {recipe.fullChain.map(c => ProductionCalculator.getProduct(c.outputProductId)?.name).join(' → ')}
                                     </div>
                                 )}
-                                {recipe.requiresOtherInputs && recipe.contributionNote && (
-                                    <div style={{
-                                        fontSize: '0.75rem',
-                                        color: '#ff9800',
-                                        marginBottom: '0.5rem',
-                                        padding: '4px 8px',
-                                        backgroundColor: 'rgba(255, 152, 0, 0.1)',
-                                        borderRadius: '4px',
-                                        border: '1px solid rgba(255, 152, 0, 0.3)'
-                                    }}>
-                                        ⚠️ {recipe.contributionNote}
-                                    </div>
-                                )}
-                                <div style={{ fontSize: '0.8rem', color: '#888' }}>
-                                    Duration: {recipe.durationSeconds}s • Conversion: {recipe.conversionRatio?.toFixed(2) || '1.00'} {modal.productName} per food
-                                </div>
                                 {isSelected && (
                                     <div style={{
                                         marginTop: '0.5rem',
-                                        padding: '4px 8px',
+                                        padding: '3px 6px',
                                         backgroundColor: 'rgba(74, 144, 226, 0.2)',
-                                        borderRadius: '4px',
-                                        fontSize: '0.8rem',
+                                        borderRadius: '3px',
+                                        fontSize: '0.75rem',
                                         color: '#4a90e2',
-                                        fontWeight: '700'
+                                        fontWeight: '700',
+                                        display: 'inline-block'
                                     }}>
-                                        ✓ Currently Selected
+                                        ✓ Selected
                                     </div>
                                 )}
                             </div>
@@ -2479,7 +2322,6 @@ const ResultsSection = ({ results }) => {
                         </div>
                     </div>
 
-                    {/* Food Categories Card - UPDATED WITH BONUSES */}
                     {results.totals.foodCategories && results.totals.foodCategories.count > 0 && (
                         <div style={{
                             padding: '1rem',
@@ -2492,7 +2334,6 @@ const ResultsSection = ({ results }) => {
                                 Food Variety Bonuses
                             </div>
 
-                            {/* Main stats */}
                             <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
                                 <div>
                                     <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#FFD700' }}>
@@ -2520,7 +2361,6 @@ const ResultsSection = ({ results }) => {
                                 )}
                             </div>
 
-                            {/* Category breakdown */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '0.75rem' }}>
                                 {results.totals.foodCategories.categories.map(cat => (
                                     <div key={cat.id} style={{
@@ -2547,7 +2387,6 @@ const ResultsSection = ({ results }) => {
                                 ))}
                             </div>
 
-                            {/* Unity breakdown (collapsible) */}
                             {results.totals.foodCategories.unityBreakdown && results.totals.foodCategories.unityBreakdown.length > 0 && (
                                 <details style={{ marginTop: '0.75rem', fontSize: '0.75rem' }}>
                                     <summary style={{ color: '#9b59b6', cursor: 'pointer', userSelect: 'none', padding: '4px' }}>
@@ -2572,7 +2411,6 @@ const ResultsSection = ({ results }) => {
                         </div>
                     )}
 
-                    {/* Water Usage Card - UPDATED TO PER MONTH WITH ICONS */}
                     <div style={{
                         padding: '1rem',
                         backgroundColor: '#1a1a1a',
@@ -2599,7 +2437,6 @@ const ResultsSection = ({ results }) => {
                         </div>
                     </div>
 
-                    {/* Processing Machines Card */}
                     {results.totals.processingMachines && results.totals.processingMachines.length > 0 && (
                         <div style={{
                             padding: '1rem',
@@ -2609,7 +2446,13 @@ const ResultsSection = ({ results }) => {
                             border: '1px solid #333'
                         }}>
                             <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                                🏭 Processing Machines
+                                {getGeneralIcon('Buildings') && (
+                                    <img
+                                        src={getGeneralIcon('Buildings')}
+                                        alt="Buildings"
+                                        style={{ width: '12px', height: '12px', objectFit: 'contain' }}
+                                    />
+                                )} Processing Machines
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                 {results.totals.processingMachines.map(machine => (
@@ -2627,8 +2470,20 @@ const ResultsSection = ({ results }) => {
                                 ))}
                             </div>
                             <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #444', fontSize: '0.75rem', color: '#888' }}>
-                                <div>⚡ {results.totals.processingElectricity.toFixed(0)} kW</div>
-                                <div>👷 {results.totals.processingWorkers} workers</div>
+                                <div>{getGeneralIcon('Electricity') && (
+                                    <img
+                                        src={getGeneralIcon('Electricity')}
+                                        alt="Electricity"
+                                        style={{ width: '12px', height: '12px', objectFit: 'contain' }}
+                                    />
+                                )} {results.totals.processingElectricity.toFixed(0)} kW</div>
+                                <div>{getGeneralIcon('Worker') && (
+                                    <img
+                                        src={getGeneralIcon('Worker')}
+                                        alt="Workers"
+                                        style={{ width: '12px', height: '12px', objectFit: 'contain' }}
+                                    />
+                                )} {results.totals.processingWorkers} workers</div>
                             </div>
                         </div>
                     )}
@@ -2642,7 +2497,7 @@ const ResultsSection = ({ results }) => {
                             border: '1px solid #333'
                         }}>
                             <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                                Fertilizer Options ({results.totals.fertilizerNeeds.totalFarmsRequiring} farm{results.totals.fertilizerNeeds.totalFarmsRequiring > 1 ? 's' : ''} need fertilizer)
+                                Fertilizer Options ({results.totals.fertilizerNeeds.totalFarmsRequiring} farm{results.totals.fertilizerNeeds.totalFarmsRequiring > 1 ? 's' : ''})
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -2666,7 +2521,7 @@ const ResultsSection = ({ results }) => {
                                                         marginLeft: '8px',
                                                         fontWeight: '700'
                                                     }}>
-                                                        MOST EFFICIENT
+                                                        BEST
                                                     </span>
                                                 )}
                                             </div>
@@ -2674,11 +2529,8 @@ const ResultsSection = ({ results }) => {
                                         <div style={{ fontSize: '0.85rem', color: '#ddd' }}>
                                             {fert.totalQuantityPerMonth.toFixed(1)} /month
                                         </div>
-                                        <div style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.25rem' }}>
-                                            {fert.totalQuantityPerDay.toFixed(2)} /day • {fert.totalQuantityPerYear.toFixed(0)} /year
-                                        </div>
                                         <div style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.25rem' }}>
-                                            Max fertility: {fert.maxFertility}% • +{fert.fertilityPerQuantity}% per unit
+                                            Max: {fert.maxFertility}% • +{fert.fertilityPerQuantity}%/unit
                                         </div>
                                     </div>
                                 ))}
@@ -2688,7 +2540,7 @@ const ResultsSection = ({ results }) => {
 
                     <div style={{ marginTop: '1.5rem' }}>
                         <h4 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#ddd', marginBottom: '0.75rem' }}>
-                            Total Production (per month):
+                            Production (per month)
                         </h4>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {Object.entries(results.totals.production).map(([productId, quantity]) => {
@@ -2812,18 +2664,16 @@ const FarmRotationCard = ({ farmNumber, farmResult }) => {
                             </div>
                             {slotDetail && (
                                 <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid #444', fontSize: '0.7rem' }}>
-                                    {/* People fed with worker icon */}
                                     <div style={{ color: '#4a90e2', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                                        {getGeneralIcon('Worker') && (
+                                        {getGeneralIcon('Population') && (
                                             <img
-                                                src={getGeneralIcon('Worker')}
+                                                src={getGeneralIcon('Population')}
                                                 alt="People"
                                                 style={{ width: '12px', height: '12px', objectFit: 'contain' }}
                                             />
                                         )}
                                         {slotDetail.peopleFed.toFixed(0)} /mo
                                     </div>
-                                    {/* Water with icon */}
                                     <div style={{ color: '#50C878', marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                                         {getProductIcon(ProductionCalculator.products?.find(p => p.name?.toLowerCase() === 'water')) && (
                                             <img
@@ -2836,7 +2686,13 @@ const FarmRotationCard = ({ farmNumber, farmResult }) => {
                                     </div>
                                     {slotDetail.processingChain && !slotDetail.processingChain.isDirect && (
                                         <div style={{ color: '#FFD700', marginTop: '2px', fontSize: '0.65rem' }}>
-                                            🏭 Processed
+                                            {getGeneralIcon('Buildings') && (
+                                                <img
+                                                    src={getGeneralIcon('Buildings')}
+                                                    alt="Buildings"
+                                                    style={{ width: '12px', height: '12px', objectFit: 'contain' }}
+                                                />
+                                            )} Processed
                                         </div>
                                     )}
                                 </div>
@@ -2846,7 +2702,6 @@ const FarmRotationCard = ({ farmNumber, farmResult }) => {
                 })}
             </div>
 
-            {/* Show processing chain details if any */}
             {processingChains && processingChains.some(c => !c.isDirect) && (
                 <div style={{
                     padding: '1rem',
@@ -2856,7 +2711,13 @@ const FarmRotationCard = ({ farmNumber, farmResult }) => {
                     border: '1px solid #4a90e2'
                 }}>
                     <div style={{ fontSize: '0.9rem', color: '#4a90e2', fontWeight: '700', marginBottom: '0.5rem' }}>
-                        🏭 Processing Required
+                        {getGeneralIcon('Buildings') && (
+                            <img
+                                src={getGeneralIcon('Buildings')}
+                                alt="Buildings"
+                                style={{ width: '12px', height: '12px', objectFit: 'contain' }}
+                            />
+                        )} Processing Required
                     </div>
                     {processingChains.filter(c => !c.isDirect).map((chain, idx) => {
                         const cropProduct = ProductionCalculator.getProduct(chain.cropProductId);
