@@ -276,7 +276,37 @@ const Calculator = () => {
 
     const selectRecipeFromModal = (recipeId) => {
         if (recipeModalProductId) {
-            if (recipeModalProductId === selectedProduct) {
+            // Check if this is for resource source selection (machine production)
+            if (resourceSourceModal.open && recipeModalProductId === resourceSourceModal.productId) {
+                // User selected a recipe for machine production from resource source modal
+                const newSources = new Map(resourceSources);
+                newSources.set(resourceSourceModal.nodeKey, {
+                    type: 'machine',
+                    config: { recipeId: recipeId }
+                });
+                setResourceSources(newSources);
+
+                // Close both modals
+                setRecipeModalOpen(false);
+                setRecipeModalProductId(null);
+                setRecipeModalRecipes([]);
+                setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
+
+                // Recalculate chain
+                if (selectedProduct && targetRate) {
+                    const newChain = ProductionCalculator.calculateProductionChain(
+                        selectedProduct,
+                        targetRate,
+                        selectedRecipe || null,
+                        recipeOverrides,
+                        newSources
+                    );
+                    const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
+                    setProductionChain(newChain);
+                    setRequirements(newReqs);
+                }
+            } else if (recipeModalProductId === selectedProduct) {
+                // Main product recipe selection
                 setSelectedRecipe(recipeId);
                 if (targetRate) {
                     const newChain = ProductionCalculator.calculateProductionChain(
@@ -290,11 +320,17 @@ const Calculator = () => {
                     setProductionChain(newChain);
                     setRequirements(newReqs);
                 }
+                setRecipeModalOpen(false);
+                setRecipeModalProductId(null);
+                setRecipeModalRecipes([]);
             } else {
+                // Recipe override for a node
                 handleRecipeOverride(recipeModalProductId, recipeId);
+                setRecipeModalOpen(false);
+                setRecipeModalProductId(null);
+                setRecipeModalRecipes([]);
             }
         }
-        closeRecipeModal();
     };
 
     // NEW: Resource source management
@@ -329,9 +365,11 @@ const Calculator = () => {
             // Open recipe selection for this product
             const recipes = ProductionCalculator.getRecipesForProduct(productId);
             if (recipes.length > 0) {
-                // Store temp data for when recipe is selected
-                setResourceSourceModal(prev => ({ ...prev, pendingMachineSelection: true }));
-                openRecipeModal(productId, recipes);
+                // IMPORTANT: Keep source modal open, open recipe modal on top
+                setRecipeModalProductId(productId);
+                setRecipeModalRecipes(recipes);
+                setRecipeModalOpen(true);
+                // DON'T close resourceSourceModal - it stays open behind the recipe modal
             }
         } else {
             // Direct source selection (mining, worldMine, trade)
@@ -1517,10 +1555,15 @@ const Calculator = () => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            zIndex: 1000,
+                            zIndex: 1100,
                             padding: '2rem'
                         }}
-                        onClick={closeRecipeModal}
+                        onClick={(e) => {
+                            // Only close if clicking the backdrop, not if source modal is open
+                            if (e.target === e.currentTarget && !resourceSourceModal.open) {
+                                closeRecipeModal();
+                            }
+                        }}
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
@@ -1544,7 +1587,16 @@ const Calculator = () => {
                                     </span>
                                 </h3>
                                 <button
-                                    onClick={closeRecipeModal}
+                                    onClick={() => {
+                                        // If source modal is open, just close recipe modal
+                                        if (resourceSourceModal.open) {
+                                            setRecipeModalOpen(false);
+                                            setRecipeModalProductId(null);
+                                            setRecipeModalRecipes([]);
+                                        } else {
+                                            closeRecipeModal();
+                                        }
+                                    }}
                                     style={{
                                         padding: '10px 20px',
                                         backgroundColor: '#555',
@@ -1765,7 +1817,12 @@ const Calculator = () => {
                             zIndex: 1000,
                             padding: '2rem'
                         }}
-                        onClick={() => setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null })}
+                        onClick={(e) => {
+                            // Only close if NOT clicking inside modal and recipe modal is not open
+                            if (e.target === e.currentTarget && !recipeModalOpen) {
+                                setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
+                            }
+                        }}
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
@@ -1788,11 +1845,42 @@ const Calculator = () => {
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                 {[
-                                    { type: 'mining', icon: getGeneralIcon('Mining'), label: '🔨 Mining (Local)', description: 'Extract from local deposits' },
-                                    { type: 'worldMine', icon: getGeneralIcon('Mine'), label: '⛏️ World Mine', description: 'Import from world map mines' },
-                                    { type: 'trade', icon: getGeneralIcon('Trade'), label: '⚖️ Trade/Contract', description: 'Purchase via contracts' },
-                                    { type: 'storage', icon: getProductTypeIcon(ProductionCalculator.getProduct(resourceSourceModal.productId)?.type), label: '📦 Storage', description: 'Provided from storage' },
-                                    { type: 'machine', icon: getGeneralIcon('Machines'), label: '🏭 Machine', description: 'Produce with recipes', disabled: !ProductionCalculator.getRecipesForProduct(resourceSourceModal.productId)?.length }
+                                    {
+                                        type: 'mining',
+                                        icon: getGeneralIcon('Mining'),
+                                        label: 'Mining (Local)',
+                                        description: 'Extract from local deposits',
+                                        emoji: '🔨'
+                                    },
+                                    {
+                                        type: 'worldMine',
+                                        icon: getGeneralIcon('Mine'),
+                                        label: 'World Mine',
+                                        description: 'Import from world map mines',
+                                        emoji: '⛏️'
+                                    },
+                                    {
+                                        type: 'trade',
+                                        icon: getGeneralIcon('Trade'),
+                                        label: 'Trade/Contract',
+                                        description: 'Purchase via contracts',
+                                        emoji: '⚖️'
+                                    },
+                                    {
+                                        type: 'storage',
+                                        icon: getProductTypeIcon(ProductionCalculator.getProduct(resourceSourceModal.productId)?.type),
+                                        label: 'Storage',
+                                        description: 'Provided from storage',
+                                        emoji: '📦'
+                                    },
+                                    {
+                                        type: 'machine',
+                                        icon: getGeneralIcon('Machines'),
+                                        label: 'Machine Production',
+                                        description: 'Produce with recipes',
+                                        disabled: !ProductionCalculator.getRecipesForProduct(resourceSourceModal.productId)?.length,
+                                        emoji: null // No emoji, use icon only
+                                    }
                                 ].map(option => {
                                     if (option.disabled) return null;
                                     const isSelected = resourceSourceModal.currentSource?.type === option.type;
@@ -1826,11 +1914,14 @@ const Calculator = () => {
                                                 }
                                             }}
                                         >
-                                            {option.icon && (
+                                            {option.icon ? (
                                                 <img src={option.icon} alt={option.label} style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+                                            ) : option.emoji && (
+                                                <span style={{ fontSize: '32px', lineHeight: 1 }}>{option.emoji}</span>
                                             )}
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontSize: '1rem', fontWeight: '700', color: '#fff', marginBottom: '2px' }}>
+                                                    {option.emoji && <span style={{ marginRight: '8px' }}>{option.emoji}</span>}
                                                     {option.label}
                                                     {isSelected && (
                                                         <span style={{ marginLeft: '8px', fontSize: '0.8rem', color: '#4a90e2', backgroundColor: 'rgba(74, 144, 226, 0.2)', padding: '2px 6px', borderRadius: '3px' }}>
