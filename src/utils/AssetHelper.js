@@ -18,7 +18,11 @@ const productTypeIcons = import.meta.glob('../assets/icons/producttypes/*.png', 
  */
 function getProductIconPath(productId) {
     if (!productId) return null;
-    const filename = productId.replace(/^Product_/, '') + '.png';
+    // Strip "Product_Virtual_" first, then fallback to "Product_"
+    const filename = productId
+        .replace(/^Product_Virtual_/, '')
+        .replace(/^Product_/, '')
+        + '.png';
     return `../assets/icons/product/${filename}`;
 }
 

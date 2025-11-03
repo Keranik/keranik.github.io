@@ -294,8 +294,6 @@ const MachineNode = ({ data, id }) => {
     const workerIcon = getGeneralIcon('Worker');
     const electricityIcon = getGeneralIcon('Electricity');
     const computingIcon = getGeneralIcon('Computing');
-    const maintenanceIcon = costs.maintenanceProductId ?
-        getProductIcon(ProductionCalculator.getProduct(costs.maintenanceProductId)) : null;
     const allCategoryIcon = getGeneralIcon('AllCategory');
 
     const cardWidth = layoutWidth * 20 * globalScale;
@@ -504,6 +502,164 @@ const MachineNode = ({ data, id }) => {
                         </div>
                     );
                 })}
+
+                {/* ✅ FIXED-WIDTH COST BAR - ALWAYS 4 SLOTS */}
+                {(() => {
+                    // Check if there are bottom ports
+                    const hasBottomPorts = parsedPorts.some(port => {
+                        const portY = port.pos.y;
+                        return portY === layoutHeight - 1;
+                    });
+
+                    const bottomOffset = hasBottomPorts ? 24 * globalScale : 4 * globalScale;
+
+                    // Get maintenance icon and determine tier color
+                    const maintenanceProduct = costs.maintenanceProductId
+                        ? ProductionCalculator.getProduct(costs.maintenanceProductId)
+                        : null;
+                    const maintenanceIconFixed = maintenanceProduct ? getProductIcon(maintenanceProduct) : null;
+
+                    // Determine maintenance tier color
+                    let maintenanceColor = '#444'; // Default gray for 0
+                    if (costs.maintenance > 0 && costs.maintenanceProductId) {
+                        if (costs.maintenanceProductId.includes('MaintenanceT1')) {
+                            maintenanceColor = '#FFFFFF'; // White for T1
+                        } else if (costs.maintenanceProductId.includes('MaintenanceT2')) {
+                            maintenanceColor = '#FFEB3B'; // Yellow for T2
+                        } else if (costs.maintenanceProductId.includes('MaintenanceT3')) {
+                            maintenanceColor = '#F44336'; // Red for T3
+                        } else {
+                            maintenanceColor = '#F44336'; // Default to red for any other maintenance
+                        }
+                    }
+
+                    return (
+                        <div style={{
+                            position: 'absolute',
+                            bottom: `${bottomOffset}px`,
+                            left: 0,
+                            right: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-evenly',
+                            padding: `${2 * globalScale}px 0`,
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            borderRadius: `${6 * globalScale}px`,
+                            fontSize: `${Math.max(7, 8 * globalScale)}px`,
+                            fontWeight: '700',
+                            whiteSpace: 'nowrap',
+                            pointerEvents: 'none',
+                            overflow: 'hidden',
+                            height: `${18 * globalScale}px`
+                        }}>
+                            {/* WORKERS - 22% */}
+                            <div style={{
+                                flex: '0 0 15%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: `${2 * globalScale}px`,
+                                color: costs.workers > 0 ? '#FFC107' : '#444'
+                            }}>
+                                {workerIcon && (
+                                    <img
+                                        src={workerIcon}
+                                        alt="Workers"
+                                        style={{
+                                            width: `${10 * globalScale}px`,
+                                            height: `${10 * globalScale}px`,
+                                            opacity: costs.workers > 0 ? 1 : 0.3
+                                        }}
+                                    />
+                                )}
+                                <span style={{ fontSize: '1em' }}>{costs.workers || 0}</span>
+                            </div>
+
+                            {/* ELECTRICITY - 22% */}
+                            <div style={{
+                                flex: '0 0 32%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: `${2 * globalScale}px`,
+                                color: costs.electricity > 0 ? '#FFEB3B' : '#444'
+                            }}>
+                                {electricityIcon && (
+                                    <img
+                                        src={electricityIcon}
+                                        alt="Electricity"
+                                        style={{
+                                            width: `${10 * globalScale}px`,
+                                            height: `${10 * globalScale}px`,
+                                            opacity: costs.electricity > 0 ? 1 : 0.3
+                                        }}
+                                    />
+                                )}
+                                <span style={{ fontSize: '0.95em' }}>
+                                    {costs.electricity > 0
+                                        ? costs.electricity >= 1000
+                                            ? `${(costs.electricity / 1000).toFixed(1)}MW`
+                                            : `${costs.electricity}kW`
+                                        : '0kW'
+                                    }
+                                </span>
+                            </div>
+
+                            {/* COMPUTING - 22% */}
+                            <div style={{
+                                flex: '0 0 22%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: `${2 * globalScale}px`,
+                                color: costs.computing > 0 ? '#9C27B0' : '#444'
+                            }}>
+                                {computingIcon && (
+                                    <img
+                                        src={computingIcon}
+                                        alt="Computing"
+                                        style={{
+                                            width: `${10 * globalScale}px`,
+                                            height: `${10 * globalScale}px`,
+                                            opacity: costs.computing > 0 ? 1 : 0.3
+                                        }}
+                                    />
+                                )}
+                                <span style={{ fontSize: '1em' }}>
+                                    {costs.computing > 0 ? `${costs.computing}TF` : '0TF'}
+                                </span>
+                            </div>
+
+                            {/* MAINTENANCE - 22% - COLOR CODED BY TIER */}
+                            <div style={{
+                                flex: '0 0 15%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: `${2 * globalScale}px`,
+                                color: maintenanceColor
+                            }}>
+                                {maintenanceIconFixed ? (
+                                    <img
+                                        src={maintenanceIconFixed}
+                                        alt="Maintenance"
+                                        style={{
+                                            width: `${10 * globalScale}px`,
+                                            height: `${10 * globalScale}px`,
+                                            opacity: costs.maintenance > 0 ? 1 : 0.3
+                                        }}
+                                    />
+                                ) : (
+                                    <span style={{ opacity: 0.3, fontSize: '0.8em' }}>🔧</span>
+                                )}
+                                <span style={{ fontSize: '1em' }}>
+                                    {costs.maintenance > 0 ? costs.maintenance.toFixed(1) : '0'}
+                                </span>
+                            </div>
+                        </div>
+                    );
+                })()}
+
             </div>
 
             {/* Static overlays */}
@@ -638,8 +794,7 @@ const MachineNode = ({ data, id }) => {
                         boxShadow: isHovered
                             ? '0 8px 24px rgba(74, 144, 226, 0.4)'
                             : '0 4px 12px rgba(0, 0, 0, 0.4)',
-                        minWidth: `${200 * globalScale}px`,
-                        maxWidth: `${350 * globalScale}px`,
+                        width: 'fit-content', // ← CHANGED: Auto-size to content
                         whiteSpace: 'nowrap'
                     }}
                     onClick={(e) => {
@@ -657,133 +812,21 @@ const MachineNode = ({ data, id }) => {
                     />
                     {machine.recipes?.length > 1 && (
                         <div style={{
-                            marginTop: `${4 * globalScale}px`,
-                            padding: `${4 * globalScale}px`,
-                            backgroundColor: 'rgba(74, 144, 226, 0.15)',
-                            borderRadius: `${4 * globalScale}px`,
+                            marginTop: `${2 * globalScale}px`,
+                            paddingTop: `${3 * globalScale}px`,
+                            borderTop: '1px solid rgba(74, 144, 226, 0.2)',
+                            fontSize: `${Math.max(7, 7 * globalScale)}px`,
+                            color: '#888',
                             textAlign: 'center',
-                            fontSize: `${10 * globalScale}px`,
-                            color: '#5aa0f2',
-                            fontWeight: '700'
+                            fontWeight: '500',
+                            letterSpacing: '0.3px'
                         }}>
-                            {machine.recipes.length} recipes available - Click to change
+                            ✨ Click to view {machine.recipes.length} available recipes
                         </div>
                     )}
                 </div>
             )}
 
-            {/* Cost badges */}
-            <div style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                right: 0,
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: `${6 * globalScale}px`,
-                marginTop: `${(recipeData ? 80 : 8) * globalScale}px`,
-                pointerEvents: 'none',
-                flexWrap: 'wrap'
-            }}>
-                {costs.workers > 0 && (
-                    <div style={{
-                        minWidth: `${costBadgeWidth}px`,
-                        height: `${costBadgeHeight}px`,
-                        padding: `${2 * globalScale}px ${6 * globalScale}px`,
-                        backgroundColor: 'rgba(255, 193, 7, 0.95)',
-                        borderRadius: `${4 * globalScale}px`,
-                        fontSize: costFontSize,
-                        fontWeight: '600',
-                        color: '#000',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: `${4 * globalScale}px`,
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
-                    }}>
-                        {workerIcon && (
-                            <img src={workerIcon} alt="Workers" style={{ width: `${costIconSize}px`, height: `${costIconSize}px`, flexShrink: 0 }} />
-                        )}
-                        <span style={{ whiteSpace: 'nowrap' }}>
-                            {costs.workers}
-                        </span>
-                    </div>
-                )}
-                {costs.electricity > 0 && (
-                    <div style={{
-                        minWidth: `${costBadgeWidth}px`,
-                        height: `${costBadgeHeight}px`,
-                        padding: `${2 * globalScale}px ${6 * globalScale}px`,
-                        backgroundColor: 'rgba(255, 235, 59, 0.95)',
-                        borderRadius: `${4 * globalScale}px`,
-                        fontSize: costFontSize,
-                        fontWeight: '600',
-                        color: '#000',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: `${4 * globalScale}px`,
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
-                    }}>
-                        {electricityIcon && (
-                            <img src={electricityIcon} alt="Electricity" style={{ width: `${costIconSize}px`, height: `${costIconSize}px`, flexShrink: 0 }} />
-                        )}
-                        <span style={{ whiteSpace: 'nowrap' }}>
-                            {costs.electricity}kW
-                        </span>
-                    </div>
-                )}
-                {costs.computing > 0 && (
-                    <div style={{
-                        minWidth: `${costBadgeWidth}px`,
-                        height: `${costBadgeHeight}px`,
-                        padding: `${2 * globalScale}px ${6 * globalScale}px`,
-                        backgroundColor: 'rgba(156, 39, 176, 0.95)',
-                        borderRadius: `${4 * globalScale}px`,
-                        fontSize: costFontSize,
-                        fontWeight: '600',
-                        color: '#fff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: `${4 * globalScale}px`,
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
-                    }}>
-                        {computingIcon && (
-                            <img src={computingIcon} alt="Computing" style={{ width: `${costIconSize}px`, height: `${costIconSize}px`, flexShrink: 0 }} />
-                        )}
-                        <span style={{ whiteSpace: 'nowrap' }}>
-                            {costs.computing}TF
-                        </span>
-                    </div>
-                )}
-                {costs.maintenance > 0 && (
-                    <div style={{
-                        minWidth: `${costBadgeWidth}px`,
-                        height: `${costBadgeHeight}px`,
-                        padding: `${2 * globalScale}px ${6 * globalScale}px`,
-                        backgroundColor: 'rgba(244, 67, 54, 0.95)',
-                        borderRadius: `${4 * globalScale}px`,
-                        fontSize: costFontSize,
-                        fontWeight: '600',
-                        color: '#fff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: `${4 * globalScale}px`,
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
-                    }}>
-                        {maintenanceIcon && (
-                            <img src={maintenanceIcon} alt="Maintenance" style={{ width: `${costIconSize}px`, height: `${costIconSize}px`, flexShrink: 0 }} />
-                        )}
-                        <span style={{ whiteSpace: 'nowrap' }}>
-                            {costs.maintenance.toFixed(1)}
-                        </span>
-                    </div>
-                )}
-            </div>
         </div>
     );
 };
