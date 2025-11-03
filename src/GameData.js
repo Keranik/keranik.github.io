@@ -1,7 +1,7 @@
 const GameData = {
   "metadataJs": {
     "version": "Update 3",
-    "lastUpdated": "10/30/2025",
+    "lastUpdated": "11/03/2025",
     "updateNotes": "Base game export"
   },
   "machines": [
@@ -8842,7 +8842,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_MechPower",
@@ -8879,7 +8880,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_Computing",
@@ -8916,7 +8918,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_Upoints",
@@ -8953,7 +8956,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_Heat",
@@ -8990,7 +8994,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_MaintenanceT1",
@@ -9027,7 +9032,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_MaintenanceT2",
@@ -9064,7 +9070,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_MaintenanceT3",
@@ -9101,7 +9108,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_SpaceCrew",
@@ -9138,7 +9146,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_SpaceResearchPoints",
@@ -9175,7 +9184,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Wood",
@@ -9215,7 +9225,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Woodchips",
@@ -9252,7 +9263,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Fertilizer",
@@ -9292,7 +9304,8 @@ const GameData = {
       "fertilizer": {
         "fertilityPerQuantityPercent": 2,
         "maxFertilityPercent": 120
-      }
+      },
+      "canBeMined": false
     },
     {
       "id": "Product_Fertilizer2",
@@ -9332,7 +9345,8 @@ const GameData = {
       "fertilizer": {
         "fertilityPerQuantityPercent": 2.5,
         "maxFertilityPercent": 140
-      }
+      },
+      "canBeMined": false
     },
     {
       "id": "Product_FertilizerOrganic",
@@ -9372,7 +9386,8 @@ const GameData = {
       "fertilizer": {
         "fertilityPerQuantityPercent": 1,
         "maxFertilityPercent": 100
-      }
+      },
+      "canBeMined": false
     },
     {
       "id": "Product_TreeSapling",
@@ -9409,7 +9424,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Paper",
@@ -9446,7 +9462,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Dirt",
@@ -9483,7 +9500,8 @@ const GameData = {
       "dumpOnTerrain": true,
       "terrainMaterialId": "Dirt_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_Compost",
@@ -9520,7 +9538,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "Compost_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_Sludge",
@@ -9557,7 +9576,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Limestone",
@@ -9594,7 +9614,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "LimestoneDisrupted_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_Rock",
@@ -9631,7 +9652,8 @@ const GameData = {
       "dumpOnTerrain": true,
       "terrainMaterialId": "RockDisrupted_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_Gravel",
@@ -9668,7 +9690,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "Gravel_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_ManufacturedSand",
@@ -9705,7 +9728,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_FilterMedia",
@@ -9742,7 +9766,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Coal",
@@ -9779,7 +9804,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "CoalDisrupted_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_Graphite",
@@ -9816,7 +9842,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Slag",
@@ -9853,7 +9880,8 @@ const GameData = {
       "dumpOnTerrain": true,
       "terrainMaterialId": "Slag_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_SlagCrushed",
@@ -9890,7 +9918,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "SlagCrushed_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_IronOre",
@@ -9927,7 +9956,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "IronOreDisrupted_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_IronOreCrushed",
@@ -9964,7 +9994,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "IronOreCrushed_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_IronScrap",
@@ -10001,7 +10032,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_IronScrapPressed",
@@ -10038,7 +10070,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MoltenIron",
@@ -10075,7 +10108,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MoltenSteel",
@@ -10112,7 +10146,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Iron",
@@ -10152,7 +10187,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Steel",
@@ -10192,7 +10228,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CopperOre",
@@ -10229,7 +10266,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "CopperOreDisrupted_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_CopperOreCrushed",
@@ -10266,7 +10304,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "CopperOreCrushed_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_CopperScrap",
@@ -10303,7 +10342,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CopperScrapPressed",
@@ -10340,7 +10380,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MoltenCopper",
@@ -10377,7 +10418,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ImpureCopper",
@@ -10414,7 +10456,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Copper",
@@ -10454,7 +10497,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Bauxite",
@@ -10491,7 +10535,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "BauxiteDisrupted_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_BauxitePowder",
@@ -10528,7 +10573,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "BauxiteCrushed_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_RedMud",
@@ -10565,7 +10611,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_HydratedAlumina",
@@ -10602,7 +10649,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Alumina",
@@ -10639,7 +10687,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_AluminumScrap",
@@ -10676,7 +10725,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_AluminumScrapPressed",
@@ -10713,7 +10763,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MoltenAluminum",
@@ -10750,7 +10801,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Aluminum",
@@ -10790,7 +10842,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_TitaniumOre",
@@ -10827,7 +10880,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "TitaniumOreDisrupted_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_TitaniumOreCrushed",
@@ -10864,7 +10918,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "TitaniumOreCrushed_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_TitaniumSlag",
@@ -10901,7 +10956,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_TitaniumChloride",
@@ -10938,7 +10994,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_TitaniumChloridePure",
@@ -10975,7 +11032,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_TitaniumSponge",
@@ -11012,7 +11070,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MoltenTitanium",
@@ -11049,7 +11108,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MoltenTitaniumAlloy",
@@ -11086,7 +11146,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_TitaniumAlloy",
@@ -11123,7 +11184,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_GoldOre",
@@ -11160,7 +11222,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "GoldOreDisrupted_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_GoldOreCrushed",
@@ -11197,7 +11260,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "GoldOreCrushed_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_GoldOrePowder",
@@ -11234,7 +11298,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_GoldOreConcentrate",
@@ -11271,7 +11336,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Gold",
@@ -11311,7 +11377,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_GoldScrap",
@@ -11348,7 +11415,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_GoldScrapPressed",
@@ -11385,7 +11453,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Sand",
@@ -11422,7 +11491,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "Sand_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_MoltenGlass",
@@ -11459,7 +11529,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_BrokenGlass",
@@ -11496,7 +11567,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Glass",
@@ -11536,7 +11608,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_GlassMix",
@@ -11573,7 +11646,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_UraniumOre",
@@ -11610,7 +11684,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "UraniumOreDisrupted_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_UraniumOreCrushed",
@@ -11647,7 +11722,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "UraniumOreCrushed_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_Yellowcake",
@@ -11684,7 +11760,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_UraniumEnriched",
@@ -11721,7 +11798,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_UraniumEnriched20",
@@ -11758,7 +11836,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_UraniumReprocessed",
@@ -11795,7 +11874,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Plutonium",
@@ -11832,7 +11912,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_UraniumDepleted",
@@ -11869,7 +11950,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "UraniumDepleted_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_UraniumRod",
@@ -11906,7 +11988,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MoxRod",
@@ -11943,7 +12026,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SpentFuel",
@@ -11983,7 +12067,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SpentMox",
@@ -12023,7 +12108,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_FissionProduct",
@@ -12060,7 +12146,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_RetiredWaste",
@@ -12097,7 +12184,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CoreFuel",
@@ -12134,7 +12222,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CoreFuelDirty",
@@ -12171,7 +12260,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_BlanketFuel",
@@ -12208,7 +12298,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_BlanketFuelEnriched",
@@ -12245,7 +12336,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Quartz",
@@ -12282,7 +12374,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "QuartzDisrupted_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_QuartzCrushed",
@@ -12319,7 +12412,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "QuartzCrushed_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_MoltenSilicon",
@@ -12356,7 +12450,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_PolySilicon",
@@ -12393,7 +12488,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SiliconWafer",
@@ -12430,7 +12526,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Water",
@@ -12467,7 +12564,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ChilledWater",
@@ -12504,7 +12602,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Seawater",
@@ -12541,7 +12640,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Brine",
@@ -12578,7 +12678,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_WasteWater",
@@ -12615,7 +12716,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ToxicSlurry",
@@ -12652,7 +12754,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_PollutedWater",
@@ -12689,7 +12792,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_PollutedAir",
@@ -12726,7 +12830,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Chlorine",
@@ -12763,7 +12868,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SteamSp",
@@ -12800,7 +12906,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SteamHi",
@@ -12837,7 +12944,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SteamLP",
@@ -12874,7 +12982,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SteamDepleted",
@@ -12911,7 +13020,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Salt",
@@ -12948,7 +13058,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Exhaust",
@@ -12985,7 +13096,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Recyclables",
@@ -13022,7 +13134,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_RecyclablesPressed",
@@ -13059,7 +13172,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CrudeOil",
@@ -13096,7 +13210,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Diesel",
@@ -13133,7 +13248,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Naphtha",
@@ -13170,7 +13286,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_FuelGas",
@@ -13207,7 +13324,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Sulfur",
@@ -13244,7 +13362,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SourWater",
@@ -13281,7 +13400,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Ammonia",
@@ -13318,7 +13438,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Acid",
@@ -13355,7 +13476,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_HeavyOil",
@@ -13392,7 +13514,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MediumOil",
@@ -13429,7 +13552,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_LightOil",
@@ -13466,7 +13590,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Plastic",
@@ -13503,7 +13628,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Rubber",
@@ -13540,7 +13666,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Hydrogen",
@@ -13577,7 +13704,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Nitrogen",
@@ -13614,7 +13742,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CarbonDioxide",
@@ -13651,7 +13780,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Ethanol",
@@ -13688,7 +13818,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Potato",
@@ -13728,7 +13859,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Corn",
@@ -13768,7 +13900,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Wheat",
@@ -13808,7 +13941,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Soybean",
@@ -13848,7 +13982,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SugarCane",
@@ -13888,7 +14023,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Canola",
@@ -13928,7 +14064,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Vegetables",
@@ -13968,7 +14105,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Fruit",
@@ -14008,7 +14146,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Poppy",
@@ -14045,7 +14184,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Bread",
@@ -14082,7 +14222,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Flour",
@@ -14119,7 +14260,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_AnimalFeed",
@@ -14156,7 +14298,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Biomass",
@@ -14193,7 +14336,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Eggs",
@@ -14233,7 +14377,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Tofu",
@@ -14270,7 +14415,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CookingOil",
@@ -14307,7 +14453,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Meat",
@@ -14344,7 +14491,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Sausage",
@@ -14381,7 +14529,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Snack",
@@ -14418,7 +14567,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Cake",
@@ -14455,7 +14605,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_FoodPack",
@@ -14492,7 +14643,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Chicken",
@@ -14529,7 +14681,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CargoShip",
@@ -14566,7 +14719,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ChickenCarcass",
@@ -14606,7 +14760,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MeatTrimmings",
@@ -14643,7 +14798,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Sugar",
@@ -14680,7 +14836,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CornMash",
@@ -14717,7 +14874,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_HouseholdGoods",
@@ -14754,7 +14912,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_HouseholdAppliances",
@@ -14791,7 +14950,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ConsumerElectronics",
@@ -14828,7 +14988,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_LuxuryGoods",
@@ -14865,7 +15026,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ImportedGoods",
@@ -14902,7 +15064,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Antibiotics",
@@ -14939,7 +15102,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Disinfectant",
@@ -14976,7 +15140,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Anesthetics",
@@ -15013,7 +15178,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Morphine",
@@ -15050,7 +15216,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MedicalEquipment",
@@ -15087,7 +15254,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MedicalSupplies",
@@ -15124,7 +15292,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MedicalSupplies2",
@@ -15161,7 +15330,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MedicalSupplies3",
@@ -15198,7 +15368,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Cement",
@@ -15235,7 +15406,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ConcreteSlab",
@@ -15272,7 +15444,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Bricks",
@@ -15309,7 +15482,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ConstructionParts",
@@ -15346,7 +15520,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ConstructionParts2",
@@ -15383,7 +15558,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ConstructionParts3",
@@ -15420,7 +15596,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ConstructionParts4",
@@ -15457,7 +15634,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MechanicalParts",
@@ -15494,7 +15672,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_VehicleParts",
@@ -15531,7 +15710,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_VehicleParts2",
@@ -15568,7 +15748,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_VehicleParts3",
@@ -15605,7 +15786,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_LabEquipment",
@@ -15642,7 +15824,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_LabEquipment2",
@@ -15679,7 +15862,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_LabEquipment3",
@@ -15716,7 +15900,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_LabEquipment4",
@@ -15753,7 +15938,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_RailParts",
@@ -15790,7 +15976,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_OfficeSupplies",
@@ -15827,7 +16014,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Electronics",
@@ -15864,7 +16052,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_PCB",
@@ -15901,7 +16090,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Electronics2",
@@ -15938,7 +16128,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Electronics3",
@@ -15975,7 +16166,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Electronics4",
@@ -16012,7 +16204,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Server",
@@ -16049,7 +16242,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Microchips",
@@ -16086,7 +16280,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MicrochipsStage1A",
@@ -16123,7 +16318,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MicrochipsStage1B",
@@ -16160,7 +16356,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MicrochipsStage1C",
@@ -16197,7 +16394,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MicrochipsStage2A",
@@ -16234,7 +16432,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MicrochipsStage2B",
@@ -16271,7 +16470,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MicrochipsStage2C",
@@ -16308,7 +16508,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MicrochipsStage3A",
@@ -16345,7 +16546,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MicrochipsStage3B",
@@ -16382,7 +16584,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MicrochipsStage3C",
@@ -16419,7 +16622,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MicrochipsStage4A",
@@ -16456,7 +16660,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_MicrochipsStage4B",
@@ -16493,7 +16698,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Diamond",
@@ -16530,7 +16736,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_DiamondPaste",
@@ -16567,7 +16774,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SapphireWafer",
@@ -16604,7 +16812,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Lens",
@@ -16641,7 +16850,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SolarCell",
@@ -16678,7 +16888,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SolarCellMono",
@@ -16715,7 +16926,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CompositePanel",
@@ -16752,7 +16964,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CompositeBodyBasic",
@@ -16789,7 +17002,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CompositeCore",
@@ -16826,7 +17040,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_ChemicalFuel",
@@ -16863,7 +17078,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SpaceStationParts1",
@@ -16900,7 +17116,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SpaceStationParts2",
@@ -16937,7 +17154,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CrewSupplies",
@@ -16974,7 +17192,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_SpaceProbeParts",
@@ -17011,7 +17230,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_AsteroidBoosterParts",
@@ -17048,7 +17268,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_CompactReactor",
@@ -17085,7 +17306,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Oxygen",
@@ -17122,7 +17344,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_HydrogenFluoride",
@@ -17159,7 +17382,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Waste",
@@ -17196,7 +17420,8 @@ const GameData = {
       "dumpOnTerrain": true,
       "terrainMaterialId": "Landfill_Terrain",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": true
     },
     {
       "id": "Product_WastePressed",
@@ -17233,7 +17458,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Flowers",
@@ -17270,7 +17496,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     }
   ],
   "recipes": [

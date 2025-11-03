@@ -1,7 +1,7 @@
 /**
- * Production Calculator Engine
+ * Production Calculator Engine - REWRITTEN FOR EXCELLENCE
  * Handles all production chain calculations, recipe optimization, and resource requirements
- * MODIFIED: Now supports dynamic data loading for mod support
+ * Now with per-minute normalization, resource source management, storage calculations, and SMART RAW MATERIAL DETECTION
  */
 class ProductionCalculator {
     constructor() {
@@ -25,12 +25,18 @@ class ProductionCalculator {
         this.foodMap = new Map();
         this.productToRecipes = new Map();
         this.fertilizers = [];
+
+        // Storage throughput limits (per minute)
+        this.STORAGE_THROUGHPUT = {
+            1: 400,
+            2: 900,
+            3: 1800,
+            4: 3000
+        };
     }
 
     /**
      * Initialize calculator with game data
-     * This is called by components after loading data via DataLoader
-     * @param {Object} gameData - The loaded game data (base game + mods)
      */
     initialize(gameData) {
         this._gameData = gameData;
@@ -144,6 +150,117 @@ class ProductionCalculator {
     }
 
     /**
+  * NEW: Check if a product is a raw/mineable resource
+  * 
+  * A product is considered RAW if:
+  * 1. It can be mined (marked as CanBeMined from terrain materials export)
+  * 2. It has NO recipes that produce it
+  * 
+  * @param {string} productId - Product ID to check
+  * @returns {boolean} - True if this product should default to raw material
+  */
+    isRawMaterial(productId) {
+        const product = this.getProduct(productId);
+        if (!product) return false;
+
+        // Check 1: Products that can be mined from terrain
+        // Examples: Coal, Sand, Iron Ore, Copper Ore, Rock, Dirt, etc.
+        if (product.canBeMined === true) {
+            return true;
+        }
+
+        // Check 2: Products with no recipes = raw materials
+        // Examples: Wood (from trees), naturally collected items
+        const recipes = this.getRecipesForProduct(productId);
+        return recipes.length === 0;
+    }
+
+    /**
+     * NEW: Normalize recipe to per-minute rates
+     * @param {Object} recipe - Recipe object
+     * @returns {Object} - Normalized recipe with per-minute rates
+     */
+    normalizeRecipeToPerMinute(recipe) {
+        if (!recipe) return null;
+
+        const cyclesPerMinute = 60 / recipe.durationSeconds;
+
+        return {
+            ...recipe,
+            cyclesPerMinute,
+            normalizedInputs: recipe.inputs.map(input => ({
+                ...input,
+                perMinute: input.quantity * cyclesPerMinute,
+                product: this.getProduct(input.productId)
+            })),
+            normalizedOutputs: recipe.outputs.map(output => ({
+                ...output,
+                perMinute: output.quantity * cyclesPerMinute,
+                product: this.getProduct(output.productId)
+            }))
+        };
+    }
+
+    /**
+     * NEW: Get storage tier options for a product
+     * @param {Object} product - Product object
+     * @param {number} requiredRate - Required throughput (per minute)
+     * @returns {Array} - Storage tier options with counts
+     */
+    getStorageTierOptions(product, requiredRate) {
+        if (!product || !product.type) return [];
+
+        const productType = product.type; // 'Countable', 'Fluid', 'Loose', 'Molten'
+        const tiers = [1, 2, 3, 4];
+
+        const options = tiers.map(tier => {
+            const throughput = this.STORAGE_THROUGHPUT[tier];
+            const count = Math.ceil(requiredRate / throughput);
+            const entityId = tier === 1
+                ? `Storage${productType}`
+                : `Storage${productType}T${tier}`;
+
+            return {
+                tier,
+                throughput,
+                count,
+                entityId,
+                productType,
+                isOptimal: false
+            };
+        });
+
+        // Mark optimal (lowest count)
+        const minCount = Math.min(...options.map(o => o.count));
+        options.forEach(option => {
+            if (option.count === minCount) {
+                option.isOptimal = true;
+            }
+        });
+
+        return options;
+    }
+
+    /**
+     * NEW: Get resource source options for a product
+     * @param {string} productId - Product ID
+     * @returns {Object} - Available source types
+     */
+    getResourceSourceOptions(productId) {
+        const product = this.getProduct(productId);
+        const recipes = this.getRecipesForProduct(productId);
+
+        return {
+            mining: true, // Always available for raw materials
+            worldMine: true, // Always available
+            trade: true, // Always available (contracts)
+            storage: true, // Always available
+            machine: recipes.length > 0, // Only if recipes exist
+            availableRecipes: recipes
+        };
+    }
+
+    /**
      * Calculate production rate (items per minute) for a recipe
      * @param {Object} recipe - Recipe object
      * @param {number} machineCount - Number of machines running this recipe
@@ -207,18 +324,26 @@ class ProductionCalculator {
 
     /**
      * Calculate full production chain for a target product and rate
+     * NOW WITH SMART RAW MATERIAL DETECTION & RESOURCE SOURCE SUPPORT
+     * 
      * @param {string} productId - Target product ID
      * @param {number} targetRate - Desired items per minute
-     * @param {string} recipeId - Optional: specific recipe to use (otherwise picks first available)
+     * @param {string} recipeId - Optional: specific recipe to use
      * @param {Map} recipeOverrides - Map of productId -> recipeId for custom recipe selections
+     * @param {Map} resourceSources - Map of nodeKey -> {type, config} for resource source preferences
      * @param {number} depth - Current recursion depth (for cycle detection)
+     * @param {Set} visited - Visited nodes for cycle detection
+     * @param {string} parentKey - Parent node key for unique identification
      * @returns {Object} - Production chain tree
      */
-    calculateProductionChain(productId, targetRate, recipeId = null, recipeOverrides = new Map(), depth = 0, visited = new Set()) {
+    calculateProductionChain(productId, targetRate, recipeId = null, recipeOverrides = new Map(), resourceSources = new Map(), depth = 0, visited = new Set(), parentKey = '') {
         // Prevent infinite recursion
         if (depth > 20) {
             return { error: 'Max recursion depth reached', productId, targetRate };
         }
+
+        // Create unique node key
+        const nodeKey = `${productId}-${depth}`;
 
         // Check for circular dependencies
         const visitKey = `${productId}-${recipeId}`;
@@ -232,26 +357,49 @@ class ProductionCalculator {
             return { error: 'Product not found', productId };
         }
 
-        // Get recipe to use - check overrides first
+        // Check if this node has a custom source
+        const customSource = resourceSources.get(nodeKey);
+
+        // SMART RAW MATERIAL DETECTION
+        // If user selected "machine" source, use recipe
+        // Otherwise, check if it's naturally a raw material
+        const isNaturallyRaw = this.isRawMaterial(productId);
+        const userWantsMachine = customSource && customSource.type === 'machine';
+
+        // Get recipe to use
         let recipe;
-        if (recipeId) {
-            recipe = this.getRecipe(recipeId);
-        } else if (recipeOverrides.has(productId)) {
-            recipe = this.getRecipe(recipeOverrides.get(productId));
-        } else {
-            // Auto-select first available recipe
-            const recipes = this.getRecipesForProduct(productId);
-            recipe = recipes[0];
+        if (userWantsMachine && customSource.config?.recipeId) {
+            // User explicitly selected machine production
+            recipe = this.getRecipe(customSource.config.recipeId);
+        } else if (!isNaturallyRaw || userWantsMachine) {
+            // Either not naturally raw, or user wants machine (try to find recipe)
+            if (recipeId) {
+                recipe = this.getRecipe(recipeId);
+            } else if (recipeOverrides.has(productId)) {
+                recipe = this.getRecipe(recipeOverrides.get(productId));
+            } else {
+                // Auto-select first available recipe
+                const recipes = this.getRecipesForProduct(productId);
+                recipe = recipes[0];
+            }
         }
 
-        // If no recipe found, this is a raw material
-        if (!recipe) {
+        // Determine if this should be treated as raw material
+        // Raw if: (naturally raw AND no custom machine source) OR (custom non-machine source) OR (no recipe found)
+        const isRawMaterial = (isNaturallyRaw && !userWantsMachine) ||
+            (customSource && customSource.type !== 'machine') ||
+            !recipe;
+
+        if (isRawMaterial) {
             return {
                 productId,
                 product,
                 targetRate,
                 isRawMaterial: true,
-                depth
+                resourceSource: customSource || { type: 'mining' }, // Default to mining
+                nodeKey,
+                depth,
+                availableSourceOptions: this.getResourceSourceOptions(productId)
             };
         }
 
@@ -264,15 +412,17 @@ class ProductionCalculator {
         // Calculate production rates
         const rates = this.calculateProductionRate(recipe, machineCalc.machineCount);
 
-        // Recursively calculate input chains with recipe overrides
+        // Recursively calculate input chains with recipe overrides and resource sources
         const inputChains = rates.inputs.map(input => {
             return this.calculateProductionChain(
                 input.productId,
                 input.ratePerMin,
-                null, // Don't force recipe, let overrides handle it
+                null,
                 recipeOverrides,
+                resourceSources,
                 depth + 1,
-                new Set(visited) // Pass copy of visited set
+                new Set(visited),
+                nodeKey
             );
         });
 
@@ -290,7 +440,8 @@ class ProductionCalculator {
             inputs: rates.inputs,
             outputs: rates.outputs,
             inputChains,
-            availableRecipes, // Include for UI recipe selection
+            availableRecipes,
+            nodeKey,
             depth,
             isRawMaterial: false
         };
@@ -298,22 +449,23 @@ class ProductionCalculator {
 
     /**
      * Calculate total resource requirements for a production chain
+     * NOW RESPECTS RESOURCE SOURCES (storage sources are excluded)
      * @param {Object} chain - Production chain from calculateProductionChain
      * @returns {Object} - { machines: Map, power, workers, maintenance, rawMaterials: Map }
      */
     calculateTotalRequirements(chain) {
         const requirements = {
-            machines: new Map(), // machineId -> count
-            power: 0, // kW
+            machines: new Map(),
+            power: 0,
             workers: 0,
-            maintenance: new Map(), // maintenanceProductId -> per month
-            rawMaterials: new Map() // productId -> rate per minute
+            maintenance: new Map(),
+            rawMaterials: new Map()
         };
 
         const processChain = (node) => {
             if (node.error || !node.machine) {
-                // Handle raw materials
-                if (node.isRawMaterial) {
+                // Handle raw materials (exclude storage sources)
+                if (node.isRawMaterial && node.resourceSource?.type !== 'storage') {
                     const current = requirements.rawMaterials.get(node.productId) || 0;
                     requirements.rawMaterials.set(node.productId, current + node.targetRate);
                 }

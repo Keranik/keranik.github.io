@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
-import { getProductIcon, getMachineImage, getGeneralIcon, getProductTypeIcon } from '../utils/AssetHelper';
+import { getProductIcon, getMachineImage, getGeneralIcon, getProductTypeIcon, getEntityIcon } from '../utils/AssetHelper';
 import OptimizationEngine from '../utils/OptimizationEngine';
 
 const Calculator = () => {
@@ -24,12 +24,33 @@ const Calculator = () => {
     const [powerUnit, setPowerUnit] = useState('kW');
     const [collapsedNodes, setCollapsedNodes] = useState(new Set());
 
-    // NEW: Resource constraints (replaces reverse mode)
-    const [resourceConstraints, setResourceConstraints] = useState(new Map()); // Map<productId, maxRate>
+    // NEW: Resource source management
+    const [resourceSources, setResourceSources] = useState(new Map()); // Map<nodeKey, {type, config}>
+    const [resourceSourceModal, setResourceSourceModal] = useState({
+        open: false,
+        nodeKey: null,
+        productId: null,
+        productName: null,
+        requiredRate: 0,
+        currentSource: null
+    });
+    const [storageTierModal, setStorageTierModal] = useState({
+        open: false,
+        product: null,
+        requiredRate: 0,
+        tiers: [],
+        selectedTier: null
+    });
+
+    // NEW: Recipe time display toggles (per-card overrides)
+    const [recipeTimeToggles, setRecipeTimeToggles] = useState(new Map()); // Map<recipeId, boolean>
+
+    // Resource constraints
+    const [resourceConstraints, setResourceConstraints] = useState(new Map());
     const [resourceInput, setResourceInput] = useState({ productId: '', productName: '', quantity: 0 });
 
     // View mode and optimization state
-    const [viewMode, setViewMode] = useState('compact'); // DEFAULT: compact
+    const [viewMode, setViewMode] = useState('compact');
     const [selectedNode, setSelectedNode] = useState(null);
     const [optimizationMode, setOptimizationMode] = useState(false);
     const [optimizationGoal, setOptimizationGoal] = useState('minimizeWorkers');
@@ -45,10 +66,9 @@ const Calculator = () => {
     const [optimizationResult, setOptimizationResult] = useState(null);
     const [optimizer, setOptimizer] = useState(null);
 
-    // NEW: Recipe selection modal (for main product dropdown replacement)
     const [recipeSelectionModalOpen, setRecipeSelectionModalOpen] = useState(false);
 
-    // Load game data and initialize optimizer
+    // Load game data on mount
     useEffect(() => {
         document.title = 'Production Calculator - Captain of Industry Tools';
 
@@ -178,7 +198,6 @@ const Calculator = () => {
 
     const handleCalculate = () => {
         if (optimizationMode && optimizer) {
-            // Merge resource constraints into optimization constraints
             const mergedConstraints = {
                 ...optimizationConstraints,
                 resourceLimits: resourceConstraints
@@ -200,7 +219,6 @@ const Calculator = () => {
                 setRecipeOverrides(result.recipeOverrides || new Map());
             }
         } else {
-            // Normal calculation
             if (!selectedProduct || !targetRate) return;
 
             const recipeToUse = selectedRecipe || null;
@@ -208,7 +226,8 @@ const Calculator = () => {
                 selectedProduct,
                 targetRate,
                 recipeToUse,
-                recipeOverrides
+                recipeOverrides,
+                resourceSources
             );
             const reqs = ProductionCalculator.calculateTotalRequirements(chain);
 
@@ -234,7 +253,8 @@ const Calculator = () => {
                 selectedProduct,
                 targetRate,
                 recipeToUse,
-                newOverrides
+                newOverrides,
+                resourceSources
             );
             const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
             setProductionChain(newChain);
@@ -263,7 +283,8 @@ const Calculator = () => {
                         selectedProduct,
                         targetRate,
                         recipeId,
-                        recipeOverrides
+                        recipeOverrides,
+                        resourceSources
                     );
                     const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
                     setProductionChain(newChain);
@@ -276,7 +297,94 @@ const Calculator = () => {
         closeRecipeModal();
     };
 
-    // NEW: Resource constraint management
+    // NEW: Resource source management
+    const openResourceSourceModal = (node) => {
+        setResourceSourceModal({
+            open: true,
+            nodeKey: node.nodeKey,
+            productId: node.productId,
+            productName: node.product?.name || node.productId,
+            requiredRate: node.targetRate,
+            currentSource: node.resourceSource || { type: 'mining' }
+        });
+    };
+
+    const selectResourceSource = (sourceType) => {
+        const { nodeKey, productId, requiredRate } = resourceSourceModal;
+
+        if (sourceType === 'storage') {
+            // Open storage tier selector
+            const product = ProductionCalculator.getProduct(productId);
+            const tiers = ProductionCalculator.getStorageTierOptions(product, requiredRate);
+            const optimal = tiers.find(t => t.isOptimal);
+
+            setStorageTierModal({
+                open: true,
+                product,
+                requiredRate,
+                tiers,
+                selectedTier: optimal
+            });
+        } else if (sourceType === 'machine') {
+            // Open recipe selection for this product
+            const recipes = ProductionCalculator.getRecipesForProduct(productId);
+            if (recipes.length > 0) {
+                // Store temp data for when recipe is selected
+                setResourceSourceModal(prev => ({ ...prev, pendingMachineSelection: true }));
+                openRecipeModal(productId, recipes);
+            }
+        } else {
+            // Direct source selection (mining, worldMine, trade)
+            const newSources = new Map(resourceSources);
+            newSources.set(nodeKey, { type: sourceType });
+            setResourceSources(newSources);
+            setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
+
+            // Recalculate chain
+            if (selectedProduct && targetRate) {
+                const newChain = ProductionCalculator.calculateProductionChain(
+                    selectedProduct,
+                    targetRate,
+                    selectedRecipe || null,
+                    recipeOverrides,
+                    newSources
+                );
+                const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
+                setProductionChain(newChain);
+                setRequirements(newReqs);
+            }
+        }
+    };
+
+    const selectStorageTier = (tier) => {
+        const { nodeKey } = resourceSourceModal;
+
+        const newSources = new Map(resourceSources);
+        newSources.set(nodeKey, {
+            type: 'storage',
+            config: { tier: tier.tier, entityId: tier.entityId, count: tier.count }
+        });
+        setResourceSources(newSources);
+
+        // Close modals
+        setStorageTierModal({ open: false, product: null, requiredRate: 0, tiers: [], selectedTier: null });
+        setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
+
+        // Recalculate chain
+        if (selectedProduct && targetRate) {
+            const newChain = ProductionCalculator.calculateProductionChain(
+                selectedProduct,
+                targetRate,
+                selectedRecipe || null,
+                recipeOverrides,
+                newSources
+            );
+            const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
+            setProductionChain(newChain);
+            setRequirements(newReqs);
+        }
+    };
+
     const addResourceConstraint = () => {
         if (!resourceInput.productId || resourceInput.quantity <= 0) return;
 
@@ -292,10 +400,35 @@ const Calculator = () => {
         setResourceConstraints(newConstraints);
     };
 
+    // NEW: Recipe time toggle handler
+    const toggleRecipeTime = (recipeId) => {
+        setRecipeTimeToggles(prev => {
+            const newMap = new Map(prev);
+            const current = newMap.get(recipeId);
+            // If undefined, use global setting; otherwise toggle
+            if (current === undefined) {
+                newMap.set(recipeId, !settings.showRecipeTimePerMinute);
+            } else {
+                newMap.set(recipeId, !current);
+            }
+            return newMap;
+        });
+    };
+
+    const getRecipeTimeDisplay = (recipeId) => {
+        const toggle = recipeTimeToggles.get(recipeId);
+        return toggle !== undefined ? toggle : settings.showRecipeTimePerMinute;
+    };
+
     const renderRecipeCard = (recipe, size = 'normal', isClickable = false, onClick = null) => {
         const machines = ProductionCalculator.getMachinesForRecipe(recipe.id);
         const machine = machines[0];
         const machineIcon = machine ? getMachineImage(machine) : null;
+        const clockIcon = getGeneralIcon('Clock');
+        const gearsIcon = getGeneralIcon('Gears');
+
+        const showPerMinute = getRecipeTimeDisplay(recipe.id);
+        const normalized = ProductionCalculator.normalizeRecipeToPerMinute(recipe);
 
         const sizes = {
             compact: {
@@ -305,7 +438,9 @@ const Calculator = () => {
                 arrowFont: '1.1rem',
                 padding: '10px',
                 gap: '8px',
-                showMachineName: false
+                showMachineName: false,
+                timeFont: '0.75rem',
+                toggleSize: 16
             },
             normal: {
                 machineIcon: 40,
@@ -314,7 +449,9 @@ const Calculator = () => {
                 arrowFont: '1.4rem',
                 padding: '12px',
                 gap: '10px',
-                showMachineName: true
+                showMachineName: true,
+                timeFont: '0.85rem',
+                toggleSize: 18
             },
             large: {
                 machineIcon: 48,
@@ -323,29 +460,27 @@ const Calculator = () => {
                 arrowFont: '1.6rem',
                 padding: '16px',
                 gap: '12px',
-                showMachineName: true
+                showMachineName: true,
+                timeFont: '0.9rem',
+                toggleSize: 20
             }
         };
 
         const config = sizes[size];
 
-        const inputs = recipe.inputs.map(input => {
-            const product = ProductionCalculator.getProduct(input.productId);
-            return {
-                product,
-                quantity: input.quantity,
-                icon: getProductIcon(product)
-            };
-        });
+        const inputs = showPerMinute ? normalized.normalizedInputs : recipe.inputs.map(input => ({
+            ...input,
+            quantity: input.quantity,
+            product: ProductionCalculator.getProduct(input.productId)
+        }));
 
-        const outputs = recipe.outputs.map(output => {
-            const product = ProductionCalculator.getProduct(output.productId);
-            return {
-                product,
-                quantity: output.quantity,
-                icon: getProductIcon(product)
-            };
-        });
+        const outputs = showPerMinute ? normalized.normalizedOutputs : recipe.outputs.map(output => ({
+            ...output,
+            quantity: output.quantity,
+            product: ProductionCalculator.getProduct(output.productId)
+        }));
+
+        const displayTime = showPerMinute ? '60' : `${recipe.durationSeconds}s`;
 
         return (
             <div
@@ -359,7 +494,8 @@ const Calculator = () => {
                     cursor: isClickable ? 'pointer' : 'default',
                     transition: 'all 0.2s',
                     borderRadius: '6px',
-                    backgroundColor: 'transparent'
+                    backgroundColor: 'transparent',
+                    position: 'relative'
                 }}
                 onMouseEnter={(e) => {
                     if (isClickable) {
@@ -372,89 +508,206 @@ const Calculator = () => {
                     }
                 }}
             >
-                {machineIcon && (
-                    <img
-                        src={machineIcon}
-                        alt={machine?.name}
-                        title={machine?.name}
-                        style={{
-                            width: `${config.machineIcon}px`,
-                            height: `${config.machineIcon}px`,
-                            objectFit: 'contain',
-                            flexShrink: 0
-                        }}
-                    />
+                {/* Machine/Gear Icon */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                        {machineIcon ? (
+                            <img
+                                src={machineIcon}
+                                alt={machine?.name}
+                                title={machine?.name}
+                                style={{
+                                    width: `${config.machineIcon}px`,
+                                    height: `${config.machineIcon}px`,
+                                    objectFit: 'contain',
+                                    flexShrink: 0
+                                }}
+                            />
+                        ) : gearsIcon && (
+                            <img
+                                src={gearsIcon}
+                                alt="Machine"
+                                style={{
+                                    width: `${config.machineIcon}px`,
+                                    height: `${config.machineIcon}px`,
+                                    objectFit: 'contain',
+                                    flexShrink: 0
+                                }}
+                            />
+                        )}
+                    </div>
+
+                    {/* Colon separator */}
+                    <span style={{
+                        color: '#666',
+                        fontSize: config.arrowFont,
+                        fontWeight: '300',
+                        opacity: 0.7
+                    }}>
+                        :
+                    </span>
+                </div>
+
+                {/* Inputs (only if recipe has inputs) */}
+                {inputs.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        {inputs.map((input, idx) => {
+                            const icon = getProductIcon(input.product);
+                            const displayQty = showPerMinute ? input.perMinute.toFixed(1) : input.quantity;
+
+                            return (
+                                <div key={idx} style={{ display: 'contents' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                                        {icon && (
+                                            <img
+                                                src={icon}
+                                                alt={input.product?.name}
+                                                title={input.product?.name}
+                                                style={{
+                                                    width: `${config.productIcon}px`,
+                                                    height: `${config.productIcon}px`,
+                                                    objectFit: 'contain'
+                                                }}
+                                            />
+                                        )}
+                                        <span style={{
+                                            color: '#ff9966',
+                                            fontSize: config.quantityFont,
+                                            fontWeight: '700',
+                                            lineHeight: 1
+                                        }}>
+                                            {displayQty}
+                                        </span>
+                                    </div>
+
+                                    {/* Plus sign between inputs (not after the last one) */}
+                                    {idx < inputs.length - 1 && (
+                                        <span style={{
+                                            color: '#888',
+                                            fontSize: config.quantityFont,
+                                            fontWeight: '700',
+                                            margin: '0 2px'
+                                        }}>
+                                            +
+                                        </span>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
                 )}
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    {inputs.map((input, idx) => (
-                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span style={{
-                                color: '#bbb',
-                                fontSize: config.quantityFont,
-                                fontWeight: '700',
-                                lineHeight: 1
-                            }}>
-                                {input.quantity}×
-                            </span>
-                            {input.icon && (
-                                <img
-                                    src={input.icon}
-                                    alt={input.product?.name}
-                                    title={input.product?.name}
-                                    style={{
-                                        width: `${config.productIcon}px`,
-                                        height: `${config.productIcon}px`,
-                                        objectFit: 'contain'
-                                    }}
-                                />
-                            )}
-                            {idx < inputs.length - 1 && (
-                                <span style={{ color: '#555', margin: '0 2px', fontSize: config.quantityFont }}>+</span>
-                            )}
-                        </div>
-                    ))}
+                {/* Arrow with Time Display */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', position: 'relative' }}>
+                    {/* Toggle Button - Above Arrow */}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            toggleRecipeTime(recipe.id);
+                        }}
+                        style={{
+                            padding: '2px 4px',
+                            backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                            border: '1px solid rgba(74, 144, 226, 0.4)',
+                            borderRadius: '3px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.15s',
+                            marginBottom: '2px'
+                        }}
+                        title={showPerMinute ? 'Show raw recipe time' : 'Show per-minute rate'}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'rgba(74, 144, 226, 0.3)';
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'rgba(74, 144, 226, 0.2)';
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                    >
+                        {clockIcon && (
+                            <img
+                                src={clockIcon}
+                                alt="Toggle time"
+                                style={{
+                                    width: `${config.toggleSize}px`,
+                                    height: `${config.toggleSize}px`,
+                                    objectFit: 'contain'
+                                }}
+                            />
+                        )}
+                    </button>
+
+                    {/* Arrow */}
+                    <span style={{
+                        color: '#888',
+                        fontSize: config.arrowFont,
+                        fontWeight: '300',
+                        lineHeight: 1
+                    }}>
+                        →
+                    </span>
+
+                    {/* Time Display Below Arrow */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <span style={{
+                            color: '#aaa',
+                            fontSize: config.timeFont,
+                            fontWeight: '600',
+                            lineHeight: 1
+                        }}>
+                            {displayTime}
+                        </span>
+                        {clockIcon && (
+                            <img
+                                src={clockIcon}
+                                alt="Time"
+                                style={{
+                                    width: `${config.toggleSize}px`,
+                                    height: `${config.toggleSize}px`,
+                                    objectFit: 'contain'
+                                }}
+                            />
+                        )}
+                    </div>
                 </div>
 
-                <span style={{
-                    color: '#888',
-                    fontSize: config.arrowFont,
-                    margin: '0 6px',
-                    fontWeight: '300'
-                }}>
-                    →
-                </span>
-
+                {/* Outputs */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    {outputs.map((output, idx) => (
-                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span style={{
-                                color: '#5aa0f2',
-                                fontSize: config.quantityFont,
-                                fontWeight: '700',
-                                lineHeight: 1
-                            }}>
-                                {output.quantity}×
-                            </span>
-                            {output.icon && (
-                                <img
-                                    src={output.icon}
-                                    alt={output.product?.name}
-                                    title={output.product?.name}
-                                    style={{
-                                        width: `${config.productIcon}px`,
-                                        height: `${config.productIcon}px`,
-                                        objectFit: 'contain'
-                                    }}
-                                />
-                            )}
-                            {idx < outputs.length - 1 && (
-                                <span style={{ color: '#555', margin: '0 2px', fontSize: config.quantityFont }}>+</span>
-                            )}
-                        </div>
-                    ))}
+                    {outputs.map((output, idx) => {
+                        const icon = getProductIcon(output.product);
+                        const displayQty = showPerMinute ? output.perMinute.toFixed(1) : output.quantity;
+
+                        return (
+                            <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                                {icon && (
+                                    <img
+                                        src={icon}
+                                        alt={output.product?.name}
+                                        title={output.product?.name}
+                                        style={{
+                                            width: `${config.productIcon}px`,
+                                            height: `${config.productIcon}px`,
+                                            objectFit: 'contain'
+                                        }}
+                                    />
+                                )}
+                                <span style={{
+                                    color: '#5aa0f2',
+                                    fontSize: config.quantityFont,
+                                    fontWeight: '700',
+                                    lineHeight: 1
+                                }}>
+                                    {displayQty}
+                                </span>
+                            </div>
+                        );
+                    })}
                 </div>
 
+                {/* Machine Name (for normal/large) */}
                 {config.showMachineName && (
                     <div style={{ flex: 1, marginLeft: '12px', minWidth: '140px' }}>
                         <div style={{ fontSize: '0.95rem', color: '#ddd', fontWeight: '600', lineHeight: 1.3 }}>
@@ -469,7 +722,7 @@ const Calculator = () => {
         );
     };
 
-    // NEW: Compact node with separate click handlers
+    // Compact node rendering (with + button for raw materials)
     const renderCompactNode = (node, level = 0, parentPath = '') => {
         if (!node) return null;
 
@@ -480,7 +733,17 @@ const Calculator = () => {
         const productIcon = getProductIcon(product);
 
         const subtreeMetrics = calculateSubtreeMetrics(node);
-        const isSelected = selectedNode?.productId === node.productId && selectedNode?.targetRate === node.targetRate;
+        const isSelected = selectedNode?.nodeKey === node.nodeKey;
+
+        // Resource source info
+        const currentSource = node.resourceSource || { type: 'mining' };
+        const sourceIcons = {
+            mining: getGeneralIcon('Mining'),
+            worldMine: getGeneralIcon('Mine'),
+            trade: getGeneralIcon('Trade'),
+            storage: getProductTypeIcon(product?.type),
+            machine: getGeneralIcon('Machines')
+        };
 
         return (
             <div key={nodeId} style={{ marginBottom: '4px' }}>
@@ -509,7 +772,7 @@ const Calculator = () => {
                         }
                     }}
                 >
-                    {/* NEW: Separate expand/collapse button */}
+                    {/* Expand/collapse button */}
                     <span
                         onClick={(e) => {
                             e.stopPropagation();
@@ -527,7 +790,7 @@ const Calculator = () => {
                         {hasChildren ? (isCollapsed ? '▶' : '▼') : ''}
                     </span>
 
-                    {/* Node content - click to select */}
+                    {/* Node content */}
                     <div
                         onClick={() => setSelectedNode(node)}
                         style={{
@@ -543,7 +806,11 @@ const Calculator = () => {
 
                         <span style={{ fontWeight: '600', color: '#fff', fontSize: '0.95rem', minWidth: '180px' }}>
                             {product?.name || node.productId}
-                            {node.isRawMaterial && <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: '#FFD700', backgroundColor: 'rgba(255,215,0,0.15)', padding: '2px 6px', borderRadius: '3px' }}>RAW</span>}
+                            {node.isRawMaterial && (
+                                <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: '#FFD700', backgroundColor: 'rgba(255,215,0,0.15)', padding: '2px 6px', borderRadius: '3px' }}>
+                                    RAW
+                                </span>
+                            )}
                         </span>
 
                         <span style={{ color: '#4a90e2', fontWeight: '700', fontSize: '0.9rem', marginLeft: '12px', minWidth: '80px' }}>
@@ -554,6 +821,19 @@ const Calculator = () => {
                             <span style={{ color: '#888', fontSize: '0.85rem', marginLeft: '12px', flex: 1 }}>
                                 {node.machineCount}× {node.machine.name}
                             </span>
+                        )}
+
+                        {node.isRawMaterial && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
+                                {sourceIcons[currentSource.type] && (
+                                    <img
+                                        src={sourceIcons[currentSource.type]}
+                                        alt={currentSource.type}
+                                        title={`Source: ${currentSource.type}`}
+                                        style={{ width: '16px', height: '16px', objectFit: 'contain', opacity: 0.7 }}
+                                    />
+                                )}
+                            </div>
                         )}
 
                         <span style={{ marginLeft: 'auto', color: '#777', fontSize: '0.8rem', display: 'flex', gap: '12px', flexShrink: 0 }}>
@@ -575,14 +855,41 @@ const Calculator = () => {
                                     {subtreeMetrics.machines}
                                 </span>
                             )}
-                            {hasChildren && (
-                                <span style={{ color: '#555' }}>
-                                    {getGeneralIcon('Chains') && <img src={getGeneralIcon('Chains')} alt="Chains" style={{ width: '14px', height: '14px' }} />}
-                                    {node.inputChains.length}
-                                </span>
-                            )}
                         </span>
                     </div>
+
+                    {/* + Button for raw materials */}
+                    {node.isRawMaterial && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openResourceSourceModal(node);
+                            }}
+                            style={{
+                                marginLeft: '8px',
+                                padding: '4px 8px',
+                                backgroundColor: '#4a90e2',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '4px',
+                                fontSize: '0.9rem',
+                                cursor: 'pointer',
+                                fontWeight: '700',
+                                transition: 'all 0.15s'
+                            }}
+                            title="Change resource source"
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#5aa0f2';
+                                e.currentTarget.style.transform = 'scale(1.05)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#4a90e2';
+                                e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                        >
+                            +
+                        </button>
+                    )}
                 </div>
 
                 {hasChildren && !isCollapsed && (
@@ -630,6 +937,16 @@ const Calculator = () => {
 
         const currentRecipeId = recipeOverrides.get(node.productId) || node.recipe?.id;
         const currentRecipe = node.availableRecipes?.find(r => r.id === currentRecipeId) || node.recipe;
+
+        // Resource source info
+        const currentSource = node.resourceSource || { type: 'mining' };
+        const sourceLabels = {
+            mining: '🔨 Mining (Local)',
+            worldMine: '⛏️ World Mine',
+            trade: '⚖️ Trade/Contract',
+            storage: '📦 Storage',
+            machine: '🏭 Machine Production'
+        };
 
         return (
             <div key={nodeId} style={{ marginLeft: `${indent}px`, marginBottom: '10px' }}>
@@ -741,6 +1058,39 @@ const Calculator = () => {
                                         </span>
                                     )}
                                 </div>
+
+                                {/* Raw material source display */}
+                                {isRaw && (
+                                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ fontSize: '0.9rem', color: '#aaa' }}>
+                                            Source: {sourceLabels[currentSource.type]}
+                                        </span>
+                                        {currentSource.type === 'storage' && currentSource.config && (
+                                            <span style={{ fontSize: '0.8rem', color: '#666', marginLeft: '4px' }}>
+                                                (Tier {currentSource.config.tier}, {currentSource.config.count}× needed)
+                                            </span>
+                                        )}
+                                        <button
+                                            onClick={() => openResourceSourceModal(node)}
+                                            style={{
+                                                marginLeft: 'auto',
+                                                padding: '4px 12px',
+                                                backgroundColor: '#4a90e2',
+                                                color: '#fff',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                fontSize: '0.85rem',
+                                                cursor: 'pointer',
+                                                fontWeight: '600',
+                                                transition: 'all 0.15s'
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5aa0f2'}
+                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
+                                        >
+                                            + Change Source
+                                        </button>
+                                    </div>
+                                )}
 
                                 {hasMultipleRecipes && currentRecipe && (
                                     <div style={{ marginTop: '8px' }}>
@@ -933,7 +1283,6 @@ const Calculator = () => {
         );
     };
 
-    // Details panel (ALWAYS on left)
     const renderDetailsPanel = () => {
         if (!selectedNode) {
             return (
@@ -1152,6 +1501,8 @@ const Calculator = () => {
             </div>
 
             <div style={{ padding: '0 2rem 2rem' }}>
+                {/* MODALS */}
+
                 {/* Recipe Selection Modal (for node recipes) */}
                 {recipeModalOpen && (
                     <div
@@ -1274,7 +1625,7 @@ const Calculator = () => {
                     </div>
                 )}
 
-                {/* NEW: Main Product Recipe Selection Modal (replaces dropdown) */}
+                {/* Main Product Recipe Selection Modal */}
                 {recipeSelectionModalOpen && availableRecipes.length > 1 && (
                     <div
                         style={{
@@ -1397,6 +1748,213 @@ const Calculator = () => {
                     </div>
                 )}
 
+                {/* Resource Source Modal */}
+                {resourceSourceModal.open && (
+                    <div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            backdropFilter: 'blur(4px)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 1000,
+                            padding: '2rem'
+                        }}
+                        onClick={() => setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null })}
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                                backgroundColor: '#2a2a2a',
+                                borderRadius: '12px',
+                                padding: '2rem',
+                                maxWidth: '600px',
+                                width: '100%',
+                                border: '2px solid #4a90e2',
+                                boxShadow: '0 12px 48px rgba(0, 0, 0, 0.6)'
+                            }}
+                        >
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1rem', color: '#fff' }}>
+                                Select Source for {resourceSourceModal.productName}
+                            </h3>
+                            <div style={{ fontSize: '0.9rem', color: '#888', marginBottom: '1.5rem' }}>
+                                Required: {resourceSourceModal.requiredRate?.toFixed(1)}/min
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                {[
+                                    { type: 'mining', icon: getGeneralIcon('Mining'), label: '🔨 Mining (Local)', description: 'Extract from local deposits' },
+                                    { type: 'worldMine', icon: getGeneralIcon('Mine'), label: '⛏️ World Mine', description: 'Import from world map mines' },
+                                    { type: 'trade', icon: getGeneralIcon('Trade'), label: '⚖️ Trade/Contract', description: 'Purchase via contracts' },
+                                    { type: 'storage', icon: getProductTypeIcon(ProductionCalculator.getProduct(resourceSourceModal.productId)?.type), label: '📦 Storage', description: 'Provided from storage' },
+                                    { type: 'machine', icon: getGeneralIcon('Machines'), label: '🏭 Machine', description: 'Produce with recipes', disabled: !ProductionCalculator.getRecipesForProduct(resourceSourceModal.productId)?.length }
+                                ].map(option => {
+                                    if (option.disabled) return null;
+                                    const isSelected = resourceSourceModal.currentSource?.type === option.type;
+
+                                    return (
+                                        <button
+                                            key={option.type}
+                                            onClick={() => selectResourceSource(option.type)}
+                                            style={{
+                                                padding: '1rem',
+                                                backgroundColor: isSelected ? '#2a4a6a' : '#1a1a1a',
+                                                border: isSelected ? '2px solid #4a90e2' : '2px solid #444',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                textAlign: 'left',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isSelected) {
+                                                    e.currentTarget.style.backgroundColor = '#252525';
+                                                    e.currentTarget.style.borderColor = '#5aa0f2';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isSelected) {
+                                                    e.currentTarget.style.backgroundColor = '#1a1a1a';
+                                                    e.currentTarget.style.borderColor = '#444';
+                                                }
+                                            }}
+                                        >
+                                            {option.icon && (
+                                                <img src={option.icon} alt={option.label} style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+                                            )}
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontSize: '1rem', fontWeight: '700', color: '#fff', marginBottom: '2px' }}>
+                                                    {option.label}
+                                                    {isSelected && (
+                                                        <span style={{ marginLeft: '8px', fontSize: '0.8rem', color: '#4a90e2', backgroundColor: 'rgba(74, 144, 226, 0.2)', padding: '2px 6px', borderRadius: '3px' }}>
+                                                            DEFAULT
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div style={{ fontSize: '0.8rem', color: '#888' }}>
+                                                    {option.description}
+                                                </div>
+                                            </div>
+                                            {isSelected && (
+                                                <div style={{ fontSize: '1.5rem', color: '#4a90e2' }}>⦿</div>
+                                            )}
+                                            {!isSelected && (
+                                                <div style={{ fontSize: '1.5rem', color: '#555' }}>○</div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Storage Tier Selection Modal */}
+                {storageTierModal.open && (
+                    <div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            backdropFilter: 'blur(4px)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 1001,
+                            padding: '2rem'
+                        }}
+                        onClick={() => setStorageTierModal({ open: false, product: null, requiredRate: 0, tiers: [], selectedTier: null })}
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                                backgroundColor: '#2a2a2a',
+                                borderRadius: '12px',
+                                padding: '2rem',
+                                maxWidth: '600px',
+                                width: '100%',
+                                border: '2px solid #4a90e2',
+                                boxShadow: '0 12px 48px rgba(0, 0, 0, 0.6)'
+                            }}
+                        >
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1rem', color: '#fff' }}>
+                                Storage Tiers for {storageTierModal.product?.name}
+                            </h3>
+                            <div style={{ fontSize: '0.9rem', color: '#888', marginBottom: '1.5rem' }}>
+                                Required throughput: {storageTierModal.requiredRate?.toFixed(1)}/min
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                {storageTierModal.tiers.map(tier => {
+                                    const storageIcon = getEntityIcon({ id: tier.entityId });
+                                    const isOptimal = tier.isOptimal;
+
+                                    return (
+                                        <button
+                                            key={tier.tier}
+                                            onClick={() => selectStorageTier(tier)}
+                                            style={{
+                                                padding: '1rem',
+                                                backgroundColor: isOptimal ? 'rgba(255, 215, 0, 0.1)' : '#1a1a1a',
+                                                border: isOptimal ? '2px solid #FFD700' : '2px solid #444',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                textAlign: 'left',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isOptimal) {
+                                                    e.currentTarget.style.backgroundColor = '#252525';
+                                                    e.currentTarget.style.borderColor = '#5aa0f2';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isOptimal) {
+                                                    e.currentTarget.style.backgroundColor = '#1a1a1a';
+                                                    e.currentTarget.style.borderColor = '#444';
+                                                }
+                                            }}
+                                        >
+                                            {storageIcon && (
+                                                <img src={storageIcon} alt={`Tier ${tier.tier}`} style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                                            )}
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontSize: '1rem', fontWeight: '700', color: '#fff', marginBottom: '4px' }}>
+                                                    {storageTierModal.product?.type} Storage {tier.tier > 1 ? `Tier ${tier.tier}` : ''}
+                                                    {isOptimal && (
+                                                        <span style={{ marginLeft: '8px', fontSize: '0.75rem', color: '#50C878', backgroundColor: 'rgba(80, 200, 120, 0.2)', padding: '2px 8px', borderRadius: '3px', fontWeight: '700' }}>
+                                                            ⭐ BEST
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div style={{ fontSize: '0.85rem', color: '#888', marginBottom: '4px' }}>
+                                                    Throughput: {tier.throughput}/min each
+                                                </div>
+                                                <div style={{ fontSize: '0.9rem', color: tier.count === 1 ? '#50C878' : '#FFD700', fontWeight: '600' }}>
+                                                    → Need {tier.count} storage{tier.count > 1 ? 's' : ''} {tier.count === 1 ? '✅' : ''}
+                                                </div>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Mode Toggle and Controls */}
                 <div style={{
                     marginBottom: '1.5rem',
@@ -1442,6 +2000,8 @@ const Calculator = () => {
                             setProductionChain(null);
                             setRequirements(null);
                             setRecipeOverrides(new Map());
+                            setResourceSources(new Map());
+                            setRecipeTimeToggles(new Map());
                             setCollapsedNodes(new Set());
                             setOptimizationMode(false);
                             setOptimizationResult(null);
@@ -1794,7 +2354,7 @@ const Calculator = () => {
                             </datalist>
                         </div>
 
-                        {/* Recipe Selection - BUTTON instead of dropdown */}
+                        {/* Recipe Selection - BUTTON */}
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
                                 Recipe {availableRecipes.length > 1 && <span style={{ color: '#4a90e2' }}>({availableRecipes.length} available)</span>}
@@ -1892,8 +2452,13 @@ const Calculator = () => {
                 {/* Results Section */}
                 {productionChain && requirements && (
                     <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '2rem', alignItems: 'start', paddingBottom: '3rem' }}>
-                        {/* LEFT: Details Panel (ALWAYS - compact or total requirements) */}
-                        <div style={{ position: 'sticky', top: '2rem' }}>
+                        {/* LEFT: Details Panel - STICKY with scroll */}
+                        <div style={{
+                            position: 'sticky',
+                            top: '2rem',
+                            maxHeight: 'calc(100vh - 4rem)',
+                            overflowY: 'auto'
+                        }}>
                             <div style={{
                                 backgroundColor: '#2a2a2a',
                                 padding: '1.5rem',
@@ -2171,7 +2736,7 @@ const Calculator = () => {
                                                 border: '1px solid #333'
                                             }}>
                                                 💡 <strong style={{ color: '#4a90e2' }}>Tip:</strong> Nodes with a blue border have multiple recipes available.
-                                                Click the recipe card to view and select alternatives!
+                                                Click the recipe card to view and select alternatives! Raw materials show a "+ Change Source" button.
                                             </div>
                                             {renderProductionNode(productionChain)}
                                         </>
@@ -2186,7 +2751,8 @@ const Calculator = () => {
                                                 color: '#888',
                                                 border: '1px solid #333'
                                             }}>
-                                                💡 <strong style={{ color: '#4a90e2' }}>Compact Mode:</strong> Click ▶/▼ to expand/collapse. Click anywhere else on a node to view details.
+                                                💡 <strong style={{ color: '#4a90e2' }}>Compact Mode:</strong> Click ▶/▼ to expand/collapse. Click a node to view details.
+                                                Raw materials show a "+" button to change their source.
                                             </div>
                                             {renderCompactNode(productionChain)}
                                         </>

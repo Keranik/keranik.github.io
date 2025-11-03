@@ -1,7 +1,7 @@
 const GameData = {
   "metadataJs": {
     "version": "Update 3",
-    "lastUpdated": "10/30/2025",
+    "lastUpdated": "11/03/2025",
     "updateNotes": "Mod export: COIExtended-Core"
   },
   "machines": [
@@ -890,7 +890,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Sardines",
@@ -930,7 +931,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Mackerel",
@@ -970,7 +972,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Cod",
@@ -1010,7 +1013,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Tuna",
@@ -1050,7 +1054,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Swordfish",
@@ -1090,7 +1095,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "FishOil",
@@ -1127,7 +1133,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "SynfuelLiquid",
@@ -1164,7 +1171,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "SynfuelGas",
@@ -1201,7 +1209,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "FishScales",
@@ -1238,7 +1247,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "FoodCanEmpty",
@@ -1275,7 +1285,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "FoodCanFish",
@@ -1312,7 +1323,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "FoodCanFruit",
@@ -1349,7 +1361,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "FoodCanVegetables",
@@ -1386,7 +1399,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "FoodCanPack",
@@ -1423,7 +1437,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "RawFish",
@@ -1460,7 +1475,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     },
     {
       "id": "Product_Virtual_CargoShip",
@@ -1497,7 +1513,8 @@ const GameData = {
       "dumpOnTerrain": false,
       "terrainMaterialId": "",
       "tags": [],
-      "fertilizer": null
+      "fertilizer": null,
+      "canBeMined": false
     }
   ],
   "recipes": [
