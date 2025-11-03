@@ -299,7 +299,7 @@ const MachineNode = ({ data, id }) => {
     const cardWidth = layoutWidth * 20 * globalScale;
     const cardHeight = layoutHeight * 20 * globalScale;
 
-    const nameFontSize = `${Math.max(10, Math.min(cardWidth * 0.04, 28))}px`;
+    const nameFontSize = `${Math.max(10, Math.min(cardWidth * 0.04, 28)) * Math.min(globalScale, 2.5)}px`;
     const sizeIndicatorFontSize = `${Math.max(8, Math.min(cardWidth * 0.025, 14))}px`;
     const costBadgeWidth = Math.max(60, cardWidth * 0.18);
     const costBadgeHeight = Math.max(24, cardHeight * 0.08);
@@ -408,7 +408,7 @@ const MachineNode = ({ data, id }) => {
                 top: 0,
                 left: 0,
                 backgroundColor: '#2a2a2a',
-                border: `${3 * globalScale}px solid #4a90e2`,
+                border: `${1 * globalScale}px solid #4a90e2`,
                 borderRadius: `${12 * globalScale}px`,
                 boxShadow: isHovered
                     ? '0 12px 32px rgba(74, 144, 226, 0.5)'
@@ -511,7 +511,7 @@ const MachineNode = ({ data, id }) => {
                         return portY === layoutHeight - 1;
                     });
 
-                    const bottomOffset = hasBottomPorts ? 24 * globalScale : 4 * globalScale;
+                    const bottomOffset = hasBottomPorts ? 24 + globalScale : globalScale;
 
                     // Get maintenance icon and determine tier color
                     const maintenanceProduct = costs.maintenanceProductId
@@ -543,7 +543,7 @@ const MachineNode = ({ data, id }) => {
                             alignItems: 'center',
                             justifyContent: 'space-evenly',
                             padding: `${2 * globalScale}px 0`,
-                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.0)',
                             borderRadius: `${6 * globalScale}px`,
                             fontSize: `${Math.max(7, 8 * globalScale)}px`,
                             fontWeight: '700',
@@ -674,22 +674,22 @@ const MachineNode = ({ data, id }) => {
                 {/* Machine name */}
                 <div style={{
                     position: 'absolute',
-                    top: `${8 * globalScale}px`,
+                    top: `${2 * globalScale}px`,
                     left: '50%',
                     transform: 'translateX(-50%)',
                     color: 'white',
                     fontWeight: '700',
                     fontSize: nameFontSize,
-                    textShadow: '0 2px 8px rgba(0, 0, 0, 0.9)',
+                    textShadow: '0 2px 8px rgba(0, 0, 0, 0.7)',
                     textAlign: 'center',
                     maxWidth: '60%',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                     padding: `${4 * globalScale}px ${8 * globalScale}px`,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.0)',
                     borderRadius: `${6 * globalScale}px`,
-                    border: '1px solid rgba(74, 144, 226, 0.5)'
+                    border: '1px solid rgba(74, 144, 226, 0.0)'
                 }}>
                     {label}
                 </div>
@@ -697,12 +697,12 @@ const MachineNode = ({ data, id }) => {
                 {/* Size indicator */}
                 <div style={{
                     position: 'absolute',
-                    top: `${8 * globalScale}px`,
-                    right: `${8 * globalScale}px`,
+                    top: `${4 * globalScale}px`,
+                    right: `${2 * globalScale}px`,
                     fontSize: sizeIndicatorFontSize,
                     color: 'rgba(255, 255, 255, 0.7)',
                     fontWeight: '600',
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.2)',
                     padding: `${3 * globalScale}px ${6 * globalScale}px`,
                     borderRadius: `${4 * globalScale}px`,
                     maxWidth: '15%',
@@ -820,7 +820,7 @@ const MachineNode = ({ data, id }) => {
                                 marginTop: `${2 * globalScale}px`,
                                 paddingTop: `${3 * globalScale}px`,
                                 borderTop: '1px solid rgba(74, 144, 226, 0.2)',
-                                fontSize: `${Math.max(7, 7 * globalScale)}px`,
+                                fontSize: `${Math.max(7, 5 * globalScale)}px`,
                                 color: '#888',
                                 textAlign: 'center',
                                 fontWeight: '500',
