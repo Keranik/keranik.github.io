@@ -238,10 +238,14 @@ const StorageNode = ({ data, id }) => {
                         fontWeight: '600',
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.6)',
                         transition: 'all 0.2s',
-                        zIndex: 200
+                        zIndex: 200,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: `${4 * globalScale}px`
                     }}
                 >
-                    🗑️
+                    <img src={getGeneralIcon('Trash')} alt="Delete" style={{ width: `${14 * globalScale}px`, height: `${14 * globalScale}px` }} />
                 </button>
             )}
         </div>
@@ -313,7 +317,7 @@ const MachineNode = ({ data, id }) => {
         const base = {
             width: baseSize,
             height: baseSize,
-            border: `${2 * globalScale}px solid #fff`,
+            border: `${0.5 * globalScale}px solid #fff`,
             position: 'absolute',
             cursor: 'crosshair',
             transition: 'all 0.2s',
@@ -390,7 +394,7 @@ const MachineNode = ({ data, id }) => {
         return 'AllCategory';
     };
 
-    const portProductIconSize = 20 * globalScale;
+    const portProductIconSize = 14 * globalScale;
 
     return (
         <div
@@ -727,6 +731,7 @@ const MachineNode = ({ data, id }) => {
                     pointerEvents: 'auto',
                     zIndex: 200
                 }}>
+
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
@@ -742,10 +747,14 @@ const MachineNode = ({ data, id }) => {
                             cursor: 'pointer',
                             fontWeight: '600',
                             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.6)',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
                         }}
+                        title="Rotate 90°"
                     >
-                        🔄
+                        <img src={getGeneralIcon('Rotate')} alt="Rotate" style={{ width: `${16 * globalScale}px`, height: `${16 * globalScale}px` }} />
                     </button>
 
                     <button
@@ -763,11 +772,17 @@ const MachineNode = ({ data, id }) => {
                             cursor: 'pointer',
                             fontWeight: '600',
                             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.6)',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
                         }}
+                        title="Delete"
                     >
-                        🗑️
+                        <img src={getGeneralIcon('Trash')} alt="Delete" style={{ width: `${16 * globalScale}px`, height: `${16 * globalScale}px` }} />
                     </button>
+
+
                 </div>
             )}
 
@@ -1248,7 +1263,14 @@ const Visualizer = () => {
                     return node;
                 })
             );
+
+            // Close modal immediately for node recipe change
+            setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null });
+
         } else if (context === 'portInputAdd' || context === 'portOutputAdd') {
+            // ✅ CLOSE MODAL FIRST so user can see the new node being created
+            setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null });
+
             // Create new node with selected recipe
             const recipe = ProductionCalculator.recipes.find(r => r.id === recipeId);
             if (!recipe) return;
@@ -1373,7 +1395,6 @@ const Visualizer = () => {
             if (connectionMode === 'auto') {
                 // Find matching ports to connect
                 const newNodePorts = parsedPorts;
-                const originalNodePorts = originalNode.data.parsedPorts;
 
                 let sourceNodeId, sourceHandle, targetNodeId, targetHandle;
 
@@ -1432,8 +1453,7 @@ const Visualizer = () => {
             saveHistory();
         }
 
-        // Close modal
-        setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null });
+        // ✅ Removed the modal close from here - now happens immediately above
     }, [recipeModalState, portActionModal, nodes, setNodes, connectionMode, selectedLayer, globalScale, setEdges, saveHistory, handlePortClick, findClearPosition]);
 
     const handlePortActionSelect = useCallback((action) => {
@@ -1614,7 +1634,7 @@ const Visualizer = () => {
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
                         }}>
-                            🏭 Factory Blueprint Designer
+                            <img src={getGeneralIcon('Buildings')} alt="Factory" style={{ width: '28px', height: '28px', verticalAlign: 'middle' }} /> Factory Blueprint Designer
                         </h2>
                         <p style={{ color: '#aaa', fontSize: '1rem', margin: 0 }}>
                             Design, optimize, and share your factory layouts • {nodes.length} machines • {edges.length} connections
@@ -1661,7 +1681,7 @@ const Visualizer = () => {
                                 transition: 'all 0.2s'
                             }}
                         >
-                            📐 Snap: {snapToGridEnabled ? 'ON' : 'OFF'}
+                            <img src={getGeneralIcon('NoSnap')} alt="SnapToGrid" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} /> Snap: {snapToGridEnabled ? 'ON' : 'OFF'}
                         </button>
 
                         {/* Undo/Redo */}
@@ -1681,7 +1701,7 @@ const Visualizer = () => {
                                 }}
                                 title="Undo (Ctrl+Z)"
                             >
-                                ↶
+                                <img src={getGeneralIcon('Undo')} alt="Undo" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />
                             </button>
                             <button
                                 onClick={redo}
@@ -1698,7 +1718,7 @@ const Visualizer = () => {
                                 }}
                                 title="Redo (Ctrl+Y)"
                             >
-                                ↷
+                                <img src={getGeneralIcon('Redo')} alt="Redo" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />
                             </button>
                         </div>
 
@@ -1716,7 +1736,7 @@ const Visualizer = () => {
                                 fontSize: '0.9rem'
                             }}
                         >
-                            💾 Export
+                            <img src={getGeneralIcon('ExportToString')} alt="ExportToString" style={{ width: '28px', height: '24px', verticalAlign: 'middle' }} /> Export
                         </button>
                         <label style={{
                             padding: '10px 16px',
@@ -1727,7 +1747,7 @@ const Visualizer = () => {
                             fontWeight: '600',
                             fontSize: '0.9rem'
                         }}>
-                            📁 Import
+                            <img src={getGeneralIcon('ImportFromString')} alt="ImportFromString" style={{ width: '51px', height: '24px', verticalAlign: 'middle' }} /> Import
                             <input
                                 type="file"
                                 accept=".json"
@@ -1805,12 +1825,12 @@ const Visualizer = () => {
                         boxShadow: '4px 0 12px rgba(0, 0, 0, 0.3)'
                     }}>
                         <h3 style={{ color: 'white', fontSize: '1.3rem', fontWeight: '700', marginBottom: '1rem' }}>
-                            🏭 Machines ({ProductionCalculator.machines?.length || 0})
+                            <img src={getGeneralIcon('Machines')} alt="Machines" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} /> Machines ({ProductionCalculator.machines?.length || 0})
                         </h3>
 
                         <input
                             type="text"
-                            placeholder="🔍 Search machines..."
+                            placeholder="Search machines..."
                             onChange={(e) => {
                                 const search = e.target.value.toLowerCase();
                                 setSelectedMachines(
@@ -2005,8 +2025,8 @@ const Visualizer = () => {
                                     lineHeight: '1.6'
                                 }}>
                                     {selectedMachines.length === 0 && ProductionCalculator.machines?.length > 0
-                                        ? '💡 Start typing to search for machines...'
-                                        : '❌ No machines found'}
+                                        ? 'Start typing to search for machines...'
+                                        : 'No machines found'}
                                 </li>
                             )}
                         </ul>
@@ -2061,8 +2081,9 @@ const Visualizer = () => {
                             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)',
                             zIndex: 10
                         }}>
-                            <div style={{ fontWeight: '700', marginBottom: '12px', color: '#4a90e2', fontSize: '1.1rem' }}>
-                                🎨 Port Types
+                            <div style={{ fontWeight: '700', marginBottom: '12px', color: '#4a90e2', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <img src={getGeneralIcon('InfoBubble')} alt="Info" style={{ width: '20px', height: '20px' }} />
+                                Port Types
                             </div>
                             {Object.entries(PORT_TYPES).map(([key, config]) => (
                                 <div key={key} style={{
