@@ -519,6 +519,7 @@ const Calculator = () => {
         }));
 
         const displayTime = showPerMinute ? '60' : `${recipe.durationSeconds}s`;
+        const hasNoInputs = inputs.length === 0;
 
         return (
             <div
@@ -586,8 +587,8 @@ const Calculator = () => {
                     </span>
                 </div>
 
-                {/* Inputs (only if recipe has inputs) */}
-                {inputs.length > 0 && (
+                {/* Inputs OR Gears icon if no inputs */}
+                {inputs.length > 0 ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         {inputs.map((input, idx) => {
                             const icon = getProductIcon(input.product);
@@ -633,6 +634,30 @@ const Calculator = () => {
                             );
                         })}
                     </div>
+                ) : (
+                    // No inputs - show Gears icon with infinity symbol
+                    gearsIcon && (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                            <img
+                                src={gearsIcon}
+                                alt="Machine processes without inputs"
+                                title="This recipe requires no inputs"
+                                style={{
+                                    width: `${config.productIcon}px`,
+                                    height: `${config.productIcon}px`,
+                                    objectFit: 'contain'
+                                }}
+                            />
+                            <span style={{
+                                color: '#ff9966',
+                                fontSize: config.quantityFont,
+                                fontWeight: '700',
+                                lineHeight: 1
+                            }}>
+                                ∞
+                            </span>
+                        </div>
+                    )
                 )}
 
                 {/* Arrow with Time Display */}
@@ -712,34 +737,48 @@ const Calculator = () => {
                     </div>
                 </div>
 
-                {/* Outputs */}
+                {/* Outputs (with + signs between them) */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     {outputs.map((output, idx) => {
                         const icon = getProductIcon(output.product);
                         const displayQty = showPerMinute ? output.perMinute.toFixed(1) : output.quantity;
 
                         return (
-                            <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                                {icon && (
-                                    <img
-                                        src={icon}
-                                        alt={output.product?.name}
-                                        title={output.product?.name}
-                                        style={{
-                                            width: `${config.productIcon}px`,
-                                            height: `${config.productIcon}px`,
-                                            objectFit: 'contain'
-                                        }}
-                                    />
+                            <div key={idx} style={{ display: 'contents' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                                    {icon && (
+                                        <img
+                                            src={icon}
+                                            alt={output.product?.name}
+                                            title={output.product?.name}
+                                            style={{
+                                                width: `${config.productIcon}px`,
+                                                height: `${config.productIcon}px`,
+                                                objectFit: 'contain'
+                                            }}
+                                        />
+                                    )}
+                                    <span style={{
+                                        color: '#5aa0f2',
+                                        fontSize: config.quantityFont,
+                                        fontWeight: '700',
+                                        lineHeight: 1
+                                    }}>
+                                        {displayQty}
+                                    </span>
+                                </div>
+
+                                {/* Plus sign between outputs (not after the last one) */}
+                                {idx < outputs.length - 1 && (
+                                    <span style={{
+                                        color: '#888',
+                                        fontSize: config.quantityFont,
+                                        fontWeight: '700',
+                                        margin: '0 2px'
+                                    }}>
+                                        +
+                                    </span>
                                 )}
-                                <span style={{
-                                    color: '#5aa0f2',
-                                    fontSize: config.quantityFont,
-                                    fontWeight: '700',
-                                    lineHeight: 1
-                                }}>
-                                    {displayQty}
-                                </span>
                             </div>
                         );
                     })}
@@ -979,11 +1018,11 @@ const Calculator = () => {
         // Resource source info
         const currentSource = node.resourceSource || { type: 'mining' };
         const sourceLabels = {
-            mining: '🔨 Mining (Local)',
-            worldMine: '⛏️ World Mine',
-            trade: '⚖️ Trade/Contract',
-            storage: '📦 Storage',
-            machine: '🏭 Machine Production'
+            mining: 'Mining (Local)',
+            worldMine: 'World Mine',
+            trade: 'Trade/Contract',
+            storage: 'Storage',
+            machine: 'Machine Production'
         };
 
         return (
@@ -1095,19 +1134,44 @@ const Calculator = () => {
                                             {node.inputChains.length} input{node.inputChains.length > 1 ? 's' : ''}
                                         </span>
                                     )}
-                                </div>
+                                </div> 
 
                                 {/* Raw material source display */}
                                 {isRaw && (
                                     <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        {/* Source icon */}
+                                        {(() => {
+                                            const sourceIcons = {
+                                                mining: getGeneralIcon('Mining'),
+                                                worldMine: getGeneralIcon('Mine'),
+                                                trade: getGeneralIcon('Trade'),
+                                                storage: getProductTypeIcon(product?.type),
+                                                machine: getGeneralIcon('Machines')
+                                            };
+                                            const icon = sourceIcons[currentSource.type];
+                                            return icon && (
+                                                <img
+                                                    src={icon}
+                                                    alt={sourceLabels[currentSource.type]}
+                                                    style={{
+                                                        width: '24px',
+                                                        height: '24px',
+                                                        objectFit: 'contain'
+                                                    }}
+                                                />
+                                            );
+                                        })()}
+
                                         <span style={{ fontSize: '0.9rem', color: '#aaa' }}>
                                             Source: {sourceLabels[currentSource.type]}
                                         </span>
+
                                         {currentSource.type === 'storage' && currentSource.config && (
                                             <span style={{ fontSize: '0.8rem', color: '#666', marginLeft: '4px' }}>
                                                 (Tier {currentSource.config.tier}, {currentSource.config.count}× needed)
                                             </span>
                                         )}
+
                                         <button
                                             onClick={() => openResourceSourceModal(node)}
                                             style={{
@@ -1129,6 +1193,7 @@ const Calculator = () => {
                                         </button>
                                     </div>
                                 )}
+
 
                                 {hasMultipleRecipes && currentRecipe && (
                                     <div style={{ marginTop: '8px' }}>
@@ -1321,6 +1386,24 @@ const Calculator = () => {
         );
     };
 
+    // Helper function to find the updated node in the new chain by matching nodeKey
+    const findNodeInChain = (chain, nodeKey) => {
+        if (!chain || !nodeKey) return null;
+
+        const search = (node) => {
+            if (node.nodeKey === nodeKey) return node;
+            if (node.inputChains && node.inputChains.length > 0) {
+                for (const child of node.inputChains) {
+                    const found = search(child);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+
+        return search(chain);
+    };
+
     const renderDetailsPanel = () => {
         if (!selectedNode) {
             return (
@@ -1336,12 +1419,16 @@ const Calculator = () => {
             );
         }
 
-        const product = selectedNode.product;
+        // CRITICAL FIX: Get the UPDATED node from the current production chain
+        // This ensures we show fresh data after recipe changes
+        const updatedNode = findNodeInChain(productionChain, selectedNode.nodeKey) || selectedNode;
+
+        const product = updatedNode.product;
         const productIcon = getProductIcon(product);
-        const machineImage = selectedNode.machine ? getMachineImage(selectedNode.machine) : null;
-        const hasMultipleRecipes = selectedNode.availableRecipes && selectedNode.availableRecipes.length > 1;
-        const currentRecipeId = recipeOverrides.get(selectedNode.productId) || selectedNode.recipe?.id;
-        const currentRecipe = selectedNode.availableRecipes?.find(r => r.id === currentRecipeId) || selectedNode.recipe;
+        const machineImage = updatedNode.machine ? getMachineImage(updatedNode.machine) : null;
+        const hasMultipleRecipes = updatedNode.availableRecipes && updatedNode.availableRecipes.length > 1;
+        const currentRecipeId = recipeOverrides.get(updatedNode.productId) || updatedNode.recipe?.id;
+        const currentRecipe = updatedNode.availableRecipes?.find(r => r.id === currentRecipeId) || updatedNode.recipe;
 
         return (
             <div>
@@ -1351,13 +1438,13 @@ const Calculator = () => {
                     )}
                     <div style={{ flex: 1 }}>
                         <h4 style={{ fontSize: '1.3rem', fontWeight: '700', color: '#fff', marginBottom: '4px' }}>
-                            {product?.name || selectedNode.productId}
+                            {product?.name || updatedNode.productId}
                         </h4>
                         <div style={{ color: '#4a90e2', fontSize: '1rem', fontWeight: '600' }}>
-                            {selectedNode.targetRate?.toFixed(2)} /min
+                            {updatedNode.targetRate?.toFixed(2)} /min
                         </div>
                     </div>
-                    {selectedNode.isRawMaterial && (
+                    {updatedNode.isRawMaterial && (
                         <span style={{
                             padding: '6px 12px',
                             backgroundColor: 'rgba(255, 215, 0, 0.15)',
@@ -1372,7 +1459,7 @@ const Calculator = () => {
                     )}
                 </div>
 
-                {currentRecipe && !selectedNode.isRawMaterial && (
+                {currentRecipe && !updatedNode.isRawMaterial && (
                     <div style={{ marginBottom: '1.5rem' }}>
                         <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '8px', fontWeight: '600' }}>
                             Current Recipe:
@@ -1389,7 +1476,7 @@ const Calculator = () => {
 
                         {hasMultipleRecipes && (
                             <button
-                                onClick={() => openRecipeModal(selectedNode.productId, selectedNode.availableRecipes)}
+                                onClick={() => openRecipeModal(updatedNode.productId, updatedNode.availableRecipes)}
                                 style={{
                                     width: '100%',
                                     padding: '10px',
@@ -1411,13 +1498,13 @@ const Calculator = () => {
                                     e.currentTarget.style.transform = 'translateY(0)';
                                 }}
                             >
-                                View {selectedNode.availableRecipes.length} Available Recipes
+                                View {updatedNode.availableRecipes.length} Available Recipes
                             </button>
                         )}
                     </div>
                 )}
 
-                {selectedNode.machine && !selectedNode.isRawMaterial && (
+                {updatedNode.machine && !updatedNode.isRawMaterial && (
                     <div style={{ marginBottom: '1.5rem' }}>
                         <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '8px', fontWeight: '600' }}>
                             Machine:
@@ -1430,14 +1517,14 @@ const Calculator = () => {
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                                 {machineImage && (
-                                    <img src={machineImage} alt={selectedNode.machine.name} style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+                                    <img src={machineImage} alt={updatedNode.machine.name} style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
                                 )}
                                 <div>
                                     <div style={{ fontSize: '1.05rem', fontWeight: '700', color: '#fff' }}>
-                                        {selectedNode.machine.name}
+                                        {updatedNode.machine.name}
                                     </div>
                                     <div style={{ fontSize: '0.9rem', color: '#4a90e2', fontWeight: '600' }}>
-                                        × {selectedNode.machineCount}
+                                        × {updatedNode.machineCount}
                                     </div>
                                 </div>
                             </div>
@@ -1446,20 +1533,20 @@ const Calculator = () => {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FFD700' }}>
                                     {getGeneralIcon('Electricity') && <img src={getGeneralIcon('Electricity')} style={{ width: '18px', height: '18px' }} />}
                                     <span style={{ fontWeight: '700' }}>
-                                        {(selectedNode.machine.electricityKw * selectedNode.machineCount).toFixed(0)} kW
+                                        {(updatedNode.machine.electricityKw * updatedNode.machineCount).toFixed(0)} kW
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#50C878' }}>
                                     {getGeneralIcon('Worker') && <img src={getGeneralIcon('Worker')} style={{ width: '18px', height: '18px' }} />}
                                     <span style={{ fontWeight: '700' }}>
-                                        {selectedNode.machine.workers * selectedNode.machineCount} workers
+                                        {updatedNode.machine.workers * updatedNode.machineCount} workers
                                     </span>
                                 </div>
-                                {selectedNode.machine.computingTFlops > 0 && (
+                                {updatedNode.machine.computingTFlops > 0 && (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4a90e2' }}>
                                         {getGeneralIcon('Computing') && <img src={getGeneralIcon('Computing')} style={{ width: '18px', height: '18px' }} />}
                                         <span style={{ fontWeight: '700' }}>
-                                            {(selectedNode.machine.computingTFlops * selectedNode.machineCount).toFixed(1)} TF
+                                            {(updatedNode.machine.computingTFlops * updatedNode.machineCount).toFixed(1)} TF
                                         </span>
                                     </div>
                                 )}
@@ -1468,13 +1555,13 @@ const Calculator = () => {
                     </div>
                 )}
 
-                {selectedNode.inputs && selectedNode.inputs.length > 0 && (
+                {updatedNode.inputs && updatedNode.inputs.length > 0 && (
                     <div>
                         <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '8px', fontWeight: '600' }}>
                             Inputs Required:
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            {selectedNode.inputs.map((input, idx) => {
+                            {updatedNode.inputs.map((input, idx) => {
                                 const inputIcon = getProductIcon(input.product);
                                 return (
                                     <div key={idx} style={{
@@ -1850,28 +1937,28 @@ const Calculator = () => {
                                         icon: getGeneralIcon('Mining'),
                                         label: 'Mining (Local)',
                                         description: 'Extract from local deposits',
-                                        emoji: '🔨'
+                                        emoji: null // No emoji, use icon only
                                     },
                                     {
                                         type: 'worldMine',
                                         icon: getGeneralIcon('Mine'),
                                         label: 'World Mine',
                                         description: 'Import from world map mines',
-                                        emoji: '⛏️'
+                                        emoji: null // No emoji, use icon only
                                     },
                                     {
                                         type: 'trade',
                                         icon: getGeneralIcon('Trade'),
                                         label: 'Trade/Contract',
                                         description: 'Purchase via contracts',
-                                        emoji: '⚖️'
+                                        emoji: null // No emoji, use icon only
                                     },
                                     {
                                         type: 'storage',
                                         icon: getProductTypeIcon(ProductionCalculator.getProduct(resourceSourceModal.productId)?.type),
                                         label: 'Storage',
                                         description: 'Provided from storage',
-                                        emoji: '📦'
+                                        emoji: null // No emoji, use icon only
                                     },
                                     {
                                         type: 'machine',
