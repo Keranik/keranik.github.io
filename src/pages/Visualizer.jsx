@@ -9,13 +9,16 @@ import {
     useEdgesState,
     Handle,
     Position,
-    MarkerType
+    MarkerType,
+    addEdge
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
 import { getMachineImage, getProductIcon, getGeneralIcon } from '../utils/AssetHelper';
+import RecipeCard from '../components/RecipeCard';
+import RecipeModal from '../components/RecipeModal';
 
 // ═══════════════════════════════════════════════════════════════════
 // CONFIGURATION
@@ -40,6 +43,7 @@ const LAYERS = [
 
 const DEFAULT_SCALE = 2.5;
 const GRID_SNAP_SIZE = 1;
+const NODE_SPACING_TILES = 1; // Spacing between stacked nodes
 
 // ═══════════════════════════════════════════════════════════════════
 // UTILITY FUNCTIONS
@@ -113,6 +117,137 @@ const calculateProduction = (machine, recipe) => {
     return { inputs, outputs, cyclesPerMinute };
 };
 
+// Check if two nodes overlap
+const nodesOverlap = (node1Pos, node1Width, node1Height, node2Pos, node2Width, node2Height) => {
+    return !(
+        node1Pos.x + node1Width < node2Pos.x ||
+        node2Pos.x + node2Width < node1Pos.x ||
+        node1Pos.y + node1Height < node2Pos.y ||
+        node2Pos.y + node2Height < node1Pos.y
+    );
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// STORAGE NODE COMPONENT
+// ═══════════════════════════════════════════════════════════════════
+
+const StorageNode = ({ data, id }) => {
+    const {
+        storageType, // 'source' | 'sink'
+        productType, // 'countable' | 'loose' | 'fluid'
+        tier,
+        product,
+        globalScale = DEFAULT_SCALE,
+        onDelete
+    } = data;
+
+    const [isHovered, setIsHovered] = useState(false);
+    const productIcon = product ? getProductIcon(product) : null;
+    const allCategoryIcon = getGeneralIcon('AllCategory');
+
+    const cardWidth = 120 * globalScale;
+    const cardHeight = 100 * globalScale;
+
+    const portConfig = PORT_TYPES[productType] || PORT_TYPES.countable;
+
+    return (
+        <div
+            style={{ width: '100%', height: '100%', position: 'relative' }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <div style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: storageType === 'source' ? '#2a4a2a' : '#4a2a2a',
+                border: `${3 * globalScale}px solid ${storageType === 'source' ? '#50C878' : '#ff6b6b'}`,
+                borderRadius: `${12 * globalScale}px`,
+                boxShadow: isHovered
+                    ? `0 12px 32px rgba(${storageType === 'source' ? '80, 200, 120' : '255, 107, 107'}, 0.5)`
+                    : '0 6px 16px rgba(0, 0, 0, 0.4)',
+                transition: 'all 0.3s',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: `${8 * globalScale}px`,
+                padding: `${12 * globalScale}px`
+            }}>
+                {/* Storage Icon */}
+                <div style={{ fontSize: `${32 * globalScale}px`, lineHeight: 1 }}>
+                    {storageType === 'source' ? '∞' : '🗑️'}
+                </div>
+
+                {/* Product Icon */}
+                {productIcon ? (
+                    <img src={productIcon} alt={product.name} style={{ width: `${32 * globalScale}px`, height: `${32 * globalScale}px`, objectFit: 'contain' }} />
+                ) : (
+                    <img src={allCategoryIcon} alt="Any" style={{ width: `${32 * globalScale}px`, height: `${32 * globalScale}px`, objectFit: 'contain' }} />
+                )}
+
+                {/* Label */}
+                <div style={{
+                    fontSize: `${10 * globalScale}px`,
+                    fontWeight: '700',
+                    color: '#fff',
+                    textAlign: 'center'
+                }}>
+                    {storageType === 'source' ? 'SOURCE' : 'SINK'}
+                </div>
+
+                <div style={{
+                    fontSize: `${8 * globalScale}px`,
+                    color: '#aaa',
+                    textAlign: 'center'
+                }}>
+                    Tier {tier} {productType}
+                </div>
+
+                {/* Port */}
+                <Handle
+                    type={storageType === 'source' ? 'source' : 'target'}
+                    position={storageType === 'source' ? Position.Right : Position.Left}
+                    style={{
+                        width: 18 * globalScale,
+                        height: 18 * globalScale,
+                        background: portConfig.color,
+                        border: `${2 * globalScale}px solid #fff`,
+                        borderRadius: portConfig.shape === 'circle' ? '50%' : portConfig.shape === 'square' ? '3px' : '50%'
+                    }}
+                />
+            </div>
+
+            {/* Delete button on hover */}
+            {isHovered && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete?.();
+                    }}
+                    style={{
+                        position: 'absolute',
+                        top: `-${30 * globalScale}px`,
+                        right: 0,
+                        padding: `${8 * globalScale}px ${12 * globalScale}px`,
+                        background: 'rgba(255, 107, 107, 0.95)',
+                        color: 'white',
+                        border: '2px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: `${8 * globalScale}px`,
+                        fontSize: `${12 * globalScale}px`,
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.6)',
+                        transition: 'all 0.2s',
+                        zIndex: 200
+                    }}
+                >
+                    🗑️
+                </button>
+            )}
+        </div>
+    );
+};
+
 // ═══════════════════════════════════════════════════════════════════
 // MACHINE NODE COMPONENT
 // ═══════════════════════════════════════════════════════════════════
@@ -131,11 +266,10 @@ const MachineNode = ({ data, id }) => {
         onRotate,
         onDelete,
         onRecipeChange,
-        onPortConnect
+        onPortClick
     } = data;
 
     const [isHovered, setIsHovered] = useState(false);
-    const [showRecipeMenu, setShowRecipeMenu] = useState(false);
 
     const recipeData = useMemo(() => {
         if (!selectedRecipe) return null;
@@ -157,30 +291,22 @@ const MachineNode = ({ data, id }) => {
         return { workers, electricity, computing, maintenance, maintenanceProductId };
     }, [machine]);
 
-    // Get game icons
     const workerIcon = getGeneralIcon('Worker');
     const electricityIcon = getGeneralIcon('Electricity');
     const computingIcon = getGeneralIcon('Computing');
-
-    // Get maintenance icon (Product_Maintenance1, Product_Maintenance2, or Product_Maintenance3)
     const maintenanceIcon = costs.maintenanceProductId ?
         getProductIcon(ProductionCalculator.getProduct(costs.maintenanceProductId)) : null;
-
-    // AllCategory fallback icon
     const allCategoryIcon = getGeneralIcon('AllCategory');
 
-    // Calculate card dimensions
     const cardWidth = layoutWidth * 20 * globalScale;
     const cardHeight = layoutHeight * 20 * globalScale;
 
-    // Percentage-based sizing
     const nameFontSize = `${Math.max(10, Math.min(cardWidth * 0.04, 28))}px`;
     const sizeIndicatorFontSize = `${Math.max(8, Math.min(cardWidth * 0.025, 14))}px`;
-    const costBadgeWidth = Math.max(60, cardWidth * 0.18); // Min 60px, ~18% of width
-    const costBadgeHeight = Math.max(24, cardHeight * 0.08); // Min 24px, ~8% of height
+    const costBadgeWidth = Math.max(60, cardWidth * 0.18);
+    const costBadgeHeight = Math.max(24, cardHeight * 0.08);
     const costFontSize = `${Math.max(9, Math.min(cardWidth * 0.022, 12))}px`;
     const costIconSize = Math.max(12, Math.min(cardWidth * 0.03, 16));
-    const recipeFontSize = `${Math.max(10, Math.min(cardWidth * 0.028, 14))}px`;
 
     const getPortStyle = (port) => {
         const config = PORT_TYPES[port.inferredType] || PORT_TYPES.countable;
@@ -223,14 +349,11 @@ const MachineNode = ({ data, id }) => {
         };
     };
 
-    // ✅ SMART PORT PRODUCT MAPPING
     const getPortProduct = (port) => {
         if (!recipeData) {
             return 'AllCategory';
         }
 
-        // Step 1: Try exact match (single-port recipes)
-        // Check inputs
         const exactInput = recipeData.inputs?.find(inp =>
             inp.ports?.length === 1 && inp.ports[0].id === port.id
         );
@@ -238,7 +361,6 @@ const MachineNode = ({ data, id }) => {
             return ProductionCalculator.getProduct(exactInput.productId);
         }
 
-        // Check outputs
         const exactOutput = recipeData.outputs?.find(out =>
             out.ports?.length === 1 && out.ports[0].id === port.id
         );
@@ -246,31 +368,21 @@ const MachineNode = ({ data, id }) => {
             return ProductionCalculator.getProduct(exactOutput.productId);
         }
 
-        // Step 2: Wildcard distribution (multiple ports per product)
-        // Group ports by type
         const inputPorts = parsedPorts.filter(p => p.type === 'input').sort((a, b) => a.id.localeCompare(b.id));
         const outputPorts = parsedPorts.filter(p => p.type === 'output').sort((a, b) => a.id.localeCompare(b.id));
 
         if (port.type === 'input') {
-            // Find wildcard inputs (those with multiple ports)
             const wildcardInputs = recipeData.inputs?.filter(inp => inp.ports?.length > 1) || [];
-
             if (wildcardInputs.length > 0) {
-                // Distribute: assign each input to a different port by index
                 const portIndex = inputPorts.findIndex(p => p.id === port.id);
-
                 if (portIndex >= 0 && portIndex < wildcardInputs.length) {
                     return ProductionCalculator.getProduct(wildcardInputs[portIndex].productId);
                 }
             }
         } else if (port.type === 'output') {
-            // Find wildcard outputs (those with multiple ports)
             const wildcardOutputs = recipeData.outputs?.filter(out => out.ports?.length > 1) || [];
-
             if (wildcardOutputs.length > 0) {
-                // Distribute: assign each output to a different port by index
                 const portIndex = outputPorts.findIndex(p => p.id === port.id);
-
                 if (portIndex >= 0 && portIndex < wildcardOutputs.length) {
                     return ProductionCalculator.getProduct(wildcardOutputs[portIndex].productId);
                 }
@@ -306,7 +418,6 @@ const MachineNode = ({ data, id }) => {
                 transition: 'all 0.3s',
                 overflow: 'visible'
             }}>
-                {/* Machine Image (FIXED SIZE, just centered) */}
                 {machineImage && (
                     <div style={{
                         position: 'absolute',
@@ -334,7 +445,7 @@ const MachineNode = ({ data, id }) => {
                     </div>
                 )}
 
-                {/* Ports (SCALE with grid) */}
+                {/* Ports */}
                 {parsedPorts.map((port) => {
                     const productOrMarker = getPortProduct(port);
                     let productIcon = null;
@@ -347,12 +458,18 @@ const MachineNode = ({ data, id }) => {
 
                     const portScale = 20 * globalScale;
 
+                    // FIX: Adjust right-edge outputs by +1 tile
+                    let adjustedX = port.pos.x;
+                    if (port.type === 'output' && port.dir === '+X' && port.pos.x === layoutWidth - 1) {
+                        adjustedX += 1;
+                    }
+
                     return (
                         <div
                             key={port.id}
                             style={{
                                 position: 'absolute',
-                                left: `${port.pos.x * portScale}px`,
+                                left: `${adjustedX * portScale}px`,
                                 top: `${port.pos.y * portScale}px`,
                                 display: 'flex',
                                 alignItems: 'center',
@@ -367,10 +484,9 @@ const MachineNode = ({ data, id }) => {
                                 style={getPortStyle(port)}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onPortConnect?.(id, port);
+                                    onPortClick?.(id, port, productOrMarker);
                                 }}
                             />
-                            {/* Port product icons SCALE */}
                             {productIcon && (
                                 <img
                                     src={productIcon}
@@ -399,7 +515,7 @@ const MachineNode = ({ data, id }) => {
                 bottom: 0,
                 pointerEvents: 'none'
             }}>
-                {/* Machine name (SCALES - max 60% width, centered top) */}
+                {/* Machine name */}
                 <div style={{
                     position: 'absolute',
                     top: `${8 * globalScale}px`,
@@ -422,30 +538,7 @@ const MachineNode = ({ data, id }) => {
                     {label}
                 </div>
 
-                {/* Recipe indicator (50-60% width, centered bottom) */}
-                {recipeData && (
-                    <div style={{
-                        position: 'absolute',
-                        bottom: `${8 * globalScale}px`,
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        padding: `${4 * globalScale}px ${8 * globalScale}px`,
-                        backgroundColor: 'rgba(80, 200, 120, 0.95)',
-                        borderRadius: `${4 * globalScale}px`,
-                        fontSize: recipeFontSize,
-                        fontWeight: '600',
-                        color: 'white',
-                        whiteSpace: 'nowrap',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        maxWidth: '60%',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                    }}>
-                        📋 {recipeData.name}
-                    </div>
-                )}
-
-                {/* Size indicator (SCALES - max 15% width, top right) */}
+                {/* Size indicator */}
                 <div style={{
                     position: 'absolute',
                     top: `${8 * globalScale}px`,
@@ -463,37 +556,16 @@ const MachineNode = ({ data, id }) => {
                 }}>
                     {layoutWidth}×{layoutHeight}
                 </div>
-
-                {/* Production rate (bottom right) */}
-                {production && (
-                    <div style={{
-                        position: 'absolute',
-                        bottom: `${8 * globalScale}px`,
-                        right: `${8 * globalScale}px`,
-                        fontSize: recipeFontSize,
-                        color: '#fff',
-                        fontWeight: '600',
-                        backgroundColor: 'rgba(80, 200, 120, 0.95)',
-                        padding: `${4 * globalScale}px ${8 * globalScale}px`,
-                        borderRadius: `${4 * globalScale}px`,
-                        whiteSpace: 'nowrap',
-                        maxWidth: '30%',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                    }} title={`${production.cyclesPerMinute.toFixed(1)} cycles/min`}>
-                        ⚙️ {production.cyclesPerMinute.toFixed(1)}/min
-                    </div>
-                )}
             </div>
 
-            {/* ✅ HOVER CONTROLS ABOVE CARD */}
+            {/* Hover controls */}
             {isHovered && (
                 <div style={{
                     position: 'absolute',
-                    bottom: '100%',  // ← Unchanged: Keeps it pinned above the node
+                    bottom: '100%',
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    marginBottom: `${globalScale}px`,  // ← CHANGED: Reduced from 8 to 4 (halves the gap; adjust to 0 for flush/tighter)
+                    marginBottom: `${globalScale}px`,
                     display: 'flex',
                     gap: `${8 * globalScale}px`,
                     pointerEvents: 'auto',
@@ -520,29 +592,6 @@ const MachineNode = ({ data, id }) => {
                         🔄
                     </button>
 
-                    {machine.recipes?.length > 1 && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setShowRecipeMenu(!showRecipeMenu);
-                            }}
-                            style={{
-                                padding: `${10 * globalScale}px ${14 * globalScale}px`,
-                                background: 'rgba(80, 200, 120, 0.95)',
-                                color: 'white',
-                                border: '2px solid rgba(255, 255, 255, 0.3)',
-                                borderRadius: `${8 * globalScale}px`,
-                                fontSize: `${14 * globalScale}px`,
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.6)',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            📋
-                        </button>
-                    )}
-
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
@@ -566,56 +615,64 @@ const MachineNode = ({ data, id }) => {
                 </div>
             )}
 
-            {/* Recipe menu (appears below when recipe button clicked) */}
-            {showRecipeMenu && machine.recipes?.length > 1 && (
-                <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    marginTop: `${8 * globalScale}px`,
-                    background: '#2a2a2a',
-                    border: '2px solid #4a90e2',
-                    borderRadius: `${8 * globalScale}px`,
-                    padding: `${8 * globalScale}px`,
-                    zIndex: 300,
-                    pointerEvents: 'auto',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                    minWidth: '200px',
-                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)'
-                }}>
-                    {machine.recipes.map(recipeId => {
-                        const recipe = ProductionCalculator.recipes?.find(r => r.id === recipeId);
-                        if (!recipe) return null;
-
-                        return (
-                            <div
-                                key={recipeId}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onRecipeChange?.(recipeId);
-                                    setShowRecipeMenu(false);
-                                }}
-                                style={{
-                                    padding: `${8 * globalScale}px ${12 * globalScale}px`,
-                                    cursor: 'pointer',
-                                    borderRadius: `${4 * globalScale}px`,
-                                    backgroundColor: selectedRecipe === recipeId ? '#4a90e2' : 'transparent',
-                                    color: 'white',
-                                    fontSize: recipeFontSize,
-                                    transition: 'all 0.2s',
-                                    marginBottom: `${4 * globalScale}px`
-                                }}
-                            >
-                                {recipe.name}
-                            </div>
-                        );
-                    })}
+            {/* Recipe Card */}
+            {recipeData && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        marginTop: `${4 * globalScale}px`,
+                        pointerEvents: 'auto',
+                        transition: 'all 0.2s',
+                        opacity: isHovered ? 1 : 0.85,
+                        filter: isHovered ? 'brightness(1.1)' : 'brightness(1)',
+                        cursor: machine.recipes?.length > 1 ? 'pointer' : 'default',
+                        backgroundColor: '#2a2a2a',
+                        borderRadius: `${8 * globalScale}px`,
+                        padding: `${6 * globalScale}px`,
+                        border: machine.recipes?.length > 1
+                            ? `2px solid ${isHovered ? '#5aa0f2' : '#4a90e2'}`
+                            : '2px solid #333',
+                        boxShadow: isHovered
+                            ? '0 8px 24px rgba(74, 144, 226, 0.4)'
+                            : '0 4px 12px rgba(0, 0, 0, 0.4)',
+                        minWidth: `${200 * globalScale}px`,
+                        maxWidth: `${350 * globalScale}px`,
+                        whiteSpace: 'nowrap'
+                    }}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (machine.recipes?.length > 1) {
+                            onRecipeChange?.(selectedRecipe);
+                        }
+                    }}
+                    title={machine.recipes?.length > 1 ? 'Click to change recipe' : recipeData.name}
+                >
+                    <RecipeCard
+                        recipe={recipeData}
+                        size="compact"
+                        isClickable={false}
+                    />
+                    {machine.recipes?.length > 1 && (
+                        <div style={{
+                            marginTop: `${4 * globalScale}px`,
+                            padding: `${4 * globalScale}px`,
+                            backgroundColor: 'rgba(74, 144, 226, 0.15)',
+                            borderRadius: `${4 * globalScale}px`,
+                            textAlign: 'center',
+                            fontSize: `${10 * globalScale}px`,
+                            color: '#5aa0f2',
+                            fontWeight: '700'
+                        }}>
+                            {machine.recipes.length} recipes available - Click to change
+                        </div>
+                    )}
                 </div>
             )}
 
-            {/* ✅ COST BADGES BELOW CARD (HORIZONTAL) */}
+            {/* Cost badges */}
             <div style={{
                 position: 'absolute',
                 top: '100%',
@@ -626,7 +683,7 @@ const MachineNode = ({ data, id }) => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 gap: `${6 * globalScale}px`,
-                marginTop: `${8 * globalScale}px`,
+                marginTop: `${(recipeData ? 80 : 8) * globalScale}px`,
                 pointerEvents: 'none',
                 flexWrap: 'wrap'
             }}>
@@ -732,7 +789,8 @@ const MachineNode = ({ data, id }) => {
 };
 
 const nodeTypes = {
-    machineNode: MachineNode
+    machineNode: MachineNode,
+    storageNode: StorageNode
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -753,12 +811,29 @@ const Visualizer = () => {
     const [history, setHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
 
-    // Load icons
+    // Recipe modal state
+    const [recipeModalState, setRecipeModalState] = useState({
+        open: false,
+        recipes: [],
+        currentRecipeId: null,
+        nodeId: null,
+        context: null // 'nodeRecipeChange' | 'portInputAdd' | 'portOutputAdd'
+    });
+
+    // Port action modal state
+    const [portActionModal, setPortActionModal] = useState({
+        open: false,
+        nodeId: null,
+        port: null,
+        product: null,
+        type: null // 'input' | 'output'
+    });
+
     const workerIcon = getGeneralIcon('Worker');
     const electricityIcon = getGeneralIcon('Electricity');
     const computingIcon = getGeneralIcon('Computing');
+    const machinesIcon = getGeneralIcon('Machines');
 
-    // Load game data
     useEffect(() => {
         document.title = 'Factory Visualizer - Captain of Industry Tools';
 
@@ -772,7 +847,6 @@ const Visualizer = () => {
         loadData();
     }, [settings.enableModdedContent, settings.enabledMods]);
 
-    // ✅ UPDATE NODES WHEN SCALE CHANGES
     useEffect(() => {
         setNodes((nds) =>
             nds.map((node) => {
@@ -781,6 +855,19 @@ const Visualizer = () => {
                     const scaledPixelPerGrid = basePixelPerGrid * globalScale;
                     const width = node.data.layoutWidth * scaledPixelPerGrid;
                     const height = node.data.layoutHeight * scaledPixelPerGrid;
+
+                    return {
+                        ...node,
+                        data: { ...node.data, globalScale },
+                        style: {
+                            ...node.style,
+                            width,
+                            height
+                        }
+                    };
+                } else if (node.type === 'storageNode') {
+                    const width = 120 * globalScale;
+                    const height = 100 * globalScale;
 
                     return {
                         ...node,
@@ -812,7 +899,6 @@ const Visualizer = () => {
         );
     }, [globalScale, setNodes, setEdges]);
 
-    // Calculate total costs with maintenance breakdown
     const totalCosts = useMemo(() => {
         let workers = 0;
         let electricity = 0;
@@ -864,6 +950,67 @@ const Visualizer = () => {
         }
     }, [historyIndex, history, setNodes, setEdges]);
 
+    // Find a clear position for a new node, bumping existing nodes if necessary
+    const findClearPosition = useCallback((idealPosition, nodeWidth, nodeHeight, priorityNodeId = null) => {
+        let position = { ...idealPosition };
+        const maxAttempts = 100;
+        let attempt = 0;
+        const bumpDistance = 20 * globalScale * GRID_SNAP_SIZE;
+
+        while (attempt < maxAttempts) {
+            let hasCollision = false;
+
+            for (const existingNode of nodes) {
+                if (existingNode.id === priorityNodeId) continue; // Don't check against self
+
+                const existingPos = existingNode.position;
+                const existingWidth = existingNode.style?.width || 100;
+                const existingHeight = existingNode.style?.height || 100;
+
+                if (nodesOverlap(position, nodeWidth, nodeHeight, existingPos, existingWidth, existingHeight)) {
+                    hasCollision = true;
+
+                    // Bump the EXISTING node (priority to new node)
+                    const dx = position.x - existingPos.x;
+                    const dy = position.y - existingPos.y;
+
+                    let bumpX = 0;
+                    let bumpY = 0;
+
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        bumpX = dx > 0 ? -bumpDistance : bumpDistance;
+                    } else {
+                        bumpY = dy > 0 ? -bumpDistance : bumpDistance;
+                    }
+
+                    setNodes((nds) =>
+                        nds.map((n) =>
+                            n.id === existingNode.id
+                                ? {
+                                    ...n,
+                                    position: {
+                                        x: n.position.x + bumpX,
+                                        y: n.position.y + bumpY
+                                    }
+                                }
+                                : n
+                        )
+                    );
+
+                    break;
+                }
+            }
+
+            if (!hasCollision) {
+                return position;
+            }
+
+            attempt++;
+        }
+
+        return position;
+    }, [nodes, globalScale, setNodes]);
+
     const onAddNode = useCallback((machine, position = null) => {
         const parsedPorts = parseLayoutPorts(machine.layout.layoutString, machine.layout.ports);
         const machineImage = getMachineImage(machine);
@@ -878,6 +1025,8 @@ const Visualizer = () => {
         if (snapToGridEnabled) {
             nodePosition = snapToGrid(nodePosition, GRID_SNAP_SIZE, globalScale);
         }
+
+        nodePosition = findClearPosition(nodePosition, width, height);
 
         const newNode = {
             id: `${machine.id}-${Date.now()}`,
@@ -896,7 +1045,7 @@ const Visualizer = () => {
                 onRotate: null,
                 onDelete: null,
                 onRecipeChange: null,
-                onPortConnect: null
+                onPortClick: null
             },
             position: nodePosition,
             style: {
@@ -909,6 +1058,7 @@ const Visualizer = () => {
         };
 
         const nodeId = newNode.id;
+
         newNode.data.onRotate = () => {
             setNodes((nds) =>
                 nds.map((node) => {
@@ -940,7 +1090,89 @@ const Visualizer = () => {
             saveHistory();
         };
 
-        newNode.data.onRecipeChange = (recipeId) => {
+        newNode.data.onRecipeChange = (currentRecipeId) => {
+            const recipes = machine.recipes?.map(rId =>
+                ProductionCalculator.recipes?.find(r => r.id === rId)
+            ).filter(Boolean) || [];
+
+            setRecipeModalState({
+                open: true,
+                recipes,
+                currentRecipeId,
+                nodeId: nodeId,
+                context: 'nodeRecipeChange'
+            });
+        };
+
+        newNode.data.onPortClick = (nodeId, port, product) => {
+            handlePortClick(nodeId, port, product);
+        };
+
+        setNodes((nds) => nds.concat(newNode));
+        saveHistory();
+    }, [setNodes, globalScale, snapToGridEnabled, saveHistory, findClearPosition]);
+
+    const onAddStorageNode = useCallback((storageType, productType, tier, product, position) => {
+        const width = 120 * globalScale;
+        const height = 100 * globalScale;
+
+        let nodePosition = position || { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 };
+        if (snapToGridEnabled) {
+            nodePosition = snapToGrid(nodePosition, GRID_SNAP_SIZE, globalScale);
+        }
+
+        nodePosition = findClearPosition(nodePosition, width, height);
+
+        const newNode = {
+            id: `storage-${storageType}-${Date.now()}`,
+            type: 'storageNode',
+            data: {
+                storageType,
+                productType,
+                tier,
+                product,
+                globalScale,
+                onDelete: null
+            },
+            position: nodePosition,
+            style: {
+                width,
+                height,
+                backgroundColor: 'transparent',
+                border: 'none',
+                position: 'relative'
+            }
+        };
+
+        const nodeId = newNode.id;
+
+        newNode.data.onDelete = () => {
+            setNodes((nds) => nds.filter(node => node.id !== nodeId));
+            setEdges((eds) => eds.filter(edge => edge.source !== nodeId && edge.target !== nodeId));
+            saveHistory();
+        };
+
+        setNodes((nds) => nds.concat(newNode));
+        saveHistory();
+    }, [setNodes, globalScale, snapToGridEnabled, saveHistory, findClearPosition]);
+
+    const handlePortClick = useCallback((nodeId, port, product) => {
+        console.log('Port clicked:', { nodeId, port, product });
+
+        setPortActionModal({
+            open: true,
+            nodeId,
+            port,
+            product,
+            type: port.type
+        });
+    }, []);
+
+    const handleRecipeSelection = useCallback((recipeId) => {
+        const { nodeId, context } = recipeModalState;
+
+        if (context === 'nodeRecipeChange') {
+            // Update existing node's recipe
             setNodes((nds) =>
                 nds.map((node) => {
                     if (node.id === nodeId) {
@@ -952,83 +1184,254 @@ const Visualizer = () => {
                     return node;
                 })
             );
-            saveHistory();
-        };
+        } else if (context === 'portInputAdd' || context === 'portOutputAdd') {
+            // Create new node with selected recipe
+            const recipe = ProductionCalculator.recipes.find(r => r.id === recipeId);
+            if (!recipe) return;
 
-        newNode.data.onPortConnect = (nodeId, port) => {
-            handlePortClick(nodeId, port);
-        };
+            const machines = ProductionCalculator.getMachinesForRecipe(recipeId);
+            if (!machines || machines.length === 0) return;
 
-        setNodes((nds) => nds.concat(newNode));
-        saveHistory();
-    }, [setNodes, globalScale, snapToGridEnabled, saveHistory]);
+            const machine = machines[0]; // Use first machine that can make this recipe
 
-    const handlePortClick = useCallback((nodeId, port) => {
-        if (connectionMode === 'manual') {
-            if (!connectingFrom) {
-                setConnectingFrom({ nodeId, portId: port.id, portType: port.type, inferredType: port.inferredType });
+            // Calculate position based on original node
+            const originalNode = nodes.find(n => n.id === nodeId);
+            if (!originalNode) return;
+
+            const { port } = portActionModal;
+            const basePixelPerGrid = 20;
+            const scaledPixelPerGrid = basePixelPerGrid * globalScale;
+            const spacing = NODE_SPACING_TILES * scaledPixelPerGrid;
+
+            let newNodePosition = { ...originalNode.position };
+
+            // Determine placement based on port direction
+            if (context === 'portInputAdd') {
+                // Place to the left for inputs
+                newNodePosition.x -= (machine.layout.width * scaledPixelPerGrid) + spacing;
             } else {
-                const sourceNode = nodes.find(n => n.id === connectingFrom.nodeId);
-                const targetNode = nodes.find(n => n.id === nodeId);
-
-                if (!sourceNode || !targetNode) {
-                    setConnectingFrom(null);
-                    return;
-                }
-
-                const sourcePort = sourceNode.data.parsedPorts.find(p => p.id === connectingFrom.portId);
-                const targetPort = port;
-
-                const isValidDirection = (sourcePort.type === 'output' && targetPort.type === 'input') ||
-                    (sourcePort.type === 'input' && targetPort.type === 'output');
-                const isCompatibleType = sourcePort.inferredType === targetPort.inferredType;
-
-                if (isValidDirection && isCompatibleType) {
-                    createEdge(
-                        sourcePort.type === 'output' ? connectingFrom.nodeId : nodeId,
-                        sourcePort.type === 'output' ? connectingFrom.portId : port.id,
-                        sourcePort.type === 'output' ? nodeId : connectingFrom.nodeId,
-                        sourcePort.type === 'output' ? port.id : connectingFrom.portId,
-                        sourcePort.inferredType
-                    );
-                }
-
-                setConnectingFrom(null);
+                // Place to the right for outputs
+                newNodePosition.x += (originalNode.data.layoutWidth * scaledPixelPerGrid) + spacing;
             }
+
+            // Create the new node
+            const parsedPorts = parseLayoutPorts(machine.layout.layoutString, machine.layout.ports);
+            const machineImage = getMachineImage(machine);
+            const width = machine.layout.width * scaledPixelPerGrid;
+            const height = machine.layout.height * scaledPixelPerGrid;
+
+            newNodePosition = findClearPosition(newNodePosition, width, height);
+
+            const newNodeId = `${machine.id}-${Date.now()}`;
+
+            const newNode = {
+                id: newNodeId,
+                type: 'machineNode',
+                data: {
+                    label: machine.name,
+                    parsedPorts,
+                    rotation: 0,
+                    machineId: machine.id,
+                    machineImage,
+                    layoutWidth: machine.layout.width,
+                    layoutHeight: machine.layout.height,
+                    machine,
+                    selectedRecipe: recipeId,
+                    globalScale,
+                    onRotate: null,
+                    onDelete: null,
+                    onRecipeChange: null,
+                    onPortClick: null
+                },
+                position: newNodePosition,
+                style: {
+                    width,
+                    height,
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    position: 'relative'
+                }
+            };
+
+            // Add handlers
+            newNode.data.onRotate = () => {
+                setNodes((nds) =>
+                    nds.map((node) => {
+                        if (node.id === newNodeId) {
+                            const newRotation = (node.data.rotation + 90) % 360;
+                            const shouldSwap = (newRotation === 90 || newRotation === 270);
+                            const currentWidth = node.style?.width;
+                            const currentHeight = node.style?.height;
+
+                            return {
+                                ...node,
+                                data: { ...node.data, rotation: newRotation },
+                                style: {
+                                    ...node.style,
+                                    width: shouldSwap ? currentHeight : currentWidth,
+                                    height: shouldSwap ? currentWidth : currentHeight
+                                }
+                            };
+                        }
+                        return node;
+                    })
+                );
+                saveHistory();
+            };
+
+            newNode.data.onDelete = () => {
+                setNodes((nds) => nds.filter(node => node.id !== newNodeId));
+                setEdges((eds) => eds.filter(edge => edge.source !== newNodeId && edge.target !== newNodeId));
+                saveHistory();
+            };
+
+            newNode.data.onRecipeChange = (currentRecipeId) => {
+                const recipes = machine.recipes?.map(rId =>
+                    ProductionCalculator.recipes?.find(r => r.id === rId)
+                ).filter(Boolean) || [];
+
+                setRecipeModalState({
+                    open: true,
+                    recipes,
+                    currentRecipeId,
+                    nodeId: newNodeId,
+                    context: 'nodeRecipeChange'
+                });
+            };
+
+            newNode.data.onPortClick = (nodeId, port, product) => {
+                handlePortClick(nodeId, port, product);
+            };
+
+            setNodes((nds) => nds.concat(newNode));
+
+            // Auto-connect if connection mode is auto
+            if (connectionMode === 'auto') {
+                // Find matching ports to connect
+                const newNodePorts = parsedPorts;
+                const originalNodePorts = originalNode.data.parsedPorts;
+
+                let sourceNodeId, sourceHandle, targetNodeId, targetHandle;
+
+                if (context === 'portInputAdd') {
+                    // New node outputs to original node input
+                    const newNodeOutputPort = newNodePorts.find(p => p.type === 'output');
+                    if (newNodeOutputPort) {
+                        sourceNodeId = newNodeId;
+                        sourceHandle = newNodeOutputPort.id;
+                        targetNodeId = nodeId;
+                        targetHandle = port.id;
+                    }
+                } else {
+                    // Original node output to new node input
+                    const newNodeInputPort = newNodePorts.find(p => p.type === 'input');
+                    if (newNodeInputPort) {
+                        sourceNodeId = nodeId;
+                        sourceHandle = port.id;
+                        targetNodeId = newNodeId;
+                        targetHandle = newNodeInputPort.id;
+                    }
+                }
+
+                if (sourceNodeId && targetNodeId) {
+                    const newEdge = {
+                        id: `e${sourceNodeId}-${sourceHandle}-${targetNodeId}-${targetHandle}`,
+                        source: sourceNodeId,
+                        sourceHandle,
+                        target: targetNodeId,
+                        targetHandle,
+                        type: 'smoothstep',
+                        animated: true,
+                        style: {
+                            stroke: LAYERS[selectedLayer].color,
+                            strokeWidth: 4 * globalScale
+                        },
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                            width: 20 * globalScale,
+                            height: 20 * globalScale,
+                            color: LAYERS[selectedLayer].color,
+                        },
+                        data: {
+                            layer: selectedLayer,
+                            portType: port.inferredType,
+                            flow: 0
+                        },
+                        label: `Layer ${selectedLayer}`,
+                        zIndex: LAYERS[selectedLayer].zIndex
+                    };
+
+                    setEdges((eds) => [...eds, newEdge]);
+                }
+            }
+
+            saveHistory();
         }
-    }, [connectionMode, connectingFrom, nodes]);
 
-    const createEdge = useCallback((sourceId, sourceHandle, targetId, targetHandle, portType) => {
-        const newEdge = {
-            id: `e${sourceId}-${sourceHandle}-${targetId}-${targetHandle}`,
-            source: sourceId,
-            sourceHandle,
-            target: targetId,
-            targetHandle,
-            type: 'smoothstep',
-            animated: true,
-            style: {
-                stroke: LAYERS[selectedLayer].color,
-                strokeWidth: 4 * globalScale
-            },
-            markerEnd: {
-                type: MarkerType.ArrowClosed,
-                width: 20 * globalScale,
-                height: 20 * globalScale,
-                color: LAYERS[selectedLayer].color,
-            },
-            data: {
-                layer: selectedLayer,
-                portType,
-                flow: 0
-            },
-            label: `Layer ${selectedLayer}`,
-            zIndex: LAYERS[selectedLayer].zIndex
-        };
+        // Close modal
+        setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null });
+    }, [recipeModalState, portActionModal, nodes, setNodes, connectionMode, selectedLayer, globalScale, setEdges, saveHistory, handlePortClick, findClearPosition]);
 
-        setEdges((eds) => [...eds, newEdge]);
-        saveHistory();
-    }, [selectedLayer, globalScale, setEdges, saveHistory]);
+    const handlePortActionSelect = useCallback((action) => {
+        const { nodeId, port, product } = portActionModal;
+
+        if (action === 'machine') {
+            // Open recipe modal for this product
+            let recipes = [];
+
+            if (port.type === 'input') {
+                // Find recipes that OUTPUT this product
+                recipes = ProductionCalculator.recipes.filter(r =>
+                    r.outputs.some(o => product !== 'AllCategory' && o.productId === product.id)
+                );
+            } else {
+                // Find recipes that INPUT this product
+                recipes = ProductionCalculator.recipes.filter(r =>
+                    r.inputs.some(i => product !== 'AllCategory' && i.productId === product.id)
+                );
+            }
+
+            if (recipes.length === 0) {
+                console.log('No recipes found for this product');
+                return;
+            }
+
+            setRecipeModalState({
+                open: true,
+                recipes,
+                currentRecipeId: null,
+                nodeId,
+                context: port.type === 'input' ? 'portInputAdd' : 'portOutputAdd'
+            });
+        } else if (action.startsWith('storage-')) {
+            // Create storage node
+            const tier = parseInt(action.split('-')[1]);
+            const productType = product !== 'AllCategory' ? port.inferredType : 'countable';
+            const storageType = port.type === 'input' ? 'source' : 'sink';
+
+            // Calculate position
+            const originalNode = nodes.find(n => n.id === nodeId);
+            if (!originalNode) return;
+
+            const basePixelPerGrid = 20;
+            const scaledPixelPerGrid = basePixelPerGrid * globalScale;
+            const spacing = NODE_SPACING_TILES * scaledPixelPerGrid;
+
+            let storagePosition = { ...originalNode.position };
+
+            if (storageType === 'source') {
+                storagePosition.x -= 120 * globalScale + spacing;
+            } else {
+                storagePosition.x += (originalNode.data.layoutWidth * scaledPixelPerGrid) + spacing;
+            }
+
+            onAddStorageNode(storageType, productType, tier, product !== 'AllCategory' ? product : null, storagePosition);
+
+            // TODO: Auto-connect if connection mode is auto
+        }
+
+        setPortActionModal({ open: false, nodeId: null, port: null, product: null, type: null });
+    }, [portActionModal, nodes, globalScale, onAddStorageNode]);
 
     const exportBlueprint = useCallback(() => {
         const blueprint = {
@@ -1037,10 +1440,14 @@ const Visualizer = () => {
             scale: globalScale,
             nodes: nodes.map(node => ({
                 id: node.id,
+                type: node.type,
                 machineId: node.data.machineId,
                 position: node.position,
                 rotation: node.data.rotation,
-                recipe: node.data.selectedRecipe
+                recipe: node.data.selectedRecipe,
+                storageType: node.data.storageType,
+                productType: node.data.productType,
+                tier: node.data.tier
             })),
             edges: edges.map(edge => ({
                 id: edge.id,
@@ -1576,6 +1983,7 @@ const Visualizer = () => {
                                 }}
                             />
                         </ReactFlow>
+
                         {/* Legend */}
                         <div style={{
                             position: 'absolute',
@@ -1622,6 +2030,139 @@ const Visualizer = () => {
                     </div>
                 </div>
             </ReactFlowProvider>
+
+            {/* GLOBAL RECIPE MODAL (outside ReactFlow) */}
+            <RecipeModal
+                isOpen={recipeModalState.open}
+                onClose={() => setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null })}
+                recipes={recipeModalState.recipes}
+                currentRecipeId={recipeModalState.currentRecipeId}
+                onSelectRecipe={handleRecipeSelection}
+            />
+
+            {/* PORT ACTION MODAL */}
+            {portActionModal.open && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        backdropFilter: 'blur(4px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 9999,
+                        padding: '2rem'
+                    }}
+                    onClick={() => setPortActionModal({ open: false, nodeId: null, port: null, product: null, type: null })}
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            backgroundColor: '#2a2a2a',
+                            borderRadius: '12px',
+                            padding: '2rem',
+                            maxWidth: '500px',
+                            width: '100%',
+                            border: '2px solid #4a90e2',
+                            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.6)'
+                        }}
+                    >
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1rem', color: '#fff' }}>
+                            {portActionModal.type === 'input' ? 'Add Input Source' : 'Add Output Destination'}
+                        </h3>
+                        <div style={{ fontSize: '0.9rem', color: '#888', marginBottom: '1.5rem' }}>
+                            Product: {portActionModal.product !== 'AllCategory' ? portActionModal.product?.name : 'Any'}
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            {/* From Machine */}
+                            <button
+                                onClick={() => handlePortActionSelect('machine')}
+                                style={{
+                                    padding: '1rem',
+                                    backgroundColor: '#1a1a1a',
+                                    border: '2px solid #444',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    textAlign: 'left',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#252525';
+                                    e.currentTarget.style.borderColor = '#5aa0f2';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#1a1a1a';
+                                    e.currentTarget.style.borderColor = '#444';
+                                }}
+                            >
+                                {machinesIcon && (
+                                    <img src={machinesIcon} alt="Machine" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+                                )}
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '1rem', fontWeight: '700', color: '#fff', marginBottom: '2px' }}>
+                                        From Machine...
+                                    </div>
+                                    <div style={{ fontSize: '0.8rem', color: '#888' }}>
+                                        Select a recipe to produce/consume this product
+                                    </div>
+                                </div>
+                            </button>
+
+                            {/* Storage Options */}
+                            <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: '0.5rem', fontWeight: '600' }}>
+                                From Storage:
+                            </div>
+
+                            {[1, 2, 3, 4].map(tier => (
+                                <button
+                                    key={tier}
+                                    onClick={() => handlePortActionSelect(`storage-${tier}`)}
+                                    style={{
+                                        padding: '0.75rem 1rem',
+                                        backgroundColor: '#1a1a1a',
+                                        border: '2px solid #444',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        textAlign: 'left',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = '#252525';
+                                        e.currentTarget.style.borderColor = '#5aa0f2';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = '#1a1a1a';
+                                        e.currentTarget.style.borderColor = '#444';
+                                    }}
+                                >
+                                    <div style={{ fontSize: '1.2rem' }}>
+                                        {portActionModal.type === 'input' ? '∞' : '🗑️'}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontSize: '0.95rem', fontWeight: '600', color: '#fff' }}>
+                                            Tier {tier} Storage
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>
+                                            {portActionModal.type === 'input' ? 'Infinite source' : 'Infinite sink'}
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

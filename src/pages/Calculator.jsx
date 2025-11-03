@@ -4,6 +4,8 @@ import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
 import { getProductIcon, getMachineImage, getGeneralIcon, getProductTypeIcon, getEntityIcon } from '../utils/AssetHelper';
 import OptimizationEngine from '../utils/OptimizationEngine';
+import RecipeCard from '../components/RecipeCard';
+import RecipeModal from '../components/RecipeModal';
 
 const Calculator = () => {
     const { settings } = useSettings();
@@ -458,347 +460,6 @@ const Calculator = () => {
         return toggle !== undefined ? toggle : settings.showRecipeTimePerMinute;
     };
 
-    const renderRecipeCard = (recipe, size = 'normal', isClickable = false, onClick = null) => {
-        const machines = ProductionCalculator.getMachinesForRecipe(recipe.id);
-        const machine = machines[0];
-        const machineIcon = machine ? getMachineImage(machine) : null;
-        const clockIcon = getGeneralIcon('Clock');
-        const gearsIcon = getGeneralIcon('Gears');
-
-        const showPerMinute = getRecipeTimeDisplay(recipe.id);
-        const normalized = ProductionCalculator.normalizeRecipeToPerMinute(recipe);
-
-        const sizes = {
-            compact: {
-                machineIcon: 32,
-                productIcon: 20,
-                quantityFont: '0.85rem',
-                arrowFont: '1.1rem',
-                padding: '10px',
-                gap: '8px',
-                showMachineName: false,
-                timeFont: '0.75rem',
-                toggleSize: 16
-            },
-            normal: {
-                machineIcon: 40,
-                productIcon: 26,
-                quantityFont: '1rem',
-                arrowFont: '1.4rem',
-                padding: '12px',
-                gap: '10px',
-                showMachineName: true,
-                timeFont: '0.85rem',
-                toggleSize: 18
-            },
-            large: {
-                machineIcon: 48,
-                productIcon: 30,
-                quantityFont: '1.1rem',
-                arrowFont: '1.6rem',
-                padding: '16px',
-                gap: '12px',
-                showMachineName: true,
-                timeFont: '0.9rem',
-                toggleSize: 20
-            }
-        };
-
-        const config = sizes[size];
-
-        const inputs = showPerMinute ? normalized.normalizedInputs : recipe.inputs.map(input => ({
-            ...input,
-            quantity: input.quantity,
-            product: ProductionCalculator.getProduct(input.productId)
-        }));
-
-        const outputs = showPerMinute ? normalized.normalizedOutputs : recipe.outputs.map(output => ({
-            ...output,
-            quantity: output.quantity,
-            product: ProductionCalculator.getProduct(output.productId)
-        }));
-
-        const displayTime = showPerMinute ? '60' : `${recipe.durationSeconds}s`;
-        const hasNoInputs = inputs.length === 0;
-
-        return (
-            <div
-                key={recipe.id}
-                onClick={onClick}
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: config.gap,
-                    padding: config.padding,
-                    cursor: isClickable ? 'pointer' : 'default',
-                    transition: 'all 0.2s',
-                    borderRadius: '6px',
-                    backgroundColor: 'transparent',
-                    position: 'relative'
-                }}
-                onMouseEnter={(e) => {
-                    if (isClickable) {
-                        e.currentTarget.style.backgroundColor = '#1a1a1a';
-                    }
-                }}
-                onMouseLeave={(e) => {
-                    if (isClickable) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                    }
-                }}
-            >
-                {/* Machine/Gear Icon */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                        {machineIcon ? (
-                            <img
-                                src={machineIcon}
-                                alt={machine?.name}
-                                title={machine?.name}
-                                style={{
-                                    width: `${config.machineIcon}px`,
-                                    height: `${config.machineIcon}px`,
-                                    objectFit: 'contain',
-                                    flexShrink: 0
-                                }}
-                            />
-                        ) : gearsIcon && (
-                            <img
-                                src={gearsIcon}
-                                alt="Machine"
-                                style={{
-                                    width: `${config.machineIcon}px`,
-                                    height: `${config.machineIcon}px`,
-                                    objectFit: 'contain',
-                                    flexShrink: 0
-                                }}
-                            />
-                        )}
-                    </div>
-
-                    {/* Colon separator */}
-                    <span style={{
-                        color: '#666',
-                        fontSize: config.arrowFont,
-                        fontWeight: '300',
-                        opacity: 0.7
-                    }}>
-                        :
-                    </span>
-                </div>
-
-                {/* Inputs OR Gears icon if no inputs */}
-                {inputs.length > 0 ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        {inputs.map((input, idx) => {
-                            const icon = getProductIcon(input.product);
-                            const displayQty = showPerMinute ? input.perMinute.toFixed(1) : input.quantity;
-
-                            return (
-                                <div key={idx} style={{ display: 'contents' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                                        {icon && (
-                                            <img
-                                                src={icon}
-                                                alt={input.product?.name}
-                                                title={input.product?.name}
-                                                style={{
-                                                    width: `${config.productIcon}px`,
-                                                    height: `${config.productIcon}px`,
-                                                    objectFit: 'contain'
-                                                }}
-                                            />
-                                        )}
-                                        <span style={{
-                                            color: '#ff9966',
-                                            fontSize: config.quantityFont,
-                                            fontWeight: '700',
-                                            lineHeight: 1
-                                        }}>
-                                            {displayQty}
-                                        </span>
-                                    </div>
-
-                                    {/* Plus sign between inputs (not after the last one) */}
-                                    {idx < inputs.length - 1 && (
-                                        <span style={{
-                                            color: '#888',
-                                            fontSize: config.quantityFont,
-                                            fontWeight: '700',
-                                            margin: '0 2px'
-                                        }}>
-                                            +
-                                        </span>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                ) : (
-                    // No inputs - show Gears icon with infinity symbol
-                    gearsIcon && (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                            <img
-                                src={gearsIcon}
-                                alt="Machine processes without inputs"
-                                title="This recipe requires no inputs"
-                                style={{
-                                    width: `${config.productIcon}px`,
-                                    height: `${config.productIcon}px`,
-                                    objectFit: 'contain'
-                                }}
-                            />
-                            <span style={{
-                                color: '#ff9966',
-                                fontSize: config.quantityFont,
-                                fontWeight: '700',
-                                lineHeight: 1
-                            }}>
-                                ∞
-                            </span>
-                        </div>
-                    )
-                )}
-
-                {/* Arrow with Time Display */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', position: 'relative' }}>
-                    {/* Toggle Button - Above Arrow */}
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleRecipeTime(recipe.id);
-                        }}
-                        style={{
-                            padding: '2px 4px',
-                            backgroundColor: 'rgba(74, 144, 226, 0.2)',
-                            border: '1px solid rgba(74, 144, 226, 0.4)',
-                            borderRadius: '3px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.15s',
-                            marginBottom: '2px'
-                        }}
-                        title={showPerMinute ? 'Show raw recipe time' : 'Show per-minute rate'}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = 'rgba(74, 144, 226, 0.3)';
-                            e.currentTarget.style.transform = 'scale(1.05)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'rgba(74, 144, 226, 0.2)';
-                            e.currentTarget.style.transform = 'scale(1)';
-                        }}
-                    >
-                        {clockIcon && (
-                            <img
-                                src={clockIcon}
-                                alt="Toggle time"
-                                style={{
-                                    width: `${config.toggleSize}px`,
-                                    height: `${config.toggleSize}px`,
-                                    objectFit: 'contain'
-                                }}
-                            />
-                        )}
-                    </button>
-
-                    {/* Arrow */}
-                    <span style={{
-                        color: '#888',
-                        fontSize: config.arrowFont,
-                        fontWeight: '300',
-                        lineHeight: 1
-                    }}>
-                        →
-                    </span>
-
-                    {/* Time Display Below Arrow */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                        <span style={{
-                            color: '#aaa',
-                            fontSize: config.timeFont,
-                            fontWeight: '600',
-                            lineHeight: 1
-                        }}>
-                            {displayTime}
-                        </span>
-                        {clockIcon && (
-                            <img
-                                src={clockIcon}
-                                alt="Time"
-                                style={{
-                                    width: `${config.toggleSize}px`,
-                                    height: `${config.toggleSize}px`,
-                                    objectFit: 'contain'
-                                }}
-                            />
-                        )}
-                    </div>
-                </div>
-
-                {/* Outputs (with + signs between them) */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    {outputs.map((output, idx) => {
-                        const icon = getProductIcon(output.product);
-                        const displayQty = showPerMinute ? output.perMinute.toFixed(1) : output.quantity;
-
-                        return (
-                            <div key={idx} style={{ display: 'contents' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                                    {icon && (
-                                        <img
-                                            src={icon}
-                                            alt={output.product?.name}
-                                            title={output.product?.name}
-                                            style={{
-                                                width: `${config.productIcon}px`,
-                                                height: `${config.productIcon}px`,
-                                                objectFit: 'contain'
-                                            }}
-                                        />
-                                    )}
-                                    <span style={{
-                                        color: '#5aa0f2',
-                                        fontSize: config.quantityFont,
-                                        fontWeight: '700',
-                                        lineHeight: 1
-                                    }}>
-                                        {displayQty}
-                                    </span>
-                                </div>
-
-                                {/* Plus sign between outputs (not after the last one) */}
-                                {idx < outputs.length - 1 && (
-                                    <span style={{
-                                        color: '#888',
-                                        fontSize: config.quantityFont,
-                                        fontWeight: '700',
-                                        margin: '0 2px'
-                                    }}>
-                                        +
-                                    </span>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Machine Name (for normal/large) */}
-                {config.showMachineName && (
-                    <div style={{ flex: 1, marginLeft: '12px', minWidth: '140px' }}>
-                        <div style={{ fontSize: '0.95rem', color: '#ddd', fontWeight: '600', lineHeight: 1.3 }}>
-                            {machine?.name || 'Unknown'}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '3px', lineHeight: 1.2 }}>
-                            {recipe.name}
-                        </div>
-                    </div>
-                )}
-            </div>
-        );
-    };
-
     // Compact node rendering (with + button for raw materials)
     const renderCompactNode = (node, level = 0, parentPath = '') => {
         if (!node) return null;
@@ -1222,7 +883,13 @@ const Calculator = () => {
                                             }}
                                         >
                                             <div style={{ padding: '4px 8px' }}>
-                                                {renderRecipeCard(currentRecipe, 'normal', false)}
+                                                <RecipeCard
+                                                    recipe={currentRecipe}
+                                                    size="normal"
+                                                    isClickable={false}
+                                                    showPerMinute={getRecipeTimeDisplay(currentRecipe.id)}
+                                                    onToggleTime={toggleRecipeTime}
+                                                />
                                             </div>
                                             <div style={{
                                                 padding: '6px 12px',
@@ -1471,7 +1138,13 @@ const Calculator = () => {
                             padding: '8px',
                             marginBottom: '8px'
                         }}>
-                            {renderRecipeCard(currentRecipe, 'normal', false)}
+                            <RecipeCard
+                                recipe={currentRecipe}
+                                size="normal"
+                                isClickable={false}
+                                showPerMinute={getRecipeTimeDisplay(currentRecipe.id)}
+                                onToggleTime={toggleRecipeTime}
+                            />
                         </div>
 
                         {hasMultipleRecipes && (
@@ -1629,263 +1302,38 @@ const Calculator = () => {
                 {/* MODALS */}
 
                 {/* Recipe Selection Modal (for node recipes) */}
-                {recipeModalOpen && (
-                    <div
-                        style={{
-                            position: 'fixed',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                            backdropFilter: 'blur(4px)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 1100,
-                            padding: '2rem'
-                        }}
-                        onClick={(e) => {
-                            // Only close if clicking the backdrop, not if source modal is open
-                            if (e.target === e.currentTarget && !resourceSourceModal.open) {
-                                closeRecipeModal();
-                            }
-                        }}
-                    >
-                        <div
-                            onClick={(e) => e.stopPropagation()}
-                            style={{
-                                backgroundColor: '#2a2a2a',
-                                borderRadius: '16px',
-                                padding: '2.5rem',
-                                maxWidth: '1100px',
-                                width: '100%',
-                                maxHeight: '85vh',
-                                overflow: 'auto',
-                                border: '2px solid #4a90e2',
-                                boxShadow: '0 12px 48px rgba(0, 0, 0, 0.6)'
-                            }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                <h3 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#fff', lineHeight: 1.2 }}>
-                                    Select Recipe
-                                    <span style={{ fontSize: '1.1rem', color: '#888', fontWeight: '400', marginLeft: '12px' }}>
-                                        ({recipeModalRecipes.length} available)
-                                    </span>
-                                </h3>
-                                <button
-                                    onClick={() => {
-                                        // If source modal is open, just close recipe modal
-                                        if (resourceSourceModal.open) {
-                                            setRecipeModalOpen(false);
-                                            setRecipeModalProductId(null);
-                                            setRecipeModalRecipes([]);
-                                        } else {
-                                            closeRecipeModal();
-                                        }
-                                    }}
-                                    style={{
-                                        padding: '10px 20px',
-                                        backgroundColor: '#555',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        fontSize: '1rem',
-                                        fontWeight: '600',
-                                        transition: 'all 0.2s'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.backgroundColor = '#666';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.backgroundColor = '#555';
-                                    }}
-                                >
-                                    ✕ Close
-                                </button>
-                            </div>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                                {recipeModalRecipes.map(recipe => {
-                                    const currentRecipeId = recipeOverrides.get(recipeModalProductId) || recipeModalRecipes[0]?.id;
-                                    const isSelected = recipe.id === currentRecipeId;
-
-                                    return (
-                                        <div
-                                            key={recipe.id}
-                                            onClick={() => selectRecipeFromModal(recipe.id)}
-                                            style={{
-                                                backgroundColor: isSelected ? '#2a4a6a' : '#1a1a1a',
-                                                border: isSelected ? '3px solid #4a90e2' : '2px solid #444',
-                                                borderRadius: '10px',
-                                                padding: '6px',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s',
-                                                position: 'relative'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                if (!isSelected) {
-                                                    e.currentTarget.style.backgroundColor = '#252525';
-                                                    e.currentTarget.style.borderColor = '#666';
-                                                    e.currentTarget.style.transform = 'translateX(4px)';
-                                                }
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (!isSelected) {
-                                                    e.currentTarget.style.backgroundColor = '#1a1a1a';
-                                                    e.currentTarget.style.borderColor = '#444';
-                                                    e.currentTarget.style.transform = 'translateX(0)';
-                                                }
-                                            }}
-                                        >
-                                            {renderRecipeCard(recipe, 'large', false)}
-                                            {isSelected && (
-                                                <div style={{
-                                                    marginTop: '10px',
-                                                    padding: '8px 16px',
-                                                    backgroundColor: 'rgba(74, 144, 226, 0.2)',
-                                                    borderRadius: '6px',
-                                                    textAlign: 'center',
-                                                    fontSize: '0.9rem',
-                                                    color: '#5aa0f2',
-                                                    fontWeight: '700',
-                                                    letterSpacing: '0.5px',
-                                                    border: '1px solid rgba(74, 144, 226, 0.3)'
-                                                }}>
-                                                    ✓ CURRENTLY SELECTED
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <RecipeModal
+                    isOpen={recipeModalOpen}
+                    onClose={() => {
+                        // If source modal is open, just close recipe modal
+                        if (resourceSourceModal.open) {
+                            setRecipeModalOpen(false);
+                            setRecipeModalProductId(null);
+                            setRecipeModalRecipes([]);
+                        } else {
+                            closeRecipeModal();
+                        }
+                    }}
+                    recipes={recipeModalRecipes}
+                    currentRecipeId={recipeOverrides.get(recipeModalProductId) || recipeModalRecipes[0]?.id}
+                    onSelectRecipe={selectRecipeFromModal}
+                    getRecipeTimeDisplay={getRecipeTimeDisplay}
+                    onToggleTime={toggleRecipeTime}
+                />
 
                 {/* Main Product Recipe Selection Modal */}
-                {recipeSelectionModalOpen && availableRecipes.length > 1 && (
-                    <div
-                        style={{
-                            position: 'fixed',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                            backdropFilter: 'blur(4px)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 1000,
-                            padding: '2rem'
-                        }}
-                        onClick={() => setRecipeSelectionModalOpen(false)}
-                    >
-                        <div
-                            onClick={(e) => e.stopPropagation()}
-                            style={{
-                                backgroundColor: '#2a2a2a',
-                                borderRadius: '16px',
-                                padding: '2.5rem',
-                                maxWidth: '1100px',
-                                width: '100%',
-                                maxHeight: '85vh',
-                                overflow: 'auto',
-                                border: '2px solid #4a90e2',
-                                boxShadow: '0 12px 48px rgba(0, 0, 0, 0.6)'
-                            }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                <h3 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#fff', lineHeight: 1.2 }}>
-                                    Select Recipe
-                                    <span style={{ fontSize: '1.1rem', color: '#888', fontWeight: '400', marginLeft: '12px' }}>
-                                        ({availableRecipes.length} available)
-                                    </span>
-                                </h3>
-                                <button
-                                    onClick={() => setRecipeSelectionModalOpen(false)}
-                                    style={{
-                                        padding: '10px 20px',
-                                        backgroundColor: '#555',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        fontSize: '1rem',
-                                        fontWeight: '600',
-                                        transition: 'all 0.2s'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.target.style.backgroundColor = '#666';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.target.style.backgroundColor = '#555';
-                                    }}
-                                >
-                                    ✕ Close
-                                </button>
-                            </div>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                                {availableRecipes.map(recipe => {
-                                    const isSelected = recipe.id === selectedRecipe;
-
-                                    return (
-                                        <div
-                                            key={recipe.id}
-                                            onClick={() => {
-                                                setSelectedRecipe(recipe.id);
-                                                setRecipeSelectionModalOpen(false);
-                                            }}
-                                            style={{
-                                                backgroundColor: isSelected ? '#2a4a6a' : '#1a1a1a',
-                                                border: isSelected ? '3px solid #4a90e2' : '2px solid #444',
-                                                borderRadius: '10px',
-                                                padding: '6px',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                if (!isSelected) {
-                                                    e.currentTarget.style.backgroundColor = '#252525';
-                                                    e.currentTarget.style.borderColor = '#666';
-                                                    e.currentTarget.style.transform = 'translateX(4px)';
-                                                }
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (!isSelected) {
-                                                    e.currentTarget.style.backgroundColor = '#1a1a1a';
-                                                    e.currentTarget.style.borderColor = '#444';
-                                                    e.currentTarget.style.transform = 'translateX(0)';
-                                                }
-                                            }}
-                                        >
-                                            {renderRecipeCard(recipe, 'large', false)}
-                                            {isSelected && (
-                                                <div style={{
-                                                    marginTop: '10px',
-                                                    padding: '8px 16px',
-                                                    backgroundColor: 'rgba(74, 144, 226, 0.2)',
-                                                    borderRadius: '6px',
-                                                    textAlign: 'center',
-                                                    fontSize: '0.9rem',
-                                                    color: '#5aa0f2',
-                                                    fontWeight: '700',
-                                                    letterSpacing: '0.5px',
-                                                    border: '1px solid rgba(74, 144, 226, 0.3)'
-                                                }}>
-                                                    ✓ CURRENTLY SELECTED
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <RecipeModal
+                    isOpen={recipeSelectionModalOpen && availableRecipes.length > 1}
+                    onClose={() => setRecipeSelectionModalOpen(false)}
+                    recipes={availableRecipes}
+                    currentRecipeId={selectedRecipe}
+                    onSelectRecipe={(recipeId) => {
+                        setSelectedRecipe(recipeId);
+                        setRecipeSelectionModalOpen(false);
+                    }}
+                    getRecipeTimeDisplay={getRecipeTimeDisplay}
+                    onToggleTime={toggleRecipeTime}
+                />
 
                 {/* Resource Source Modal */}
                 {resourceSourceModal.open && (
