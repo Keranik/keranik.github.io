@@ -771,6 +771,8 @@ const MachineNode = ({ data, id }) => {
                 </div>
             )}
 
+            
+
             {/* Recipe Card */}
             {recipeData && (
                 <div
@@ -794,7 +796,7 @@ const MachineNode = ({ data, id }) => {
                         boxShadow: isHovered
                             ? '0 8px 24px rgba(74, 144, 226, 0.4)'
                             : '0 4px 12px rgba(0, 0, 0, 0.4)',
-                        width: 'fit-content', // ← CHANGED: Auto-size to content
+                        width: 'fit-content',
                         whiteSpace: 'nowrap'
                     }}
                     onClick={(e) => {
@@ -810,20 +812,39 @@ const MachineNode = ({ data, id }) => {
                         size="compact"
                         isClickable={false}
                     />
-                    {machine.recipes?.length > 1 && (
-                        <div style={{
-                            marginTop: `${2 * globalScale}px`,
-                            paddingTop: `${3 * globalScale}px`,
-                            borderTop: '1px solid rgba(74, 144, 226, 0.2)',
-                            fontSize: `${Math.max(7, 7 * globalScale)}px`,
-                            color: '#888',
-                            textAlign: 'center',
-                            fontWeight: '500',
-                            letterSpacing: '0.3px'
-                        }}>
-                            ✨ Click to view {machine.recipes.length} available recipes
-                        </div>
-                    )}
+                    {machine.recipes?.length > 1 && (() => {
+                        const recipesIcon = getGeneralIcon('Recipes');
+
+                        return (
+                            <div style={{
+                                marginTop: `${2 * globalScale}px`,
+                                paddingTop: `${3 * globalScale}px`,
+                                borderTop: '1px solid rgba(74, 144, 226, 0.2)',
+                                fontSize: `${Math.max(7, 7 * globalScale)}px`,
+                                color: '#888',
+                                textAlign: 'center',
+                                fontWeight: '500',
+                                letterSpacing: '0.3px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: `${3 * globalScale}px`
+                            }}>
+                                {recipesIcon && (
+                                    <img
+                                        src={recipesIcon}
+                                        alt="Recipes"
+                                        style={{
+                                            width: `${8 * globalScale}px`,
+                                            height: `${8 * globalScale}px`,
+                                            opacity: 0.7
+                                        }}
+                                    />
+                                )}
+                                <span>Click to view {machine.recipes.length} available recipes</span>
+                            </div>
+                        );
+                    })()}
                 </div>
             )}
 
