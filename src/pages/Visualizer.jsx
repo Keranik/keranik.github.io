@@ -252,6 +252,31 @@ const Visualizer = () => {
         }
     }, [connectionProbe.active, connectionProbe.target]);
 
+    /* Modals */
+    const [recipeModalState, setRecipeModalState] = useState({
+        open: false,
+        recipes: [],
+        currentRecipeId: null,
+        nodeId: null,
+        context: null,
+        port: null,      // ✅ ADD THIS
+        product: null    // ✅ ADD THIS
+    });
+    const [portActionModal, setPortActionModal] = useState({
+        open: false, nodeId: null, port: null, product: null, type: null
+    });
+
+    /* Port Click Handler - Define early so it can be used in callbacks */
+    const handlePortClick = useCallback((nodeId, port, product) => {
+        setPortActionModal({
+            open: true,
+            nodeId: nodeId,
+            port: port,
+            product: product,
+            type: port.type
+        });
+    }, []);
+
     /* Layers + edge visuals */
     const [visibleLayers, setVisibleLayers] = useState(new Set([0, 1, 2, 3, 4, 5]));
     const handleToggleLayer = useCallback((h) => {
@@ -279,10 +304,20 @@ const Visualizer = () => {
                         node.data.globalScale !== globalScale ||
                         node.data.connectionStatus !== status ||
                         node.style?.width !== width ||
-                        node.style?.height !== height
+                        node.style?.height !== height ||
+                        !node.data.onPortClick
                     ) {
                         changed = true;
-                        return { ...node, data: { ...node.data, globalScale, connectionStatus: status }, style: { ...node.style, width, height } };
+                        return {
+                            ...node,
+                            data: {
+                                ...node.data,
+                                globalScale,
+                                connectionStatus: status,
+                                onPortClick: handlePortClick
+                            },
+                            style: { ...node.style, width, height }
+                        };
                     }
                 } else if (node.type === 'storageNode') {
                     const width = 120 * globalScale;
@@ -307,11 +342,17 @@ const Visualizer = () => {
                 const conn = connectionManager.connections.get(edge.id);
                 return {
                     ...edge,
+                    // PRESERVE top-level handle properties
+                    sourceHandle: edge.sourceHandle,
+                    targetHandle: edge.targetHandle,
                     type: 'connection',
                     style: { ...edge.style, strokeWidth: 4 * globalScale },
                     markerEnd: { ...edge.markerEnd, width: 20 * globalScale, height: 20 * globalScale },
                     data: {
                         ...edge.data,
+                        // PRESERVE data-level handle properties
+                        sourceHandle: edge.sourceHandle ?? edge.data?.sourceHandle,
+                        targetHandle: edge.targetHandle ?? edge.data?.targetHandle,
                         globalScale,
                         flow: conn?.flow || 0,
                         satisfied: conn?.satisfied || 'unassigned',
@@ -323,7 +364,7 @@ const Visualizer = () => {
                 };
             })
         );
-    }, [globalScale, setNodes, setEdges, visibleLayers]);
+    }, [globalScale, setNodes, setEdges, visibleLayers, handlePortClick]);
 
     useEffect(() => {
         connectionManager.setNodeGetter((nodeId) => nodes.find((n) => n.id === nodeId));
@@ -466,7 +507,7 @@ const Visualizer = () => {
                 onRotate: null,
                 onDelete: null,
                 onRecipeChange: null,
-                onPortClick: null
+                onPortClick: handlePortClick
             },
             position: nodePosition,
             style: { width, height, backgroundColor: 'transparent', border: 'none', position: 'relative' }
@@ -502,13 +543,9 @@ const Visualizer = () => {
             setRecipeModalState({ open: true, recipes, currentRecipeId, nodeId: id, context: 'nodeRecipeChange' });
         };
 
-        newNode.data.onPortClick = (nodeId, port, product) => {
-            // reserved
-        };
-
         setNodes((nds) => nds.concat(newNode));
         saveHistory();
-    }, [setNodes, globalScale, snapToGridEnabled, saveHistory, edges, setEdges, computeViewportCenterInFlowSpace, findClearPosition]);
+    }, [setNodes, globalScale, snapToGridEnabled, saveHistory, edges, setEdges, computeViewportCenterInFlowSpace, findClearPosition, handlePortClick]);
 
     const onAddStorageNode = useCallback((storageType, productType, tier, product, position) => {
         const width = 120 * globalScale;
@@ -554,17 +591,25 @@ const Visualizer = () => {
 
     /* Connections */
     const onConnect = useCallback((params) => {
-        // Ensure preview disappears even if RF doesn't call onConnectEnd in some flows
         setConnectionProbe({ active: false, source: null, target: null });
 
-        const result = connectionManager.createConnection({ ...params, layer: selectedLayer });
+        // Generate ID first
+        const edgeId = `edge-${params.source}-${params.sourceHandle}-${params.target}-${params.targetHandle}-${Date.now()}`;
+
+        // Pass the ID to connection manager
+        const result = connectionManager.createConnection({
+            ...params,
+            id: edgeId,  // ✅ Pass the generated ID
+            layer: selectedLayer
+        });
+
         if (result.error) {
             console.error('Connection error:', result.error);
             return;
         }
 
         const newEdge = {
-            id: result.connection.id,
+            id: edgeId,  // Use the same ID
             source: params.source,
             sourceHandle: params.sourceHandle,
             target: params.target,
@@ -579,8 +624,8 @@ const Visualizer = () => {
                 color: LAYERS[selectedLayer].color
             },
             data: {
-                sourceHandle: params.sourceHandle,  // ✅ ADD THIS
-                targetHandle: params.targetHandle,  // ✅ ADD THIS
+                sourceHandle: params.sourceHandle,
+                targetHandle: params.targetHandle,
                 layer: selectedLayer,
                 flow: result.connection.flow,
                 satisfied: result.connection.satisfied,
@@ -598,24 +643,22 @@ const Visualizer = () => {
         setNodes((nds) => [...nds]);
     }, [selectedLayer, globalScale, setEdges, saveHistory, setNodes, handleFlowBadgeClick]);
 
-    const [recipeModalState, setRecipeModalState] = useState({
-        open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null
-    });
-    const [portActionModal, setPortActionModal] = useState({
-        open: false, nodeId: null, port: null, product: null, type: null
-    });
-
     const handleRecipeSelection = useCallback((recipeId) => {
-        const { nodeId, context } = recipeModalState;
+        const { nodeId, context, port, product } = recipeModalState; // ✅ Get port from recipeModalState
 
         if (context === 'nodeRecipeChange') {
             setNodes((nds) => nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, selectedRecipe: recipeId } } : n)));
-            setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null });
+            setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null, port: null, product: null });
             return;
         }
 
         if (context === 'portInputAdd' || context === 'portOutputAdd') {
-            setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null });
+            setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null, port: null, product: null });
+
+            if (!port) {
+                console.error('Port is null in recipeModalState');
+                return;
+            }
 
             const recipe = ProductionCalculator.recipes.find((r) => r.id === recipeId);
             if (!recipe) return;
@@ -627,7 +670,10 @@ const Visualizer = () => {
             const originalNode = nodes.find((n) => n.id === nodeId);
             if (!originalNode) return;
 
-            const { port } = portActionModal;
+            if (!port) {
+                console.error('Port is null in portActionModal');
+                return;
+            }
             const s = 20 * globalScale;
             const spacing = NODE_SPACING_TILES * s;
 
@@ -666,7 +712,7 @@ const Visualizer = () => {
                     onRotate: null,
                     onDelete: null,
                     onRecipeChange: null,
-                    onPortClick: null
+                    onPortClick: handlePortClick
                 },
                 position: newPos,
                 style: { width, height, backgroundColor: 'transparent', border: 'none', position: 'relative' }
@@ -702,8 +748,6 @@ const Visualizer = () => {
                 setRecipeModalState({ open: true, recipes, currentRecipeId, nodeId: newId, context: 'nodeRecipeChange' });
             };
 
-            newNode.data.onPortClick = (nodeId, port, product) => { };
-
             setNodes((nds) => nds.concat(newNode));
 
             if (connectionMode === 'auto') {
@@ -725,7 +769,7 @@ const Visualizer = () => {
 
             saveHistory();
         }
-    }, [recipeModalState, portActionModal, nodes, setNodes, connectionMode, selectedLayer, globalScale, setEdges, saveHistory, findClearPosition, onConnect, edges]);
+    }, [recipeModalState, nodes, setNodes, connectionMode, selectedLayer, globalScale, setEdges, saveHistory, findClearPosition, onConnect, edges, handlePortClick]);
 
     const handlePortActionSelect = useCallback((action) => {
         const { nodeId, port, product } = portActionModal;
@@ -750,8 +794,13 @@ const Visualizer = () => {
                 recipes,
                 currentRecipeId: null,
                 nodeId,
-                context: port.type === 'input' ? 'portInputAdd' : 'portOutputAdd'
+                context: port.type === 'input' ? 'portInputAdd' : 'portOutputAdd',
+                port: port,      // ✅ PASS PORT
+                product: product // ✅ PASS PRODUCT
             });
+
+            // Close port action modal AFTER transferring data
+            setPortActionModal({ open: false, nodeId: null, port: null, product: null, type: null });
         } else if (action.startsWith('storage-')) {
             const tier = parseInt(action.split('-')[1]);
             const productType = product !== 'AllCategory' ? port.inferredType : 'countable';

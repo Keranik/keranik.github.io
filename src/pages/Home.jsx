@@ -32,6 +32,27 @@ const Home = () => {
                 position: 'relative',
                 zIndex: 1
             }}>
+                {/* Alpha Banner */}
+                <div style={{
+                    width: '100%',
+                    padding: '1rem 2rem',
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    border: '1px solid rgba(255, 193, 7, 0.3)',
+                    borderRadius: '8px',
+                    marginBottom: '2rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.75rem',
+                    fontSize: '0.95rem',
+                    fontWeight: '500',
+                    color: '#ffc107',
+                    textAlign: 'center',
+                    boxShadow: '0 2px 8px rgba(255, 193, 7, 0.15)'
+                }}>
+                    <span style={{ fontSize: '1.2rem' }}>🛠️</span>
+                    <span>Early Alpha Version: We're focused on core functionality. Some features may be incomplete or unstable at this stage.</span>
+                </div>
                 {/* Hero Section - Above the Fold */}
                 <section style={{
                     padding: '4rem 2rem 3rem',

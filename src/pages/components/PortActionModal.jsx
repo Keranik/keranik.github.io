@@ -76,12 +76,14 @@ const PortActionModal = ({
               <img src={machinesIcon} alt="Machine" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
             )}
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '1rem', fontWeight: '700', color: '#fff', marginBottom: '2px' }}>
-                From Machine...
-              </div>
-              <div style={{ fontSize: '0.8rem', color: '#888' }}>
-                Select a recipe to produce/consume this product
-              </div>
+                          <div style={{ fontSize: '1rem', fontWeight: '700', color: '#fff', marginBottom: '2px' }}>
+                              {type === 'input' ? 'From Machine...' : 'To Machine...'}
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: '#888' }}>
+                              {type === 'input'
+                                  ? 'Select a recipe to produce this product'
+                                  : 'Select a recipe to consume this product'}
+                          </div>
             </div>
           </button>
 
