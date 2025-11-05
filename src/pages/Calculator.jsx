@@ -636,21 +636,6 @@ const Calculator = () => {
                     </div>
                 )}
 
-                {hasChildren && isCollapsed && (
-                    <div style={{
-                        marginTop: '4px',
-                        marginLeft: `${(level + 1) * 20}px`,
-                        padding: '6px 12px',
-                        backgroundColor: '#1a1a1a',
-                        border: '1px solid #444',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        color: '#777',
-                        fontStyle: 'italic'
-                    }}>
-                        🔽 {node.inputChains.length} collapsed input{node.inputChains.length > 1 ? 's' : ''} - click ▶ to expand
-                    </div>
-                )}
             </div>
         );
     };

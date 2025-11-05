@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useMemo } from 'react';
+﻿import { useCallback, useState, useEffect, useMemo } from 'react';
 import {
     ReactFlow,
     Background,
@@ -19,6 +19,14 @@ import { useSettings } from '../contexts/SettingsContext';
 import { getMachineImage, getProductIcon, getGeneralIcon } from '../utils/AssetHelper';
 import RecipeCard from '../components/RecipeCard';
 import RecipeModal from '../components/RecipeModal';
+
+// NEW IMPORTS - Connection System
+import connectionManager from '../utils/ConnectionManager';
+import pathfindingHelper from '../utils/PathfindingHelper';
+import ConnectionEdge from '../components/visualizer/ConnectionEdge';
+import PriorityModal from '../components/visualizer/PriorityModal';
+import ConnectionWarning from '../components/visualizer/ConnectionWarning';
+import LayerFilter from '../components/visualizer/LayerFilter';
 
 // ═══════════════════════════════════════════════════════════════════
 // CONFIGURATION
@@ -43,7 +51,7 @@ const LAYERS = [
 
 const DEFAULT_SCALE = 2.5;
 const GRID_SNAP_SIZE = 1;
-const NODE_SPACING_TILES = 1; // Spacing between stacked nodes
+const NODE_SPACING_TILES = 1;
 
 // ═══════════════════════════════════════════════════════════════════
 // UTILITY FUNCTIONS
@@ -117,7 +125,6 @@ const calculateProduction = (machine, recipe) => {
     return { inputs, outputs, cyclesPerMinute };
 };
 
-// Check if two nodes overlap
 const nodesOverlap = (node1Pos, node1Width, node1Height, node2Pos, node2Width, node2Height) => {
     return !(
         node1Pos.x + node1Width < node2Pos.x ||
@@ -133,22 +140,30 @@ const nodesOverlap = (node1Pos, node1Width, node1Height, node2Pos, node2Width, n
 
 const StorageNode = ({ data, id }) => {
     const {
-        storageType, // 'source' | 'sink'
-        productType, // 'countable' | 'loose' | 'fluid'
+        storageType,
+        productType,
         tier,
         product,
         globalScale = DEFAULT_SCALE,
-        onDelete
+        onDelete,
+        connectionStatus = 'unassigned'
     } = data;
 
     const [isHovered, setIsHovered] = useState(false);
     const productIcon = product ? getProductIcon(product) : null;
     const allCategoryIcon = getGeneralIcon('AllCategory');
-
-    const cardWidth = 120 * globalScale;
-    const cardHeight = 100 * globalScale;
-
     const portConfig = PORT_TYPES[productType] || PORT_TYPES.countable;
+
+    // Determine border color based on connection status
+    const getBorderColor = () => {
+        switch (connectionStatus) {
+            case 'satisfied': return '#50C878'; // Green
+            case 'partial': return '#FFEB3B'; // Yellow
+            case 'error': return '#F44336'; // Red
+            case 'unassigned':
+            default: return storageType === 'source' ? '#50C878' : '#ff6b6b';
+        }
+    };
 
     return (
         <div
@@ -160,7 +175,7 @@ const StorageNode = ({ data, id }) => {
                 width: '100%',
                 height: '100%',
                 backgroundColor: storageType === 'source' ? '#2a4a2a' : '#4a2a2a',
-                border: `${3 * globalScale}px solid ${storageType === 'source' ? '#50C878' : '#ff6b6b'}`,
+                border: `${3 * globalScale}px solid ${getBorderColor()}`,
                 borderRadius: `${12 * globalScale}px`,
                 boxShadow: isHovered
                     ? `0 12px 32px rgba(${storageType === 'source' ? '80, 200, 120' : '255, 107, 107'}, 0.5)`
@@ -173,19 +188,16 @@ const StorageNode = ({ data, id }) => {
                 gap: `${8 * globalScale}px`,
                 padding: `${12 * globalScale}px`
             }}>
-                {/* Storage Icon */}
                 <div style={{ fontSize: `${32 * globalScale}px`, lineHeight: 1 }}>
                     {storageType === 'source' ? '∞' : '🗑️'}
                 </div>
 
-                {/* Product Icon */}
                 {productIcon ? (
                     <img src={productIcon} alt={product.name} style={{ width: `${32 * globalScale}px`, height: `${32 * globalScale}px`, objectFit: 'contain' }} />
                 ) : (
                     <img src={allCategoryIcon} alt="Any" style={{ width: `${32 * globalScale}px`, height: `${32 * globalScale}px`, objectFit: 'contain' }} />
                 )}
 
-                {/* Label */}
                 <div style={{
                     fontSize: `${10 * globalScale}px`,
                     fontWeight: '700',
@@ -203,7 +215,6 @@ const StorageNode = ({ data, id }) => {
                     Tier {tier} {productType}
                 </div>
 
-                {/* Port */}
                 <Handle
                     type={storageType === 'source' ? 'source' : 'target'}
                     position={storageType === 'source' ? Position.Right : Position.Left}
@@ -217,7 +228,6 @@ const StorageNode = ({ data, id }) => {
                 />
             </div>
 
-            {/* Delete button on hover */}
             {isHovered && (
                 <button
                     onClick={(e) => {
@@ -259,18 +269,19 @@ const StorageNode = ({ data, id }) => {
 const MachineNode = ({ data, id }) => {
     const {
         label,
-        parsedPorts,
+        parsedPorts = [],
         rotation = 0,
         machineImage,
-        layoutWidth,
-        layoutHeight,
+        layoutWidth = 1,
+        layoutHeight = 1,
         machine,
         selectedRecipe,
         globalScale = DEFAULT_SCALE,
         onRotate,
         onDelete,
         onRecipeChange,
-        onPortClick
+        onPortClick,
+        connectionStatus = 'unassigned'
     } = data;
 
     const [isHovered, setIsHovered] = useState(false);
@@ -305,10 +316,21 @@ const MachineNode = ({ data, id }) => {
 
     const nameFontSize = `${Math.max(10, Math.min(cardWidth * 0.04, 28)) * Math.min(globalScale, 2.5)}px`;
     const sizeIndicatorFontSize = `${Math.max(8, Math.min(cardWidth * 0.025, 14))}px`;
-    const costBadgeWidth = Math.max(60, cardWidth * 0.18);
-    const costBadgeHeight = Math.max(24, cardHeight * 0.08);
-    const costFontSize = `${Math.max(9, Math.min(cardWidth * 0.022, 12))}px`;
-    const costIconSize = Math.max(12, Math.min(cardWidth * 0.03, 16));
+
+    useEffect(() => {
+        console.log('Node rendered:', { id, hasPorts: !!parsedPorts?.length, portCount: parsedPorts?.length });
+    }, [id, parsedPorts]);
+
+    // Determine border color based on connection status
+    const getBorderColor = () => {
+        switch (connectionStatus) {
+            case 'satisfied': return '#50C878'; // Green - all connections satisfied
+            case 'partial': return '#FFEB3B'; // Yellow - partially satisfied
+            case 'error': return '#F44336'; // Red - errors/unsatisfied
+            case 'unassigned':
+            default: return '#4a90e2'; // Blue - default/no connections
+        }
+    };
 
     const getPortStyle = (port) => {
         const config = PORT_TYPES[port.inferredType] || PORT_TYPES.countable;
@@ -402,7 +424,6 @@ const MachineNode = ({ data, id }) => {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {/* Rotating machine container */}
             <div style={{
                 width: '100%',
                 height: '100%',
@@ -412,7 +433,7 @@ const MachineNode = ({ data, id }) => {
                 top: 0,
                 left: 0,
                 backgroundColor: '#2a2a2a',
-                border: `${1 * globalScale}px solid #4a90e2`,
+                border: `${1 * globalScale}px solid ${getBorderColor()}`,
                 borderRadius: `${12 * globalScale}px`,
                 boxShadow: isHovered
                     ? '0 12px 32px rgba(74, 144, 226, 0.5)'
@@ -447,7 +468,6 @@ const MachineNode = ({ data, id }) => {
                     </div>
                 )}
 
-                {/* Ports */}
                 {parsedPorts.map((port) => {
                     const productOrMarker = getPortProduct(port);
                     let productIcon = null;
@@ -460,11 +480,11 @@ const MachineNode = ({ data, id }) => {
 
                     const portScale = 20 * globalScale;
 
-                    // FIX: Adjust right-edge outputs by +1 tile
                     let adjustedX = port.pos.x;
                     if (port.type === 'output' && port.dir === '+X' && port.pos.x === layoutWidth - 1) {
                         adjustedX += 1;
                     }
+
 
                     return (
                         <div
@@ -481,9 +501,10 @@ const MachineNode = ({ data, id }) => {
                         >
                             <Handle
                                 type={port.type}
-                                position={Position.Left}
+                                position={port.type === 'input' ? Position.Left : Position.Right}
                                 id={port.id}
                                 style={getPortStyle(port)}
+                                isConnectable={true}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onPortClick?.(id, port, productOrMarker);
@@ -507,9 +528,7 @@ const MachineNode = ({ data, id }) => {
                     );
                 })}
 
-                {/* ✅ FIXED-WIDTH COST BAR - ALWAYS 4 SLOTS */}
                 {(() => {
-                    // Check if there are bottom ports
                     const hasBottomPorts = parsedPorts.some(port => {
                         const portY = port.pos.y;
                         return portY === layoutHeight - 1;
@@ -517,23 +536,21 @@ const MachineNode = ({ data, id }) => {
 
                     const bottomOffset = hasBottomPorts ? 24 + globalScale : globalScale;
 
-                    // Get maintenance icon and determine tier color
                     const maintenanceProduct = costs.maintenanceProductId
                         ? ProductionCalculator.getProduct(costs.maintenanceProductId)
                         : null;
                     const maintenanceIconFixed = maintenanceProduct ? getProductIcon(maintenanceProduct) : null;
 
-                    // Determine maintenance tier color
-                    let maintenanceColor = '#444'; // Default gray for 0
+                    let maintenanceColor = '#444';
                     if (costs.maintenance > 0 && costs.maintenanceProductId) {
                         if (costs.maintenanceProductId.includes('MaintenanceT1')) {
-                            maintenanceColor = '#FFFFFF'; // White for T1
+                            maintenanceColor = '#FFFFFF';
                         } else if (costs.maintenanceProductId.includes('MaintenanceT2')) {
-                            maintenanceColor = '#FFEB3B'; // Yellow for T2
+                            maintenanceColor = '#FFEB3B';
                         } else if (costs.maintenanceProductId.includes('MaintenanceT3')) {
-                            maintenanceColor = '#F44336'; // Red for T3
+                            maintenanceColor = '#F44336';
                         } else {
-                            maintenanceColor = '#F44336'; // Default to red for any other maintenance
+                            maintenanceColor = '#F44336';
                         }
                     }
 
@@ -556,7 +573,6 @@ const MachineNode = ({ data, id }) => {
                             overflow: 'hidden',
                             height: `${18 * globalScale}px`
                         }}>
-                            {/* WORKERS - 22% */}
                             <div style={{
                                 flex: '0 0 15%',
                                 display: 'flex',
@@ -579,7 +595,6 @@ const MachineNode = ({ data, id }) => {
                                 <span style={{ fontSize: '1em' }}>{costs.workers || 0}</span>
                             </div>
 
-                            {/* ELECTRICITY - 22% */}
                             <div style={{
                                 flex: '0 0 32%',
                                 display: 'flex',
@@ -609,7 +624,6 @@ const MachineNode = ({ data, id }) => {
                                 </span>
                             </div>
 
-                            {/* COMPUTING - 22% */}
                             <div style={{
                                 flex: '0 0 22%',
                                 display: 'flex',
@@ -634,7 +648,6 @@ const MachineNode = ({ data, id }) => {
                                 </span>
                             </div>
 
-                            {/* MAINTENANCE - 22% - COLOR CODED BY TIER */}
                             <div style={{
                                 flex: '0 0 15%',
                                 display: 'flex',
@@ -666,7 +679,6 @@ const MachineNode = ({ data, id }) => {
 
             </div>
 
-            {/* Static overlays */}
             <div style={{
                 position: 'absolute',
                 top: 0,
@@ -675,7 +687,6 @@ const MachineNode = ({ data, id }) => {
                 bottom: 0,
                 pointerEvents: 'none'
             }}>
-                {/* Machine name */}
                 <div style={{
                     position: 'absolute',
                     top: `${2 * globalScale}px`,
@@ -698,7 +709,6 @@ const MachineNode = ({ data, id }) => {
                     {label}
                 </div>
 
-                {/* Size indicator */}
                 <div style={{
                     position: 'absolute',
                     top: `${4 * globalScale}px`,
@@ -718,7 +728,6 @@ const MachineNode = ({ data, id }) => {
                 </div>
             </div>
 
-            {/* Hover controls */}
             {isHovered && (
                 <div style={{
                     position: 'absolute',
@@ -731,7 +740,6 @@ const MachineNode = ({ data, id }) => {
                     pointerEvents: 'auto',
                     zIndex: 200
                 }}>
-
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
@@ -781,14 +789,9 @@ const MachineNode = ({ data, id }) => {
                     >
                         <img src={getGeneralIcon('Trash')} alt="Delete" style={{ width: `${16 * globalScale}px`, height: `${16 * globalScale}px` }} />
                     </button>
-
-
                 </div>
             )}
 
-            
-
-            {/* Recipe Card */}
             {recipeData && (
                 <div
                     style={{
@@ -867,6 +870,11 @@ const MachineNode = ({ data, id }) => {
     );
 };
 
+// Custom edge types
+const edgeTypes = {
+    connection: ConnectionEdge
+};
+
 const nodeTypes = {
     machineNode: MachineNode,
     storageNode: StorageNode
@@ -890,13 +898,24 @@ const Visualizer = () => {
     const [history, setHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
 
+    // NEW: Connection system state
+    const [visibleLayers, setVisibleLayers] = useState(new Set([0, 1, 2, 3, 4, 5]));
+    const [priorityModalState, setPriorityModalState] = useState({
+        open: false,
+        sourceNodeId: null,
+        sourcePortId: null,
+        connections: [],
+        totalProduction: 0,
+        product: null
+    });
+
     // Recipe modal state
     const [recipeModalState, setRecipeModalState] = useState({
         open: false,
         recipes: [],
         currentRecipeId: null,
         nodeId: null,
-        context: null // 'nodeRecipeChange' | 'portInputAdd' | 'portOutputAdd'
+        context: null
     });
 
     // Port action modal state
@@ -905,13 +924,20 @@ const Visualizer = () => {
         nodeId: null,
         port: null,
         product: null,
-        type: null // 'input' | 'output'
+        type: null
     });
 
     const workerIcon = getGeneralIcon('Worker');
     const electricityIcon = getGeneralIcon('Electricity');
     const computingIcon = getGeneralIcon('Computing');
     const machinesIcon = getGeneralIcon('Machines');
+
+    // NEW: Initialize connection manager with node getter
+    useEffect(() => {
+        connectionManager.setNodeGetter((nodeId) => {
+            return nodes.find(n => n.id === nodeId);
+        });
+    }, [nodes]);
 
     useEffect(() => {
         document.title = 'Factory Visualizer - Captain of Industry Tools';
@@ -929,6 +955,9 @@ const Visualizer = () => {
     useEffect(() => {
         setNodes((nds) =>
             nds.map((node) => {
+                // NEW: Update connection status for each node
+                const connectionStatus = connectionManager.getNodeStatus(node.id);
+
                 if (node.type === 'machineNode') {
                     const basePixelPerGrid = 20;
                     const scaledPixelPerGrid = basePixelPerGrid * globalScale;
@@ -937,7 +966,7 @@ const Visualizer = () => {
 
                     return {
                         ...node,
-                        data: { ...node.data, globalScale },
+                        data: { ...node.data, globalScale, connectionStatus },
                         style: {
                             ...node.style,
                             width,
@@ -950,7 +979,7 @@ const Visualizer = () => {
 
                     return {
                         ...node,
-                        data: { ...node.data, globalScale },
+                        data: { ...node.data, globalScale, connectionStatus },
                         style: {
                             ...node.style,
                             width,
@@ -963,20 +992,55 @@ const Visualizer = () => {
         );
 
         setEdges((eds) =>
-            eds.map((edge) => ({
-                ...edge,
-                style: {
-                    ...edge.style,
-                    strokeWidth: 4 * globalScale
-                },
-                markerEnd: {
-                    ...edge.markerEnd,
-                    width: 20 * globalScale,
-                    height: 20 * globalScale
-                }
-            }))
+            eds.map((edge) => {
+                const conn = connectionManager.connections.get(edge.id);
+
+                return {
+                    ...edge,
+                    type: 'connection',
+                    style: {
+                        ...edge.style,
+                        strokeWidth: 4 * globalScale
+                    },
+                    markerEnd: {
+                        ...edge.markerEnd,
+                        width: 20 * globalScale,
+                        height: 20 * globalScale
+                    },
+                    data: {
+                        ...edge.data,
+                        globalScale,
+                        flow: conn?.flow || 0,
+                        satisfied: conn?.satisfied || 'unassigned',
+                        product: conn?.product || null,
+                        warnings: conn?.warnings || [],
+                        onFlowBadgeClick: (edgeId) => handleFlowBadgeClick(edgeId)
+                    },
+                    hidden: !visibleLayers.has(edge.data?.layer || 0)
+                };
+            })
         );
-    }, [globalScale, setNodes, setEdges]);
+    }, [globalScale, setNodes, setEdges, visibleLayers]);
+
+    // NEW: Calculate connections by layer for LayerFilter
+    const connectionsByLayer = useMemo(() => {
+        const counts = {};
+        LAYERS.forEach(layer => {
+            counts[layer.height] = 0;
+        });
+
+        edges.forEach(edge => {
+            const layer = edge.data?.layer || 0;
+            counts[layer] = (counts[layer] || 0) + 1;
+        });
+
+        return counts;
+    }, [edges]);
+
+    // NEW: Get all warnings
+    const allWarnings = useMemo(() => {
+        return connectionManager.getAllWarnings();
+    }, [edges]);
 
     const totalCosts = useMemo(() => {
         let workers = 0;
@@ -1029,18 +1093,20 @@ const Visualizer = () => {
         }
     }, [historyIndex, history, setNodes, setEdges]);
 
-    // Find a clear position for a new node, bumping existing nodes if necessary
     const findClearPosition = useCallback((idealPosition, nodeWidth, nodeHeight, priorityNodeId = null) => {
         let position = { ...idealPosition };
         const maxAttempts = 100;
         let attempt = 0;
         const bumpDistance = 20 * globalScale * GRID_SNAP_SIZE;
 
+        // Check current nodes state
+        const currentNodes = nodes; // Capture current state
+
         while (attempt < maxAttempts) {
             let hasCollision = false;
 
-            for (const existingNode of nodes) {
-                if (existingNode.id === priorityNodeId) continue; // Don't check against self
+            for (const existingNode of currentNodes) {
+                if (existingNode.id === priorityNodeId) continue;
 
                 const existingPos = existingNode.position;
                 const existingWidth = existingNode.style?.width || 100;
@@ -1049,32 +1115,15 @@ const Visualizer = () => {
                 if (nodesOverlap(position, nodeWidth, nodeHeight, existingPos, existingWidth, existingHeight)) {
                     hasCollision = true;
 
-                    // Bump the EXISTING node (priority to new node)
+                    // DON'T bump - just find a new position for the NEW node instead
                     const dx = position.x - existingPos.x;
                     const dy = position.y - existingPos.y;
 
-                    let bumpX = 0;
-                    let bumpY = 0;
-
                     if (Math.abs(dx) > Math.abs(dy)) {
-                        bumpX = dx > 0 ? -bumpDistance : bumpDistance;
+                        position.x += dx > 0 ? bumpDistance : -bumpDistance;
                     } else {
-                        bumpY = dy > 0 ? -bumpDistance : bumpDistance;
+                        position.y += dy > 0 ? bumpDistance : -bumpDistance;
                     }
-
-                    setNodes((nds) =>
-                        nds.map((n) =>
-                            n.id === existingNode.id
-                                ? {
-                                    ...n,
-                                    position: {
-                                        x: n.position.x + bumpX,
-                                        y: n.position.y + bumpY
-                                    }
-                                }
-                                : n
-                        )
-                    );
 
                     break;
                 }
@@ -1088,7 +1137,149 @@ const Visualizer = () => {
         }
 
         return position;
-    }, [nodes, globalScale, setNodes]);
+    }, [nodes, globalScale]); // ← CRITICAL: Include 'nodes' in dependencies
+
+    // NEW: Handle connection creation
+    const onConnect = useCallback((params) => {
+        console.log('Connection params:', params);
+
+        // Create connection via ConnectionManager
+        const result = connectionManager.createConnection({
+            ...params,
+            layer: selectedLayer
+        });
+
+        if (result.error) {
+            console.error('Connection error:', result.error);
+            return;
+        }
+
+        // Create edge
+        const newEdge = {
+            id: result.connection.id,
+            source: params.source,
+            sourceHandle: params.sourceHandle,
+            target: params.target,
+            targetHandle: params.targetHandle,
+            type: 'connection',
+            animated: true,
+            style: {
+                stroke: LAYERS[selectedLayer].color,
+                strokeWidth: 4 * globalScale
+            },
+            markerEnd: {
+                type: MarkerType.ArrowClosed,
+                width: 20 * globalScale,
+                height: 20 * globalScale,
+                color: LAYERS[selectedLayer].color,
+            },
+            data: {
+                layer: selectedLayer,
+                flow: result.connection.flow,
+                satisfied: result.connection.satisfied,
+                product: result.connection.product,
+                warnings: result.connection.warnings,
+                globalScale,
+                onFlowBadgeClick: (edgeId) => handleFlowBadgeClick(edgeId)
+            },
+            zIndex: LAYERS[selectedLayer].zIndex
+        };
+
+        setEdges((eds) => [...eds, newEdge]);
+        saveHistory();
+
+        // Update all node statuses
+        connectionManager.updateAllStatuses();
+
+        // Trigger node re-render to update border colors
+        setNodes((nds) => [...nds]);
+
+    }, [selectedLayer, globalScale, setEdges, saveHistory, setNodes]);
+
+    // NEW: Handle flow badge click
+    const handleFlowBadgeClick = useCallback((edgeId) => {
+        const conn = connectionManager.connections.get(edgeId);
+        if (!conn) return;
+
+        // Get all connections from this output
+        const outputConnections = [];
+        connectionManager.connections.forEach((c) => {
+            if (c.source === conn.source && c.sourceHandle === conn.sourceHandle) {
+                outputConnections.push(c);
+            }
+        });
+
+        const sourceNode = nodes.find(n => n.id === conn.source);
+        if (!sourceNode) return;
+
+        const sourcePort = sourceNode.data.parsedPorts?.find(p => p.id === conn.sourceHandle);
+        if (!sourcePort) return;
+
+        const totalProduction = connectionManager.getOutputProduction(sourceNode, sourcePort);
+
+        setPriorityModalState({
+            open: true,
+            sourceNodeId: conn.source,
+            sourcePortId: conn.sourceHandle,
+            connections: outputConnections,
+            totalProduction,
+            product: conn.product
+        });
+    }, [nodes]);
+
+    // NEW: Handle priority modal update
+    const handlePriorityUpdate = useCallback((updates) => {
+        updates.forEach(update => {
+            connectionManager.setConnectionMode(update.id, update.mode, {
+                manualFlow: update.flow,
+                priority: update.priority
+            });
+        });
+
+        // Update edges with new flow values
+        setEdges((eds) =>
+            eds.map((edge) => {
+                const conn = connectionManager.connections.get(edge.id);
+                if (!conn) return edge;
+
+                return {
+                    ...edge,
+                    data: {
+                        ...edge.data,
+                        flow: conn.flow,
+                        satisfied: conn.satisfied
+                    }
+                };
+            })
+        );
+
+        // Update node statuses
+        setNodes((nds) => [...nds]);
+
+        saveHistory();
+    }, [setEdges, setNodes, saveHistory]);
+
+    // NEW: Handle layer toggle
+    const handleToggleLayer = useCallback((layerHeight) => {
+        setVisibleLayers(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(layerHeight)) {
+                newSet.delete(layerHeight);
+            } else {
+                newSet.add(layerHeight);
+            }
+            return newSet;
+        });
+    }, []);
+
+    // NEW: Handle toggle all layers
+    const handleToggleAllLayers = useCallback((show) => {
+        if (show) {
+            setVisibleLayers(new Set([0, 1, 2, 3, 4, 5]));
+        } else {
+            setVisibleLayers(new Set());
+        }
+    }, []);
 
     const onAddNode = useCallback((machine, position = null) => {
         const parsedPorts = parseLayoutPorts(machine.layout.layoutString, machine.layout.ports);
@@ -1121,6 +1312,7 @@ const Visualizer = () => {
                 machine,
                 selectedRecipe: defaultRecipe,
                 globalScale,
+                connectionStatus: 'unassigned',
                 onRotate: null,
                 onDelete: null,
                 onRecipeChange: null,
@@ -1164,6 +1356,12 @@ const Visualizer = () => {
         };
 
         newNode.data.onDelete = () => {
+            // Delete all connections involving this node
+            const connectedEdges = edges.filter(e => e.source === nodeId || e.target === nodeId);
+            connectedEdges.forEach(edge => {
+                connectionManager.deleteConnection(edge.id);
+            });
+
             setNodes((nds) => nds.filter(node => node.id !== nodeId));
             setEdges((eds) => eds.filter(edge => edge.source !== nodeId && edge.target !== nodeId));
             saveHistory();
@@ -1189,7 +1387,7 @@ const Visualizer = () => {
 
         setNodes((nds) => nds.concat(newNode));
         saveHistory();
-    }, [setNodes, globalScale, snapToGridEnabled, saveHistory, findClearPosition]);
+    }, [setNodes, globalScale, snapToGridEnabled, saveHistory, findClearPosition, edges, setEdges]);
 
     const onAddStorageNode = useCallback((storageType, productType, tier, product, position) => {
         const width = 120 * globalScale;
@@ -1210,7 +1408,11 @@ const Visualizer = () => {
                 productType,
                 tier,
                 product,
-                globalScale,
+                globalScale: DEFAULT_SCALE,
+                layoutWidth: machine.layoutWidth,
+                layoutHeight: machine.layoutHeight,
+                parsedPorts,
+                connectionStatus: 'unassigned',
                 onDelete: null
             },
             position: nodePosition,
@@ -1226,6 +1428,12 @@ const Visualizer = () => {
         const nodeId = newNode.id;
 
         newNode.data.onDelete = () => {
+            // Delete all connections involving this node
+            const connectedEdges = edges.filter(e => e.source === nodeId || e.target === nodeId);
+            connectedEdges.forEach(edge => {
+                connectionManager.deleteConnection(edge.id);
+            });
+
             setNodes((nds) => nds.filter(node => node.id !== nodeId));
             setEdges((eds) => eds.filter(edge => edge.source !== nodeId && edge.target !== nodeId));
             saveHistory();
@@ -1233,7 +1441,7 @@ const Visualizer = () => {
 
         setNodes((nds) => nds.concat(newNode));
         saveHistory();
-    }, [setNodes, globalScale, snapToGridEnabled, saveHistory, findClearPosition]);
+    }, [setNodes, globalScale, snapToGridEnabled, saveHistory, findClearPosition, edges, setEdges]);
 
     const handlePortClick = useCallback((nodeId, port, product) => {
         console.log('Port clicked:', { nodeId, port, product });
@@ -1251,7 +1459,6 @@ const Visualizer = () => {
         const { nodeId, context } = recipeModalState;
 
         if (context === 'nodeRecipeChange') {
-            // Update existing node's recipe
             setNodes((nds) =>
                 nds.map((node) => {
                     if (node.id === nodeId) {
@@ -1264,23 +1471,19 @@ const Visualizer = () => {
                 })
             );
 
-            // Close modal immediately for node recipe change
             setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null });
 
         } else if (context === 'portInputAdd' || context === 'portOutputAdd') {
-            // ✅ CLOSE MODAL FIRST so user can see the new node being created
             setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null });
 
-            // Create new node with selected recipe
             const recipe = ProductionCalculator.recipes.find(r => r.id === recipeId);
             if (!recipe) return;
 
             const machines = ProductionCalculator.getMachinesForRecipe(recipeId);
             if (!machines || machines.length === 0) return;
 
-            const machine = machines[0]; // Use first machine that can make this recipe
+            const machine = machines[0];
 
-            // Calculate position based on original node
             const originalNode = nodes.find(n => n.id === nodeId);
             if (!originalNode) return;
 
@@ -1291,16 +1494,12 @@ const Visualizer = () => {
 
             let newNodePosition = { ...originalNode.position };
 
-            // Determine placement based on port direction
             if (context === 'portInputAdd') {
-                // Place to the left for inputs
                 newNodePosition.x -= (machine.layout.width * scaledPixelPerGrid) + spacing;
             } else {
-                // Place to the right for outputs
                 newNodePosition.x += (originalNode.data.layoutWidth * scaledPixelPerGrid) + spacing;
             }
 
-            // Create the new node
             const parsedPorts = parseLayoutPorts(machine.layout.layoutString, machine.layout.ports);
             const machineImage = getMachineImage(machine);
             const width = machine.layout.width * scaledPixelPerGrid;
@@ -1324,6 +1523,7 @@ const Visualizer = () => {
                     machine,
                     selectedRecipe: recipeId,
                     globalScale,
+                    connectionStatus: 'unassigned',
                     onRotate: null,
                     onDelete: null,
                     onRecipeChange: null,
@@ -1339,7 +1539,6 @@ const Visualizer = () => {
                 }
             };
 
-            // Add handlers
             newNode.data.onRotate = () => {
                 setNodes((nds) =>
                     nds.map((node) => {
@@ -1366,6 +1565,11 @@ const Visualizer = () => {
             };
 
             newNode.data.onDelete = () => {
+                const connectedEdges = edges.filter(e => e.source === newNodeId || e.target === newNodeId);
+                connectedEdges.forEach(edge => {
+                    connectionManager.deleteConnection(edge.id);
+                });
+
                 setNodes((nds) => nds.filter(node => node.id !== newNodeId));
                 setEdges((eds) => eds.filter(edge => edge.source !== newNodeId && edge.target !== newNodeId));
                 saveHistory();
@@ -1393,13 +1597,11 @@ const Visualizer = () => {
 
             // Auto-connect if connection mode is auto
             if (connectionMode === 'auto') {
-                // Find matching ports to connect
                 const newNodePorts = parsedPorts;
 
                 let sourceNodeId, sourceHandle, targetNodeId, targetHandle;
 
                 if (context === 'portInputAdd') {
-                    // New node outputs to original node input
                     const newNodeOutputPort = newNodePorts.find(p => p.type === 'output');
                     if (newNodeOutputPort) {
                         sourceNodeId = newNodeId;
@@ -1408,7 +1610,6 @@ const Visualizer = () => {
                         targetHandle = port.id;
                     }
                 } else {
-                    // Original node output to new node input
                     const newNodeInputPort = newNodePorts.find(p => p.type === 'input');
                     if (newNodeInputPort) {
                         sourceNodeId = nodeId;
@@ -1419,57 +1620,33 @@ const Visualizer = () => {
                 }
 
                 if (sourceNodeId && targetNodeId) {
-                    const newEdge = {
-                        id: `e${sourceNodeId}-${sourceHandle}-${targetNodeId}-${targetHandle}`,
-                        source: sourceNodeId,
-                        sourceHandle,
-                        target: targetNodeId,
-                        targetHandle,
-                        type: 'smoothstep',
-                        animated: true,
-                        style: {
-                            stroke: LAYERS[selectedLayer].color,
-                            strokeWidth: 4 * globalScale
-                        },
-                        markerEnd: {
-                            type: MarkerType.ArrowClosed,
-                            width: 20 * globalScale,
-                            height: 20 * globalScale,
-                            color: LAYERS[selectedLayer].color,
-                        },
-                        data: {
-                            layer: selectedLayer,
-                            portType: port.inferredType,
-                            flow: 0
-                        },
-                        label: `Layer ${selectedLayer}`,
-                        zIndex: LAYERS[selectedLayer].zIndex
-                    };
-
-                    setEdges((eds) => [...eds, newEdge]);
+                    // Use onConnect to create connection via ConnectionManager
+                    setTimeout(() => {
+                        onConnect({
+                            source: sourceNodeId,
+                            sourceHandle,
+                            target: targetNodeId,
+                            targetHandle
+                        });
+                    }, 100);
                 }
             }
 
             saveHistory();
         }
-
-        // ✅ Removed the modal close from here - now happens immediately above
-    }, [recipeModalState, portActionModal, nodes, setNodes, connectionMode, selectedLayer, globalScale, setEdges, saveHistory, handlePortClick, findClearPosition]);
+    }, [recipeModalState, portActionModal, nodes, setNodes, connectionMode, selectedLayer, globalScale, setEdges, saveHistory, handlePortClick, findClearPosition, onConnect, edges]);
 
     const handlePortActionSelect = useCallback((action) => {
         const { nodeId, port, product } = portActionModal;
 
         if (action === 'machine') {
-            // Open recipe modal for this product
             let recipes = [];
 
             if (port.type === 'input') {
-                // Find recipes that OUTPUT this product
                 recipes = ProductionCalculator.recipes.filter(r =>
                     r.outputs.some(o => product !== 'AllCategory' && o.productId === product.id)
                 );
             } else {
-                // Find recipes that INPUT this product
                 recipes = ProductionCalculator.recipes.filter(r =>
                     r.inputs.some(i => product !== 'AllCategory' && i.productId === product.id)
                 );
@@ -1488,12 +1665,10 @@ const Visualizer = () => {
                 context: port.type === 'input' ? 'portInputAdd' : 'portOutputAdd'
             });
         } else if (action.startsWith('storage-')) {
-            // Create storage node
             const tier = parseInt(action.split('-')[1]);
             const productType = product !== 'AllCategory' ? port.inferredType : 'countable';
             const storageType = port.type === 'input' ? 'source' : 'sink';
 
-            // Calculate position
             const originalNode = nodes.find(n => n.id === nodeId);
             if (!originalNode) return;
 
@@ -1511,11 +1686,35 @@ const Visualizer = () => {
 
             onAddStorageNode(storageType, productType, tier, product !== 'AllCategory' ? product : null, storagePosition);
 
-            // TODO: Auto-connect if connection mode is auto
+            // Auto-connect if connection mode is auto
+            if (connectionMode === 'auto') {
+                setTimeout(() => {
+                    const storageNodes = nodes.filter(n => n.type === 'storageNode');
+                    const latestStorage = storageNodes[storageNodes.length - 1];
+
+                    if (latestStorage) {
+                        if (storageType === 'source') {
+                            onConnect({
+                                source: latestStorage.id,
+                                sourceHandle: 'default',
+                                target: nodeId,
+                                targetHandle: port.id
+                            });
+                        } else {
+                            onConnect({
+                                source: nodeId,
+                                sourceHandle: port.id,
+                                target: latestStorage.id,
+                                targetHandle: 'default'
+                            });
+                        }
+                    }
+                }, 100);
+            }
         }
 
         setPortActionModal({ open: false, nodeId: null, port: null, product: null, type: null });
-    }, [portActionModal, nodes, globalScale, onAddStorageNode]);
+    }, [portActionModal, nodes, globalScale, onAddStorageNode, connectionMode, onConnect]);
 
     const exportBlueprint = useCallback(() => {
         const blueprint = {
@@ -1736,7 +1935,7 @@ const Visualizer = () => {
                                 fontSize: '0.9rem'
                             }}
                         >
-                            <img src={getGeneralIcon('ExportToString')} alt="ExportToString" style={{ width: '28px', height: '24px', verticalAlign: 'middle' }} /> Export
+                            <img src={getGeneralIcon('ExportToString')} alt="Export" style={{ height: '20px', width: 'auto', verticalAlign: 'middle' }} /> Export
                         </button>
                         <label style={{
                             padding: '10px 16px',
@@ -1747,7 +1946,7 @@ const Visualizer = () => {
                             fontWeight: '600',
                             fontSize: '0.9rem'
                         }}>
-                            <img src={getGeneralIcon('ImportFromString')} alt="ImportFromString" style={{ width: '51px', height: '24px', verticalAlign: 'middle' }} /> Import
+                            <img src={getGeneralIcon('ImportFromString')} alt="Import" style={{ height: '20px', width: 'auto', verticalAlign: 'middle' }} /> Import
                             <input
                                 type="file"
                                 accept=".json"
@@ -2039,34 +2238,47 @@ const Visualizer = () => {
                             edges={edges}
                             onNodesChange={onNodesChange}
                             onEdgesChange={onEdgesChange}
+                            onConnect={onConnect}
                             nodeTypes={nodeTypes}
+                            edgeTypes={edgeTypes}
                             fitView
                             snapToGrid={snapToGridEnabled}
                             snapGrid={[20 * globalScale * GRID_SNAP_SIZE, 20 * globalScale * GRID_SNAP_SIZE]}
                             style={{ backgroundColor: '#1a1a1a' }}
+                            // ↓ ADD THESE NEW PROPS:
+                            connectionLineType="step"
+                            connectionLineStyle={{
+                                stroke: LAYERS[selectedLayer].color,
+                                strokeWidth: 3,
+                                strokeDasharray: '5,5',
+                                animation: 'dash 0.5s linear infinite'
+                            }}
+                            defaultEdgeOptions={{
+                                type: 'connection',
+                                animated: true
+                            }}
                         >
-                            <Background
-                                color="#444"
-                                gap={20 * globalScale}
-                                size={1}
-                            />
-                            <Controls
-                                style={{
-                                    background: '#2a2a2a',
-                                    border: '2px solid #4a90e2',
-                                    borderRadius: '8px'
-                                }}
-                            />
-                            <MiniMap
-                                nodeColor={() => '#2a4a6a'}
-                                maskColor="rgba(26, 26, 26, 0.8)"
-                                style={{
-                                    background: '#2a2a2a',
-                                    border: '2px solid #4a90e2',
-                                    borderRadius: '8px'
-                                }}
-                            />
                         </ReactFlow>
+
+                        {/* Layer Filter */}
+                        <LayerFilter
+                            layers={LAYERS}
+                            visibleLayers={visibleLayers}
+                            onToggleLayer={handleToggleLayer}
+                            onToggleAllLayers={handleToggleAllLayers}
+                            connectionsByLayer={connectionsByLayer}
+                            position="top-right"
+                            globalScale={globalScale}
+                        />
+
+                        {/* Connection Warning */}
+                        {allWarnings.length > 0 && (
+                            <ConnectionWarning
+                                warnings={allWarnings.flatMap(w => w.warnings)}
+                                onDismiss={() => { }}
+                                position="top-right"
+                            />
+                        )}
 
                         {/* Legend */}
                         <div style={{
@@ -2116,13 +2328,25 @@ const Visualizer = () => {
                 </div>
             </ReactFlowProvider>
 
-            {/* GLOBAL RECIPE MODAL (outside ReactFlow) */}
+            {/* GLOBAL RECIPE MODAL */}
             <RecipeModal
                 isOpen={recipeModalState.open}
                 onClose={() => setRecipeModalState({ open: false, recipes: [], currentRecipeId: null, nodeId: null, context: null })}
                 recipes={recipeModalState.recipes}
                 currentRecipeId={recipeModalState.currentRecipeId}
                 onSelectRecipe={handleRecipeSelection}
+            />
+
+            {/* PRIORITY MODAL */}
+            <PriorityModal
+                isOpen={priorityModalState.open}
+                onClose={() => setPriorityModalState({ open: false, sourceNodeId: null, sourcePortId: null, connections: [], totalProduction: 0, product: null })}
+                sourceNodeId={priorityModalState.sourceNodeId}
+                sourcePortId={priorityModalState.sourcePortId}
+                connections={priorityModalState.connections}
+                totalProduction={priorityModalState.totalProduction}
+                product={priorityModalState.product}
+                onUpdate={handlePriorityUpdate}
             />
 
             {/* PORT ACTION MODAL */}
@@ -2164,7 +2388,6 @@ const Visualizer = () => {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            {/* From Machine */}
                             <button
                                 onClick={() => handlePortActionSelect('machine')}
                                 style={{
@@ -2201,7 +2424,6 @@ const Visualizer = () => {
                                 </div>
                             </button>
 
-                            {/* Storage Options */}
                             <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: '0.5rem', fontWeight: '600' }}>
                                 From Storage:
                             </div>
