@@ -50,7 +50,8 @@ const Layout = () => {
 
             {/* Content Wrapper (above background) */}
             <div style={{ position: 'relative', zIndex: 1 }}>
-                {/* Header */}
+                {/* TEMPORARILY DISABLED SITE HEADER (banner) */}
+                {/*
                 <header style={{
                     backgroundColor: '#2a2a2a',
                     borderBottom: '2px solid #4a90e2',
@@ -77,6 +78,7 @@ const Layout = () => {
                         />
                     </div>
                 </header>
+                */}
 
                 {/* Navigation */}
                 <nav style={{
