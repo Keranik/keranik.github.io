@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { EdgeLabelRenderer, useReactFlow } from '@xyflow/react';
+import { EdgeLabelRenderer } from '@xyflow/react';
 import FlowBadge from './FlowBadge';
+import { useGetHandleCenterFlow } from './domAnchors';
 
 /**
  * ConnectionEdge
@@ -8,15 +9,15 @@ import FlowBadge from './FlowBadge';
  * - Draws a 90° step path by default, or a routed polyline if data.path is provided
  * - Renders FlowBadge in the middle; click opens your priority/throughput modal
  *
- * Expects data: { flow, product, satisfied, globalScale, onFlowBadgeClick, path? }
+ * Expects data: { flow, product, satisfied, globalScale, onFlowBadgeClick, path?, sourceHandle?, targetHandle? }
  */
 export default function ConnectionEdge(props) {
     const {
         id,
         source,
-        sourceHandle,
+        sourceHandle: propsSourceHandle,
         target,
-        targetHandle,
+        targetHandle: propsTargetHandle,
         sourceX,
         sourceY,
         targetX,
@@ -27,68 +28,35 @@ export default function ConnectionEdge(props) {
         selected,
     } = props;
 
-    const rf = useReactFlow();
     const [hovered, setHovered] = useState(false);
+    const getHandleCenterFlow = useGetHandleCenterFlow();
 
-    // screen -> flow conversion that works across XYFlow/React Flow versions
-    const screenToFlow = useMemo(() => {
-        if (rf && typeof rf.screenToFlowPosition === 'function') {
-            return (x, y) => rf.screenToFlowPosition({ x, y });
-        }
-        if (rf && typeof rf.project === 'function') {
-            return (x, y) => rf.project({ x, y });
-        }
-        // Fallback: compute from viewport matrix
-        return (x, y) => {
-            const pane = document.querySelector('.react-flow__pane');
-            const wrapper = pane?.parentElement || document.querySelector('.react-flow');
-            const rect = (pane || wrapper)?.getBoundingClientRect();
-            const viewportEl =
-                document.querySelector('.react-flow__viewport') ||
-                document.querySelector('.react-flow__renderer');
-            let zoom = 1, tx = 0, ty = 0;
-
-            if (viewportEl) {
-                const tr = window.getComputedStyle(viewportEl).transform;
-                const m = tr && tr !== 'none' ? tr.match(/matrix\(([^)]+)\)/) : null;
-                if (m) {
-                    const parts = m[1].split(',').map((v) => parseFloat(v.trim()));
-                    zoom = parts[0] || 1;
-                    tx = parts[4] || 0;
-                    ty = parts[5] || 0;
-                }
-            }
-
-            const relX = x - (rect?.left || 0);
-            const relY = y - (rect?.top || 0);
-            return { x: (relX - tx) / zoom, y: (relY - ty) / zoom };
-        };
-    }, [rf]);
-
-    // DOM handle center -> flow coords
-    const getHandleCenterFlow = (nodeId, handleId) => {
-        if (!nodeId || !handleId) return null;
-        const sel = `.react-flow__handle[data-nodeid="${nodeId}"][data-handleid="${handleId}"]`;
-        const el = document.querySelector(sel);
-        if (!el) return null;
-        const r = el.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        return screenToFlow(cx, cy);
-    };
+    // Get handles from props first, fallback to data
+    const sourceHandle = propsSourceHandle ?? data?.sourceHandle;
+    const targetHandle = propsTargetHandle ?? data?.targetHandle;
 
     // Resolve anchored endpoints: prefer DOM measurement, else fall back to props
     const { sx, sy, tx, ty } = useMemo(() => {
         const s = getHandleCenterFlow(source, sourceHandle);
         const t = getHandleCenterFlow(target, targetHandle);
-        return {
+
+        const coords = {
             sx: s?.x ?? sourceX,
             sy: s?.y ?? sourceY,
             tx: t?.x ?? targetX,
             ty: t?.y ?? targetY,
         };
-        // Recompute when any positional input or handles change
-    }, [source, sourceHandle, target, targetHandle, sourceX, sourceY, targetX, targetY]);
+
+        //console.log('ConnectionEdge coords:', {
+        //    source, sourceHandle,
+        //    target, targetHandle,
+        //    measured: { s, t },
+        //    fallback: { sourceX, sourceY, targetX, targetY },
+        //    final: coords
+        //});
+
+        return coords;
+    }, [source, sourceHandle, target, targetHandle, sourceX, sourceY, targetX, targetY, getHandleCenterFlow]);
 
     // Build path:
     // - If you supply a routed polyline in data.path (array of {x,y}), we render that.

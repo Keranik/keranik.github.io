@@ -579,6 +579,8 @@ const Visualizer = () => {
                 color: LAYERS[selectedLayer].color
             },
             data: {
+                sourceHandle: params.sourceHandle,  // ✅ ADD THIS
+                targetHandle: params.targetHandle,  // ✅ ADD THIS
                 layer: selectedLayer,
                 flow: result.connection.flow,
                 satisfied: result.connection.satisfied,
