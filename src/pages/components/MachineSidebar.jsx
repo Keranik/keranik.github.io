@@ -25,50 +25,53 @@ const MachineSidebar = ({
 
     return (
         <div style={{
-            width: '320px',
+            width: '240px',
             background: '#2a2a2a',
             color: 'white',
-            padding: '1.5rem',
+            padding: '1rem',
             overflowY: 'auto',
+            overflowX: 'hidden',
             borderRight: '2px solid #4a90e2',
             boxShadow: '4px 0 12px rgba(0, 0, 0, 0.3)'
         }}>
-            <h3 style={{ color: 'white', fontSize: '1.3rem', fontWeight: '700', marginBottom: '1rem' }}>
-                <img src={machinesIcon} alt="Machines" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} /> Machines ({ProductionCalculator.machines?.length || 0})
+            <h3 style={{ color: 'white', fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem', whiteSpace: 'nowrap' }}>
+                <img src={machinesIcon} alt="Machines" style={{ width: '20px', height: '20px', verticalAlign: 'middle' }} /> Machines ({ProductionCalculator.machines?.length || 0})
             </h3>
 
             <input
                 type="text"
-                placeholder="Search machines..."
+                placeholder="Search..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 style={{
                     width: '100%',
                     marginBottom: '1rem',
-                    padding: '12px',
+                    padding: '8px 10px',
                     background: '#1a1a1a',
                     color: 'white',
                     border: '2px solid #4a90e2',
-                    borderRadius: '8px',
-                    fontSize: '1rem'
+                    borderRadius: '6px',
+                    fontSize: '0.9rem',
+                    boxSizing: 'border-box'
                 }}
             />
 
             <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#aaa' }}>
-                    Connection Layer:
+                <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#aaa', fontSize: '0.85rem' }}>
+                    Layer:
                 </label>
                 <select
                     value={selectedLayer}
                     onChange={(e) => onChangeLayer(Number(e.target.value))}
                     style={{
                         width: '100%',
-                        padding: '10px',
+                        padding: '8px',
                         background: '#1a1a1a',
                         color: 'white',
                         border: '2px solid #4a90e2',
-                        borderRadius: '8px',
-                        fontSize: '1rem'
+                        borderRadius: '6px',
+                        fontSize: '0.9rem',
+                        boxSizing: 'border-box'
                     }}
                 >
                     {LAYERS.map((layer) => (
@@ -80,21 +83,22 @@ const MachineSidebar = ({
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#aaa' }}>
-                    Connection Mode:
+                <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#aaa', fontSize: '0.85rem' }}>
+                    Mode:
                 </label>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '6px' }}>
                     <button
                         onClick={() => onChangeConnectionMode('auto')}
                         style={{
                             flex: 1,
-                            padding: '10px',
+                            padding: '8px',
                             background: connectionMode === 'auto' ? '#4a90e2' : '#333',
                             color: 'white',
                             border: 'none',
-                            borderRadius: '8px',
+                            borderRadius: '6px',
                             cursor: 'pointer',
-                            fontWeight: '600'
+                            fontWeight: '600',
+                            fontSize: '0.85rem'
                         }}
                     >
                         Auto
@@ -103,13 +107,14 @@ const MachineSidebar = ({
                         onClick={() => onChangeConnectionMode('manual')}
                         style={{
                             flex: 1,
-                            padding: '10px',
+                            padding: '8px',
                             background: connectionMode === 'manual' ? '#4a90e2' : '#333',
                             color: 'white',
                             border: 'none',
-                            borderRadius: '8px',
+                            borderRadius: '6px',
                             cursor: 'pointer',
-                            fontWeight: '600'
+                            fontWeight: '600',
+                            fontSize: '0.85rem'
                         }}
                     >
                         Manual
@@ -119,25 +124,29 @@ const MachineSidebar = ({
 
             {connectingFrom && (
                 <div style={{
-                    padding: '12px',
+                    padding: '10px',
                     background: '#4a90e2',
-                    borderRadius: '8px',
+                    borderRadius: '6px',
                     marginBottom: '1rem',
                     textAlign: 'center',
-                    fontWeight: '600'
+                    fontWeight: '600',
+                    fontSize: '0.85rem'
                 }}>
                     Connecting from port {connectingFrom.portId}...
                     <button
                         onClick={onCancelConnectingFrom}
                         style={{
-                            marginLeft: '8px',
+                            marginTop: '6px',
                             padding: '4px 8px',
                             background: '#ff6b6b',
                             border: 'none',
                             borderRadius: '4px',
                             color: 'white',
                             cursor: 'pointer',
-                            fontWeight: '600'
+                            fontWeight: '600',
+                            fontSize: '0.8rem',
+                            display: 'block',
+                            width: '100%'
                         }}
                     >
                         Cancel
@@ -151,7 +160,7 @@ const MachineSidebar = ({
                 margin: 0,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '8px'
+                gap: '6px'
             }}>
                 {results.length > 0 ? results.map((machine) => {
                     const machineImage = getMachineImage(machine);
@@ -159,17 +168,19 @@ const MachineSidebar = ({
                         <li
                             key={machine.id}
                             onClick={() => onMachineClick(machine)}
+                            title={machine.name}
                             style={{
                                 cursor: 'pointer',
-                                padding: '12px',
-                                borderRadius: '8px',
+                                padding: '8px',
+                                borderRadius: '6px',
                                 color: 'white',
                                 backgroundColor: '#1a1a1a',
                                 border: '2px solid #333',
                                 transition: 'all 0.2s',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '12px'
+                                gap: '8px',
+                                minWidth: 0
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor = '#2a4a6a';
@@ -186,15 +197,21 @@ const MachineSidebar = ({
                                 <img
                                     src={machineImage}
                                     alt={machine.name}
-                                    style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+                                    style={{ width: '32px', height: '32px', objectFit: 'contain', flexShrink: 0 }}
                                 />
                             )}
-                            <div style={{ flex: 1 }}>
-                                <div style={{ fontWeight: '600', fontSize: '0.95rem', marginBottom: '2px' }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{
+                                    fontWeight: '600',
+                                    fontSize: '0.85rem',
+                                    marginBottom: '2px',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                }}>
                                     {machine.name}
                                 </div>
-                                <div style={{ fontSize: '0.75rem', color: '#888' }}>
-                                    {/* Use ASCII 'x' instead of Unicode multiplication sign */}
+                                <div style={{ fontSize: '0.7rem', color: '#888', whiteSpace: 'nowrap' }}>
                                     {machine.layout.width}x{machine.layout.height} tiles
                                 </div>
                             </div>
@@ -204,13 +221,13 @@ const MachineSidebar = ({
                     <li style={{
                         color: '#666',
                         textAlign: 'center',
-                        padding: '3rem 1rem',
-                        fontSize: '0.9rem',
+                        padding: '2rem 0.5rem',
+                        fontSize: '0.85rem',
                         fontStyle: 'italic',
-                        lineHeight: '1.6'
+                        lineHeight: '1.5'
                     }}>
                         {ProductionCalculator.machines?.length > 0
-                            ? 'Start typing to search for machines...'
+                            ? 'Start typing to search...'
                             : 'No machines found'}
                     </li>
                 )}

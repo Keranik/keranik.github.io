@@ -12,7 +12,7 @@ import '@xyflow/react/dist/style.css';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
-import { getMachineImage } from '../utils/AssetHelper';
+import { getMachineImage, getEntityIconTop } from '../utils/AssetHelper';
 
 // Connection System
 import connectionManager from '../utils/ConnectionManager';
@@ -975,6 +975,7 @@ const Visualizer = () => {
                         width: '100%'
                     }}
                 >
+
                     <MachineSidebar
                         selectedLayer={selectedLayer}
                         onChangeLayer={setSelectedLayer}

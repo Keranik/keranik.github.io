@@ -11,6 +11,7 @@ const productIcons = import.meta.glob('../assets/icons/product/*.png', { eager: 
 const layoutEntityIcons = import.meta.glob('../assets/icons/layoutentity/*.png', { eager: true, import: 'default' });
 const generalIcons = import.meta.glob('../assets/icons/general/*.png', { eager: true, import: 'default' });
 const productTypeIcons = import.meta.glob('../assets/icons/producttypes/*.png', { eager: true, import: 'default' });
+const topdownIcons = import.meta.glob('../assets/icons/topdown/*.png', { eager: true, import: 'default' });
 
 /**
  * Convert product ID to icon path key
@@ -33,6 +34,15 @@ function getProductIconPath(productId) {
 function getEntityIconPath(entityId) {
     if (!entityId) return null;
     return `../assets/icons/layoutentity/${entityId}.png`;
+}
+
+/**
+ * Convert entity ID to topdown icon path key
+ * Entity IDs like "FoodMill" -> "../assets/icons/topdown/FoodMill.png"
+ */
+function getEntityIconTopPath(entityId) {
+    if (!entityId) return null;
+    return `../assets/icons/topdown/${entityId}.png`;
 }
 
 /**
@@ -131,6 +141,19 @@ export function getEntityIcon(entity) {
 }
 
 /**
+ * Get topdown entity icon URL (for farms, buildings, etc.)
+ * @param {Object} entity - Entity object with an id property
+ * @returns {string|null} - Icon URL or null
+ */
+export function getEntityIconTop(entity) {
+    if (!entity) return null;
+    const path = getEntityIconTopPath(entity.id);
+    if (!path) return null;
+    // Return the imported image URL
+    return topdownIcons[path] || null;
+}
+
+/**
  * Get general icon URL
  * @param {string} iconName - Icon name (e.g., "Worker", "Electricity", "Computing")
  * @returns {string|null} - Icon URL or null
@@ -195,5 +218,6 @@ export default {
     getFarmImage,
     getGeneralIcon,
     getProductTypeIcon,
-    getEntityIcon // NEW: Added to default export
+    getEntityIcon,
+    getEntityIconTop// NEW: Added to default export
 };

@@ -12,11 +12,11 @@ export const PORT_TYPES = {
 
 export const LAYERS = [
     { height: 0, name: 'Ground', color: '#ffffff', zIndex: 1 },
-    { height: 1, name: 'Layer 1', color: '#ff6b6b', zIndex: 2 },
-    { height: 2, name: 'Layer 2', color: '#4ecdc4', zIndex: 3 },
-    { height: 3, name: 'Layer 3', color: '#ffe66d', zIndex: 4 },
-    { height: 4, name: 'Layer 4', color: '#a8dadc', zIndex: 5 },
-    { height: 5, name: 'Layer 5', color: '#f1a7fe', zIndex: 6 }
+    { height: 1, name: 'Layer 1', color: '#ff0000', zIndex: 2 },
+    { height: 2, name: 'Layer 2', color: '#00ff00', zIndex: 3 },
+    { height: 3, name: 'Layer 3', color: '#0000ff', zIndex: 4 },
+    { height: 4, name: 'Layer 4', color: '#00ffff', zIndex: 5 },
+    { height: 5, name: 'Layer 5', color: '#ffff00', zIndex: 6 }
 ];
 
 export const GRID_SNAP_SIZE = 1;

@@ -42,7 +42,7 @@ const HeaderToolbar = ({
                         <img src={getGeneralIcon('Buildings')} alt="Factory" style={{ width: '28px', height: '28px', verticalAlign: 'middle' }} /> Factory Blueprint Designer
                     </h2>
                     <p style={{ color: '#aaa', fontSize: '1rem', margin: 0 }}>
-                        Design, optimize, and share your factory layouts • {nodesCount} machines • {edgesCount} connections
+                        Design, optimize, and share your factory layouts | {nodesCount} machines | {edgesCount} connections
                     </p>
                 </div>
 
