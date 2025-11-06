@@ -205,7 +205,7 @@ const CompactNode = ({
                                     width: '16px',
                                     height: '16px',
                                     objectFit: 'contain',
-                                    transform: 'translateX(-17%) translateY(17%)'
+                                    transform: 'translateX(-17%) translateY(-17%)'
                                 }}
                             />
                         ) : (
@@ -214,13 +214,13 @@ const CompactNode = ({
                         {/* Recipe count - just the number */}
                         <span style={{
                             position: 'absolute',
-                            top: '0px',
+                            bottom: '0px',
                             right: '1px',
                             color: '#ffffff',
                             fontSize: '0.65rem',
                             fontWeight: '900',
                             lineHeight: 1,
-                            textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000'
+                            textShadow: '-1px -1px 0 #00000044, 1px -1px 0 #00000044, -1px 1px 0 #00000044, 1px 1px 0 #00000044'
                         }}>
                             {node.availableRecipes.length}
                         </span>
