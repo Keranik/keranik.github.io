@@ -6,6 +6,7 @@ import { getProductIcon, getMachineImage, getGeneralIcon, getProductTypeIcon, ge
 import OptimizationEngine from '../utils/OptimizationEngine';
 import RecipeCard from '../components/RecipeCard';
 import RecipeModal from '../components/RecipeModal';
+import ProductSelectorModal from '../components/ProductSelectorModal';
 
 const Calculator = () => {
     const { settings } = useSettings();
@@ -17,10 +18,10 @@ const Calculator = () => {
     const [targetRate, setTargetRate] = useState(60);
     const [productionChain, setProductionChain] = useState(null);
     const [requirements, setRequirements] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
     const [availableRecipes, setAvailableRecipes] = useState([]);
     const [recipeOverrides, setRecipeOverrides] = useState(new Map());
     const [recipeModalOpen, setRecipeModalOpen] = useState(false);
+    const [productModalOpen, setProductModalOpen] = useState(false);
     const [recipeModalProductId, setRecipeModalProductId] = useState(null);
     const [recipeModalRecipes, setRecipeModalRecipes] = useState([]);
     const [powerUnit, setPowerUnit] = useState('kW');
@@ -144,10 +145,6 @@ const Calculator = () => {
         .filter(product => {
             const recipes = ProductionCalculator.getRecipesForProduct(product.id);
             return recipes.length > 0;
-        })
-        .filter(product => {
-            if (!searchTerm) return true;
-            return product.name.toLowerCase().includes(searchTerm.toLowerCase());
         })
         .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -1320,6 +1317,17 @@ const Calculator = () => {
                     onToggleTime={toggleRecipeTime}
                 />
 
+                <ProductSelectorModal
+                    isOpen={productModalOpen}
+                    onClose={() => setProductModalOpen(false)}
+                    onSelectProduct={(id) => {
+                        setSelectedProduct(id);
+                        setProductModalOpen(false);
+                    }}
+                    products={producibleProducts}
+                    currentProductId={selectedProduct}
+                />
+
                 {/* Resource Source Modal */}
                 {resourceSourceModal.open && (
                     <div
@@ -1605,7 +1613,6 @@ const Calculator = () => {
                             setSelectedProduct('');
                             setSelectedRecipe('');
                             setTargetRate(60);
-                            setSearchTerm('');
                             setResourceConstraints(new Map());
                             setResourceInput({ productId: '', productName: '', quantity: 0 });
                             setProductionChain(null);
@@ -1927,25 +1934,9 @@ const Calculator = () => {
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
                                 Target Product
                             </label>
-                            <input
-                                type="text"
-                                list="products-list"
-                                value={searchTerm}
-                                onChange={(e) => {
-                                    setSearchTerm(e.target.value);
-                                    const match = producibleProducts.find(p => p.name.toLowerCase() === e.target.value.toLowerCase());
-                                    if (match) {
-                                        setSelectedProduct(match.id);
-                                    }
-                                }}
-                                onBlur={(e) => {
-                                    const match = producibleProducts.find(p => p.name.toLowerCase() === e.target.value.toLowerCase());
-                                    if (match) {
-                                        setSelectedProduct(match.id);
-                                        setSearchTerm(match.name);
-                                    }
-                                }}
-                                placeholder="Search and select product..."
+                            <button
+                                onClick={() => setProductModalOpen(true)}
+                                disabled={!dataLoaded}
                                 style={{
                                     width: '100%',
                                     padding: '12px',
@@ -1953,16 +1944,28 @@ const Calculator = () => {
                                     color: 'white',
                                     border: '2px solid #555',
                                     borderRadius: '6px',
-                                    fontSize: '1rem'
+                                    fontSize: '1rem',
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    transition: 'all 0.2s'
                                 }}
-                            />
-                            <datalist id="products-list">
-                                {producibleProducts.slice(0, 200).map(product => (
-                                    <option key={product.id} value={product.name}>
-                                        {product.name} ({product.type})
-                                    </option>
-                                ))}
-                            </datalist>
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#3a3a3a';
+                                    e.currentTarget.style.borderColor = '#4a90e2';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#333';
+                                    e.currentTarget.style.borderColor = '#555';
+                                }}
+                            >
+                                <span>
+                                    {selectedProduct ? ProductionCalculator.getProduct(selectedProduct)?.name : 'Select product...'}
+                                </span>
+                                <span style={{ color: '#4a90e2' }}>▼</span>
+                            </button>
                         </div>
 
                         {/* Recipe Selection - BUTTON */}
