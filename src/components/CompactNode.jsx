@@ -18,6 +18,7 @@ const CompactNode = ({
     const product = node.product;
     const productIcon = getProductIcon(product);
     const recipeIcon = getGeneralIcon('Recipes');
+    const plusIcon = getGeneralIcon('Plus'); 
     // Calculate subtree metrics
     const calculateSubtreeMetrics = (n) => {
         const metrics = { workers: 0, powerKw: 0, machines: 0, computing: 0, maintenance: 0 };
@@ -205,7 +206,9 @@ const CompactNode = ({
                                     width: '16px',
                                     height: '16px',
                                     objectFit: 'contain',
-                                    transform: 'translateX(-17%) translateY(-17%)'
+                                    transform: 'translateX(-17%) translateY(-17%)',
+                                    filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'
+                                    
                                 }}
                             />
                         ) : (
@@ -220,7 +223,8 @@ const CompactNode = ({
                             fontSize: '0.65rem',
                             fontWeight: '900',
                             lineHeight: 1,
-                            textShadow: '-1px -1px 0 #00000044, 1px -1px 0 #00000044, -1px 1px 0 #00000044, 1px 1px 0 #00000044'
+                            //filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.4))'
+                            textShadow: '-0.2px -0.2px 0 #000000, -0.2px -0.2px 0 #000000, -0.2px -0.2px 0 #000000, -0.2px -0.2px 0 #000000'
                         }}>
                             {node.availableRecipes.length}
                         </span>
@@ -264,7 +268,17 @@ const CompactNode = ({
                             e.currentTarget.style.borderColor = 'rgba(74, 144, 226, 0.4)';
                         }}
                     >
-                        +
+                        <img
+                            src={plusIcon}
+                            alt="Change resource source"
+                            style={{
+                                width: '16px',
+                                height: '16px',
+                                objectFit: 'contain',
+                                filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'
+
+                            }}
+                        />
                     </button>
                 )}
             </div>
