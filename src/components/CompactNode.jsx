@@ -126,7 +126,17 @@ const CompactNode = ({
                         {node.targetRate?.toFixed(1)}/min
                     </span>
                     {!node.isRawMaterial && node.machine && (
-                        <span style={{ color: '#888', fontSize: '0.85rem', marginLeft: '12px', flex: 1 }}>
+                        <span
+                            style={{
+                                color: '#888',
+                                fontSize: '0.85rem',
+                                marginLeft: '12px',
+                                flex: 1,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                            }}
+                        >
                             {node.machineCount}× {node.machine.name}
                         </span>
                     )}
@@ -144,21 +154,27 @@ const CompactNode = ({
                     )}
                     <span style={{ marginLeft: 'auto', color: '#777', fontSize: '0.8rem', display: 'flex', gap: '12px', flexShrink: 0 }}>
                         {subtreeMetrics.powerKw > 0 && (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                {getGeneralIcon('Electricity') && <img src={getGeneralIcon('Electricity')} alt="Power" style={{ width: '14px', height: '14px' }} />}
-                                {(subtreeMetrics.powerKw / 1000).toFixed(1)}MW
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: '60px', justifyContent: 'flex-end' }}>
+                                {getGeneralIcon('Electricity') && <img src={getGeneralIcon('Electricity')} alt="Power" style={{ width: '14px', height: '14px', flexShrink: 0 }} />}
+                                <span style={{ fontFamily: 'monospace', textAlign: 'left', minWidth: '40px' }}>
+                                    {(subtreeMetrics.powerKw / 1000).toFixed(1).padStart(5, ' ')}MW
+                                </span>
                             </span>
                         )}
                         {subtreeMetrics.workers > 0 && (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                {getGeneralIcon('Worker') && <img src={getGeneralIcon('Worker')} alt="Workers" style={{ width: '14px', height: '14px' }} />}
-                                {subtreeMetrics.workers}
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: '50px', justifyContent: 'flex-end' }}>
+                                {getGeneralIcon('Worker') && <img src={getGeneralIcon('Worker')} alt="Workers" style={{ width: '14px', height: '14px', flexShrink: 0 }} />}
+                                <span style={{ fontFamily: 'monospace', textAlign: 'left', minWidth: '30px' }}>
+                                    {subtreeMetrics.workers.toString().padStart(3, ' ')}
+                                </span>
                             </span>
                         )}
                         {subtreeMetrics.machines > 0 && (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                {getGeneralIcon('Machines') && <img src={getGeneralIcon('Machines')} alt="Machines" style={{ width: '14px', height: '14px' }} />}
-                                {subtreeMetrics.machines}
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: '50px', justifyContent: 'flex-end' }}>
+                                {getGeneralIcon('Machines') && <img src={getGeneralIcon('Machines')} alt="Machines" style={{ width: '14px', height: '14px', flexShrink: 0 }} />}
+                                <span style={{ fontFamily: 'monospace', textAlign: 'left', minWidth: '30px' }}>
+                                    {subtreeMetrics.machines.toString().padStart(3, ' ')}
+                                </span>
                             </span>
                         )}
                     </span>

@@ -27,6 +27,7 @@ const ProductionNode = ({
     const electricityIcon = getGeneralIcon('Electricity');
     const workerIcon = getGeneralIcon('Worker');
     const computingIcon = getGeneralIcon('Computing');
+    const recipeIcon = getGeneralIcon('Recipes');
 
     const hasMultipleRecipes = node.availableRecipes && node.availableRecipes.length > 1;
 
@@ -247,7 +248,7 @@ const ProductionNode = ({
                                             />
                                         </div>
                                         <div style={{
-                                            padding: '6px 12px',
+                                            padding: '2px 2px',
                                             backgroundColor: 'rgba(74, 144, 226, 0.1)',
                                             borderTop: '1px solid rgba(74, 144, 226, 0.2)',
                                             fontSize: '0.7rem',
@@ -256,7 +257,16 @@ const ProductionNode = ({
                                             fontWeight: '500',
                                             letterSpacing: '0.3px'
                                         }}>
-                                            ✨ Click to view {node.availableRecipes.length} available recipes
+                                            <img
+                                                src={recipeIcon}
+                                                alt={'?'}
+                                                style={{
+                                                    width: '24px',
+                                                    height: '24px',
+                                                    objectFit: 'contain',
+                                                    filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'
+                                                }}
+                                            /> Click to view {node.availableRecipes.length} available recipes
                                         </div>
                                     </div>
                                 </div>
