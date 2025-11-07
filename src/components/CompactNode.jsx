@@ -1,4 +1,5 @@
 import { getProductIcon, getGeneralIcon, getProductTypeIcon } from '../utils/AssetHelper';
+
 const CompactNode = ({
     node,
     level = 0,
@@ -12,37 +13,46 @@ const CompactNode = ({
     recipeOverrides
 }) => {
     if (!node) return null;
+
     const nodeId = `${parentPath}-${node.productId}-${level}`;
     const isCollapsed = collapsedNodes.has(nodeId);
     const hasChildren = node.inputChains && node.inputChains.length > 0;
     const product = node.product;
     const productIcon = getProductIcon(product);
     const recipeIcon = getGeneralIcon('Recipes');
-    const plusIcon = getGeneralIcon('Plus'); 
+    const plusIcon = getGeneralIcon('Plus');
+
     // Calculate subtree metrics
     const calculateSubtreeMetrics = (n) => {
         const metrics = { workers: 0, powerKw: 0, machines: 0, computing: 0, maintenance: 0 };
+
         const traverse = (node) => {
             if (!node) return;
+
             if (node.machine && !node.isRawMaterial) {
                 const count = node.machineCount || 0;
                 metrics.workers += (node.machine.workers || 0) * count;
                 metrics.powerKw += (node.machine.electricityKw || 0) * count;
                 metrics.machines += count;
                 metrics.computing += (node.machine.computingTFlops || 0) * count;
+
                 if (node.machine.maintenance?.perMonth) {
                     metrics.maintenance += node.machine.maintenance.perMonth * count;
                 }
             }
+
             if (node.inputChains) {
                 node.inputChains.forEach(traverse);
             }
         };
+
         traverse(n);
         return metrics;
     };
+
     const subtreeMetrics = calculateSubtreeMetrics(node);
     const isSelected = selectedNode?.nodeKey === node.nodeKey;
+
     // Resource source info
     const currentSource = node.resourceSource || { type: 'mining' };
     const sourceIcons = {
@@ -52,12 +62,16 @@ const CompactNode = ({
         storage: getProductTypeIcon(product?.type),
         machine: getGeneralIcon('Machines')
     };
+
     const hasMultipleRecipes = node.availableRecipes && node.availableRecipes.length > 1;
+
     // Condition for showing + button: raw materials OR single-recipe hybrids using machine
     const showSourceButton = node.isRawMaterial || (!node.isRawMaterial && node.availableRecipes && node.availableRecipes.length === 1);
+
     return (
         <div style={{ marginBottom: '4px' }}>
             <div
+                onClick={() => onSelectNode(node)}
                 style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -67,18 +81,25 @@ const CompactNode = ({
                     borderRadius: '6px',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
-                    marginLeft: `${level * 20}px`
+                    marginLeft: `${level * 20}px`,
+                    boxShadow: isSelected ? '0 0 4px rgba(74, 144, 226, 0.3)' : 'none'
                 }}
                 onMouseEnter={(e) => {
                     if (!isSelected) {
                         e.currentTarget.style.backgroundColor = '#252525';
                         e.currentTarget.style.borderColor = '#555';
+                    } else {
+                        // Add a subtle glow effect when hovering over selected node
+                        e.currentTarget.style.boxShadow = '0 0 8px rgba(74, 144, 226, 0.5)';
                     }
                 }}
                 onMouseLeave={(e) => {
                     if (!isSelected) {
                         e.currentTarget.style.backgroundColor = '#1a1a1a';
                         e.currentTarget.style.borderColor = '#333';
+                    } else {
+                        // Remove glow effect, restore base selected glow
+                        e.currentTarget.style.boxShadow = '0 0 4px rgba(74, 144, 226, 0.3)';
                     }
                 }}
             >
@@ -99,9 +120,9 @@ const CompactNode = ({
                 >
                     {hasChildren ? (isCollapsed ? '▶' : '▼') : ''}
                 </span>
+
                 {/* Node content */}
                 <div
-                    onClick={() => onSelectNode(node)}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -112,6 +133,7 @@ const CompactNode = ({
                     {productIcon && (
                         <img src={productIcon} alt={product?.name} style={{ width: '24px', height: '24px', flexShrink: 0 }} />
                     )}
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: '180px' }}>
                         <span style={{ fontWeight: '600', color: '#fff', fontSize: '0.95rem' }}>
                             {product?.name || node.productId}
@@ -122,9 +144,11 @@ const CompactNode = ({
                             )}
                         </span>
                     </div>
+
                     <span style={{ color: '#4a90e2', fontWeight: '700', fontSize: '0.9rem', marginLeft: '12px', minWidth: '80px' }}>
                         {node.targetRate?.toFixed(1)}/min
                     </span>
+
                     {!node.isRawMaterial && node.machine && (
                         <span
                             style={{
@@ -140,6 +164,7 @@ const CompactNode = ({
                             {node.machineCount}× {node.machine.name}
                         </span>
                     )}
+
                     {node.isRawMaterial && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
                             {sourceIcons[currentSource.type] && (
@@ -152,6 +177,7 @@ const CompactNode = ({
                             )}
                         </div>
                     )}
+
                     <span style={{ marginLeft: 'auto', color: '#777', fontSize: '0.8rem', display: 'flex', gap: '12px', flexShrink: 0 }}>
                         {subtreeMetrics.powerKw > 0 && (
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: '60px', justifyContent: 'flex-end' }}>
@@ -179,6 +205,7 @@ const CompactNode = ({
                         )}
                     </span>
                 </div>
+
                 {/* Recipe change button for non-raw materials with multiple recipes - original styling, positioned at end */}
                 {!node.isRawMaterial && hasMultipleRecipes && onOpenRecipeModal && (
                     <button
@@ -224,7 +251,6 @@ const CompactNode = ({
                                     objectFit: 'contain',
                                     transform: 'translateX(-17%) translateY(-17%)',
                                     filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'
-                                    
                                 }}
                             />
                         ) : (
@@ -239,13 +265,13 @@ const CompactNode = ({
                             fontSize: '0.65rem',
                             fontWeight: '900',
                             lineHeight: 1,
-                            //filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.4))'
                             textShadow: '-0.2px -0.2px 0 #000000, -0.2px -0.2px 0 #000000, -0.2px -0.2px 0 #000000, -0.2px -0.2px 0 #000000'
                         }}>
                             {node.availableRecipes.length}
                         </span>
                     </button>
                 )}
+
                 {/* + Button for raw materials OR single-recipe hybrids using machine - matched to recipe button styling with min size */}
                 {showSourceButton && (
                     <button
@@ -292,12 +318,12 @@ const CompactNode = ({
                                 height: '16px',
                                 objectFit: 'contain',
                                 filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'
-
                             }}
                         />
                     </button>
                 )}
             </div>
+
             {hasChildren && !isCollapsed && (
                 <div style={{ marginTop: '4px' }}>
                     {node.inputChains.map((child, idx) => (
@@ -320,4 +346,5 @@ const CompactNode = ({
         </div>
     );
 };
+
 export default CompactNode;

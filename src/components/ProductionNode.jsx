@@ -155,6 +155,22 @@ const ProductionNode = ({
                                 )}
                             </div>
 
+                            {/* Add this near the top of the node card, after the product name */}
+                            {node.consolidationInfo && node.consolidationInfo.isShared && (
+                                <span style={{
+                                    display: 'inline-block',
+                                    marginLeft: '8px',
+                                    padding: '2px 8px',
+                                    fontSize: '0.75rem',
+                                    backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                                    color: '#4a90e2',
+                                    borderRadius: '4px',
+                                    fontWeight: '600'
+                                }}>
+                                    🔗 SHARED ({node.consolidationInfo.consumers.length})
+                                </span>
+                            )}
+
                             {/* Raw material source display */}
                             {isRaw && (
                                 <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -310,6 +326,45 @@ const ProductionNode = ({
                                 </div>
                             </div>
                         </div>
+
+                        {/* Add this after displaying recipe.name */}
+                        {node.consolidationInfo && node.consolidationInfo.isShared && (
+                            <div style={{
+                                marginTop: '8px',
+                                padding: '8px',
+                                backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                                border: '1px solid rgba(74, 144, 226, 0.3)',
+                                borderRadius: '6px',
+                                fontSize: '0.85rem'
+                            }}>
+                                <div style={{
+                                    color: '#4a90e2',
+                                    fontWeight: '600',
+                                    marginBottom: '4px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}>
+                                    <span>🔗</span>
+                                    <span>Shared Resource</span>
+                                </div>
+                                <div style={{ color: '#ccc', fontSize: '0.8rem' }}>
+                                    <div>Total Demand: <strong>{node.consolidationInfo.totalDemand.toFixed(2)}/min</strong></div>
+                                    <div>Actual Production: <strong>{node.consolidationInfo.actualProduction.toFixed(2)}/min</strong></div>
+                                    <div>Utilization: <strong>{node.consolidationInfo.utilizationPercent.toFixed(1)}%</strong></div>
+                                    <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid rgba(74, 144, 226, 0.2)' }}>
+                                        Shared by <strong>{node.consolidationInfo.consumers.length}</strong> recipe(s):
+                                        <ul style={{ margin: '4px 0 0 0', paddingLeft: '20px' }}>
+                                            {node.consolidationInfo.consumers.map((consumer, idx) => (
+                                                <li key={idx}>
+                                                    {consumer.parentProduct}: {consumer.rate.toFixed(2)}/min
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <div style={{
                             display: 'flex',

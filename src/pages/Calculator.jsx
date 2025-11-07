@@ -3,8 +3,6 @@ import ProductionCalculator from '../utils/ProductionCalculator';
 import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
 import { getProductIcon, getMachineImage, getGeneralIcon, getProductTypeIcon, getEntityIcon } from '../utils/AssetHelper';
-import OptimizationEngine from '../utils/OptimizationEngine';
-import RecipeCard from '../components/RecipeCard';
 import RecipeModal from '../components/RecipeModal';
 import ProductSelectorModal from '../components/ProductSelectorModal';
 import ResourceSourceModal from '../components/ResourceSourceModal';
@@ -13,6 +11,9 @@ import OptimizationControls from '../components/OptimizationControls';
 import DetailsPanel from '../components/DetailsPanel';
 import ProductionNode from '../components/ProductionNode';
 import CompactNode from '../components/CompactNode';
+import ProductionSolver from '../utils/ProductionSolver';
+import ConsolidatedResourcesPanel from '../components/ConsolidatedResourcesPanel';
+import OptimizationAlternativesPanel from '../components/OptimizationAlternativesPanel';
 
 const Calculator = () => {
     const { settings } = useSettings();
@@ -32,6 +33,9 @@ const Calculator = () => {
     const [recipeModalRecipes, setRecipeModalRecipes] = useState([]);
     const [powerUnit, setPowerUnit] = useState('kW');
     const [collapsedNodes, setCollapsedNodes] = useState(new Set());
+    const [useConsolidation, setUseConsolidation] = useState(false);
+    const [showResourcePoolDetail, setShowResourcePoolDetail] = useState(false);
+    const [selectedAlternative, setSelectedAlternative] = useState('best');
 
     // Resource source management
     const [resourceSources, setResourceSources] = useState(new Map());
@@ -73,7 +77,7 @@ const Calculator = () => {
         tierRestrictions: null
     });
     const [optimizationResult, setOptimizationResult] = useState(null);
-    const [optimizer, setOptimizer] = useState(null);
+    const [solver] = useState(() => ProductionSolver);
 
     const [recipeSelectionModalOpen, setRecipeSelectionModalOpen] = useState(false);
 
@@ -85,10 +89,6 @@ const Calculator = () => {
             const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
             const gameData = await DataLoader.loadGameData(enabledMods);
             ProductionCalculator.initialize(gameData);
-
-            const engine = new OptimizationEngine(ProductionCalculator);
-            setOptimizer(engine);
-
             setDataLoaded(true);
         };
 
@@ -147,7 +147,6 @@ const Calculator = () => {
         );
     }
 
-
     const trashIcon = getGeneralIcon('Trash');
     const optimizationOn = getGeneralIcon('LogisticsAuto');
     const optimizationOff = getGeneralIcon('LogisticsOff');
@@ -182,44 +181,83 @@ const Calculator = () => {
         });
     };
 
+    const handleNodeClick = (node) => {
+        // If clicking the same node, deselect it (go back to total requirements)
+        if (selectedNode && selectedNode.nodeKey === node.nodeKey) {
+            setSelectedNode(null);
+        } else {
+            setSelectedNode(node);
+        }
+    };
+
     const handleCalculate = () => {
-        if (optimizationMode && optimizer) {
-            const mergedConstraints = {
+        if (!selectedProduct || !targetRate) return;
+
+        // Use ProductionSolver for all calculations
+        const result = solver.solve({
+            targetProductId: selectedProduct,
+            targetRate: targetRate,
+            useConsolidation: useConsolidation,
+            resourceSources: resourceSources,
+            recipeOverrides: recipeOverrides,
+            optimizationMode: optimizationMode,
+            optimizationGoal: optimizationGoal,
+            constraints: optimizationMode ? {
                 ...optimizationConstraints,
                 resourceLimits: resourceConstraints
-            };
+            } : {},
+            resourceConstraints: resourceConstraints
+        });
 
-            const result = optimizer.optimize({
+        if (result.error) {
+            console.error('Calculation error:', result.error);
+            setProductionChain({ error: result.error });
+            setRequirements(null);
+            setOptimizationResult(null);
+            setSelectedAlternative('best');
+            return;
+        }
+
+        setProductionChain(result.chain);
+        setRequirements(result.requirements);
+
+        if (result.optimized) {
+            setOptimizationResult({
+                score: result.score,
+                metrics: result.metrics,
+                alternatives: result.alternatives,
+                explanation: result.explanation
+            });
+            setRecipeOverrides(result.recipeOverrides || new Map());
+        } else {
+            setOptimizationResult(null);
+        }
+    };
+
+    const handleSelectAlternative = (alternativeId, recipeOverrides) => {
+        setSelectedAlternative(alternativeId);
+
+        // Apply the alternative's recipe overrides
+        setRecipeOverrides(recipeOverrides);
+
+        // Recalculate with these overrides
+        if (selectedProduct && targetRate) {
+            const result = solver.solve({
                 targetProductId: selectedProduct,
                 targetRate: targetRate,
-                optimizationGoal,
-                availableResources: resourceConstraints,
-                constraints: mergedConstraints
+                useConsolidation: useConsolidation,
+                resourceSources: resourceSources,
+                recipeOverrides: recipeOverrides,
+                optimizationMode: false, // Switch to manual mode with these recipes
+                optimizationGoal: optimizationGoal,
+                constraints: {},
+                resourceConstraints: new Map()
             });
 
-            setOptimizationResult(result);
-
-            if (result.chain) {
+            if (!result.error) {
                 setProductionChain(result.chain);
-                setRequirements(ProductionCalculator.calculateTotalRequirements(result.chain));
-                setRecipeOverrides(result.recipeOverrides || new Map());
+                setRequirements(result.requirements);
             }
-        } else {
-            if (!selectedProduct || !targetRate) return;
-
-            const recipeToUse = selectedRecipe || null;
-            const chain = ProductionCalculator.calculateProductionChain(
-                selectedProduct,
-                targetRate,
-                recipeToUse,
-                recipeOverrides,
-                resourceSources
-            );
-            const reqs = ProductionCalculator.calculateTotalRequirements(chain);
-
-            setProductionChain(chain);
-            setRequirements(reqs);
-            setOptimizationResult(null);
         }
     };
 
@@ -234,17 +272,22 @@ const Calculator = () => {
         setRecipeOverrides(newOverrides);
 
         if (selectedProduct && targetRate) {
-            const recipeToUse = selectedRecipe || null;
-            const newChain = ProductionCalculator.calculateProductionChain(
-                selectedProduct,
-                targetRate,
-                recipeToUse,
-                newOverrides,
-                resourceSources
-            );
-            const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
-            setProductionChain(newChain);
-            setRequirements(newReqs);
+            const result = solver.solve({
+                targetProductId: selectedProduct,
+                targetRate: targetRate,
+                useConsolidation: useConsolidation,
+                resourceSources: resourceSources,
+                recipeOverrides: newOverrides,
+                optimizationMode: false, // Recipe override = manual mode
+                optimizationGoal: optimizationGoal,
+                constraints: {},
+                resourceConstraints: new Map()
+            });
+
+            if (!result.error) {
+                setProductionChain(result.chain);
+                setRequirements(result.requirements);
+            }
         }
     };
 
@@ -261,15 +304,9 @@ const Calculator = () => {
     };
 
     const selectRecipeFromModal = (recipeId) => {
-        console.log('selectRecipeFromModal called with:', recipeId); // DEBUG
-        console.log('recipeModalProductId:', recipeModalProductId); // DEBUG
-        console.log('resourceSourceModal.open:', resourceSourceModal.open); // DEBUG
-
         if (recipeModalProductId) {
             // Check if this is for resource source selection (machine production)
             if (resourceSourceModal.open && recipeModalProductId === resourceSourceModal.productId) {
-                console.log('Setting machine production for resource source'); // DEBUG
-
                 // User selected a recipe for machine production from resource source modal
                 const newSources = new Map(resourceSources);
                 newSources.set(resourceSourceModal.nodeKey, {
@@ -293,20 +330,27 @@ const Calculator = () => {
 
                 // Recalculate chain
                 if (selectedProduct && targetRate) {
-                    const newChain = ProductionCalculator.calculateProductionChain(
+                    let newChain = solver.solve(
                         selectedProduct,
                         targetRate,
                         selectedRecipe || null,
                         recipeOverrides,
                         newSources
                     );
-                    const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
+
+                    // Apply consolidation if enabled
+                    if (useConsolidation) {
+                        newChain = ResourceConsolidator.consolidateChain(newChain, ProductionCalculator);
+                    }
+
+                    const newReqs = useConsolidation
+                        ? ResourceConsolidator.calculateConsolidatedRequirements(newChain)
+                        : ProductionCalculator.calculateTotalRequirements(newChain);
+
                     setProductionChain(newChain);
                     setRequirements(newReqs);
                 }
             } else if (recipeModalProductId === selectedProduct) {
-                console.log('Changing main product recipe'); // DEBUG
-
                 // Main product recipe selection
                 setSelectedRecipe(recipeId);
                 setRecipeModalOpen(false);
@@ -314,20 +358,27 @@ const Calculator = () => {
                 setRecipeModalRecipes([]);
 
                 if (targetRate) {
-                    const newChain = ProductionCalculator.calculateProductionChain(
+                    let newChain = solver.solve(
                         selectedProduct,
                         targetRate,
                         recipeId,
                         recipeOverrides,
                         resourceSources
                     );
-                    const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
+
+                    // Apply consolidation if enabled
+                    if (useConsolidation) {
+                        newChain = ResourceConsolidator.consolidateChain(newChain, ProductionCalculator);
+                    }
+
+                    const newReqs = useConsolidation
+                        ? ResourceConsolidator.calculateConsolidatedRequirements(newChain)
+                        : ProductionCalculator.calculateTotalRequirements(newChain);
+
                     setProductionChain(newChain);
                     setRequirements(newReqs);
                 }
             } else {
-                console.log('Setting recipe override for intermediate node'); // DEBUG
-
                 // Recipe override for a node (intermediate product in chain)
                 handleRecipeOverride(recipeModalProductId, recipeId);
                 setRecipeModalOpen(false);
@@ -377,14 +428,23 @@ const Calculator = () => {
             setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
 
             if (selectedProduct && targetRate) {
-                const newChain = ProductionCalculator.calculateProductionChain(
+                let newChain = solver.solve(
                     selectedProduct,
                     targetRate,
                     selectedRecipe || null,
                     recipeOverrides,
                     newSources
                 );
-                const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
+
+                // Apply consolidation if enabled
+                if (useConsolidation) {
+                    newChain = ResourceConsolidator.consolidateChain(newChain, ProductionCalculator);
+                }
+
+                const newReqs = useConsolidation
+                    ? ResourceConsolidator.calculateConsolidatedRequirements(newChain)
+                    : ProductionCalculator.calculateTotalRequirements(newChain);
+
                 setProductionChain(newChain);
                 setRequirements(newReqs);
             }
@@ -405,14 +465,23 @@ const Calculator = () => {
         setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
 
         if (selectedProduct && targetRate) {
-            const newChain = ProductionCalculator.calculateProductionChain(
+            let newChain = solver.solve(
                 selectedProduct,
                 targetRate,
                 selectedRecipe || null,
                 recipeOverrides,
                 newSources
             );
-            const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
+
+            // Apply consolidation if enabled
+            if (useConsolidation) {
+                newChain = ResourceConsolidator.consolidateChain(newChain, ProductionCalculator);
+            }
+
+            const newReqs = useConsolidation
+                ? ResourceConsolidator.calculateConsolidatedRequirements(newChain)
+                : ProductionCalculator.calculateTotalRequirements(newChain);
+
             setProductionChain(newChain);
             setRequirements(newReqs);
         }
@@ -532,20 +601,28 @@ const Calculator = () => {
                     recipes={availableRecipes}
                     currentRecipeId={selectedRecipe}
                     onSelectRecipe={(recipeId) => {
-                        console.log('Main product recipe selected:', recipeId); // DEBUG
                         setSelectedRecipe(recipeId);
                         setRecipeSelectionModalOpen(false);
 
                         // Recalculate the chain with the new recipe
                         if (targetRate && selectedProduct) {
-                            const newChain = ProductionCalculator.calculateProductionChain(
+                            let newChain = solver.solve(
                                 selectedProduct,
                                 targetRate,
                                 recipeId,
                                 recipeOverrides,
                                 resourceSources
                             );
-                            const newReqs = ProductionCalculator.calculateTotalRequirements(newChain);
+
+                            // Apply consolidation if enabled
+                            if (useConsolidation) {
+                                newChain = ResourceConsolidator.consolidateChain(newChain, ProductionCalculator);
+                            }
+
+                            const newReqs = useConsolidation
+                                ? ResourceConsolidator.calculateConsolidatedRequirements(newChain)
+                                : ProductionCalculator.calculateTotalRequirements(newChain);
+
                             setProductionChain(newChain);
                             setRequirements(newReqs);
                         }
@@ -583,6 +660,14 @@ const Calculator = () => {
                     onSelectStorageTier={selectStorageTier}
                 />
 
+                {/* Consolidated Resources Detail Modal */}
+                {showResourcePoolDetail && productionChain && productionChain.consolidatedResources && (
+                    <ConsolidatedResourcesPanel
+                        consolidatedResources={productionChain.consolidatedResources}
+                        onClose={() => setShowResourcePoolDetail(false)}
+                    />
+                )}
+
                 {/* Mode Toggle and Controls */}
                 <div style={{
                     marginBottom: '1.5rem',
@@ -603,19 +688,54 @@ const Calculator = () => {
                             cursor: 'pointer',
                             fontWeight: '700',
                             transition: 'all 0.2s',
-                            boxShadow: optimizationMode ? '0 2px 8px rgba(80, 200, 120, 0.3)' : 'none',
+                            boxShadow: optimizationMode
+                                ? '0 4px 10px rgba(80, 200, 120, 0.4)'
+                                : '0 2px 6px rgba(0, 0, 0, 0.3)',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '8px'
+                            gap: '8px',
+                            filter: 'drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.4))'
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = optimizationMode
+                                ? '0 6px 14px rgba(80, 200, 120, 0.5)'
+                                : '0 4px 10px rgba(0, 0, 0, 0.4)';
                         }}
                         onMouseLeave={(e) => {
                             e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = optimizationMode
+                                ? '0 4px 10px rgba(80, 200, 120, 0.4)'
+                                : '0 2px 6px rgba(0, 0, 0, 0.3)';
                         }}
                     >
-                        {optimizationMode ? (<><img src={optimizationOff} alt="Off" style={{ width: '43px', height: '24px', marginRight: '8px' }} />Disable Optimization</>) : (<><img src={optimizationOn} alt="On" style={{ width: '43px', height: '24px', marginRight: '8px' }} />Enable Optimization</>)}
+                        {optimizationMode ? (
+                            <>
+                                <img
+                                    src={optimizationOff}
+                                    alt="Off"
+                                    style={{
+                                        width: '43px',
+                                        height: '24px',
+                                        filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4))'
+                                    }}
+                                />
+                                Disable Optimization
+                            </>
+                        ) : (
+                            <>
+                                <img
+                                    src={optimizationOn}
+                                    alt="On"
+                                    style={{
+                                        width: '43px',
+                                        height: '24px',
+                                        filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4))'
+                                    }}
+                                />
+                                Enable Optimization
+                            </>
+                        )}
                     </button>
 
                     <button
@@ -633,7 +753,10 @@ const Calculator = () => {
                             setCollapsedNodes(new Set());
                             setOptimizationMode(false);
                             setOptimizationResult(null);
+                            setUseConsolidation(false);
+                            setShowResourcePoolDetail(false);
                             setSelectedNode(null);
+                            setSelectedAlternative('best');
                             setOptimizationConstraints({
                                 maxPower: null,
                                 maxWorkers: null,
@@ -654,20 +777,21 @@ const Calculator = () => {
                             cursor: 'pointer',
                             fontWeight: '700',
                             transition: 'all 0.2s',
-                            boxShadow: '0 2px 8px rgba(255, 107, 107, 0.3)',
+                            boxShadow: '0 4px 10px rgba(255, 107, 107, 0.4)',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '8px'
+                            gap: '8px',
+                            filter: 'drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.4))'
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = '#ff5252';
                             e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 107, 107, 0.4)';
+                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(255, 107, 107, 0.5)';
                         }}
                         onMouseLeave={(e) => {
                             e.currentTarget.style.backgroundColor = '#ff6b6b';
                             e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 107, 107, 0.3)';
+                            e.currentTarget.style.boxShadow = '0 4px 10px rgba(255, 107, 107, 0.4)';
                         }}
                     >
                         <img
@@ -676,9 +800,10 @@ const Calculator = () => {
                             style={{
                                 width: '24px',
                                 height: '24px',
-                                marginRight: '8px'
+                                filter: 'drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.4))'
                             }}
-                        /> Clear All
+                        />
+                        Clear All
                     </button>
                 </div>
 
@@ -707,7 +832,7 @@ const Calculator = () => {
                     border: '1px solid #444',
                     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
                 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 200px auto', gap: '1.5rem', alignItems: 'end' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 200px', gap: '1.5rem', alignItems: 'end', marginBottom: '1.5rem' }}>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
                                 Target Product
@@ -815,6 +940,50 @@ const Calculator = () => {
                                 }}
                             />
                         </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                        {/* Consolidation Toggle - Updated */}
+                        <label style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            cursor: 'pointer',
+                            fontSize: '0.95rem',
+                            color: '#e0e0e0',
+                            padding: '10px 16px',
+                            backgroundColor: '#333',
+                            borderRadius: '6px',
+                            border: '1px solid #555',
+                            transition: 'all 0.2s'
+                        }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#3a3a3a';
+                                e.currentTarget.style.borderColor = '#4a90e2';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#333';
+                                e.currentTarget.style.borderColor = '#555';
+                            }}
+                        >
+                            <input
+                                type="checkbox"
+                                checked={useConsolidation}
+                                onChange={(e) => setUseConsolidation(e.target.checked)}
+                                style={{
+                                    width: '18px',
+                                    height: '18px',
+                                    cursor: 'pointer',
+                                    accentColor: '#4a90e2'
+                                }}
+                            />
+                            <span style={{ fontWeight: '600' }}>
+                                🔗 Consolidate Resources
+                            </span>
+                            <span style={{ fontSize: '0.8rem', color: '#888' }}>
+                                {useConsolidation ? '(Sharing enabled)' : '(Independent chains)'}
+                            </span>
+                        </label>
 
                         <button
                             onClick={handleCalculate}
@@ -829,8 +998,20 @@ const Calculator = () => {
                                 cursor: selectedProduct && targetRate ? 'pointer' : 'not-allowed',
                                 fontWeight: '700',
                                 transition: 'all 0.2s',
-                                boxShadow: selectedProduct && targetRate ? '0 2px 8px rgba(74, 144, 226, 0.4)' : 'none',
+                                boxShadow: selectedProduct && targetRate ? '0 4px 10px rgba(74, 144, 226, 0.4)' : 'none',
                                 height: '48px'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (selectedProduct && targetRate) {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 6px 14px rgba(74, 144, 226, 0.5)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (selectedProduct && targetRate) {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 10px rgba(74, 144, 226, 0.4)';
+                                }
                             }}
                         >
                             Calculate
@@ -855,9 +1036,11 @@ const Calculator = () => {
                                 border: '1px solid #444',
                                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
                             }}>
-                                <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
-                                    {viewMode === 'compact' && selectedNode ? 'Node Details' : 'Total Requirements'}
-                                </h3>
+                                {viewMode === 'compact' && selectedNode && (
+                                    <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
+                                        Node Details
+                                    </h3>
+                                )}
 
                                 <DetailsPanel
                                     selectedNode={selectedNode ? findNodeInChain(productionChain, selectedNode.nodeKey) || selectedNode : null}
@@ -870,6 +1053,9 @@ const Calculator = () => {
                                     onSetPowerUnit={setPowerUnit}
                                     getRecipeTimeDisplay={getRecipeTimeDisplay}
                                     onToggleRecipeTime={toggleRecipeTime}
+                                    productionChain={productionChain}
+                                    useConsolidation={useConsolidation}
+                                    onViewResourcePoolDetails={() => setShowResourcePoolDetail(true)}
                                 />
                             </div>
                         </div>
@@ -988,18 +1174,18 @@ const Calculator = () => {
                                                 💡 <strong style={{ color: '#4a90e2' }}>Compact Mode:</strong> Click ▶/▼ to expand/collapse. Click a node to view details.
                                                 Raw materials show a "+" button to change their source.
                                             </div>
-<CompactNode
-                                                        node={productionChain}
-                                                        level={0}
-                                                        parentPath=""
-                                                        collapsedNodes={collapsedNodes}
-                                                        onToggleCollapse={toggleNodeCollapse}
-                                                        onSelectNode={setSelectedNode}
-                                                        selectedNode={selectedNode}
-                                                        onOpenResourceSourceModal={openResourceSourceModal}
-                                                        onOpenRecipeModal={openRecipeModal}
-                                                        recipeOverrides={recipeOverrides}
-                                                    />
+                                            <CompactNode
+                                                node={productionChain}
+                                                level={0}
+                                                parentPath=""
+                                                collapsedNodes={collapsedNodes}
+                                                onToggleCollapse={toggleNodeCollapse}
+                                                onSelectNode={handleNodeClick}
+                                                selectedNodeKey={selectedNode?.nodeKey}
+                                                onOpenResourceSourceModal={openResourceSourceModal}
+                                                onOpenRecipeModal={openRecipeModal}
+                                                recipeOverrides={recipeOverrides}
+                                            />
                                         </>
                                     )}
                                 </div>

@@ -1,5 +1,7 @@
 import { getProductIcon, getMachineImage, getGeneralIcon } from '../utils/AssetHelper';
 import RecipeCard from './RecipeCard';
+import ProductionCalculator from '../utils/ProductionCalculator';
+import ResourceConsolidator from '../utils/ResourceConsolidator';
 
 const DetailsPanel = ({
     selectedNode,
@@ -11,23 +13,20 @@ const DetailsPanel = ({
     onOpenRecipeModal,
     onSetPowerUnit,
     getRecipeTimeDisplay,
-    onToggleRecipeTime
+    onToggleRecipeTime,
+    productionChain,
+    useConsolidation,
+    onViewResourcePoolDetails
 }) => {
-    if (!selectedNode && viewMode === 'compact') {
-        return (
-            <div style={{
-                padding: '2rem',
-                textAlign: 'center',
-                color: '#888',
-                fontSize: '0.95rem',
-                fontStyle: 'italic'
-            }}>
-                Click on a node to view details
-            </div>
-        );
-    }
+    // In compact mode:
+    // - If no node selected OR if requirements exist but no selectedNode, show total requirements
+    // - If a node is selected, show node details
 
-    if (viewMode === 'compact' && selectedNode) {
+    const shouldShowTotalRequirements = viewMode === 'detailed' ||
+        (viewMode === 'compact' && (!selectedNode || !selectedNode.productId));
+
+    // Show node details in compact mode when a node is selected
+    if (viewMode === 'compact' && selectedNode && selectedNode.productId) {
         const product = selectedNode.product;
         const productIcon = getProductIcon(product);
         const machineImage = selectedNode.machine ? getMachineImage(selectedNode.machine) : null;
@@ -203,9 +202,53 @@ const DetailsPanel = ({
         );
     }
 
-    // Total requirements view (detailed mode)
+    // Show total requirements view (both in detailed mode and compact mode when no node selected)
+    if (!requirements) {
+        return (
+            <div style={{
+                padding: '2rem',
+                textAlign: 'center',
+                color: '#888',
+                fontSize: '0.95rem',
+                fontStyle: 'italic'
+            }}>
+                {viewMode === 'compact' ? 'Run calculation to view requirements' : 'No data available'}
+            </div>
+        );
+    }
+
+    // Get consolidation stats if applicable
+    const stats = useConsolidation && productionChain?.consolidatedResources
+        ? ResourceConsolidator.getConsolidationStats(productionChain)
+        : null;
+
     return (
         <>
+            {/* Header for compact mode */}
+            {viewMode === 'compact' && (
+                <div style={{
+                    marginBottom: '1.5rem',
+                    paddingBottom: '1rem',
+                    borderBottom: '2px solid #444'
+                }}>
+                    <h3 style={{
+                        fontSize: '1.3rem',
+                        fontWeight: '700',
+                        color: '#4a90e2',
+                        margin: 0
+                    }}>
+                        Total Requirements
+                    </h3>
+                    <div style={{
+                        fontSize: '0.85rem',
+                        color: '#888',
+                        marginTop: '4px'
+                    }}>
+                        Click a node to view details
+                    </div>
+                </div>
+            )}
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
                 <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
                     <div style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '4px' }}>Total Machines</div>
@@ -353,7 +396,7 @@ const DetailsPanel = ({
             )}
 
             {requirements.maintenance.size > 0 && (
-                <div>
+                <div style={{ marginBottom: stats ? '1.5rem' : '0' }}>
                     <h4 style={{ marginBottom: '0.75rem', color: '#ccc', fontSize: '1.1rem', fontWeight: '600' }}>
                         Maintenance:
                     </h4>
@@ -378,11 +421,88 @@ const DetailsPanel = ({
                     </div>
                 </div>
             )}
+
+            {/* Resource Pool Summary - integrated seamlessly at the bottom */}
+            {stats && stats.totalResources > 0 && (
+                <div>
+                    <h4 style={{ marginBottom: '0.75rem', color: '#ccc', fontSize: '1.1rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        
+                        Shared Resource Pool:
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            backgroundColor: '#1a1a1a',
+                            padding: '8px 12px',
+                            borderRadius: '4px',
+                            fontSize: '0.9rem'
+                        }}>
+                            <span style={{ color: '#ddd' }}>Shared Resources</span>
+                            <span style={{ color: '#4a90e2', fontWeight: 'bold' }}>{stats.sharedResources}</span>
+                        </div>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            backgroundColor: '#1a1a1a',
+                            padding: '8px 12px',
+                            borderRadius: '4px',
+                            fontSize: '0.9rem'
+                        }}>
+                            <span style={{ color: '#ddd' }}>Single-Use Resources</span>
+                            <span style={{ color: '#ccc', fontWeight: 'bold' }}>{stats.singleUseResources}</span>
+                        </div>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            backgroundColor: '#1a1a1a',
+                            padding: '8px 12px',
+                            borderRadius: '4px',
+                            fontSize: '0.9rem'
+                        }}>
+                            <span style={{ color: '#ddd' }}>Avg. Utilization</span>
+                            <span style={{
+                                fontWeight: 'bold',
+                                color: parseFloat(stats.averageUtilization) >= 90 ? '#4caf50' :
+                                    parseFloat(stats.averageUtilization) >= 70 ? '#ff9800' : '#f44336'
+                            }}>
+                                {stats.averageUtilization}%
+                            </span>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={onViewResourcePoolDetails}
+                        style={{
+                            width: '100%',
+                            padding: '10px',
+                            backgroundColor: '#4a90e2',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            fontSize: '0.9rem',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#5aa0f2';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#4a90e2';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        View Detailed Breakdown →
+                    </button>
+                </div>
+            )}
         </>
     );
 };
-
-// Add missing import
-import ProductionCalculator from '../utils/ProductionCalculator';
 
 export default DetailsPanel;

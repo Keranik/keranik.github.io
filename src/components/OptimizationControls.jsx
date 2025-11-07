@@ -40,7 +40,9 @@ const OptimizationControls = ({
     onChangeConstraints,
     onChangeResourceInput,
     onAddResourceConstraint,
-    onRemoveResourceConstraint
+    onRemoveResourceConstraint,
+    onSelectAlternative,
+    currentAlternative = 'best'
 }) => {
     const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
 
@@ -389,39 +391,74 @@ const OptimizationControls = ({
                     </div>
                 )}
             </div>
-            {/* Optimization Result Summary */}
+            {/* Optimization Result Summary with Alternatives */}
             {optimizationResult && !optimizationResult.error && (
+                <div style={{ marginTop: '1rem' }}>
+                    {/* Main success message */}
+                    <div style={{
+                        padding: '12px',
+                        backgroundColor: 'rgba(80, 200, 120, 0.1)',
+                        border: '1px solid rgba(80, 200, 120, 0.3)',
+                        borderRadius: '6px',
+                        fontSize: '0.9rem',
+                        color: '#50C878',
+                        display: 'flex',
+                        alignItems: 'center',
+                        marginBottom: '12px'
+                    }}>
+                        {getGeneralIcon('Checkmark') && (
+                            <img
+                                src={getGeneralIcon('Checkmark')}
+                                alt="Success"
+                                style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    objectFit: 'contain',
+                                    marginRight: '8px'
+                                }}
+                            />
+                        )}
+                        <span>
+                            {optimizationResult.explanation}
+                        </span>
+                    </div>
+
+                    {/* Alternatives Expandable Section */}
+                    {optimizationResult.alternatives?.length > 0 && (
+                        <AlternativesSection
+                            optimizationResult={optimizationResult}
+                            onSelectAlternative={onSelectAlternative}
+                            currentAlternative={currentAlternative}
+                        />
+                    )}
+                </div>
+            )}
+
+            {optimizationResult?.error && (
                 <div style={{
                     marginTop: '1rem',
                     padding: '12px',
-                    backgroundColor: 'rgba(80, 200, 120, 0.1)',
-                    border: '1px solid rgba(80, 200, 120, 0.3)',
+                    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                    border: '1px solid rgba(255, 107, 107, 0.3)',
                     borderRadius: '6px',
                     fontSize: '0.9rem',
-                    color: '#50C878',
+                    color: '#ff6b6b',
                     display: 'flex',
                     alignItems: 'center'
                 }}>
-                    {getGeneralIcon('Checkmark') && (
+                    {getGeneralIcon('Warning') && (
                         <img
-                            src={getGeneralIcon('Checkmark')}
-                            alt="Success"
+                            src={getGeneralIcon('Warning')}
+                            alt="Warning"
                             style={{
                                 width: '16px',
                                 height: '16px',
                                 objectFit: 'contain',
-                                marginRight: '4px'
+                                marginRight: '8px'
                             }}
                         />
                     )}
-                    <span>
-                        {optimizationResult.explanation}
-                        {optimizationResult.alternatives?.length > 0 && (
-                            <span style={{ color: '#888', marginLeft: '8px' }}>
-                                ({optimizationResult.alternatives.length} alternative{optimizationResult.alternatives.length > 1 ? 's' : ''} found)
-                            </span>
-                        )}
-                    </span>
+                    <span>{optimizationResult.error}</span>
                 </div>
             )}
             {optimizationResult?.error && (
@@ -444,7 +481,7 @@ const OptimizationControls = ({
                                 width: '16px',
                                 height: '16px',
                                 objectFit: 'contain',
-                                marginRight: '4px'
+                                marginRight: '8px'
                             }}
                         />
                     )}
@@ -464,5 +501,218 @@ const OptimizationControls = ({
         </div>
     );
 };
+
+/**
+ * Alternatives Section - Nested inside OptimizationControls
+ */
+const AlternativesSection = ({ optimizationResult, onSelectAlternative, currentAlternative }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const totalSolutions = (optimizationResult.alternatives?.length || 0) + 1;
+
+    return (
+        <div style={{
+            backgroundColor: '#1a1a1a',
+            border: '1px solid #444',
+            borderRadius: '6px',
+            overflow: 'hidden'
+        }}>
+            {/* Collapsible Header */}
+            <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#252525'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{
+                        fontSize: '0.9rem',
+                        transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s',
+                        color: '#50C878'
+                    }}>
+                        ▶
+                    </span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '600', color: '#ddd' }}>
+                        {totalSolutions} Solution{totalSolutions > 1 ? 's' : ''} Found
+                    </span>
+                    <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                        ({isExpanded ? 'Click to collapse' : 'Click to compare alternatives'})
+                    </span>
+                </div>
+
+                {!isExpanded && currentAlternative !== 'best' && (
+                    <span style={{
+                        fontSize: '0.8rem',
+                        color: '#4a90e2',
+                        fontWeight: '600',
+                        padding: '4px 8px',
+                        backgroundColor: 'rgba(74, 144, 226, 0.15)',
+                        borderRadius: '4px'
+                    }}>
+                        Alternative Active
+                    </span>
+                )}
+            </button>
+
+            {/* Expanded Content */}
+            {isExpanded && (
+                <div style={{
+                    padding: '16px',
+                    borderTop: '1px solid #333'
+                }}>
+                    {/* Best Solution */}
+                    <SolutionCard
+                        solution={{
+                            score: optimizationResult.score,
+                            metrics: optimizationResult.metrics,
+                            reason: 'Optimal solution for selected goal',
+                            recipeOverrides: optimizationResult.recipeOverrides
+                        }}
+                        index={0}
+                        isBest={true}
+                        isSelected={currentAlternative === 'best'}
+                        onSelect={() => onSelectAlternative('best', optimizationResult.recipeOverrides)}
+                    />
+
+                    {/* Alternative Solutions */}
+                    {optimizationResult.alternatives.map((alt, idx) => (
+                        <SolutionCard
+                            key={idx}
+                            solution={alt}
+                            index={idx + 1}
+                            isBest={false}
+                            isSelected={currentAlternative === `alt-${idx}`}
+                            onSelect={() => onSelectAlternative(`alt-${idx}`, alt.recipeOverrides)}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+/**
+ * Individual Solution Card
+ */
+const SolutionCard = ({ solution, index, isBest, isSelected, onSelect }) => {
+    const metrics = solution.metrics;
+
+    return (
+        <div
+            onClick={onSelect}
+            style={{
+                marginBottom: '10px',
+                padding: '12px',
+                backgroundColor: isSelected ? 'rgba(74, 144, 226, 0.1)' : '#0a0a0a',
+                border: isSelected ? '2px solid #4a90e2' : '1px solid #333',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                position: 'relative'
+            }}
+            onMouseEnter={(e) => {
+                if (!isSelected) {
+                    e.currentTarget.style.borderColor = '#555';
+                    e.currentTarget.style.backgroundColor = '#151515';
+                }
+            }}
+            onMouseLeave={(e) => {
+                if (!isSelected) {
+                    e.currentTarget.style.borderColor = '#333';
+                    e.currentTarget.style.backgroundColor = '#0a0a0a';
+                }
+            }}
+        >
+            {/* Badge */}
+            {isBest && (
+                <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    padding: '3px 8px',
+                    backgroundColor: 'rgba(80, 200, 120, 0.2)',
+                    color: '#50C878',
+                    borderRadius: '4px',
+                    fontSize: '0.7rem',
+                    fontWeight: '700',
+                    border: '1px solid rgba(80, 200, 120, 0.4)'
+                }}>
+                    ★ BEST
+                </div>
+            )}
+
+            {/* Title */}
+            <div style={{
+                fontSize: '0.9rem',
+                fontWeight: '700',
+                color: isSelected ? '#4a90e2' : '#fff',
+                marginBottom: '8px',
+                paddingRight: isBest ? '70px' : '0'
+            }}>
+                Solution #{index + 1}
+                {isSelected && (
+                    <span style={{
+                        marginLeft: '8px',
+                        fontSize: '0.75rem',
+                        color: '#4a90e2',
+                        fontWeight: '600'
+                    }}>
+                        (Active)
+                    </span>
+                )}
+            </div>
+
+            {/* Compact Metrics */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '8px',
+                marginBottom: '8px'
+            }}>
+                <MetricBadge label="Workers" value={metrics.workers} />
+                <MetricBadge label="Power" value={`${(metrics.powerKw / 1000).toFixed(1)}MW`} />
+                <MetricBadge label="Machines" value={metrics.machines} />
+                <MetricBadge label="Score" value={solution.score.toFixed(1)} highlight={true} />
+            </div>
+
+            {/* Reason */}
+            <div style={{
+                fontSize: '0.8rem',
+                color: '#888',
+                fontStyle: 'italic'
+            }}>
+                {solution.reason}
+            </div>
+        </div>
+    );
+};
+
+/**
+ * Compact metric badge
+ */
+const MetricBadge = ({ label, value, highlight }) => (
+    <div style={{
+        padding: '6px',
+        backgroundColor: highlight ? 'rgba(80, 200, 120, 0.1)' : '#1a1a1a',
+        borderRadius: '4px',
+        textAlign: 'center'
+    }}>
+        <div style={{ fontSize: '0.65rem', color: '#666', marginBottom: '2px' }}>{label}</div>
+        <div style={{ fontSize: '0.85rem', fontWeight: '700', color: highlight ? '#50C878' : '#ddd' }}>
+            {value}
+        </div>
+    </div>
+);
 
 export default OptimizationControls;
