@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { getProductIcon, getGeneralIcon } from '../utils/AssetHelper';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import ProductSelectorModal from './ProductSelectorModal';
+import RecipeConstraintModal from './RecipeConstraintModal'; // NEW
+import MiniRecipeCard from './MiniRecipeCard'; // NEW
 
 const CONSTRAINT_RANGES = {
     maxWorkers: { min: 1, max: 1000, step: 1 },
@@ -35,6 +37,7 @@ const OptimizationControls = ({
     resourceConstraints,
     resourceInput,
     optimizationResult,
+    disabledRecipes = new Set(), // NEW
     onToggleOptimization,
     onChangeGoal,
     onChangeConstraints,
@@ -42,9 +45,11 @@ const OptimizationControls = ({
     onAddResourceConstraint,
     onRemoveResourceConstraint,
     onSelectAlternative,
+    onApplyRecipeConstraints, // NEW
     currentAlternative = 'best'
 }) => {
     const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
+    const [isRecipeConstraintModalOpen, setIsRecipeConstraintModalOpen] = useState(false); // NEW
 
     if (!optimizationMode) {
         return null;
@@ -90,6 +95,14 @@ const OptimizationControls = ({
     };
 
     const productsForModal = ProductionCalculator.products || [];
+
+    // NEW: Calculate which list to show (disabled or enabled - whichever is smaller)
+    const allRecipes = ProductionCalculator.recipes || [];
+    const enabledRecipes = allRecipes.filter(r => !disabledRecipes.has(r.id));
+    const disabledRecipesList = allRecipes.filter(r => disabledRecipes.has(r.id));
+    const showDisabled = disabledRecipes.size < enabledRecipes.length;
+    const displayRecipes = showDisabled ? disabledRecipesList : enabledRecipes;
+    const maxPreviewRecipes = 16; // Show max 6 in preview
 
     return (
         <div style={{
@@ -213,6 +226,181 @@ const OptimizationControls = ({
                 </div>
             </div>
 
+            {/* NEW: Recipe Constraints Section */}
+            <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.75rem'
+                }}>
+                    <label style={{
+                        color: '#ccc',
+                        fontWeight: '600',
+                        fontSize: '0.95rem'
+                    }}>
+                        Recipe Constraints
+                    </label>
+                    <button
+                        onClick={() => setIsRecipeConstraintModalOpen(true)}
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: disabledRecipes.size > 0 ? 'rgba(255, 107, 107, 0.15)' : '#333',
+                            border: disabledRecipes.size > 0 ? '1px solid rgba(255, 107, 107, 0.4)' : '1px solid #555',
+                            borderRadius: '6px',
+                            color: disabledRecipes.size > 0 ? '#ff6b6b' : '#ddd',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = disabledRecipes.size > 0 ? 'rgba(255, 107, 107, 0.25)' : '#3a3a3a';
+                            e.currentTarget.style.borderColor = disabledRecipes.size > 0 ? 'rgba(255, 107, 107, 0.6)' : '#666';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = disabledRecipes.size > 0 ? 'rgba(255, 107, 107, 0.15)' : '#333';
+                            e.currentTarget.style.borderColor = disabledRecipes.size > 0 ? 'rgba(255, 107, 107, 0.4)' : '#555';
+                        }}
+                    >
+                        <img
+                            src={getGeneralIcon('Filter')}
+                            alt="Filter Recipes"
+                            style={{
+                                width: '24px',
+                                height: '24px',
+                                objectFit: 'contain',
+                                marginRight: '4px',
+                                filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'
+                            }}
+                        /> Recipe Filter
+                        {disabledRecipes.size > 0 && (
+                            <span style={{
+                                padding: '2px 6px',
+                                backgroundColor: 'rgba(255, 107, 107, 0.3)',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: '700'
+                            }}>
+                                {disabledRecipes.size}
+                            </span>
+                        )}
+                    </button>
+                </div>
+
+                {/* Recipe Preview Grid */}
+                {disabledRecipes.size > 0 ? (
+                    <div style={{
+                        backgroundColor: '#1a1a1a',
+                        padding: '12px',
+                        borderRadius: '6px',
+                        border: '1px solid #333'
+                    }}>
+                        <div style={{
+                            fontSize: '0.85rem',
+                            color: '#888',
+                            marginBottom: '10px',
+                            fontWeight: '600'
+                        }}>
+                            {showDisabled ? (
+                                <>
+                                        <img
+                                        src={getGeneralIcon('Blocked')}
+                                        alt="Blocked Recipes"
+                                        style={{
+                                            width: '24px',
+                                            height: '24px',
+                                            objectFit: 'contain',
+                                            marginRight: '12px',
+                                            filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'
+                                        }}
+                                        />
+                                    {disabledRecipes.size} Disabled Recipe{disabledRecipes.size !== 1 ? 's' : ''}</>
+                            ) : (
+                                    <>
+
+<img
+                                            src={getGeneralIcon('Checkmark')}
+                                            alt="Allowed Recipes"
+                                            style={{
+                                                width: '24px',
+                                                height: '24px',
+                                                objectFit: 'contain',
+                                                marginRight: '12px',
+                                                filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'
+                                            }}
+                                        />
+
+                                        {enabledRecipes.length} Enabled Recipe{enabledRecipes.length !== 1 ? 's' : ''} (Showing sample)</>
+                            )}
+                        </div>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                            gap: '8px',
+                            maxHeight: '200px',
+                            overflowY: 'auto',
+                            overflowX: 'hidden'
+                        }}>
+                            {displayRecipes.slice(0, maxPreviewRecipes).map(recipe => (
+                                <div
+                                    key={recipe.id}
+                                    style={{
+                                        backgroundColor: '#0a0a0a',
+                                        padding: '8px',
+                                        borderRadius: '4px',
+                                        border: showDisabled ? '1px solid rgba(255, 107, 107, 0.3)' : '1px solid rgba(80, 200, 120, 0.3)',
+                                        opacity: showDisabled ? 0.6 : 1
+                                    }}
+                                >
+                                    <MiniRecipeCard recipe={recipe} iconSize={18} />
+                                </div>
+                            ))}
+                        </div>
+                        {displayRecipes.length > maxPreviewRecipes && (
+                            <div style={{
+                                marginTop: '10px',
+                                fontSize: '0.8rem',
+                                color: '#666',
+                                textAlign: 'center',
+                                fontStyle: 'italic'
+                            }}>
+                                <img
+                                    src={getGeneralIcon('Plus')}
+                                    alt="See More"
+                                    style={{
+                                        width: '16px',
+                                        height: '16px',
+                                        objectFit: 'contain',
+                                        marginRight: '2px',
+                                        filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.5))'
+                                    }}
+                                /> {displayRecipes.length - maxPreviewRecipes} more {showDisabled ? 'disabled' : 'enabled'}... (click Manage to see all)
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div style={{
+                        backgroundColor: '#1a1a1a',
+                        padding: '16px',
+                        borderRadius: '6px',
+                        border: '1px solid #333',
+                        textAlign: 'center',
+                        color: '#888',
+                        fontSize: '0.9rem'
+                    }}>
+                        <div style={{ marginBottom: '8px', fontSize: '2rem' }}>✓</div>
+                        All {allRecipes.length} recipes are enabled
+                        <div style={{ marginTop: '8px', fontSize: '0.8rem', color: '#666' }}>
+                            Click "Recipe Filter" to add constraints
+                        </div>
+                    </div>
+                )}
+            </div>
+
             {/* Constraints Sliders */}
             <div style={{ marginBottom: '1.5rem' }}>
                 <label style={{
@@ -222,7 +410,7 @@ const OptimizationControls = ({
                     fontWeight: '600',
                     fontSize: '0.95rem'
                 }}>
-                    Constraints (Optional)
+                    Metrics Constraints (Optional)
                 </label>
                 <div style={{
                     display: 'grid',
@@ -694,6 +882,14 @@ const OptimizationControls = ({
                 onSelectProduct={handleResourceProductSelect}
                 products={productsForModal}
                 currentProductId={resourceInput.productId}
+            />
+
+            {/* NEW: Recipe Constraint Modal */}
+            <RecipeConstraintModal
+                isOpen={isRecipeConstraintModalOpen}  // ✅ state defined above
+                onClose={() => setIsRecipeConstraintModalOpen(false)}  // ✅ correct
+                disabledRecipes={disabledRecipes}  // ✅ from props
+                onApply={onApplyRecipeConstraints}  // ✅ use prop callback
             />
         </div>
     );

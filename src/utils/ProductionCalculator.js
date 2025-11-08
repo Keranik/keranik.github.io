@@ -2,6 +2,8 @@
  * Production Calculator Engine - REWRITTEN FOR EXCELLENCE
  * Handles all production chain calculations, recipe optimization, and resource requirements
  * Now with per-minute normalization, resource source management, storage calculations, and SMART RAW MATERIAL DETECTION
+ * 
+ * NEW: Simple A↔B loop detection - if Product A only makes Product B and Product B only makes Product A, treat both as raw
  */
 class ProductionCalculator {
     constructor() {
@@ -33,6 +35,9 @@ class ProductionCalculator {
             3: 1800,
             4: 3000
         };
+
+        // NEW: Simple tautology detection cache
+        this.tautologicalProducts = new Set(); // Products that are in A↔B loops
     }
 
     /**
@@ -50,6 +55,8 @@ class ProductionCalculator {
         this.foods = gameData.foods || [];
         this.foodCategories = gameData.foodCategories || [];
         this.farmResearch = gameData.farmResearch || [];
+        this.research = gameData.research || [];
+        
 
         // Build lookup maps for fast access
         this.productMap = new Map(this.products.map(p => [p.id, p]));
@@ -58,6 +65,7 @@ class ProductionCalculator {
         this.farmMap = new Map(this.farms.map(f => [f.id, f]));
         this.cropMap = new Map(this.crops.map(c => [c.id, c]));
         this.foodMap = new Map(this.foods.map(f => [f.id, f]));
+        this.researchMap = new Map(this.research.map(r => [r.id, r]));
 
         // Build reverse lookup: product -> recipes that produce it
         this.productToRecipes = new Map();
@@ -80,6 +88,9 @@ class ProductionCalculator {
                 maxFertility: p.fertilizer.maxFertilityPercent
             }));
 
+        // NEW: Detect A↔B tautological loops
+        this._detectTautologicalLoops();
+
         // Log loaded data for debugging
         console.log('ProductionCalculator initialized:', {
             machines: this.machines.length,
@@ -88,8 +99,71 @@ class ProductionCalculator {
             farms: this.farms.length,
             crops: this.crops.length,
             foods: this.foods.length,
-            fertilizers: this.fertilizers.length
+            fertilizers: this.fertilizers.length,
+            tautologicalProducts: this.tautologicalProducts.size,
+            research: this.research.length
         });
+    }
+
+    /**
+ * NEW: Detect A↔B tautological loops
+ * Simple rule: If Product A has ONLY ONE recipe that produces it from Product B,
+ * AND Product B has ONLY ONE recipe that produces it from Product A,
+ * then both are tautological and should be treated as raw materials.
+ */
+    _detectTautologicalLoops() {
+        console.log('🔍 Detecting A↔B tautological loops...');
+
+        const tautologicalPairs = [];
+
+        // Build a map of product -> [what it's made from (if only one recipe)]
+        const productToSingleSource = new Map();
+
+        this.products.forEach(product => {
+            const recipes = this.getRecipesForProduct(product.id);
+
+            // Only consider if there's exactly ONE recipe that produces this product
+            if (recipes.length === 1) {
+                const recipe = recipes[0];
+
+                // Only consider if the recipe has exactly ONE input
+                if (recipe.inputs.length === 1) {
+                    const inputProductId = recipe.inputs[0].productId;
+                    productToSingleSource.set(product.id, inputProductId);
+                }
+            }
+        });
+
+        // Now check for mutual loops: A→B (only path) and B→A (only path)
+        const processedPairs = new Set();
+
+        productToSingleSource.forEach((sourceProductId, targetProductId) => {
+            // Check if the source product also has only one recipe, and it comes from target
+            const reverseSource = productToSingleSource.get(sourceProductId);
+
+            if (reverseSource === targetProductId) {
+                // Found a tautological loop! A→B (only way) and B→A (only way)
+
+                // Avoid processing the same pair twice
+                const pairKey = [targetProductId, sourceProductId].sort().join('↔');
+                if (processedPairs.has(pairKey)) return;
+                processedPairs.add(pairKey);
+
+                this.tautologicalProducts.add(targetProductId);
+                this.tautologicalProducts.add(sourceProductId);
+
+                const productA = this.getProduct(targetProductId);
+                const productB = this.getProduct(sourceProductId);
+
+                tautologicalPairs.push(`${productA?.name || targetProductId} ↔ ${productB?.name || sourceProductId}`);
+            }
+        });
+
+        console.log(`✅ Found ${tautologicalPairs.length / 2} tautological pairs (${this.tautologicalProducts.size} products)`);
+
+        if (tautologicalPairs.length > 0) {
+            console.log('🚫 Tautological loops (will be treated as raw):', tautologicalPairs.join(', '));
+        }
     }
 
     /**
@@ -150,11 +224,12 @@ class ProductionCalculator {
     }
 
     /**
-  * NEW: Check if a product is a raw/mineable resource
+  * Check if a product is a raw/mineable resource
   * 
   * A product is considered RAW if:
   * 1. It can be mined (marked as CanBeMined from terrain materials export)
   * 2. It has NO recipes that produce it
+  * 3. NEW: It's part of a tautological A↔B loop
   * 
   * @param {string} productId - Product ID to check
   * @returns {boolean} - True if this product should default to raw material
@@ -172,7 +247,60 @@ class ProductionCalculator {
         // Check 2: Products with no recipes = raw materials
         // Examples: Wood (from trees), naturally collected items
         const recipes = this.getRecipesForProduct(productId);
-        return recipes.length === 0;
+        if (recipes.length === 0) {
+            return true;
+        }
+
+        // Check 3: NEW - Products in tautological A↔B loops
+        // Examples: Iron Scrap ↔ Iron Scrap Pressed, Aluminum Scrap ↔ Aluminum Pressed
+        if (this.tautologicalProducts.has(productId)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+ * Get research node by ID
+ */
+    getResearchNode(researchId) {
+        return this.researchMap.get(researchId);
+    }
+
+    /**
+     * Get all research nodes
+     */
+    getAllResearch() {
+        return this.research;
+    }
+
+    /**
+     * Get research nodes by tier
+     */
+    getResearchByTier(tier) {
+        return this.research.filter(r => r.tier === tier);
+    }
+
+    /**
+     * Find which research node unlocks a specific recipe
+     */
+    getResearchForRecipe(recipeId) {
+        return this.research.find(node =>
+            node.unlocks.some(unlock =>
+                unlock.type === 'recipe' && unlock.id === recipeId
+            )
+        );
+    }
+
+    /**
+     * Find which research node unlocks a specific machine
+     */
+    getResearchForMachine(machineId) {
+        return this.research.find(node =>
+            node.unlocks.some(unlock =>
+                unlock.type === 'machine' && unlock.id === machineId
+            )
+        );
     }
 
     /**
@@ -287,6 +415,17 @@ class ProductionCalculator {
     }
 
     /**
+ * Get recipes for a product, filtered by disabled recipes
+ * @param {string} productId - Product ID
+ * @param {Set} disabledRecipes - Set of disabled recipe IDs
+ * @returns {Array} - Enabled recipes only
+ */
+    getEnabledRecipesForProduct(productId, disabledRecipes = new Set()) {
+        const allRecipes = this.getRecipesForProduct(productId);
+        return allRecipes.filter(recipe => !disabledRecipes.has(recipe.id));
+    }
+
+    /**
      * Calculate how many machines are needed to produce a target rate
      * @param {string} recipeId - Recipe ID
      * @param {string} productId - Product we want to produce
@@ -325,6 +464,7 @@ class ProductionCalculator {
     /**
      * Calculate full production chain for a target product and rate
      * NOW WITH SMART RAW MATERIAL DETECTION & RESOURCE SOURCE SUPPORT
+     * ENHANCED WITH SIMPLE A↔B TAUTOLOGY PREVENTION
      * 
      * @param {string} productId - Target product ID
      * @param {number} targetRate - Desired items per minute
@@ -336,9 +476,10 @@ class ProductionCalculator {
      * @param {string} parentKey - Parent node key for unique identification
      * @returns {Object} - Production chain tree
      */
-    calculateProductionChain(productId, targetRate, recipeId = null, recipeOverrides = new Map(), resourceSources = new Map(), depth = 0, visited = new Set(), parentKey = '') {
+    calculateProductionChain(productId, targetRate, recipeId = null, recipeOverrides = new Map(), resourceSources = new Map(), depth = 0, visited = new Set(), parentKey = '', disabledRecipes = new Set()) {
         // Prevent infinite recursion
         if (depth > 20) {
+            console.error('❌ Max recursion depth reached for', productId);
             return { error: 'Max recursion depth reached', productId, targetRate };
         }
 
@@ -348,6 +489,7 @@ class ProductionCalculator {
         // Check for circular dependencies
         const visitKey = `${productId}-${recipeId}`;
         if (visited.has(visitKey)) {
+            console.warn('⚠️ Circular dependency detected:', visitKey);
             return { error: 'Circular dependency detected', productId, targetRate };
         }
         visited.add(visitKey);
@@ -362,25 +504,43 @@ class ProductionCalculator {
 
         // SMART RAW MATERIAL DETECTION
         // If user selected "machine" source, use recipe
-        // Otherwise, check if it's naturally a raw material
+        // Otherwise, check if it's naturally a raw material (includes tautological products)
         const isNaturallyRaw = this.isRawMaterial(productId);
         const userWantsMachine = customSource && customSource.type === 'machine';
 
         // Get recipe to use
         let recipe;
         if (userWantsMachine && customSource.config?.recipeId) {
-            // User explicitly selected machine production
             recipe = this.getRecipe(customSource.config.recipeId);
         } else if (!isNaturallyRaw || userWantsMachine) {
-            // Either not naturally raw, or user wants machine (try to find recipe)
             if (recipeId) {
                 recipe = this.getRecipe(recipeId);
             } else if (recipeOverrides.has(productId)) {
                 recipe = this.getRecipe(recipeOverrides.get(productId));
             } else {
-                // Auto-select first available recipe
+                // Auto-select first available recipe that's NOT disabled
                 const recipes = this.getRecipesForProduct(productId);
-                recipe = recipes[0];
+
+                // FILTER OUT DISABLED RECIPES - ADD THIS
+                const enabledRecipes = recipes.filter(r => !disabledRecipes.has(r.id));
+
+                if (enabledRecipes.length === 0) {
+                    // All recipes are disabled! Treat as raw material
+                    console.warn(`⚠️ All recipes for ${productId} are disabled, treating as raw material`);
+                    return {
+                        productId,
+                        product: this.getProduct(productId),
+                        targetRate,
+                        isRawMaterial: true,
+                        resourceSource: customSource || { type: 'mining' },
+                        nodeKey: `${productId}-${depth}`,
+                        depth,
+                        availableSourceOptions: this.getResourceSourceOptions(productId),
+                        warning: 'All recipes disabled - using raw material source'
+                    };
+                }
+
+                recipe = enabledRecipes[0]; // Use first enabled recipe
             }
         }
 
@@ -399,13 +559,15 @@ class ProductionCalculator {
                 resourceSource: customSource || { type: 'mining' }, // Default to mining
                 nodeKey,
                 depth,
-                availableSourceOptions: this.getResourceSourceOptions(productId)
+                availableSourceOptions: this.getResourceSourceOptions(productId),
+                isTautological: this.tautologicalProducts.has(productId) // NEW: Flag tautological products
             };
         }
 
         // Calculate machines needed
         const machineCalc = this.calculateMachinesNeeded(recipe.id, productId, targetRate);
         if (!machineCalc) {
+            console.error('❌ Cannot calculate machines for', productId, recipe.id);
             return { error: 'Cannot calculate machines', productId, recipeId };
         }
 
@@ -422,7 +584,8 @@ class ProductionCalculator {
                 resourceSources,
                 depth + 1,
                 new Set(visited),
-                nodeKey
+                nodeKey,
+                disabledRecipes
             );
         });
 
@@ -584,6 +747,25 @@ class ProductionCalculator {
         comparisons.sort((a, b) => a.efficiency.machinesTotal - b.efficiency.machinesTotal);
 
         return comparisons;
+    }
+
+    /**
+     * NEW: Get tautology detection statistics
+     */
+    getTautologyStats() {
+        const pairs = [];
+        this.tautologicalProducts.forEach(productId => {
+            const product = this.getProduct(productId);
+            if (product) {
+                pairs.push(product.name || productId);
+            }
+        });
+
+        return {
+            tautologicalProducts: Array.from(this.tautologicalProducts),
+            count: this.tautologicalProducts.size,
+            products: pairs
+        };
     }
 }
 

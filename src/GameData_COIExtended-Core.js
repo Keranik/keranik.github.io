@@ -1,7 +1,7 @@
 const GameData = {
   "metadataJs": {
     "version": "Update 3",
-    "lastUpdated": "11/03/2025",
+    "lastUpdated": "11/08/2025",
     "updateNotes": "Mod export: COIExtended-Core"
   },
   "machines": [
@@ -16501,6 +16501,3293 @@ const GameData = {
   ],
   "foodCategories": [],
   "farmResearch": [],
+  "research": [
+    {
+      "id": "ResearchRetainingWalls",
+      "name": "Retaining walls",
+      "description": "Prevents terrain from collapsing. Walls can be placed below the surface to prevent terrain collapse during mining, or above terrain to aid with dumping operations. The placement elevation is adjustable. Walls will collapse if they hold more than 5 units of height or if they are overfilled.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Structures/Icons/RetainingWallStraight1.png",
+      "gridPosition": {
+        "x": 28,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "RetainingWallStraight1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallStraight4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallCorner",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallTee",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallCross",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallStraight2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallRamp2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallRamp4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallRamp2Shallow",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallRamp2ShallowOffset",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchConcreteAdvanced"
+      ],
+      "researchDurationMonths": 16,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleCapIncrease2",
+      "name": "Vehicles management I",
+      "description": "Increases vehicle limit by 30.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/VehicleLimitIncrease.svg",
+      "gridPosition": {
+        "x": 44,
+        "y": 23
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "BarrierStraight1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierCorner",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierCross",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierEnd",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierTee",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierCrossFresh",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierCornerFresh",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierEndingFresh",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierStraight1Fresh",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierTeeFresh",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierCrossRed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierCornerRed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierEndingRed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierStraight1Red",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierTeeRed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierCrossWashed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierCornerWashed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierEndingWashed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierStraight1Washed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierTeeWashed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 36,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchIronSmeltingScrap",
+      "name": "Iron smelting (from scrap)",
+      "description": "Unlocks the ability to produce iron from scrap metal, utilizing smelting furnaces and casting machines for resource-efficient production.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SmeltingFurnaceT1.png",
+      "gridPosition": {
+        "x": 0,
+        "y": 10
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "SmeltingFurnaceT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronSmeltingT1Scrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "Caster",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CharcoalBurning",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "CharcoalMaker",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronCasting",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "MoltenMetalChannel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "MiniZip_IoPortShape_MoltenMetalChannel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "SmokeStack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackExhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchVehicleAndMining"
+      ],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTransportsBalancing",
+      "name": "Transports balancing",
+      "description": "Unlocks advanced transport management tools, allowing precise control over input/output priorities and ratios for optimized conveyor and pipe networks.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Zipper_IoPortShape_FlatConveyor.png",
+      "gridPosition": {
+        "x": 28,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_FlatConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_LooseMaterialConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_Pipe",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_MoltenMetalChannel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_FlatConveyor_small",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_LooseMaterialConveyor_small",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_Pipe_small",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_MoltenMetalChannel_small",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_FlatConveyor_large",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_LooseMaterialConveyor_large",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_Pipe_large",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_MoltenMetalChannel_large",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_FlatConveyor_long",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_LooseMaterialConveyor_long",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_Pipe_long",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_MoltenMetalChannel_long",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchConveyorBelts"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchConveyorBeltsT3",
+      "name": "Conveyor belts III",
+      "description": "Introduces advanced conveyor systems with significantly increased capacity, optimizing material transport for high-demand production lines.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/FlatConveyorT3.png",
+      "gridPosition": {
+        "x": 116,
+        "y": 10
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "FlatConveyorT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "LooseMaterialConveyorT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "PipeT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchConveyorBeltsT2",
+      "name": "Conveyor belts II",
+      "description": "Enhances conveyor belts with improved mechanics, delivering higher throughput for more efficient transport of goods across your facilities.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/FlatConveyorT2.png",
+      "gridPosition": {
+        "x": 56,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "FlatConveyorT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "LooseMaterialConveyorT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchConveyorBelts",
+      "name": "Conveyor belts",
+      "description": "Unlocks basic conveyor belts for direct, automated connections between machines, ensuring smooth and continuous material flow.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/FlatConveyorT1.png",
+      "gridPosition": {
+        "x": 24,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "FlatConveyorT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "MiniZip_IoPortShape_FlatConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "LooseMaterialConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "MiniZip_IoPortShape_LooseMaterialConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp2Packing"
+      ],
+      "researchDurationMonths": 24,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchPipeTransportsT3",
+      "name": "Pipes III",
+      "description": "Harnesses innovative alloys to deliver highly efficient pipes, offering superior fluid transport capabilities for large-scale industrial needs.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/PipeT3.png",
+      "gridPosition": {
+        "x": 76,
+        "y": 27
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "PipeT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 84,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchPipeTransports",
+      "name": "Pipes",
+      "description": "Enables the use of pipes for seamless, high-volume fluid transport, eliminating the need for cumbersome truck-based logistics.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/PipeT1.png",
+      "gridPosition": {
+        "x": 0,
+        "y": 35
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "PipeT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "MiniZip_IoPortShape_Pipe",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchPipeTransportsT2",
+      "name": "Pipes II",
+      "description": "Upgrades pipes with advanced materials, increasing pressure and diameter to significantly boost fluid throughput for more efficient operations.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/PipeT2.png",
+      "gridPosition": {
+        "x": 40,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "PipeT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "SmokeStackLarge",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 36,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleAssembly3H",
+      "name": "Hydrogen mega vehicles",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Vehicle/TruckT3LooseH.png",
+      "gridPosition": {
+        "x": 156,
+        "y": 4
+      },
+      "unlocks": [
+        {
+          "type": "vehicle",
+          "id": "TruckT3LooseH",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TruckT3FluidH",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "ExcavatorT3H",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchVehicleAssembly3"
+      ],
+      "researchDurationMonths": 168,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleAssembly3",
+      "name": "Mega vehicles",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Vehicle/TruckT3Loose.png",
+      "gridPosition": {
+        "x": 152,
+        "y": 5
+      },
+      "unlocks": [
+        {
+          "type": "vehicle",
+          "id": "TruckT3Loose",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TruckT3Fluid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "ExcavatorT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 144,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchStacker",
+      "name": "Stacker",
+      "description": "Enables the use of stackers to efficiently manage and organize material flows, improving logistics and storage in your transport network.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Stacker.png",
+      "gridPosition": {
+        "x": 32,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "Stacker",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchRetainingWalls"
+      ],
+      "researchDurationMonths": 20,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipArmor3",
+      "name": "Armor III",
+      "description": "Armor III research unlocks advanced battleship armor using cutting-edge metallurgical techniques, significantly enhancing durability against enemy fire. It ensures vessels withstand intense combat and harsh seas, protecting critical maritime operations. This upgrade strengthens your fleet\u2019s resilience for prolonged naval engagements.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/World/Icons/Armor3.png",
+      "gridPosition": {
+        "x": 124,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "ArmorT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchShipWeapons3"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipRadar3",
+      "name": "Ship bridge IV",
+      "description": "Ship Bridge IV research introduces advanced radar systems with superior electronics, improving navigation and enemy detection for battleships. It enhances tactical coordination, ensuring safer and more precise maritime operations. This upgrade is vital for commanding complex naval strategies.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/World/Icons/Bridge2.png",
+      "gridPosition": {
+        "x": 132,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "BridgeT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchShipArmor3",
+        "ResearchAluminumSmelting"
+      ],
+      "researchDurationMonths": 92,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchEngine4",
+      "name": "Ship engine IV",
+      "description": "Ship Engine IV research delivers a high-efficiency engine through compact engineering, boosting battleship speed and maneuverability. It powers vessels for extended combat missions, enhancing fleet responsiveness. This upgrade drives faster, more reliable naval operations.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/World/Icons/Engine4.png",
+      "gridPosition": {
+        "x": 140,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "EngineT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchShipRadar3"
+      ],
+      "researchDurationMonths": 92,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipWeapons4",
+      "name": "Ship weapons IV",
+      "description": "Ship Weapons IV research equips battleships with powerful weaponry, leveraging advanced gunpowder technology for devastating combat strength. It ensures superiority in naval battles, securing critical sea routes. This upgrade bolsters your fleet\u2019s offensive capabilities.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/World/Icons/Gun4.png",
+      "gridPosition": {
+        "x": 152,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Gun4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Gun4Rear",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchEngine4",
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 48,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipArmor4",
+      "name": "Armor IV",
+      "description": "Armor IV research provides battleships with exceptionally resilient armor through innovative alloy compositions, offering unmatched protection. It fortifies vessels against extreme combat and environmental threats, ensuring mission success. Requiring titanium advancements, this upgrade secures your fleet\u2019s dominance.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/World/Icons/Armor4.png",
+      "gridPosition": {
+        "x": 160,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "ArmorT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchShipWeapons4",
+        "ResearchTitaniumSmelting"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipFuelTankUpgrade2",
+      "name": "Mega fuel tank",
+      "description": "Mega Fuel Tank research unlocks a high-capacity fuel tank design, enabling battleships to undertake longer missions without refueling. It supports extended naval campaigns, enhancing strategic flexibility. This upgrade ensures your fleet\u2019s endurance in prolonged conflicts.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/World/Icons/FuelTank2.png",
+      "gridPosition": {
+        "x": 164,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "FuelTankT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchShipArmor4"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchEngine5",
+      "name": "Ship engine V",
+      "description": "Ship Engine V research integrates next-generation compact technologies for an ultra-efficient engine, maximizing battleship speed and range. It empowers top-tier vessels to outmaneuver opponents in critical naval operations. It ensures unmatched performance for your fleet\u2019s most demanding battles.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/World/Icons/Engine5.png",
+      "gridPosition": {
+        "x": 168,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "EngineT5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchShipFuelTankUpgrade2"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipWeapons5",
+      "name": "Ship weapons V",
+      "description": "Ship Weapons V research deploys state-of-the-art weaponry with refined gunpowder innovations, delivering unparalleled firepower for battleship supremacy. It secures naval dominance, protecting key maritime routes from all threats. This upgrade ensures your fleet\u2019s overwhelming combat strength.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/World/Icons/Gun5.png",
+      "gridPosition": {
+        "x": 172,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Gun5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Gun5Rear",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchEngine5"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCargoShipDrydock",
+      "name": "Cargo Ship Drydock",
+      "description": "Cargo Ship Drydock research enables construction of dedicated cargo ships, expanding your fleet\u2019s capacity for resource transport to support naval operations. It unlocks specialized drydocks, streamlining shipbuilding for logistical efficiency. This upgrade bolsters your factory\u2019s maritime supply chain.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/World/Icons/CargoShipDryDock.png",
+      "gridPosition": {
+        "x": 44,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "CargoShipDrydock",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "CargoShipRecipe",
+            "CargoShipRecipeT2"
+          ]
+        }
+      ],
+      "parentIds": [
+        "ResearchCargoDepot"
+      ],
+      "researchDurationMonths": 8,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipyardT2",
+      "name": "Shipyard II",
+      "description": "Shipyard II research upgrades shipyards with advanced input and output ports, enhancing construction efficiency for battleships. It streamlines production, supporting rapid combat fleet expansion.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Shipyard2.png",
+      "gridPosition": {
+        "x": 48,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "ShipyardAdvanced",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCargoDepot"
+      ],
+      "researchDurationMonths": 24,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchConveyorBeltsT4",
+      "name": "Conveyor Belts IV",
+      "description": "Introduces high-capacity conveyor systems for loose and flat materials, plus advanced molten metal channels. These cutting-edge beasts handle massive throughput, speeding up resource transport across sprawling factories.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Logistics/Transports/LooseConveyorT4.png",
+      "gridPosition": {
+        "x": 148,
+        "y": 14
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "LooseMaterialConveyorT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "FlatConveyorT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "MoltenMetalChannelT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 240,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchThroughputCounters",
+      "name": "Throughput Counters",
+      "description": "Unlocks specialized counters for conveyors, pipes, and molten metal channels to track material and fluid flow. These tools provide real-time data, helping you fine-tune your logistics network for peak efficiency.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Logistics/Icons/CounterFlat.png",
+      "gridPosition": {
+        "x": 36,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "Counter_IoPortShape_FlatConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Counter_IoPortShape_LooseMaterialConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Counter_IoPortShape_Pipe",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Counter_IoPortShape_MoltenMetalChannel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchConveyorRouting"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFishingDock",
+      "name": "Fishery and Canning",
+      "description": "This research unlocks the Basic Fishing Dock, a simple wooden platform for catching anchovies and sardines, providing an early-game food source. It also enables the Cannery, allowing fish preservation with iron cans to ensure a stable food supply. Ideal for new island settlements, it integrates with basic trade logistics.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Agriculture/Icons/FishingDock.png",
+      "gridPosition": {
+        "x": 8,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FishingDock",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "Cannery",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Anchovies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanFish",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CannedFishFromAnchovies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Sardines",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanFish",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CannedFishFromSardines",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EmptyCanProductionT1Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchTradeDock"
+      ],
+      "researchDurationMonths": 4,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFishingDock2",
+      "name": "Advanced Fishery",
+      "description": "Advanced Fishery research unlocks an upgraded fishing dock with conveyor belt systems for automated fish transport, targeting larger species like mackerel and cod alongside smaller fish. It enhances canning with new recipes for raw fish, fruits, and vegetables, using improved iron and steel cans. This upgrade boosts mid-game food production efficiency.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Agriculture/Icons/FishingDock2.png",
+      "gridPosition": {
+        "x": 52,
+        "y": 23
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FishingDockII",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Cod",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "RawFish",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FishScales",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RawFishFromCod",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Mackerel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "RawFish",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FishScales",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RawFishFromMackerel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "RawFish",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanFish",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CannedFishFromRawFish",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fruit",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanFruit",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CannedFruitProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Vegetables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanVegetables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CannedVegetablesProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EmptyCanProductionT2Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EmptyCanProductionT3Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EmptyCanProductionT3Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchFishingDock",
+        "ResearchSteelSmelting"
+      ],
+      "researchDurationMonths": 24,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFishingDock3",
+      "name": "High-Tech Fishery",
+      "description": "High-Tech Fishery research unlocks a cutting-edge dock that uses automation and large boats to catch premium tuna and swordfish, alongside all prior fish types. It requires fewer workers and less power, maximizing output, and supports advanced canning with aluminum and high-grade steel cans. This late-game upgrade optimizes food logistics for expansive factories.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Agriculture/Icons/FishingDock3.png",
+      "gridPosition": {
+        "x": 128,
+        "y": 28
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FishingDockIII",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EmptyCanProductionT4Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EmptyCanProductionT5Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EmptyCanProductionT4Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EmptyCanProductionT5Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Aluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FoodCanEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EmptyCanProductionT5Aluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Tuna",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "RawFish",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FishScales",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FishOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RawFishFromTuna",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Swordfish",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "RawFish",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FishScales",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "FishOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RawFishFromSwordfish",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchFishingDock2",
+        "ResearchAluminumSmelting"
+      ],
+      "researchDurationMonths": 48,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchOverclocking",
+      "name": "Overclocking",
+      "description": "Overclocking allows you to enhance the performance of machines and production lines in your factory by boosting their processing speed at the expense of higher energy consumption and wear. Strategic use of Overclocking maximizes factory output but demands precise resource allocation to avoid costly inefficiencies.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/UserInterface/EntityIcons/Boost.png",
+      "gridPosition": {
+        "x": 44,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "TechnologyOverclocking",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchMaintenanceDepot"
+      ],
+      "researchDurationMonths": 38,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchHydrocrackingOil",
+      "name": "Oil Hydrocracking",
+      "description": "Oil Hydrocracking research unlocks recipes to break down heavy and medium oil into lighter fuels using hydrogen. It transforms heavy oil into medium oil and medium oil into light oil, boosting fuel production efficiency. This process streamlines your factory\u2019s ability to create versatile hydrocarbons for advanced energy needs.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 92,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HeavyOilToMediumCracking",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MediumOilToLightCracking",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchHydrogenReforming"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSynfuelRefining",
+      "name": "Synfuel Refining",
+      "description": "Synfuel Refining research enables the Synfuel Refinery to convert crude oil, hydrogen, and steam into high-energy synfuel liquid or gas. It produces valuable byproducts like sour water and fuel gas, supporting diverse industrial applications. This unlocks a powerful fuel source for late-game factory expansion.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Icons/SynfuelRefinery.png",
+      "gridPosition": {
+        "x": 148,
+        "y": 47
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "SynfuelLiquid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SourWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SynfuelLiquidRefining",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "SynfuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SynfuelGasRefining",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "SynfuelRefinery",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 192,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSynfuelGenerator",
+      "name": "Synfuel Generator",
+      "description": "Synfuel Generator research unlocks generators that burn synfuel liquid to produce 12 MW of electricity with minimal exhaust. These compact machines deliver high-efficiency power, ideal for scaling up your factory\u2019s energy grid. It\u2019s a key step for robust, high-output power production.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Icons/SynfuelGenerator.png",
+      "gridPosition": {
+        "x": 156,
+        "y": 47
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "SynfuelGenerator",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 240,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchHighPressureBoiler",
+      "name": "High-Pressure Boiler",
+      "description": "High-Pressure Boiler research unlocks advanced boilers that burn various fuels with super steam for superior steam generation. These boilers optimize heat production, powering distillation and other high-demand processes. It boosts factory efficiency with enhanced steam output for late-game operations.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Icons/HighPressureBoiler.png",
+      "gridPosition": {
+        "x": 164,
+        "y": 35
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "HighPressureBoiler",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "HPSteamGenerationHeavyOil",
+            "HPSteamGenerationMediumOil",
+            "HPSteamGenerationLightOil",
+            "HPSteamGenerationNaphtha",
+            "HPSteamGenerationEthanol",
+            "HPSteamGenerationFuelGas",
+            "HPSteamGenerationSynfluidSuper",
+            "HPSteamGenerationSyngasSuper"
+          ]
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HPSteamGenerationHeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HPSteamGenerationMediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HPSteamGenerationLightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HPSteamGenerationNaphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HPSteamGenerationEthanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HPSteamGenerationFuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "SynfuelLiquid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HPSteamGenerationSynfluidSuper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "SynfuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HPSteamGenerationSyngasSuper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSuperPressSteam",
+        "ResearchSynfuelRefining"
+      ],
+      "researchDurationMonths": 192,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSynfuelCargoShips",
+      "name": "Synfuel Cargo Ships",
+      "description": "Synfuel Cargo Ships research allows cargo ships to run on synfuel, enabling cleaner and more efficient maritime transport. These ships maintain high cargo capacity while reducing emissions, streamlining global trade routes. It enhances your factory\u2019s ability to move resources across the world map.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 156,
+        "y": 51
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchSynfuelRefining"
+      ],
+      "researchDurationMonths": 292,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSynfuelLocomotives",
+      "name": "Synfuel Locomotives",
+      "description": "Synfuel Locomotives research enables trains to use synfuel, powering cleaner and more efficient rail transport. These locomotives offer robust cargo capacity with reduced environmental impact, optimizing your rail network. It strengthens factory logistics with eco-friendly, high-performance trains.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Icons/LocomotiveT1SynfuelLiquidSide.png",
+      "gridPosition": {
+        "x": 156,
+        "y": 39
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "LocomotiveT1SynfuelLiquid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainStationFuelSynfuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSynfuelRefining"
+      ],
+      "researchDurationMonths": 192,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSynfuelRockets",
+      "name": "Rocket III",
+      "description": "Rocket III research unlocks advanced synfuel-powered cargo rockets for high-capacity space transport. Building on prior rocket technology, these rockets deliver massive payloads with greater efficiency.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 0,
+      "iconPath": "Assets/Unity/Generated/Icons/Vehicle/CargoRocketT2Transporter.png",
+      "gridPosition": {
+        "x": 172,
+        "y": 22
+      },
+      "unlocks": [
+        {
+          "type": "vehicle",
+          "id": "CargoRocketT3Transporter",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSynfuelRefining",
+        "ResearchRocket2"
+      ],
+      "researchDurationMonths": 172,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCargoDepot5",
+      "name": "Cargo Depot V \u0026 VI",
+      "description": "This research unlocks Cargo Depot V \u0026 VI, enabling massive cargo ships that leverage synfuel for unparalleled transport capacity across the world map. These colossal vessels dramatically enhance trade efficiency, supporting fluid, loose, and unit cargo modules for a robust global supply chain. Requiring advanced research facilities, it revolutionizes late-game logistics with synfuel\u2019s high-energy potential.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Icons/CargoDepotT5.png",
+      "gridPosition": {
+        "x": 148,
+        "y": 8
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "CargoDepotT5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotT6",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleFluidT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleLooseT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleUnitT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 240,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFuelStationsT4",
+      "name": "Fuel Stations IV",
+      "description": "Fuel Stations IV research unlocks massive fuel stations that support diesel, hydrogen, and synfuel, catering to heavy-duty vehicles. These advanced stations maximize refueling throughput, streamlining logistics for sprawling factory operations. Built on prior vehicle capacity upgrades, they boost efficiency in your industrial transport network.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Icons/FuelStationT4.png",
+      "gridPosition": {
+        "x": 152,
+        "y": 35
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FuelStationT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "FuelStationHydrogenT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "FuelStationSynfuelT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchVehicleCapIncrease6"
+      ],
+      "researchDurationMonths": 192,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSynfuelVehicles",
+      "name": "Synfuel Vehicles",
+      "description": "This research unlocks synfuel compatibility for heavy-duty vehicles like large trucks, excavators, tree harvesters, and planters, enhancing their efficiency and range. Synfuel-powered vehicles produce fewer emissions while delivering superior performance, optimizing mid-game logistics. It builds on synfuel refining technology, integrating seamlessly into your factory\u2019s transport network.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Vehicles/Legacy/LargeTruckS.png",
+      "gridPosition": {
+        "x": 156,
+        "y": 43
+      },
+      "unlocks": [
+        {
+          "type": "vehicle",
+          "id": "LargeTruckS",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "LargeExcavatorS",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TreeHarvesterT2S",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TreePlanterT1S",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSynfuelRefining"
+      ],
+      "researchDurationMonths": 240,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleAssembly3S",
+      "name": "Synfuel mega vehicles",
+      "description": "Synfuel Mega Vehicles research enables advanced trucks and excavators to utilize synfuel, boosting their capacity and efficiency for large-scale operations. These high-performance vehicles support loose and fluid cargo, streamlining massive logistics tasks. Requiring synfuel refining and mega vehicle research, this upgrade powers late-game factory expansion with reduced environmental impact.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Vehicle/TruckT3Loose.png",
+      "gridPosition": {
+        "x": 156,
+        "y": 8
+      },
+      "unlocks": [
+        {
+          "type": "vehicle",
+          "id": "TruckT3LooseS",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TruckT3FluidS",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "ExcavatorT3S",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchVehicleAssembly3"
+      ],
+      "researchDurationMonths": 168,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchLargeVehicles",
+      "name": "Large vehicles",
+      "description": "Large Vehicles research unlocks a new tier of robust trucks and excavators, positioned between standard trucks and mega vehicles, enhancing logistics capacity. It enables production of advanced vehicle parts and unlocks supporting infrastructure like fuel stations and depots. This upgrade boosts factory transport efficiency, paving the way for large-scale operations.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FuelStationT3.png",
+      "gridPosition": {
+        "x": 116,
+        "y": 4
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FuelStationT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "VehiclesDepotT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "LargeTruckD",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "LargeExcavator",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts3AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts3AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts3AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 144,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchLargeVehiclesH",
+      "name": "Hydrogen large vehicles",
+      "description": "Hydrogen Large Vehicles research enables large trucks and excavators to run on hydrogen, offering improved efficiency and reduced emissions. Building on hydrogen cell technology, these vehicles enhance transport performance for mid-to-large-scale factory logistics. This upgrade optimizes resource movement, complementing the large vehicles tier with sustainable power.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Icons/LargeExcavatorH.png",
+      "gridPosition": {
+        "x": 120,
+        "y": 4
+      },
+      "unlocks": [
+        {
+          "type": "vehicle",
+          "id": "LargeExcavatorH",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "LargeTruckH",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchLargeVehicles"
+      ],
+      "researchDurationMonths": 168,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSuperDistillation",
+      "name": "Super Distillation",
+      "description": "Super Distillation research unlocks a chain of three advanced distillation towers and a hydrocracker, all built to process oil and titanium with super steam. These machines split crude oil into usable fuels, refine them further into diesel and naphtha, and purify titanium chloride for high-tech production.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Icons/DistillationTowerS1T2.png",
+      "gridPosition": {
+        "x": 160,
+        "y": 29
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "DistillationTowerS1T2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CrudeOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SourWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CrudeOilRefiningT2COIE",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CrudeOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SourWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CrudeOilRefiningT2Sp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "DistillationTowerS2T2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MediumOilRefiningT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MediumOilRefiningT2Sp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "DistillationTowerS3T2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LightOilRefiningT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LightOilRefiningT2Sp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumChloride",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumChloridePure",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "TitaniumPurificationT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumChloride",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumChloridePure",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "TitaniumPurificationT2Sp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "HydroCrackerT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HeavyOilCrackingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HeavyOilCrackingToNaphthaT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "NaphthaReformingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DieselReformingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DieselReformingT2Sp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "NaphthaReformingToGasT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "NaphthaReformingToGasT2Sp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FuelGasReformingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HeavyOilToMediumCrackingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MediumOilToLightCrackingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SourWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SourWaterStrippingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SourWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SourWaterStrippingT2Sp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSuperPressSteam",
+        "ResearchTitaniumSmelting"
+      ],
+      "researchDurationMonths": 256,
+      "anyParentCanUnlock": false
+    }
+  ],
   "mods": null
 };
 

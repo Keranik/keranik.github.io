@@ -35,6 +35,7 @@ class ProductionSolver {
      * @param {string} params.optimizationGoal - Optimization objective (minimizeWorkers, etc.)
      * @param {Object} params.constraints - Optimization constraints (maxPower, maxWorkers, etc.)
      * @param {Map} params.resourceConstraints - Map of productId -> max available rate
+     * @param {Set} params.disabledRecipes - NEW: Set of recipe IDs to exclude from calculations
      * @returns {Object} - { chain, requirements, optimized, score?, alternatives?, explanation? }
      */
     solve(params) {
@@ -47,7 +48,8 @@ class ProductionSolver {
             optimizationMode = false,
             optimizationGoal = 'minimizeWorkers',
             constraints = {},
-            resourceConstraints = new Map()
+            resourceConstraints = new Map(),
+            disabledRecipes = new Set() // NEW: Extract disabled recipes
         } = params;
 
         // Validate inputs
@@ -68,7 +70,8 @@ class ProductionSolver {
                 resourceSources,
                 optimizationGoal,
                 constraints,
-                resourceConstraints
+                resourceConstraints,
+                disabledRecipes // NEW: Pass through
             });
         } else {
             return this.simpleSolve({
@@ -76,7 +79,8 @@ class ProductionSolver {
                 targetRate,
                 useConsolidation,
                 resourceSources,
-                recipeOverrides
+                recipeOverrides,
+                disabledRecipes // NEW: Pass through
             });
         }
     }
@@ -91,7 +95,8 @@ class ProductionSolver {
             targetRate,
             useConsolidation,
             resourceSources,
-            recipeOverrides
+            recipeOverrides,
+            disabledRecipes = new Set() // NEW: Extract with default
         } = params;
 
         try {
@@ -101,7 +106,11 @@ class ProductionSolver {
                 targetRate,
                 null, // No specific recipe for root (will use override if exists)
                 recipeOverrides,
-                resourceSources
+                resourceSources,
+                0, // depth
+                new Set(), // visited
+                '', // parentKey
+                disabledRecipes // NEW: Pass as 8th parameter
             );
 
             if (chain.error) {
@@ -155,7 +164,8 @@ class ProductionSolver {
             resourceSources,
             optimizationGoal,
             constraints,
-            resourceConstraints
+            resourceConstraints,
+            disabledRecipes = new Set() // NEW: Extract with default
         } = params;
 
         try {
@@ -167,10 +177,12 @@ class ProductionSolver {
                 availableResources: resourceConstraints,
                 constraints: {
                     ...constraints,
-                    resourceLimits: resourceConstraints
+                    resourceLimits: resourceConstraints,
+                    disabledRecipes: disabledRecipes // NEW: Pass in constraints
                 },
                 useConsolidation,
-                resourceSources
+                resourceSources,
+                disabledRecipes // NEW: Pass at top level too
             });
 
             if (result.error) {
@@ -236,16 +248,23 @@ class ProductionSolver {
      * Compare multiple recipes for the same product
      * Useful for manual recipe selection UI
      */
-    compareRecipes(productId, targetRate, recipeOverrides = new Map(), useConsolidation = false) {
+    compareRecipes(productId, targetRate, recipeOverrides = new Map(), useConsolidation = false, disabledRecipes = new Set()) {
         const recipes = this.calculator.getRecipesForProduct(productId);
 
-        const comparisons = recipes.map(recipe => {
+        // NEW: Filter out disabled recipes
+        const enabledRecipes = recipes.filter(r => !disabledRecipes.has(r.id));
+
+        const comparisons = enabledRecipes.map(recipe => {
             let chain = this.calculator.calculateProductionChain(
                 productId,
                 targetRate,
                 recipe.id,
                 recipeOverrides,
-                new Map() // No resource sources for comparison
+                new Map(), // No resource sources for comparison
+                0,
+                new Set(),
+                '',
+                disabledRecipes // NEW: Pass disabled recipes
             );
 
             if (useConsolidation) {

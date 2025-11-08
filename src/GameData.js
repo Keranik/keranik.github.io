@@ -1,7 +1,7 @@
 const GameData = {
   "metadataJs": {
     "version": "Update 3",
-    "lastUpdated": "11/03/2025",
+    "lastUpdated": "11/08/2025",
     "updateNotes": "Base game export"
   },
   "machines": [
@@ -125723,6 +125723,19850 @@ const GameData = {
       },
       "spacePointsRequiredFrom": 10,
       "iconPath": "Assets/Base/Icons/Edicts/WaterSaver.svg"
+    }
+  ],
+  "research": [
+    {
+      "id": "ResearchCpPacking",
+      "name": "Construction",
+      "description": "Production of basic construction parts.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/AssemblyManual.png",
+      "gridPosition": {
+        "x": 0,
+        "y": 20
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "AssemblyManual",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CpAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MechPartsAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rubber",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ElectronicsAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [],
+      "researchDurationMonths": 4,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCustomSurfaces",
+      "name": "Custom surfaces",
+      "description": "Allows laying down custom surfaces, such as concrete, on the ground. Surfaces reduce the maintenance needs of vehicles that drive over them.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/UserInterface/Toolbar/Concrete128.png",
+      "gridPosition": {
+        "x": 28,
+        "y": 3
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "TechnologyCustomSurfaces",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "DefaultConcrete_TerrainSurface",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Bricks_TerrainSurface",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Cobblestone_TerrainSurface",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Sand1_TerrainSurface",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Sand2_TerrainSurface",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Metal2_TerrainSurface",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchConcreteAdvanced"
+      ],
+      "researchDurationMonths": 16,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRepairDock",
+      "name": "Ship dock repair",
+      "description": "Enables to repair the ship dock so we can start working on ship repairs.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Shipyard2.png",
+      "gridPosition": {
+        "x": 16,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "Shipyard2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchBeacon"
+      ],
+      "researchDurationMonths": 10,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchMaintenanceDepot",
+      "name": "Maintenance Depot II",
+      "description": "Converts products into maintenance which is distributed to all machines, buildings, and vehicles that need it. Important as if there is not enough maintenance, vehicles and machines can break down temporarily.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/MaintenanceDepotT1.png",
+      "gridPosition": {
+        "x": 40,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "MaintenanceDepotT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_MaintenanceT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MaintenanceT1Recipe",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRecycling",
+      "name": "Recycling",
+      "description": "Recycling can transform your island\u0027s economy in a significant way as it allows to recover a portion of raw materials from various sources like settlement, maintenance, or research. Recycling reduces the need for raw minerals extraction and thus also extends longevity of deposits. Places that support recycling will return \u0027Recyclables\u0027. This product can be separated via waste sorting plant into scraps (such as iron or copper scraps) which can be sent to any furnace for smelting. The ratio of materials recycled is based on \u0027Recycling efficiency\u0027 and more about that is explained in the waste sorting plant.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Technologies/Recycling.svg",
+      "gridPosition": {
+        "x": 60,
+        "y": 5
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "TechnologyRecycling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "WasteSortingPlant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "SettlementBiomassModule",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_MaintenanceT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Recyclables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MaintenanceT1Recycling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Biomass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BiomassBurning",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Biomass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationBiomass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCompactor",
+      "name": "Compactor",
+      "description": "Presses loose items into compact units for easier transportation. A shredder can be used to restore compacted products back to their uncompacted state.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Compactor.png",
+      "gridPosition": {
+        "x": 64,
+        "y": 5
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "Compactor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "Shredder",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronScrapPressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PressingOfIronScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperScrapPressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PressingOfCopperScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Recyclables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_RecyclablesPressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PressingOfRecyclables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Waste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_WastePressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PressingOfWaste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronScrapPressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ShreddingIronScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperScrapPressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ShreddingCopperScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_WastePressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Waste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ShreddingWaste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TreeSapling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Biomass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ShreddingSaplings",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchRecycling"
+      ],
+      "researchDurationMonths": 48,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRecyclingForSettlement",
+      "name": "Settlement recycling",
+      "description": "Collects recyclables from the attached settlement. Recyclables are generated only from products that you provide to the settlement (e.g. Household goods). If a settlement does not have this module built, all recyclables end up in general waste.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SettlementRecyclablesModule.png",
+      "gridPosition": {
+        "x": 80,
+        "y": 3
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "SettlementRecyclablesModule",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchHouseholdGoods",
+        "ResearchRecyclingEdict"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchBricksProduction",
+      "name": "Basic concrete",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Concrete.svg",
+      "gridPosition": {
+        "x": 12,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "BricksMaker",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SimpleConcreteMaking",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RainwaterHarvester",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchTradeDock",
+        "ResearchVehicleAndMining",
+        "ResearchPowerAndMaintenance"
+      ],
+      "researchDurationMonths": 6,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRotaryKilnGas",
+      "name": "Rotary kiln (gas)",
+      "description": "Performs calcination process under high temperatures. Used to produce cement.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/RotaryKilnGas.png",
+      "gridPosition": {
+        "x": 84,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "RotaryKilnGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CementProductionGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CementProductionHydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchNaphthaProcessing"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCp2Packing",
+      "name": "Construction II",
+      "description": "Production of advanced construction parts.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/AssemblyElectrified.png",
+      "gridPosition": {
+        "x": 20,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "AssemblyElectrified",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CpAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp2AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp2AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MechPartsAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rubber",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ElectronicsAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCopperRefinement",
+        "ResearchRubberProduction"
+      ],
+      "researchDurationMonths": 20,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSettlementWater",
+      "name": "Settlement water",
+      "description": "Provides fresh water to the attached settlement and returns waste water that needs to be disposed of. Providing fresh water to a settlement generates extra Unity and reduces health risks.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SettlementWaterModule.png",
+      "gridPosition": {
+        "x": 28,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "SettlementWaterModule",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "WaterNeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchUndergroundWater"
+      ],
+      "researchDurationMonths": 24,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFoodMarket2",
+      "name": "Food market II",
+      "description": "Provides food to the attached settlement. This one can store multiple types of products.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SettlementFoodModuleT2.png",
+      "gridPosition": {
+        "x": 48,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "SettlementFoodModuleT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchStorage2"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSettlementPower",
+      "name": "Settlement power",
+      "description": "Provides electricity to the attached settlement which generates extra Unity.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SettlementPowerModule.png",
+      "gridPosition": {
+        "x": 44,
+        "y": 33
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "SettlementPowerModule",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchPowerGeneration2"
+      ],
+      "researchDurationMonths": 42,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchHousing2",
+      "name": "Housing II",
+      "description": "Advanced housing for 140 people that provides more comfort. It can also provide a monthly Unity increase if the housing is provided with required services. Housing can be either attached to an existing settlement to become part of it (and benefit from all the already provided services such as food). Or it can be placed independently to establish  itself as a new settlement, in that case you need to attach it with service modules.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/HousingT2.png",
+      "gridPosition": {
+        "x": 32,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "HousingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSettlementWater"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCp3Packing",
+      "name": "Construction III",
+      "description": "Production of advanced construction parts.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/AssemblyElectrifiedT2.png",
+      "gridPosition": {
+        "x": 52,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "AssemblyElectrifiedT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SlagCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingSlagT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingGravelT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ManufacturedSand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SlagCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingSlagMT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ManufacturedSand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingGravelMT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "ConcreteMixerT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CpAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp2AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CpAssemblySteelT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp3AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp3AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MechPartsAssemblyT3Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MechPartsAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rubber",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ElectronicsAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LabEquipment1AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSteelSmelting"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCp4Packing",
+      "name": "Construction IV",
+      "description": "Production of advanced construction parts.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/ConstructionParts4.svg",
+      "gridPosition": {
+        "x": 104,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp4AssemblyElectrifiedT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_MaintenanceT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_MaintenanceT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MaintenanceT2Recipe",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_MaintenanceT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Recyclables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MaintenanceT2Recycling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "MaintenanceDepotT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchPolySiliconProduction"
+      ],
+      "researchDurationMonths": 128,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchBasicComputing",
+      "name": "Basic computing",
+      "description": "Provides computing as a resource that can be used on your island. Computing is used in advanced machines such as robotic assemblers or microchip makers. This is early technology with low efficiency.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Mainframe.png",
+      "gridPosition": {
+        "x": 124,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "Mainframe",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_Computing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 144,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRoboticAssembly",
+      "name": "Robotic assembly",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/AssemblyRoboticT1.png",
+      "gridPosition": {
+        "x": 128,
+        "y": 16
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "AssemblyRoboticT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CpAssemblyT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CpAssemblySteelT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp2AssemblyT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp3AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp4AssemblyRoboticT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MechPartsAssemblyT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LabEquipment1AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Paper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LabEquipment2AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LabEquipment3AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rubber",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ElectronicsAssemblyT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PCB",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PolySilicon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Electronics2AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SlagCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingSlagT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingGravelT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ManufacturedSand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SlagCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingSlagMT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ManufacturedSand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingGravelMT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "ConcreteMixerT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchBasicComputing"
+      ],
+      "researchDurationMonths": 144,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchStatueOfMaintenance",
+      "name": "Statue of maintenance",
+      "description": "Statue that not just demonstrates the wealth of your island but also serves as a celebration of your industrial success. It has such a positive effect on your population that it reduces your island\u0027s maintenance requirements by 4.00%. In order to get the bonus, the statue needs to be provided with \u0027Fuel gas\u0027 on a continuous basis. However, if you don\u0027t maintain your statue you will get a negative effect. Because nothing demotivates your workers from performing maintenance more than seeing a broken statue of maintenance. You can build this statue multiple times should your wealth allow it, but each additional statue\u0027s effect is reduced by half.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/StatueOfMaintenance.png",
+      "gridPosition": {
+        "x": 108,
+        "y": 8
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "StatueOfMaintenance",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "StatueOfMaintenanceGolden",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp4Packing"
+      ],
+      "researchDurationMonths": 144,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchHousing3",
+      "name": "Housing III",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/HousingT3.png",
+      "gridPosition": {
+        "x": 76,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "HousingT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "SettlementFountain",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "SettlementPillar",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "SettlementSquare1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "SettlementSquare2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchHousing4",
+      "name": "Housing IV",
+      "description": "Advanced housing for 400 people that provides more comfort. It can also provide a monthly Unity increase if the housing is provided with required services. Housing can be either attached to an existing settlement to become part of it (and benefit from all the already provided services such as food). Or it can be placed independently to establish  itself as a new settlement, in that case you need to attach it with service modules.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/HousingT4.png",
+      "gridPosition": {
+        "x": 116,
+        "y": 16
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "HousingT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSettlementDecorations",
+      "name": "Settlement decorations",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchLuxuryGoods",
+      "name": "Luxury goods",
+      "description": "Provides luxury goods to the attached settlement which generates extra Unity.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SettlementLuxuryGoodsModule.png",
+      "gridPosition": {
+        "x": 96,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "SettlementLuxuryGoodsModule",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ImportedGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LuxuryGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ImportedGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LuxuryGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LuxuryGoodsAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ImportedGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LuxuryGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LuxuryGoodsAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ImportedGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LuxuryGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LuxuryGoodsAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchGoldSmelting"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchIspModule",
+      "name": "The internet",
+      "description": "Connects a settlement to cloud which costs computing.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SettlementComputingModule.png",
+      "gridPosition": {
+        "x": 140,
+        "y": 14
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "SettlementComputingModule",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchDatacenter"
+      ],
+      "researchDurationMonths": 216,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTombOfCaptains",
+      "name": "Tomb of Captains",
+      "description": "Tomb of Captains provides final resting place for generations of captains who lead the people of this island. When completed, fires should be always lit and tomb should be decorated with flowers to pay tribute to resting Captains.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/TombOfCaptains.png",
+      "gridPosition": {
+        "x": 124,
+        "y": 33
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "TombOfCaptainsStage1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TombOfCaptainsStage2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TombOfCaptainsStage3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TombOfCaptainsStage4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TombOfCaptainsStage5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TombOfCaptainsStageFinal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Crop_Flowers",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Flowers",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 128,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchAssembler3",
+      "name": "Robotic assembly II",
+      "description": "Robotic assembly that is faster and can produce more advanced products.",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/AssemblyRoboticT2.png",
+      "gridPosition": {
+        "x": 148,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "AssemblyRoboticT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CpAssemblyT5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CpAssemblySteelT5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp2AssemblyT5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp3AssemblyT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConstructionParts4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Cp4AssemblyRoboticT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MechPartsAssemblyT5Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MechPartsAssemblyT5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rubber",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ElectronicsAssemblyT5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PCB",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PolySilicon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Electronics2AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Microchips",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Electronics3AssemblyRoboticT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Server",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ServerAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumEnriched",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumRod",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "UraniumRodsAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 288,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchMicrochipProduction",
+      "name": "Microchip production",
+      "description": "The most sophisticated manufacturing processes where a thin monocrystalline wafer is slowly transformed into a matrix of microchips. Chips are built from many layers where each layer has to be placed with nanometer precision. This is performed in a special chamber that employs ultraviolet technology - substances reacting with light to form the layers. Microchips typically go through lot of stages including washing and coating in between. It is good to start small and then expand. Small setups can be connected in form of a loop with a sorter.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SiliconCrystallizer.png",
+      "gridPosition": {
+        "x": 132,
+        "y": 14
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "SiliconCrystallizer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PolySilicon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SiliconWafer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SiliconCrystallization",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SiliconWafer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdStage1A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdStage2A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdStage3A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdStage1B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdStage2B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdStage3B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdStage1C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdStage2C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdStage3C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage4A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdStage1D",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage4A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage4B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdStage2D",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage4B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Microchips",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachine_MicrochipProdFinalStage",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "MicrochipMachine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Microchips",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Electronics3AssemblyRoboticT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchRoboticAssembly",
+        "ResearchGoldSmelting"
+      ],
+      "researchDurationMonths": 216,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchMicrochipProduction2",
+      "name": "Microchip production II",
+      "description": "The most sophisticated manufacturing processes where a thin monocrystalline wafer is slowly transformed into a matrix of microchips. Chips are built from many layers where each layer has to be placed with nanometer precision. This is performed in a special chamber that employs ultraviolet technology - substances reacting with light to form the layers. Microchips typically go through lot of stages including washing and coating in between. It is good to start small and then expand. Small setups can be connected in form of a loop with a sorter.",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/MicrochipMachineT2.png",
+      "gridPosition": {
+        "x": 148,
+        "y": 22
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_SiliconWafer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdStage1A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdStage2A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdStage3A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage1C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdStage1B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdStage2B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdStage3B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage2C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdStage1C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdStage2C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdStage3C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage3C",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage4A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdStage1D",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage4A",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage4B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdStage2D",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MicrochipsStage4B",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Microchips",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MicrochipMachineT2_MicrochipProdFinalStage",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "MicrochipMachineT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 300,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchBasicFarming",
+      "name": "Basic farming",
+      "description": "Basic farming of potatoes. We just need to hope it will rain.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FarmT1.png",
+      "gridPosition": {
+        "x": 0,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FarmT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Crop_Potato",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Potato",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFarmingT2",
+      "name": "Irrigated farms",
+      "description": "Irrigated farm that can be connected to a source of water or fertilizer. That could be useful.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FarmT2.png",
+      "gridPosition": {
+        "x": 24,
+        "y": 32
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FarmT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp2Packing"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTreePlanting",
+      "name": "Tree planting",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ForestryTower.png",
+      "gridPosition": {
+        "x": 32,
+        "y": 34
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "ForestryTower",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TreePlanterT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Crop_TreeSapling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TreeSapling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "FirTree",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "SpruceTree",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "BirchTree",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "MapleTree",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "OakTree",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "PalmTree",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchFarmingT2",
+        "ResearchCropRotation"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCropRotation",
+      "name": "Crop rotation",
+      "description": "Enables to set up crop rotation for farms. Can be used to increase farm\u0027s yield.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Technologies/CropRotation.svg",
+      "gridPosition": {
+        "x": 24,
+        "y": 36
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "TechnologyCropRotation",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Crop_GreenManure",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp2Packing"
+      ],
+      "researchDurationMonths": 26,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFarmingT3",
+      "name": "Greenhouse",
+      "description": "Has 25% increased crop yield compared to the basic farm. Crops also require 12% extra water and fertility.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FarmT3.png",
+      "gridPosition": {
+        "x": 88,
+        "y": 37
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FarmT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 84,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFarmingT4",
+      "name": "Greenhouse II",
+      "description": "Has 50% increased crop yield compared to the basic farm. Crops also require 25% extra water and fertility.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FarmT4.png",
+      "gridPosition": {
+        "x": 116,
+        "y": 37
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FarmT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchFarmingT3",
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchBurner",
+      "name": "Burner",
+      "description": "Disposes solid waste by burning it",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Burner.png",
+      "gridPosition": {
+        "x": 40,
+        "y": 42
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "Burner",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Waste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LandfillBurning",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 20,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVegetables",
+      "name": "Vegetables farming",
+      "description": "Enables to grow \u0026 harvest vegetables in farms.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Vegetables.svg",
+      "gridPosition": {
+        "x": 28,
+        "y": 45
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Crop_Vegetables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Vegetables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCropRotation"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCornCrop",
+      "name": "Corn farming",
+      "description": "Enables to grow \u0026 harvest corn in farms.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Corn.svg",
+      "gridPosition": {
+        "x": 48,
+        "y": 43
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Crop_Corn",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Corn",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Corn",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CornMash",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CornMilling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Corn",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CornDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AnaerobicDigester",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Corn",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnimalFeedFromCorn",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Corn",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnimalFeedFromCornT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchWheatCrop"
+      ],
+      "researchDurationMonths": 42,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchWheatCrop",
+      "name": "Wheat farming \u0026 processing",
+      "description": "",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Wheat.svg",
+      "gridPosition": {
+        "x": 44,
+        "y": 45
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Crop_Wheat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Bread",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "FoodMill",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "BakingUnit",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wheat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Flour",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "WheatMilling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Flour",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Bread",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BreadProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wheat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "WheatDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AnaerobicDigester",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wheat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnimalFeedFromWheat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wheat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnimalFeedFromWheatT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnimalFeedBurning",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationAnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchBurner",
+        "ResearchVegetables"
+      ],
+      "researchDurationMonths": 36,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSoybeanCrop",
+      "name": "Soybean farming",
+      "description": "",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FoodProcessor.png",
+      "gridPosition": {
+        "x": 60,
+        "y": 46
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "FoodProcessor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Crop_Soybeans",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Tofu",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Soybean",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Tofu",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "TofuProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Soybean",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SoybeanDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AnaerobicDigester",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Soybean",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnimalFeedFromSoybean",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Soybean",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnimalFeedFromSoybeanT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchWheatCrop",
+        "ResearchSulfurProcessing"
+      ],
+      "researchDurationMonths": 48,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCanola",
+      "name": "Canola",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Canola.svg",
+      "gridPosition": {
+        "x": 84,
+        "y": 46
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Crop_Canola",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Canola",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CookingOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CanolaMilling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Canola",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CanolaBurning",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchBioDiesel"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSugarCane",
+      "name": "Sugar cane",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/SugarCane.svg",
+      "gridPosition": {
+        "x": 116,
+        "y": 41
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Crop_SugarCane",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sugar",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SugarCane",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sugar",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Biomass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SugarRefiningCane",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sugar",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SugarToEthanolFermentation",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SugarCane",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SugarCaneDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AnaerobicDigester",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Biomass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BiomassBurning",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchFarmingT3",
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchChickenFarm",
+      "name": "Chicken farm",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FoodProcessor.png",
+      "gridPosition": {
+        "x": 76,
+        "y": 50
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Chicken",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Eggs",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "FoodProcessor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "ChickenFarm",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ChickenCarcass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Meat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MeatTrimmings",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MeatProcessing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MeatTrimmings",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MeatTrimmingsCompost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MeatTrimmings",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MeatTrimmingsCompostT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MeatTrimmings",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MeatTrimmingsDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AnaerobicDigester",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Eggs",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EggsDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AnaerobicDigester",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Potato",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnimalFeedFromPotato",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Potato",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnimalFeedFromPotatoT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MeatTrimmings",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MeatTrimmingsBurning",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ChickenCarcass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ChickenCarcassBurning",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchWheatCrop",
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSnacksProduction",
+      "name": "Snacks production",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Snack.svg",
+      "gridPosition": {
+        "x": 96,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Snack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Corn",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CookingOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Snack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Biomass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SnackProductionCorn",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Potato",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CookingOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Snack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Biomass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SnackProductionPotato",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchPlasticProduction"
+      ],
+      "researchDurationMonths": 84,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFruit",
+      "name": "Fruit",
+      "description": "Enables to grow \u0026 harvest fruit in greenhouses.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Fruits.svg",
+      "gridPosition": {
+        "x": 92,
+        "y": 34
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Crop_Fruits",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fruit",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cake",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Flour",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sugar",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CookingOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Eggs",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fruit",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cake",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CakeProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fruit",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FruitDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AnaerobicDigester",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchFarmingT3"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSausageProduction",
+      "name": "Sausage production",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Sausage.svg",
+      "gridPosition": {
+        "x": 124,
+        "y": 49
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Sausage",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MeatTrimmings",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Flour",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sausage",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SausageProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ChickenCarcass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MeatTrimmings",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MeatProcessingTrimmings",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchChickenFarm",
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFoodPacking",
+      "name": "Food packing",
+      "description": "Enables to pack food in order to sell it via contracts.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/FoodPack.svg",
+      "gridPosition": {
+        "x": 84,
+        "y": 51
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Eggs",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Bread",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FoodPackAssemblyEggs",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Meat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Bread",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FoodPackAssemblyMeat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Tofu",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Vegetables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FoodPackAssemblyTofu",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Eggs",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Bread",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FoodPackAssemblyEggsT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Eggs",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Bread",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FoodPackAssemblyEggsT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Meat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Bread",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FoodPackAssemblyMeatT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Meat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Bread",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FoodPackAssemblyMeatT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Tofu",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Vegetables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FoodPackAssemblyTofuT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Tofu",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Vegetables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FoodPackAssemblyTofuT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchChickenFarm"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchUndergroundWater",
+      "name": "Groundwater pump",
+      "description": "Pumps water from the ground deposit which is replenished during rain. Has to be built on top of a groundwater deposit.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/LandWaterPump.png",
+      "gridPosition": {
+        "x": 24,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LandWaterPumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "LandWaterPump",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "LandWaterPumping"
+          ]
+        }
+      ],
+      "parentIds": [
+        "ResearchCp2Packing"
+      ],
+      "researchDurationMonths": 16,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchWaterTreatment",
+      "name": "Wastewater treatment",
+      "description": "Converts not so nice water to nice water. Just don\u0027t tell this to the people who drink it.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/WaterTreatmentPlant.png",
+      "gridPosition": {
+        "x": 88,
+        "y": 23
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "WaterTreatmentPlant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_WasteWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Chlorine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sludge",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "WaterTreatment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_WasteWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FilterMedia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Chlorine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sludge",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "WaterTreatmentT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ToxicSlurry",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FilterMedia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ToxicSlurryTreatment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sludge",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SludgeDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AnaerobicDigester",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sludge",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SludgeBurning",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FilterMedia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FilterMediaMixing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ManufacturedSand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FilterMedia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FilterMediaMixingM",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FilterMedia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FilterMediaMixingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ManufacturedSand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FilterMedia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FilterMediaMixingMT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchElectrolysis"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchWaterTreatment2",
+      "name": "Wastewater treatment II",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSaltProduction",
+      "name": "Salt production",
+      "description": "Produces salt by evaporating residual water from brine.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/OceanWaterPumpT1.png",
+      "gridPosition": {
+        "x": 60,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OceanWaterPumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "OceanWaterPumpT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "EvaporationPond",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "EvaporationPondHeated",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SaltMaking",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SaltMakingHeated",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SaltMakingFromBrine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SaltMakingFromBrineHeated",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BrineMaking",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BrineMakingHeated",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BrineProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchThermalDesalinationBasic",
+      "name": "Basic desalination",
+      "description": "Enables to repurpose basic distiller for water desalination. It is not very efficient.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/OceanWaterPumpT1.png",
+      "gridPosition": {
+        "x": 40,
+        "y": 36
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OceanWaterPumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "OceanWaterPumpT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "WaterDesalinationBasic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchThermalDesalination",
+      "name": "Thermal desalination",
+      "description": "Heats saline water into vapor to collect it as clean water. Produces brine as a byproduct.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ThermalDesalinator.png",
+      "gridPosition": {
+        "x": 80,
+        "y": 23
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "ThermalDesalinator",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "DesalinationFromSP",
+            "DesalinationFromHP",
+            "DesalinationFromLP",
+            "DesalinationFromDepleted"
+          ]
+        },
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OceanWaterPumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "OceanWaterPumpT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OceanWaterPumpingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "OceanWaterPumpLarge",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DesalinationFromHP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DesalinationFromLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVacuumDesalination",
+      "name": "Vacuum desalination",
+      "description": "Enables to utilize depleted steam for desalination.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Water.svg",
+      "gridPosition": {
+        "x": 116,
+        "y": 27
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DesalinationFromDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchChemicalPlant",
+      "name": "Chemical plant \u0026 paper",
+      "description": "",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ChemicalPlant.png",
+      "gridPosition": {
+        "x": 64,
+        "y": 28
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "ChemicalPlant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "Shredder",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Woodchips",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Paper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PaperProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Woodchips",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ShreddingWood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Woodchips",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationWood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSulfurProcessing"
+      ],
+      "researchDurationMonths": 48,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFertilizers",
+      "name": "Fertilizers",
+      "description": "Provides industrial production of chemical fertilizer.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Fertilizer.svg",
+      "gridPosition": {
+        "x": 68,
+        "y": 28
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fertilizer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FertilizerProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fertilizer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FertilizerProductionT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FertilizerOrganic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fertilizer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FertilizerProductionFromOrganic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FertilizerOrganic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fertilizer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FertilizerProductionFromOrganicT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Nitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AmmoniaSynthesis",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fertilizer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fertilizer2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Fertilizer2Production",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fertilizer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fertilizer2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Fertilizer2ProductionT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fertilizer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FertilizerChem1Dumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Fertilizer2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FertilizerChem2Dumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchChemicalPlant"
+      ],
+      "researchDurationMonths": 54,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchChemicalPlant2",
+      "name": "Chemical plant II",
+      "description": "Performs variety of chemical recipes including processing of fluids and their packaging.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ChemicalPlant2.png",
+      "gridPosition": {
+        "x": 120,
+        "y": 8
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "ChemicalPlant2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Nitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AmmoniaSynthesisT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FuelGasSynthesis",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Chlorine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SourWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GraphiteProductionT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Woodchips",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Paper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PaperProductionT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchConveyorBeltsT3"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchElectrolysis",
+      "name": "Electrolysis",
+      "description": "Decomposes a product into simpler substances by passing an electric current through it.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Electrolyzer.png",
+      "gridPosition": {
+        "x": 84,
+        "y": 23
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "Electrolyzer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "WaterElectrolysis",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Nitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AmmoniaElectrolysis",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Chlorine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BrineElectrolysis",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FlareHydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackOxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackLargeOxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchThermalDesalination"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchElectrolysis2",
+      "name": "Electrolyzer II",
+      "description": "Decomposes a product into simpler substances by passing an electric current through it.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ElectrolyzerT2.png",
+      "gridPosition": {
+        "x": 120,
+        "y": 35
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "ElectrolyzerT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "WaterElectrolysisT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Nitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AmmoniaElectrolysisT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Chlorine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BrineElectrolysisT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCarbonDioxideRecycling",
+      "name": "CO2 recycling",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/CarbonDioxide.svg",
+      "gridPosition": {
+        "x": 124,
+        "y": 8
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GraphiteProductionCo2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CarbonToEthanolProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchChemicalPlant2"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchOrganicFertilizer",
+      "name": "Organic fertilizer",
+      "description": "High-power mixer for general materials mixing.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/IndustrialMixer.png",
+      "gridPosition": {
+        "x": 48,
+        "y": 48
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "IndustrialMixer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FertilizerOrganic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OrganicFertilizerProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FertilizerOrganic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OrganicFertilizerProductionT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Dirt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FertilizerOrganic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OrganicFertilizerProductionDirt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Dirt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FertilizerOrganic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OrganicFertilizerProductionDirtT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnimalFeedCompost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnimalFeedCompostT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Biomass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BiomassCompost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Biomass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BiomassCompostT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Dirt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DirtMixing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Dirt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DirtMixingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FertilizerOrganic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FertilizerOrganicDumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchWheatCrop"
+      ],
+      "researchDurationMonths": 42,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFermentation",
+      "name": "Fermentation",
+      "description": "Employs microorganisms to convert sugars into other useful substances such as ethanol. The microorganisms employed here are not getting any salary (they just love sugar).",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FermentationTank.png",
+      "gridPosition": {
+        "x": 76,
+        "y": 43
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "FermentationTank",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CornMash",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CornToEthanolFermentation",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rubber",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RubberProductionEthanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationEthanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FlareEthanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCornCrop",
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": true
+    },
+    {
+      "id": "ResearchHospital",
+      "name": "Hospital",
+      "description": "Provides healthcare that increases overall health of your population, gives extra unity and also reduces negative effects of diseases. This building needs to be provided with medical supplies in order to work.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Hospital.png",
+      "gridPosition": {
+        "x": 96,
+        "y": 43
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "Hospital",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalEquipment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalEquipmentAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalEquipment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalEquipmentAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalEquipment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalEquipmentAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Disinfectant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DisinfectantProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Disinfectant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DisinfectantProductionT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalEquipment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Disinfectant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalSuppliesAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalEquipment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Disinfectant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalSuppliesAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalEquipment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Disinfectant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalSuppliesAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchFermentation",
+        "ResearchPlasticProduction"
+      ],
+      "researchDurationMonths": 84,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchMedicalSupplies2",
+      "name": "Medical supplies II",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/MedicalSupplies2.svg",
+      "gridPosition": {
+        "x": 132,
+        "y": 43
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Sugar",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Antibiotics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AntibioticsFermentation",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Antibiotics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalSupplies2AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Antibiotics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalSupplies2AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Antibiotics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalSupplies2AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSugarCane",
+        "ResearchHospital"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchMedicalSupplies3",
+      "name": "Medical supplies III",
+      "description": "",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Poppy.svg",
+      "gridPosition": {
+        "x": 148,
+        "y": 43
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Crop_Poppy",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HydrogenFluoride",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Anesthetics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AnestheticsProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Poppy",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Morphine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MorphineProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Anesthetics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Morphine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalSupplies3AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Anesthetics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Morphine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalSupplies3AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Anesthetics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Morphine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MedicalSupplies3AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Poppy",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PoppyDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AnaerobicDigester",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rock",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HydrogenFluoride",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FluorideLeaching",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchMedicalSupplies2",
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 240,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFocusIncreaseInc",
+      "name": "\u002B Focus points",
+      "description": "\u002B4.00% to focus generated by offices",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 25,
+      "perLevelBonuses": {
+        "FocusPointsMultiplier": 0.0399999991
+      },
+      "spacePointsRequiredFrom": 5,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 176,
+        "y": 15
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchCropYieldInc"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchHousingCapInc",
+      "name": "\u002B Housing capacity",
+      "description": "\u002B5.00% to housing capacity",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 40,
+      "perLevelBonuses": {
+        "HousingCapacityMultiplier": 0.0500000007
+      },
+      "spacePointsRequiredFrom": 4,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 176,
+        "y": 11
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchCropYieldInc"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSettlementWaterDec",
+      "name": "- Settlement water use",
+      "description": "-2.00% to water consumption of settlements",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 40,
+      "perLevelBonuses": {
+        "SettlementWaterConsumptionMultiplier": -0.0199999996
+      },
+      "spacePointsRequiredFrom": 10,
+      "iconPath": "Assets/Base/Icons/Edicts/WaterSaver.svg",
+      "gridPosition": {
+        "x": 172,
+        "y": 13
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchCropYieldInc"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchUnityCapInc",
+      "name": "\u002B Unity capacity",
+      "description": "\u002B5.00% to Unity capacity",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 60,
+      "perLevelBonuses": {
+        "UnityCapacityMultiplier": 0.0500000007
+      },
+      "spacePointsRequiredFrom": 5,
+      "iconPath": "Assets/Base/Icons/Edicts/UnityIncreased.svg",
+      "gridPosition": {
+        "x": 176,
+        "y": 7
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchCropYieldInc"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCropYieldInc",
+      "name": "\u002B Crop yield",
+      "description": "\u002B1.00% to crop yield, \u002B0.25% crop water consumption",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 250,
+      "perLevelBonuses": {
+        "FarmYieldMultiplier": 0.00999999978,
+        "FarmWaterConsumptionMultiplier": 0.00249999994
+      },
+      "spacePointsRequiredFrom": 20,
+      "iconPath": "Assets/Base/Icons/Edicts/FarmingBoost.svg",
+      "gridPosition": {
+        "x": 168,
+        "y": 11
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRainwaterYieldInc",
+      "name": "\u002B Rainwater yield",
+      "description": "\u002B5.00% to rainwater yield",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 40,
+      "perLevelBonuses": {
+        "RainYieldMultiplier": 0.0500000007
+      },
+      "spacePointsRequiredFrom": 10,
+      "iconPath": "Assets/Base/Icons/Edicts/WaterSaver.svg",
+      "gridPosition": {
+        "x": 172,
+        "y": 9
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchCropYieldInc"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchMaintenanceProductionInc",
+      "name": "\u002B Maintenance output",
+      "description": "\u002B1.00% to maintenance production bonus",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 50,
+      "perLevelBonuses": {
+        "MaintenanceProductionMultiplier": 0.00999999978
+      },
+      "spacePointsRequiredFrom": 4,
+      "iconPath": "Assets/Base/Icons/Edicts/MaintenanceProdIncrease.svg",
+      "gridPosition": {
+        "x": 176,
+        "y": 34
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchVehicleLimitsInc"
+      ],
+      "researchDurationMonths": 480,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSolarPowerInc",
+      "name": "\u002B Solar power",
+      "description": "\u002B2.00% to solar power production",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 200,
+      "perLevelBonuses": {
+        "SolarPowerMultiplier": 0.0199999996
+      },
+      "spacePointsRequiredFrom": 10,
+      "iconPath": "Assets/Base/Icons/Edicts/SolarBoost.svg",
+      "gridPosition": {
+        "x": 176,
+        "y": 42
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchVehicleLimitsInc"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleLimitsInc",
+      "name": "\u002B Vehicle limit",
+      "description": "\u002B5 to vehicle limit",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 60,
+      "perLevelBonuses": {
+        "VehicleLimitBonus": 5
+      },
+      "spacePointsRequiredFrom": 20,
+      "iconPath": "Assets/Base/Icons/VehicleLimitIncrease.svg",
+      "gridPosition": {
+        "x": 168,
+        "y": 38
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehiclesFuelDec",
+      "name": "- Vehicle fuel use",
+      "description": "-1.00% to vehicle fuel consumption",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 35,
+      "perLevelBonuses": {
+        "VehiclesFuelConsumptionMultiplier": -0.00999999978
+      },
+      "spacePointsRequiredFrom": 5,
+      "iconPath": "Assets/Base/Icons/Edicts/FuelReduced.svg",
+      "gridPosition": {
+        "x": 172,
+        "y": 32
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchVehicleLimitsInc"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipsFuelDec",
+      "name": "- Ship fuel use",
+      "description": "-1.00% to ship fuel consumption",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 35,
+      "perLevelBonuses": {
+        "ShipsFuelConsumptionMultiplier": -0.00999999978
+      },
+      "spacePointsRequiredFrom": 5,
+      "iconPath": "Assets/Base/Icons/Edicts/FuelReduced.svg",
+      "gridPosition": {
+        "x": 172,
+        "y": 40
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchVehicleLimitsInc"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTrainsFuelDec",
+      "name": "- Train fuel use",
+      "description": "-1.00% to train fuel consumption",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 35,
+      "perLevelBonuses": {
+        "TrainsFuelConsumptionMultiplier": -0.00999999978
+      },
+      "spacePointsRequiredFrom": 5,
+      "iconPath": "Assets/Base/Icons/Edicts/FuelReduced.svg",
+      "gridPosition": {
+        "x": 172,
+        "y": 36
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchVehicleLimitsInc"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTreesGrowthSpeedInc",
+      "name": "\u002B Tree growth speed",
+      "description": "\u002B1.00% to tree growth speed",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 50,
+      "perLevelBonuses": {
+        "TreesGrowthSpeed": 0.00999999978
+      },
+      "spacePointsRequiredFrom": 5,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 172,
+        "y": 5
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchCropYieldInc"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchWorldMinesEfficiencyInc",
+      "name": "\u002B World mine output",
+      "description": "\u002B2.00% to world mine and oil rig efficiency",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 50,
+      "perLevelBonuses": {
+        "WorldMinesEfficiency": 0.0199999996
+      },
+      "spacePointsRequiredFrom": 5,
+      "iconPath": "Assets/Base/Icons/Edicts/WorldMinesEfficiency.svg",
+      "gridPosition": {
+        "x": 176,
+        "y": 38
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchVehicleLimitsInc"
+      ],
+      "researchDurationMonths": 400,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRocketsCapacityInc",
+      "name": "\u002B Rockets capacity",
+      "description": "\u002B5.00% to rocket payload capacity",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 20,
+      "perLevelBonuses": {
+        "RocketsCapacityMultiplier": 0.0500000007
+      },
+      "spacePointsRequiredFrom": 1,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 172,
+        "y": 44
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchVehicleLimitsInc"
+      ],
+      "researchDurationMonths": 580,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchAirPollutionDec",
+      "name": "- Air pollution",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehiclesPollutionDec",
+      "name": "- Vehicles pollution",
+      "description": "-4.00% pollution from vehicles",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 20,
+      "perLevelBonuses": {
+        "VehiclesPollutionMultiplier": -0.0399999991
+      },
+      "spacePointsRequiredFrom": 15,
+      "iconPath": "Assets/Base/Icons/Edicts/AirPollutionReduced.svg",
+      "gridPosition": {
+        "x": 100,
+        "y": 25
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchExhaustFiltration"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTrainsPollutionDec",
+      "name": "- Trains pollution",
+      "description": "-4.00% pollution from trains",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 20,
+      "perLevelBonuses": {
+        "TrainsPollutionMultiplier": -0.0399999991
+      },
+      "spacePointsRequiredFrom": 15,
+      "iconPath": "Assets/Base/Icons/Edicts/AirPollutionReduced.svg",
+      "gridPosition": {
+        "x": 100,
+        "y": 33
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchExhaustFiltration"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipsPollutionDec",
+      "name": "- Ships pollution",
+      "description": "-4.00% pollution from ships",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 20,
+      "perLevelBonuses": {
+        "ShipsPollutionMultiplier": -0.0399999991
+      },
+      "spacePointsRequiredFrom": 15,
+      "iconPath": "Assets/Base/Icons/Edicts/AirPollutionReduced.svg",
+      "gridPosition": {
+        "x": 100,
+        "y": 29
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchExhaustFiltration"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCaptainsOffice",
+      "name": "Captain\u0027s office I",
+      "description": "Your own office! This is where all the important decision are made.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/CaptainOfficeT1.png",
+      "gridPosition": {
+        "x": 12,
+        "y": 30
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "CaptainOfficeT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_MaintenanceReduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_FuelReduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_PopsBoostT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_FoodConsumptionIncrease",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchTools",
+        "ResearchPowerAndMaintenance"
+      ],
+      "researchDurationMonths": 16,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTools",
+      "name": "Tools",
+      "description": "Provides advanced tools for easier planning and management.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/UserInterface/Toolbar/Copy.svg",
+      "gridPosition": {
+        "x": 8,
+        "y": 30
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "TechnologyCopyTool",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "TechnologyCutTool",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "TechnologyCloneTool",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "TechnologyUnityTool",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "TechnologyPauseTool",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "TechnologyUpgradeTool",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "TechnologyPlanningTool",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [],
+      "researchDurationMonths": 2,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchBlueprints",
+      "name": "Blueprints",
+      "description": "Enables to create, import and use blueprints.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/UserInterface/Toolbar/Blueprints.svg",
+      "gridPosition": {
+        "x": 16,
+        "y": 34
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "TechnologyBlueprints",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCaptainsOffice"
+      ],
+      "researchDurationMonths": 6,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTerrainLeveling",
+      "name": "Terrain leveling",
+      "description": "Combines mining \u0026 dumping designations into one. Useful for terrain flattening or ramps setup. If part of terrain is below the designation, trucks will dump there. If part of terrain is above designation, it will be mined by excavators. For mining to work, the designation has to be inside of a mine tower area.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/UserInterface/General/PlatformFlat128.png",
+      "gridPosition": {
+        "x": 16,
+        "y": 30
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "TechnologyTerrainLeveling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCaptainsOffice"
+      ],
+      "researchDurationMonths": 6,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchEdicts1",
+      "name": "Edicts I",
+      "description": "Some really useful edicts that you can apply in your office.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Edicts/PopGrowthPause.svg",
+      "gridPosition": {
+        "x": 28,
+        "y": 39
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Edict_GrowthPause",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_PopsEviction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_FoodConsumptionReduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_FarmYieldIncrease",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCaptainsOffice"
+      ],
+      "researchDurationMonths": 18,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchEdicts2",
+      "name": "Edicts II",
+      "description": "Another set of useful edicts.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Edicts/HealthBoost.svg",
+      "gridPosition": {
+        "x": 44,
+        "y": 39
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Edict_HealthBonus",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_WaterConsumptionReduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_PopsQuarantine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_ResearchEfficiencyInc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchEdicts1",
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 36,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCaptainsOffice2",
+      "name": "Captain\u0027s office II",
+      "description": "A bit more spacious office. It provides access to advanced edicts and gives a passive increase in quick trade volume.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/CaptainOfficeT2.png",
+      "gridPosition": {
+        "x": 56,
+        "y": 39
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "CaptainOfficeT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_PopsBoostT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_WaterConsumptionReductionT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_FarmYieldIncreaseT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_ResearchEfficiencyIncT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing",
+        "ResearchEdicts2"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchEdicts3",
+      "name": "Edicts III",
+      "description": "",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Edicts/PopGrowth.svg",
+      "gridPosition": {
+        "x": 64,
+        "y": 39
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Edict_PopsBoostT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_FoodConsumptionReductionT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_HealthBonusT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_FuelReductionT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_ShipFuelReduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_ResearchEfficiencyIncT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCaptainsOffice2"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchEdicts4",
+      "name": "Edicts IV",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Edicts/UnityIncreased.svg",
+      "gridPosition": {
+        "x": 80,
+        "y": 39
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Edict_FoodConsumptionIncreaseT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_WaterConsumptionReductionT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_FarmYieldIncreaseT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_MaintenanceReductionT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_ResearchEfficiencyIncT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchEdicts3",
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchEdicts5",
+      "name": "Edicts V",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Edicts/MaintenanceReduced.svg",
+      "gridPosition": {
+        "x": 120,
+        "y": 39
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Edict_MaintenanceReductionT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_ResearchEfficiencyIncT5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchEdicts4",
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchResearchLab2",
+      "name": "Research lab I",
+      "description": "Conducts more advanced research but requires a continuous supply of lab equipment to operate. Additional labs increase research speed. If recycling technology is researched, the lab can return consumed products as recyclables.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ResearchLab2.png",
+      "gridPosition": {
+        "x": 36,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "ResearchLab2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LabEquipment1AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp2Packing"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchResearchLab3",
+      "name": "Research lab II",
+      "description": "Conducts more advanced research but requires a continuous supply of lab equipment to operate. Additional labs increase research speed. If recycling technology is researched, the lab can return consumed products as recyclables.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ResearchLab3.png",
+      "gridPosition": {
+        "x": 72,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "ResearchLab3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Paper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LabEquipment2AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchChemicalPlant",
+        "ResearchGlassSmelting"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchResearchLab4",
+      "name": "Research lab III",
+      "description": "Conducts more advanced research but requires a continuous supply of lab equipment to operate. Additional labs increase research speed. If recycling technology is researched, the lab can return consumed products as recyclables.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ResearchLab4.png",
+      "gridPosition": {
+        "x": 112,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "ResearchLab4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LabEquipment3AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp4Packing"
+      ],
+      "researchDurationMonths": 108,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchResearchLab5",
+      "name": "Research lab IV",
+      "description": "Conducts more advanced research but requires a continuous supply of lab equipment to operate. Additional labs increase research speed. If recycling technology is researched, the lab can return consumed products as recyclables.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ResearchLab5.png",
+      "gridPosition": {
+        "x": 144,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "ResearchLab5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LabEquipment4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LabEquipment4AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchDatacenter"
+      ],
+      "researchDurationMonths": 216,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchDatacenter",
+      "name": "Data center",
+      "description": "A data center is used to host server racks that you add to it. It is highly scalable and makes computing more affordable. Each added server rack provides computing. It is worth noting that each server rack has its power, cooling, and maintenance demands. However, some people say that all it does is to persist and search in a vast collection of pictures of cats and memes - we were not able to debunk this.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/DataCenter.png",
+      "gridPosition": {
+        "x": 136,
+        "y": 14
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "DataCenter",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_MaintenanceT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MaintenanceT3Recipe",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_MaintenanceT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Recyclables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MaintenanceT3Recycling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "MaintenanceDepotT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ChilledWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "WaterChilling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "WaterChiller",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "WaterChilling"
+          ]
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Server",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ServerAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchMicrochipProduction"
+      ],
+      "researchDurationMonths": 216,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchOffices",
+      "name": "Offices",
+      "description": "Employs people on your island to generate focus points, which can be spent on bonuses.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/OfficeBuildingT1.png",
+      "gridPosition": {
+        "x": 108,
+        "y": 16
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "OfficeBuildingT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "OfficeBuildingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "OfficeBuildingT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Paper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HouseholdGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_OfficeSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OfficeSuppliesAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Paper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HouseholdGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_OfficeSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OfficeSuppliesAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Paper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HouseholdGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_OfficeSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OfficeSuppliesAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_OfficeSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_ResearchEfficiencyInc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_MaintenanceProductionInc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_CropYieldInc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_RecyclingInc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_TrucksCapacityInc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_TrainsCapacityInc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_ContractsProfitInc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_FoodConsumptionDec",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_SettlementConsumptionDec",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_UnityInc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_ContractsUnityDec",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Focus_WorldMinesEfficiency",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp4Packing"
+      ],
+      "researchDurationMonths": 128,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleCapIncrease",
+      "name": "Vehicles management",
+      "description": "Increases vehicle limit by 30.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 10,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTradeDock",
+      "name": "Trading dock",
+      "description": "Allows trading of various goods with villages on the world map. All the products you trade are delivered into a trading dock. Also, trading can be a lifesaver if you run into a shortage of critical products, so it is advised to always have a trading dock available.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/TradeDock.png",
+      "gridPosition": {
+        "x": 4,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "TradeDock",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "StorageUnit",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchBasicFarming"
+      ],
+      "researchDurationMonths": 2,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCargoDepot",
+      "name": "Cargo depot",
+      "description": "Enables to automate the transportation process of resources that are outside of the island (crude oil for instance).",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/CargoDepotT1.png",
+      "gridPosition": {
+        "x": 40,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "CargoDepotT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleFluidT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleLooseT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleUnitT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 36,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTrucksCapacityEdict",
+      "name": "Trucks overloading edict",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleCapIncrease3",
+      "name": "Vehicles management II",
+      "description": "Increases vehicle limit by 30.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/VehicleLimitIncrease.svg",
+      "gridPosition": {
+        "x": 60,
+        "y": 36
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchCaptainsOffice2"
+      ],
+      "researchDurationMonths": 48,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleCapIncrease4",
+      "name": "Vehicles management III",
+      "description": "Increases vehicle limit by 30.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/VehicleLimitIncrease.svg",
+      "gridPosition": {
+        "x": 80,
+        "y": 35
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Edict_TruckCapacityIncrease",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_TruckCapacityIncreaseT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleCapIncrease5",
+      "name": "Vehicles management IV",
+      "description": "Increases vehicle limit by 30.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/VehicleLimitIncrease.svg",
+      "gridPosition": {
+        "x": 116,
+        "y": 46
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleCapIncrease6",
+      "name": "Vehicles management V",
+      "description": "Increases vehicle limit by 30.",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/VehicleLimitIncrease.svg",
+      "gridPosition": {
+        "x": 148,
+        "y": 35
+      },
+      "unlocks": [],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 180,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchAdvancedLogisticsControl",
+      "name": "Advanced logistics control",
+      "description": "Provides extra management of logistics and dumping.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Technologies/CustomRoutes.svg",
+      "gridPosition": {
+        "x": 28,
+        "y": 21
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "TechnologyCustomRoutes",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchFuelStation"
+      ],
+      "researchDurationMonths": 16,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchLogisticsZones",
+      "name": "Logistics zones",
+      "description": "Logistics Zones let you split your island into controlled sections, limiting which vehicles can access them and how cargo and materials are shared. They\u0027re especially useful when scaling up to cover large areas. Zones can be managed from the Vehicle Management window.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Technologies/LogisticsZones.svg",
+      "gridPosition": {
+        "x": 48,
+        "y": 23
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "TechnologyLogisticsZones",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchVehicleCapIncrease2"
+      ],
+      "researchDurationMonths": 42,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchStoragesT1",
+      "name": "Storage",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 10,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchStorage2",
+      "name": "Storage II",
+      "description": "",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/StorageLooseT2.png",
+      "gridPosition": {
+        "x": 44,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "StorageLooseT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "StorageFluidT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "StorageUnitT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCargoDepot"
+      ],
+      "researchDurationMonths": 36,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchStorage3",
+      "name": "Storage (Large) I",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/StorageLooseT3.png",
+      "gridPosition": {
+        "x": 80,
+        "y": -1
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "StorageLooseT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "StorageFluidT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "StorageUnitT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchStorage4",
+      "name": "Storage (Large) II",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/StorageLooseT4.png",
+      "gridPosition": {
+        "x": 116,
+        "y": -1
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "StorageLooseT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "StorageFluidT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "StorageUnitT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4",
+        "ResearchStorage3"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCargoDepot2",
+      "name": "Cargo depot II",
+      "description": "",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/CargoDepotT2.png",
+      "gridPosition": {
+        "x": 56,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "CargoDepotT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleFluidT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleLooseT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleUnitT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing",
+        "ResearchCargoDepot"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCargoDepot3",
+      "name": "Cargo depot III \u0026 IV",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/CargoDepotT3.png",
+      "gridPosition": {
+        "x": 120,
+        "y": -1
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "CargoDepotT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleFluidT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleLooseT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "CargoDepotModuleUnitT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchStorage4"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCargoDepot4",
+      "name": "Cargo depot IV",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFuelStation",
+      "name": "Fuel station",
+      "description": "Tired of excavators going back and forth to refuel? Build this station and assign it some trucks.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FuelStationT1.png",
+      "gridPosition": {
+        "x": 24,
+        "y": 21
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FuelStationT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp2Packing"
+      ],
+      "researchDurationMonths": 10,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFuelStation2",
+      "name": "Fuel station II",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchFuelStation3",
+      "name": "Fuel station III",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleRamps",
+      "name": "Ramp for vehicles",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/VehicleRamp.png",
+      "gridPosition": {
+        "x": 16,
+        "y": 24
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "VehicleRamp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "VehicleRamp2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "VehicleRamp3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchBasicDiesel"
+      ],
+      "researchDurationMonths": 4,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTransportsLifts",
+      "name": "Conveyor lifts",
+      "description": "Allows to raise or lower conveyors in a compact footprint.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/LiftIoPortShape_FlatConveyor_3.png",
+      "gridPosition": {
+        "x": 28,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor_1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor__6",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor__5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor__4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor__3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor__2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor__1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor_2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor_3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor_4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor_5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_FlatConveyor_6",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor_1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor__6",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor__5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor__4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor__3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor__2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor__1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor_2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor_3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor_4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor_5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LiftIoPortShape_LooseMaterialConveyor_6",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchConveyorBelts"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleAssembly2",
+      "name": "Bigger Vehicles",
+      "description": "Large vehicles to scale your mining and logistics operations. Their production requires glass which has to be acquired via quick trade from other world settlements until you research how to produce it yourself.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/VehiclesDepotT2.png",
+      "gridPosition": {
+        "x": 56,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "VehiclesDepotT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TruckT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "ExcavatorT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TreeHarvesterT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "OreSortingPlantT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "FuelStationT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts2AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts2AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts2AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTreeHarvester",
+      "name": "Tree harvester II",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 10,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchHydrogenCell",
+      "name": "Hydrogen cell",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FuelStationHydrogenT1.png",
+      "gridPosition": {
+        "x": 92,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FuelStationHydrogenT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TruckT2H",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "ExcavatorT2H",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TreeHarvesterT2H",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TreePlanterT1H",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainStationFuelHydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "LocomotiveT1Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "TechnologyHydrogenCargoShip",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchHydrogenReforming"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchConveyorRouting",
+      "name": "Smart conveyor routing",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FlatConveyorSorter.png",
+      "gridPosition": {
+        "x": 32,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FlatConveyorSorter",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "LooseConveyorSorter",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchTransportsBalancing"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTrains",
+      "name": "Trains",
+      "description": "",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/RailParts.svg",
+      "gridPosition": {
+        "x": 56,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "TechnologyTrains",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainDepot",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainStationRoot",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainStationLoose",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainStationUnit",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainStationFluid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainStationEmpty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainStationFuelDiesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainStationFuelSteam",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingSmall",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingSmallConnector",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingSmallEntrance",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingLarge",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingLargeConnector",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingLargeEntrance",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingSmallV2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingSmallConnectorV2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingSmallEntranceV2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingLargeV2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingLargeConnectorV2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TrainLevelCrossingLargeEntranceV2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_RailParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RailPartsAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_RailParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RailPartsAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_RailParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RailPartsAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts2AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts2AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts2AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTrainDepotAddon",
+      "name": "Long trains",
+      "description": "Extends maximum train length and internal capacity of attached train depot. Multiple extensions can be chained together.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/TrainDepotAddon.png",
+      "gridPosition": {
+        "x": 60,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "TrainDepotAddon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchTrains"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSettlementWaste",
+      "name": "Settlement waste",
+      "description": "Basic collection and disposal of waste from settlements.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SettlementLandfillModule.png",
+      "gridPosition": {
+        "x": 0,
+        "y": 30
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "SettlementLandfillModule",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Waste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleAndMining",
+      "name": "Vehicles \u0026 mining",
+      "description": "Excavator \u0026 mining tower to enable mining raw materials. And more trucks to reinforce our logistics.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/VehiclesDepot.png",
+      "gridPosition": {
+        "x": 8,
+        "y": 10
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "VehiclesDepot",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "ExcavatorT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TruckT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TreeHarvesterT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "MineTower",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "StorageLoose",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "OreSortingPlantT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronSmeltingT1Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts1AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts1AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts1AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts1AssemblyT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts1AssemblyT5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rock",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Dirt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [],
+      "researchDurationMonths": 6,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCopperRefinement",
+      "name": "Copper refinement",
+      "description": "Copper electrolysis enables us to reach 99% pure copper. This way we can leverage its properties to the maximum.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/CopperElectrolysis.png",
+      "gridPosition": {
+        "x": 16,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "CopperElectrolysis",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperSmeltingT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperSmeltingT1Scrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ImpureCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperCasting",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ImpureCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperElectrolysisWithWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchBricksProduction"
+      ],
+      "researchDurationMonths": 10,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchConcreteAdvanced",
+      "name": "Advanced concrete",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Concrete.svg",
+      "gridPosition": {
+        "x": 24,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CementProduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "RotaryKiln",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SlagCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingSlag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingGravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ManufacturedSand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingGravelM",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Cement",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ManufacturedSand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SlagCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConcreteSlab",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConcreteMixingSlagM",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "ConcreteMixer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "Crusher",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SlagCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SlagCrushing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rock",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RockCrushing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ManufacturedSand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GravelCrushing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Quartz",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_QuartzCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "QuartzCrushing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_QuartzCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "QuartzMilling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp2Packing"
+      ],
+      "researchDurationMonths": 20,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSteelSmelting",
+      "name": "Steel smelting",
+      "description": "Process to convert iron into more durable steel.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/OxygenFurnace.png",
+      "gridPosition": {
+        "x": 48,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenSteel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteelSmelting",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "OxygenFurnace",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Nitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AirSeparation",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AirSeparator",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "CasterCooled",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "SteelCastingCooled"
+          ]
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenSteel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteelCastingCooled",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Metal1_TerrainSurface",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Metal3_TerrainSurface",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Metal4_TerrainSurface",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Nitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackNitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Nitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackLargeNitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackOxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackLargeOxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 48,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchExhaustFiltration",
+      "name": "Exhaust filtration",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ExhaustScrubber.png",
+      "gridPosition": {
+        "x": 96,
+        "y": 29
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ExhaustFiltering",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ExhaustFilteringLime",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "ExhaustScrubber",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CarbonDioxideInjection",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "GasInjectionPump",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "CarbonDioxideInjection"
+          ]
+        }
+      ],
+      "parentIds": [
+        "ResearchPipeTransportsT3"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCopperRefinement2",
+      "name": "Copper refinement II",
+      "description": "More efficient process of copper refinement using acid.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/Copper.svg",
+      "gridPosition": {
+        "x": 60,
+        "y": 23
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_ImpureCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperElectrolysisProcess",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSulfurProcessing"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchGlassSmelting",
+      "name": "Glass making",
+      "description": "Provides glass production.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/IndustrialMixer.png",
+      "gridPosition": {
+        "x": 64,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "IndustrialMixer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BrokenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassCastingT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "GlassMakerT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GlassMix",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassSmelting",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GlassMix",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassMixMixing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GlassMix",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassMixMixingWithAcid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BrokenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassSmeltingWithBroken",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSaltProduction"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchHouseholdGoods",
+      "name": "Household goods",
+      "description": "Household goods for a settlement, generates extra Unity when provided.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SettlementHouseholdGoodsModule.png",
+      "gridPosition": {
+        "x": 76,
+        "y": 10
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "SettlementHouseholdGoodsModule",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HouseholdGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HouseholdGoodsAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HouseholdGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HouseholdGoodsAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HouseholdGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HouseholdGoodsAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HouseholdGoods",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HouseholdGoodsAssemblyT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_HouseholdGoodsConsumptionIncrease",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_HouseholdGoodsConsumptionIncreaseT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_HouseholdGoodsConsumptionIncreaseT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchAdvancedSmelting",
+      "name": "Advanced smelting",
+      "description": "Provides smelting with higher throughput and increased efficiency for crushed ores.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SmeltingFurnaceT2.png",
+      "gridPosition": {
+        "x": 80,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_IronScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronSmeltingT2Scrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronSmeltingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperSmeltingT2Scrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperSmeltingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GlassMix",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassSmeltingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BrokenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassSmeltingT2WithBroken",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "SmeltingFurnaceT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenSteel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteelSmeltingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "OxygenFurnaceT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "CasterT2",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "IronCastingCooled",
+            "CopperCastingCooled",
+            "AluminumCastingT2"
+          ]
+        },
+        {
+          "type": "machine",
+          "id": "CasterCooledT2",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "SteelCastingCooledT2",
+            "TitaniumAlloyCastingT2"
+          ]
+        },
+        {
+          "type": "machine",
+          "id": "CrusherLarge",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronCastingCooled",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ImpureCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperCastingCooled",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenSteel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteelCastingCooledT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronOreCrushing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperOreCrushing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rock",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RockCrushingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gravel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ManufacturedSand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GravelCrushingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SlagCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SlagCrushingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Quartz",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_QuartzCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "QuartzCrushingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_QuartzCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "QuartzMillingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronOreCrushingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperOreCrushingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 84,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCrusherLarge",
+      "name": "Crusher (large)",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchIndustrialMixerT2",
+      "name": "Mixer II",
+      "description": "High-power mixer for general materials mixing.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/IndustrialMixerT2.png",
+      "gridPosition": {
+        "x": 84,
+        "y": 16
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "IndustrialMixerT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GlassMix",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassMixMixingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GlassMix",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassMixMixingWithAcidT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AcidMixMixingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SulfurNeutralizationT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BrineProductionT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchAdvancedSmelting"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchGlassSmeltingT2",
+      "name": "Glass making II",
+      "description": "Casts molten glass into glass sheets and with much greater efficiency",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/GlassMakerT2.png",
+      "gridPosition": {
+        "x": 116,
+        "y": 20
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassCastingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "GlassMakerT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchArcFurnaceT1",
+      "name": "Arc furnace I",
+      "description": "Melts metals via a powerful electric arc. The arc is deployed using graphite anodes that are partially spent during the process due to the high heat. Beware that the furnace consumes a significant amount of power. It would be polite to notify your local power plant before turning this on.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ArcFurnace.png",
+      "gridPosition": {
+        "x": 88,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "ArcFurnace",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronSmeltingArcT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronSmeltingArcScrapT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperSmeltingArcT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperSmeltingArcScrapT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GlassMix",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassSmeltingArcT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BrokenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassSmeltingArcT1WithBroken",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Chlorine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SourWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GraphiteProductionT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchAdvancedSmelting"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchPolySiliconProduction",
+      "name": "Silicon \u0026 electronics II",
+      "description": "Purifies silicon using hydrogen. The processed silicon can be used in electronics.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SiliconReactor.png",
+      "gridPosition": {
+        "x": 96,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenSilicon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SiliconSmeltingArc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenSilicon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PolySilicon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SiliconTreatment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "SiliconReactor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PCB",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PCBAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PCB",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PCBAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Copper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PCB",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PCBAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PCB",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PolySilicon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Electronics2AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchArcFurnaceT1",
+        "ResearchPlasticProduction"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchArcFurnace2",
+      "name": "Arc furnace II",
+      "description": "This furnace has a cooling system to safely reach higher operating temperatures. This provides increased throughput and an opportunity to reuse some of the excess heat. Power requirements are increased as well.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ArcFurnace2.png",
+      "gridPosition": {
+        "x": 120,
+        "y": 12
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "ArcFurnace2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronSmeltingArc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronSmeltingArcScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperSmeltingArc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CopperScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenCopper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CopperSmeltingArcScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GlassMix",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassSmeltingArc",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BrokenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GlassSmeltingArcWithBroken",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenSilicon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SiliconSmeltingArc2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchConveyorBeltsT3"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchGoldSmelting",
+      "name": "Gold smelting",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SettlingTank.png",
+      "gridPosition": {
+        "x": 92,
+        "y": 14
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "SettlingTank",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldOreConcentrate",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sand",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GoldSmelting",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Gold",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GoldScrapSmelting",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "GoldFurnace",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GoldOreCrushing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GoldOreCrushingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldOrePowder",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GoldMilling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldOrePowder",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GoldOreMillingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldOrePowder",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldOreConcentrate",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ToxicSlurry",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "GoldSettling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ToxicSlurry",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ToxicSlurryDumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldScrapPressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PressingOfGoldScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldScrapPressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_GoldScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ShreddingGoldScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Gold_TerrainSurface",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchAdvancedSmelting"
+      ],
+      "researchDurationMonths": 84,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchAluminumSmelting",
+      "name": "Aluminum smelting",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/AluminumCell.png",
+      "gridPosition": {
+        "x": 124,
+        "y": 22
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Alumina",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenAluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AluminumElectrolysis",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AluminumCell",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "SettlingTank",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Bauxite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BauxitePowder",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BauxiteMilling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Bauxite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BauxitePowder",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BauxiteMillingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BauxitePowder",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Brine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HydratedAlumina",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_RedMud",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BauxiteDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_RedMud",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Seawater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RedMudSettling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_RedMud",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RedMudSettlingAcid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HydratedAlumina",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Alumina",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AluminaCalcificationGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HydratedAlumina",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Alumina",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AluminaCalcificationHydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenAluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Aluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AluminumCasting",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenAluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Aluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AluminumCastingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AluminumScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenAluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AluminumSmeltingScrapArcT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_RedMud",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RedMudDumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AluminumScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AluminumScrapPressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PressingOfAluminumScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AluminumScrapPressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AluminumScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ShreddingAluminumScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTitaniumSmelting",
+      "name": "Titanium smelting",
+      "description": "Mixes two molten metals to produce a uniform, high-quality alloy.",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/AlloyMixer.png",
+      "gridPosition": {
+        "x": 152,
+        "y": 27
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_TitaniumOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IlmeniteMilling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IlmeniteMillingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumSlag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IlmeniteSmeltingArc2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumSlag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Chlorine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumChloride",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "TitaniumChlorination",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumChloride",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumChloridePure",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "TitaniumPurification",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumChloridePure",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumSponge",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Chlorine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "TitaniumChlorideReduction",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumSponge",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenTitanium",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "TitaniumSmeltingArc2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenTitanium",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenAluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenTitaniumAlloy",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "TitaniumAlloyMixing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AlloyMixer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenTitaniumAlloy",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumAlloy",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "TitaniumAlloyCastingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 328,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchElectronics4",
+      "name": "Electronics IV",
+      "description": "",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/DiamondReactor.png",
+      "gridPosition": {
+        "x": 152,
+        "y": 22
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Graphite",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diamond",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DiamondSynthesis",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "DiamondReactor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SapphireWafer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_DiamondPaste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Lens",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "LensMaking",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "LensMaker",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diamond",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_DiamondPaste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DiamondPasteFromHeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diamond",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CookingOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_DiamondPaste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DiamondPasteFromCookingOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Lens",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diamond",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "Electronics4Assembly",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchAssembler3"
+      ],
+      "researchDurationMonths": 300,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRecyclingIncrease",
+      "name": "Recycling increase",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRecyclingEdict",
+      "name": "Recycling edict I",
+      "description": "Edicts that can be enabled to increase island\u0027s overall recycling efficiency.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Edicts/RecyclingIncrease.svg",
+      "gridPosition": {
+        "x": 76,
+        "y": 3
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Edict_RecyclingIncrease",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchRecycling",
+        "ResearchResearchLab3"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRecyclingEdict1",
+      "name": "Recycling edict II",
+      "description": "Edicts that can be enabled to increase island\u0027s overall recycling efficiency.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Edicts/RecyclingIncrease.svg",
+      "gridPosition": {
+        "x": 84,
+        "y": 3
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Edict_RecyclingIncreaseT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchRecyclingForSettlement"
+      ],
+      "researchDurationMonths": 84,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRecyclingEdict2",
+      "name": "Recycling edict III",
+      "description": "Edicts that can be enabled to increase island\u0027s overall recycling efficiency.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Edicts/RecyclingIncrease.svg",
+      "gridPosition": {
+        "x": 132,
+        "y": 2
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Edict_RecyclingIncreaseT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 144,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRecyclingEdict4",
+      "name": "Recycling edict IV",
+      "description": "Edicts that can be enabled to increase island\u0027s overall recycling efficiency.",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/Edicts/RecyclingIncrease.svg",
+      "gridPosition": {
+        "x": 148,
+        "y": 2
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Edict_RecyclingIncreaseT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab5",
+        "ResearchRecyclingEdict2"
+      ],
+      "researchDurationMonths": 300,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRecyclingEdict5",
+      "name": "Recycling edict V",
+      "description": "Edicts that can be enabled to increase island\u0027s overall recycling efficiency.",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 0,
+      "iconPath": "Assets/Base/Icons/Edicts/RecyclingIncrease.svg",
+      "gridPosition": {
+        "x": 164,
+        "y": 2
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Edict_RecyclingIncreaseT5",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchRecyclingEdict4",
+        "ResearchSpaceStationResearch"
+      ],
+      "researchDurationMonths": 580,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchDeconstructionRatioIncrease",
+      "name": "Deconstruction efficiency",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 10,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchDeconstructionRatioIncrease2",
+      "name": "Deconstruction efficiency II",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 10,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchElectricity",
+      "name": "Electricity",
+      "description": "Burns diesel to create electricity.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/DieselGenerator.png",
+      "gridPosition": {
+        "x": 0,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "DieselGenerator",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_Electricity",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchPowerAndMaintenance",
+      "name": "Maintenance",
+      "description": "Converts products into maintenance which is distributed to all machines, buildings, and vehicles that need it. Important as if there is not enough maintenance, vehicles and machines can break down temporarily.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/MaintenanceDepotT0.png",
+      "gridPosition": {
+        "x": 4,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_MechanicalParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_MaintenanceT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MaintenanceT0Recipe",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "MaintenanceDepotT0",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_MaintenanceT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCpPacking",
+        "ResearchElectricity"
+      ],
+      "researchDurationMonths": 2,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchBeacon",
+      "name": "Beacon",
+      "description": "Strong light helps other refugees to find your island and join you. This can help you to get more workers and some extra starting loot.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Beacon.png",
+      "gridPosition": {
+        "x": 12,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "Beacon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchPowerAndMaintenance"
+      ],
+      "researchDurationMonths": 4,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchPowerGeneration2",
+      "name": "Power generation II",
+      "description": "Unlocks power generation from coal.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/BoilerCoal.png",
+      "gridPosition": {
+        "x": 40,
+        "y": 31
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "BoilerCoal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationCoal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TurbineHighPress",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "PowerGeneratorT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Flywheel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackHpSteam",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackLargeHpSteam",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackLpSteam",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackLargeLpSteam",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_MechPower",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchUndergroundWater",
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 30,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchDieselGeneratorLarge",
+      "name": "Large generator",
+      "description": "More powerful generator. Can also serve as a power backup.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/DieselGeneratorT2.png",
+      "gridPosition": {
+        "x": 56,
+        "y": 33
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "DieselGeneratorT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing"
+      ],
+      "researchDurationMonths": 48,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchBoilerElectric",
+      "name": "Electric boiler",
+      "description": "Produces high pressure steam by boiling water. Basically a giant kettle. But not recommended for tea preparation.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/BoilerElectric.png",
+      "gridPosition": {
+        "x": 48,
+        "y": 29
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "BoilerElectric",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationElectricHalf",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationElectric",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchGasCombustion"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchMechPowerStorage",
+      "name": "Mechanical power storage",
+      "description": "Provides mechanical power storage and turbines auto-balancing capability.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 10,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchPowerGeneration3",
+      "name": "Power generation III",
+      "description": "Improves power production efficiency by reusing low pressure steam to create mechanical power.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/TurbineLowPress.png",
+      "gridPosition": {
+        "x": 76,
+        "y": 31
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "TurbineLowPress",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackDepletedSteam",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackLargeDepletedSteam",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3",
+        "ResearchWaterRecovery"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchPowerGeneration4",
+      "name": "Power generation IV",
+      "description": "Optimized power generator with lower friction and better efficiency. The slower it spins the lower its efficiency is.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/TurbineHighPressT2.png",
+      "gridPosition": {
+        "x": 108,
+        "y": 31
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "TurbineHighPressT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "TurbineLowPressT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "PowerGeneratorT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "CoolingTowerT2",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "SteamSpCondensationT2",
+            "SteamHpCondensationT2",
+            "SteamLpCondensationT2",
+            "SteamDepletedCondensationT2"
+          ]
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamHpCondensationT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamLpCondensationT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamDepletedCondensationT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp4Packing",
+        "ResearchPowerGeneration3"
+      ],
+      "researchDurationMonths": 108,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchWaterRecovery",
+      "name": "Water recovery",
+      "description": "Improves water efficiency of a power plant by recovering some steam back to water.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/CoolingTowerT1.png",
+      "gridPosition": {
+        "x": 60,
+        "y": 31
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamHpCondensation",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamLP",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamLpCondensation",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamDepletedCondensation",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "CoolingTowerT1",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "SteamHpCondensation",
+            "SteamLpCondensation",
+            "SteamDepletedCondensation"
+          ]
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing",
+        "ResearchPowerGeneration2"
+      ],
+      "researchDurationMonths": 48,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchThermalStorage",
+      "name": "Thermal storage",
+      "description": "Thermal storage uses steam to heat its tank of molten salt to store thermal energy. The accumulated energy can be then used to boil incoming water back to steam. The conversion process has losses but maintaining the accumulated heat does not decay while the storage is operational.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ThermalStorage.png",
+      "gridPosition": {
+        "x": 84,
+        "y": 27
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "ThermalStorage",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_Heat",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchPipeTransportsT3"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchNuclearReactor",
+      "name": "Nuclear reactor",
+      "description": "Thermal reactor that maintains nuclear chain reaction from enriched uranium rods. The reaction releases a large amount of energy utilized for steam generation. This plant can be set up to effectively provide up to 90 MW of electricity when running on full power. Beware that spent fuel is radioactive and can harm the population if not stored in a specialized facility.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/NuclearReactor.png",
+      "gridPosition": {
+        "x": 116,
+        "y": 31
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "NuclearReactor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "UraniumEnrichmentPlant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "SettlingTank",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "NuclearWasteStorage",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Yellowcake",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HydrogenFluoride",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumEnriched",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "UraniumEnrichment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "UraniumCrushing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumOre",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "UraniumCrushingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumOreCrushed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Yellowcake",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ToxicSlurry",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "UraniumLeaching",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rock",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HydrogenFluoride",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FluorideLeaching",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumEnriched",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumRod",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "UraniumRodsAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumEnriched",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumRod",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "UraniumRodsAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ToxicSlurry",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ToxicSlurryDumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumRod",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SpentFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4",
+        "ResearchPowerGeneration4"
+      ],
+      "researchDurationMonths": 144,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchUraniumEnrichment",
+      "name": "Uranium enrichment",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchNuclearReactor2",
+      "name": "Nuclear reactor II",
+      "description": "Advanced thermal reactor that provides increased throughput. This reactor is also able to utilize MOX fuel. It can also regulate its power level automatically (if computing is provided). This plant can be set up to effectively provide up to 120 MW of electricity when running on full power.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/NuclearReactorT2.png",
+      "gridPosition": {
+        "x": 136,
+        "y": 31
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "NuclearReactorT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "NuclearReprocessingPlant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SpentFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumReprocessed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plutonium",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FissionProduct",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SpentFuelReprocessing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plutonium",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoxRod",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "MoxRodsAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumReprocessed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HydrogenFluoride",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumEnriched",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ReprocessedUraniumEnrichment",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_RetiredWaste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Recyclables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ShreddingRetiredWaste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoxRod",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SpentMox",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_RetiredWaste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumEnriched",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HydrogenFluoride",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumEnriched20",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "UraniumEnrichment20",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchBasicComputing",
+        "ResearchNuclearReactor"
+      ],
+      "researchDurationMonths": 192,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchNuclearReactor3",
+      "name": "Fast breeder reactor",
+      "description": "Fast breeder reactor is a nuclear reactor in which the fission chain reaction is sustained by fast neutrons. This process needs highly enriched fuel and produces large amounts of heat. The core containing enriched fuel is surrounded by a blanket of fissionable material which is bombarded by the fast neutrons and transformed into fissile fuel. This process also allows to burn transuranic isotopes which would normally take thousands of years to decay. This reactor does not use solid fuel rods, instead, its fuel is dissolved in molten salt. It runs under higher operating temperatures to produce super pressurized steam (800 \u00B0C). If the core is overheated and no emergency cooling is available, the reactor will automatically shut off by draining its molten fuel out of the reactor, all fuel will be lost, and the reactor will be damaged. This plant can be set up to effectively provide up to 240 MW of electricity when running on full power.",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 0,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/FastBreederReactor.png",
+      "gridPosition": {
+        "x": 164,
+        "y": 31
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "FastBreederReactor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumEnriched20",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CoreFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CoreFuelFromEnriched",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plutonium",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CoreFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CoreFuelFromPu",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BlanketFuelEnriched",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BlanketFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BlanketFuelFromDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Yellowcake",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BlanketFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BlanketFuelFromYellowcake",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BlanketFuelEnriched",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BlanketFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CoreFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BlanketFuelReprocessing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BlanketFuelEnriched",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BlanketFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plutonium",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BlanketFuelReprocessingToPu",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BlanketFuelEnriched",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BlanketFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumEnriched20",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "BlanketFuelReprocessingToU30",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SpentFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BlanketFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FissionProduct",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SpentFuelToBlanket",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SpentMox",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Salt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_BlanketFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FissionProduct",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SpentMoxToBlanket",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CoreFuelDirty",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenGlass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CoreFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FissionProduct",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CoreFuelReprocessing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchNuclearReactor2",
+        "ResearchSuperPressSteam",
+        "ResearchSpaceStationResearch"
+      ],
+      "researchDurationMonths": 480,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSolarPanels",
+      "name": "Solar panels",
+      "description": "Converts sunlight to electricity. Surprisingly, the efficiency depends on how sunny it is.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SolarPanel.png",
+      "gridPosition": {
+        "x": 108,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "SolarPanel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PolySilicon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SolarCell",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SolarCellAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PolySilicon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SolarCell",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SolarCellAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_PolySilicon",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SolarCell",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SolarCellAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_SolarPowerIncrease",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_SolarPowerIncreaseT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "SolarPanelQuarter",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp4Packing"
+      ],
+      "researchDurationMonths": 108,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSolarPanels2",
+      "name": "Solar panels II",
+      "description": "Solar panels that are made from a single crystal silicon. That makes them more expensive to produce but they provide 25% more energy.",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SolarPanelMono.png",
+      "gridPosition": {
+        "x": 152,
+        "y": 18
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "SolarPanelMono",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Aluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SiliconWafer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Glass",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SolarCellMono",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SolarCellMonoAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SolarCell",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Recyclables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ShreddingPolyCells",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_SolarPowerIncreaseT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "SolarPanelMonoQuarter",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchAssembler3"
+      ],
+      "researchDurationMonths": 264,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchBasicDiesel",
+      "name": "Basic diesel",
+      "description": "Enables to pump island\u0027s limited reserve of oil and convert it to diesel. Not very efficient.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/BasicDieselDistiller.png",
+      "gridPosition": {
+        "x": 12,
+        "y": 20
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "BasicDieselDistiller",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CrudeOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_WasteWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DieselDistillationBasic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CrudeOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OilGroundPumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "OilPump",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "OilGroundPumping"
+          ]
+        },
+        {
+          "type": "machine",
+          "id": "WasteDump",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_WasteWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "OceanWasteWaterPumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "StorageFluid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchPowerAndMaintenance"
+      ],
+      "researchDurationMonths": 6,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchCrudeOilDistillation",
+      "name": "Advanced diesel",
+      "description": "Advanced process for diesel production and much more.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/BoilerCoal.png",
+      "gridPosition": {
+        "x": 40,
+        "y": 21
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "BoilerCoal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationCoal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CrudeOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SourWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CrudeOilRefiningT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "DistillationTowerT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CrudeOilRefiningT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "DistillationTowerT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "Flare",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "FlareDiesel",
+            "FlareHeavyOil",
+            "FlareLightOil",
+            "FlareNaphtha",
+            "FlareEthanol",
+            "FlareFuelGas",
+            "FlareAmmonia",
+            "FlareHydrogen"
+          ]
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FlareHeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FlareLightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FlareHydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SourWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SourWaterDumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 32,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSulfurProcessing",
+      "name": "Sulfur processing",
+      "description": "",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SourWaterStripper.png",
+      "gridPosition": {
+        "x": 56,
+        "y": 21
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "SourWaterStripper",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "IndustrialMixer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SourWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SourWaterStripping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AcidMixMixing",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Limestone",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Slag",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SulfurNeutralization",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Acid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "WasteAcidDumping",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ammonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FlareAmmonia",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SulfurBurning",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing",
+        "ResearchCrudeOilDistillation"
+      ],
+      "researchDurationMonths": 54,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchGasCombustion",
+      "name": "Gas combustion",
+      "description": "Produces high pressure steam by burning gas.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/BoilerGas.png",
+      "gridPosition": {
+        "x": 44,
+        "y": 29
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "BoilerGas",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "SteamGenerationHeavyOil",
+            "SteamGenerationMediumOil",
+            "SteamGenerationLightOil",
+            "SteamGenerationNaphtha",
+            "SteamGenerationEthanol",
+            "SteamGenerationFuelGas",
+            "SteamGenerationHydrogen"
+          ]
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationHeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationMediumOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationLightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationFuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationHydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackDepletedSteam",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackLargeDepletedSteam",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchPowerGeneration2",
+        "ResearchCrudeOilDistillation"
+      ],
+      "researchDurationMonths": 42,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchBiofuel",
+      "name": "Biofuel",
+      "description": "",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/AnaerobicDigester.png",
+      "gridPosition": {
+        "x": 44,
+        "y": 19
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "AnaerobicDigester",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "HydroCrackerT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Potato",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PotatoDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Vegetables",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Compost",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VegetablesDigestion",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FuelGasReforming",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Nitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AirSeparation",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "AirSeparator",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Nitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackNitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Nitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackLargeNitrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackOxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackLargeOxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 36,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchBioDiesel",
+      "name": "Biodiesel",
+      "description": "Performs variety of chemical recipes including processing of fluids and their packaging.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/ChemicalPlant.png",
+      "gridPosition": {
+        "x": 80,
+        "y": 46
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "ChemicalPlant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CookingOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EthanolCookingOilReforming",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CookingOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "EthanolCookingOilReformingT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Soybean",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CookingOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AnimalFeed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SoybeanMilling",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSoybeanCrop",
+        "ResearchFermentation"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchNaphthaProcessing",
+      "name": "Naphtha processing",
+      "description": "Introduces extra distillation step to expand oil processing capabilities.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/DistillationTowerT3.png",
+      "gridPosition": {
+        "x": 80,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "DistillationTowerT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_LightOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HeavyDistillateRefining",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rubber",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RubberProductionNaphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rubber",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_WasteWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RubberProductionNaphthaAlt",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationNaphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "DieselReforming",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FlareNaphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3",
+        "ResearchVehicleAssembly2"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchNaphthaReforming",
+      "name": "Reforming \u0026 cracking",
+      "description": "Transforms different fuel types between each other to help with consumption imbalance.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/HydroCrackerT1.png",
+      "gridPosition": {
+        "x": 84,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "HydroCrackerT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "NaphthaReforming",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "NaphthaReformingToGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HeavyOilCracking",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HeavyOil",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HeavyOilCrackingToNaphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "FlareHydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchNaphthaProcessing"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchHeavyOilCracking",
+      "name": "Heavy oil cracking",
+      "description": "",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "",
+      "gridPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "unlocks": [],
+      "parentIds": [],
+      "researchDurationMonths": 10,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchHydrogenReforming",
+      "name": "Hydrogen production",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/HydrogenReformer.png",
+      "gridPosition": {
+        "x": 88,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "HydrogenReformer",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CarbonDioxide",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HydrogenReforming",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchNaphthaReforming"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchIncinerationPlant",
+      "name": "Incineration plant",
+      "description": "Burns waste with much better efficiency than a basic burner. The process is energy positive and generates steam.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/IncinerationPlant.png",
+      "gridPosition": {
+        "x": 88,
+        "y": 27
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Waste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IncinerationOfWaste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_WastePressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FuelGas",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IncinerationOfWastePressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Waste",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IncinerationOfWasteHydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_WastePressed",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamHi",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IncinerationOfWastePressedHydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "IncinerationPlant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchElectrolysis"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRubberProduction",
+      "name": "Synthetic rubber",
+      "description": "Produces synthetic rubber.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/VacuumDistillationTower.png",
+      "gridPosition": {
+        "x": 16,
+        "y": 20
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "VacuumDistillationTower",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rubber",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_WasteWater",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RubberProductionDieselWithCoal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Sulfur",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Rubber",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "RubberProductionDiesel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchBasicDiesel"
+      ],
+      "researchDurationMonths": 8,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchPlasticProduction",
+      "name": "Plastic",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/PolymerizationPlant.png",
+      "gridPosition": {
+        "x": 92,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Naphtha",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Chlorine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PlasticMaking",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Ethanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Chlorine",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "PlasticMakingEthanol",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "PolymerizationPlant",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchElectrolysis"
+      ],
+      "researchDurationMonths": 72,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchHouseholdAppliances",
+      "name": "Household appliances",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SettlementHouseholdAppliancesModule.png",
+      "gridPosition": {
+        "x": 108,
+        "y": 20
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HouseholdAppliances",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HouseholdAppliancesAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HouseholdAppliances",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HouseholdAppliancesAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_HouseholdAppliances",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HouseholdAppliancesAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "SettlementHouseholdAppliancesModule",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_HouseholdAppliancesConsumptionIncrease",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_HouseholdAppliancesConsumptionIncreaseT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_HouseholdAppliancesConsumptionIncreaseT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp4Packing"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchConsumerElectronics",
+      "name": "Consumer electronics",
+      "description": "",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SettlementConsumerElectronicsModule.png",
+      "gridPosition": {
+        "x": 152,
+        "y": 14
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_Electronics3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Aluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ConsumerElectronics",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ConsumerElectronicsAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "SettlementConsumerElectronicsModule",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_ConsumerElectronicsConsumptionIncrease",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_ConsumerElectronicsConsumptionIncreaseT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Edict_ConsumerElectronicsConsumptionIncreaseT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchAssembler3"
+      ],
+      "researchDurationMonths": 264,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSuperPressSteam",
+      "name": "Super heated steam",
+      "description": "Super pressurized steam heated to 800 \u00B0C. Can be leveraged to produce hydrogen using sulfur-iodine cycle which is more efficient than electrolysis.",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/TurbineSuperPress.png",
+      "gridPosition": {
+        "x": 156,
+        "y": 33
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "TurbineSuperPress",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamGenerationSpElectric",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Hydrogen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Oxygen",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamDepleted",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "HydrogenProductionFromSteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackSpSteam",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackLargeSpSteam",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SteamSp",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Water",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SteamSpCondensationT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab5"
+      ],
+      "researchDurationMonths": 240,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipWeapons",
+      "name": "Ship weapons",
+      "description": "Once fitted on the ship, we can finally stop running away from every battle.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Ships/BattleShip/Icons/Gun2.png",
+      "gridPosition": {
+        "x": 44,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Gun1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Gun1Rear",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCrudeOilDistillation"
+      ],
+      "researchDurationMonths": 42,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipArmor",
+      "name": "Ship armor",
+      "description": "Our ship will take more hits from enemy\u0027s artillery. Our crew is looking forward to test it, huh?",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Ships/BattleShip/Icons/Armor1.png",
+      "gridPosition": {
+        "x": 48,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "ArmorT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchShipWeapons"
+      ],
+      "researchDurationMonths": 48,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipRadar",
+      "name": "Ship bridge II",
+      "description": "Advanced ship bridge. Also contains a better radar for area explorations.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Ships/BattleShip/Icons/Ship2.png",
+      "gridPosition": {
+        "x": 52,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "BridgeT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSteelSmelting"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchEngine2",
+      "name": "Ship engine II",
+      "description": "Once fitted, the ship will be able to travel farther.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Ships/BattleShip/Icons/Engine2.png",
+      "gridPosition": {
+        "x": 76,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "EngineT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3",
+        "ResearchShipFuelTankUpgrade"
+      ],
+      "researchDurationMonths": 84,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipWeapons2",
+      "name": "Ship weapons II",
+      "description": "Ship guns that provide increased range and damage.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Ships/BattleShip/Icons/Gun3.png",
+      "gridPosition": {
+        "x": 88,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Gun2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Gun2Rear",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchEngine2"
+      ],
+      "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipFuelTankUpgrade",
+      "name": "Fuel tank upgrade",
+      "description": "",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Ships/BattleShip/Icons/Engine1.png",
+      "gridPosition": {
+        "x": 56,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "FuelTankT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipArmor2",
+      "name": "Ship armor II",
+      "description": "",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Ships/BattleShip/Icons/Armor2.png",
+      "gridPosition": {
+        "x": 96,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "ArmorT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchShipWeapons2"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipRadar2",
+      "name": "Ship bridge III",
+      "description": "Advanced ship bridge. Also contains a better radar for area explorations.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Ships/BattleShip/Icons/Ship3.png",
+      "gridPosition": {
+        "x": 104,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "BridgeT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchShipArmor2"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchEngine3",
+      "name": "Ship engine III",
+      "description": "Once fitted, the ship will be able to travel farther.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Ships/BattleShip/Icons/Engine3.png",
+      "gridPosition": {
+        "x": 112,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "EngineT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchShipRadar2"
+      ],
+      "researchDurationMonths": 128,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchShipWeapons3",
+      "name": "Ship weapons III",
+      "description": "Ship guns that provide increased range and damage.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Ships/BattleShip/Icons/Gun4.png",
+      "gridPosition": {
+        "x": 116,
+        "y": 54
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Gun3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "Gun3Rear",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchShipRadar2",
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 84,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRocketAssemblyAndLaunch",
+      "name": "Rocket assembly \u0026 launch",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/RocketAssemblyDepot.png",
+      "gridPosition": {
+        "x": 128,
+        "y": 22
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "RocketAssemblyDepot",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RocketLaunchPad",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TestingRocketT0Transporter",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "ConcreteReinforced_TerrainSurface",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Aluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositePanel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CompositePanelAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Aluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositePanel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CompositePanelAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Aluminum",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositePanel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CompositePanelAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchBasicComputing",
+        "ResearchAluminumSmelting"
+      ],
+      "researchDurationMonths": 144,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSpaceStation",
+      "name": "Space station",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/SpaceStationParts1.svg",
+      "gridPosition": {
+        "x": 132,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "Space_SpaceStation",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositePanel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositeBodyBasic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CompositeCoreBasicAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositePanel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositeBodyBasic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CompositeCoreBasicAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositePanel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Steel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositeBodyBasic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CompositeCoreBasicAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositeBodyBasic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SolarCell",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ChemicalFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SpaceStationParts1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "StationPartsBasicAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositeBodyBasic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SolarCell",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ChemicalFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SpaceStationParts1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "StationPartsBasicAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositeBodyBasic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SolarCell",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ChemicalFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SpaceStationParts1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "StationPartsBasicAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSolarPanels",
+        "ResearchRocketAssemblyAndLaunch"
+      ],
+      "researchDurationMonths": 192,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSpaceStationCrew",
+      "name": "Crewed station",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/SpaceCrew.svg",
+      "gridPosition": {
+        "x": 136,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CrewSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CrewSuppliesAssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CrewSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CrewSuppliesAssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_FoodPack",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MedicalSupplies2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plastic",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CrewSupplies",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CrewSuppliesAssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_SpaceCrew",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchMedicalSupplies2",
+        "ResearchSpaceStation"
+      ],
+      "researchDurationMonths": 216,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSpaceStationResearch",
+      "name": "Orbital research",
+      "description": "",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Products/Icons/SpaceResearchPoints.svg",
+      "gridPosition": {
+        "x": 160,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_CompositePanel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_TitaniumAlloy",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositeCore",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CompositeCoreAssembly",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositeCore",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SolarCellMono",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_ChemicalFuel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SpaceStationParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "StationPartsAssembly",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_SpaceResearchPoints",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchTitaniumSmelting",
+        "ResearchElectronics4",
+        "ResearchSolarPanels2",
+        "ResearchSpaceStationCrew"
+      ],
+      "researchDurationMonths": 360,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchRocket2",
+      "name": "Rocket II",
+      "description": "Cargo rocket capable of delivering payloads into orbit. It uses Hydrogen and Oxygen as fuel.",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 0,
+      "iconPath": "Assets/Unity/Generated/Icons/Vehicle/CargoRocketT2Transporter.png",
+      "gridPosition": {
+        "x": 164,
+        "y": 22
+      },
+      "unlocks": [
+        {
+          "type": "vehicle",
+          "id": "CargoRocketT2Transporter",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSpaceStationResearch"
+      ],
+      "researchDurationMonths": 280,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchSpaceProbe",
+      "name": "Space probe",
+      "description": "",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 0,
+      "iconPath": "Assets/Base/Products/Icons/SpaceProbeParts.svg",
+      "gridPosition": {
+        "x": 168,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_CompositeCore",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Plutonium",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_SpaceProbeParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "ProbePartsAssembly",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSpaceStationResearch"
+      ],
+      "researchDurationMonths": 408,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchAsteroidBooster",
+      "name": "Asteroid boosters",
+      "description": "",
+      "baseCost": 0,
+      "tier": 5,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 0,
+      "iconPath": "Assets/Base/Products/Icons/CompactReactor.svg",
+      "gridPosition": {
+        "x": 176,
+        "y": 25
+      },
+      "unlocks": [
+        {
+          "type": "product",
+          "id": "Product_TitaniumAlloy",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_UraniumEnriched20",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompactReactor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CompactReactorAssembly",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompositeCore",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_CompactReactor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Diamond",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_AsteroidBoosterParts",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "AsteroidBoosterPartsAssembly",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchSpaceProbe"
+      ],
+      "researchDurationMonths": 480,
+      "anyParentCanUnlock": false
     }
   ],
   "mods": null

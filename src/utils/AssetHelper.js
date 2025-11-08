@@ -74,6 +74,39 @@ function getCropIconPath(cropId) {
 }
 
 /**
+ * NEW: Convert research icon path to web path
+ * Research iconPath like "Assets/Base/Products/Icons/ConstructionParts4.svg" 
+ * -> Try product icon, then layout entity icon, then general icon
+ */
+function getResearchIconPath(iconPath) {
+    if (!iconPath) return null;
+
+    // Extract filename from path (e.g., "ConstructionParts4.svg" -> "ConstructionParts4")
+    const filename = iconPath.split('/').pop().replace(/\.(svg|png)$/i, '');
+
+    // Try multiple icon directories in order of likelihood
+    // 1. Product icons (for product-based research)
+    const productPath = `../assets/icons/product/${filename}.png`;
+    if (productIcons[productPath]) {
+        return productPath;
+    }
+
+    // 2. Layout entity icons (for building/machine research)
+    const entityPath = `../assets/icons/layoutentity/${filename}.png`;
+    if (layoutEntityIcons[entityPath]) {
+        return entityPath;
+    }
+
+    // 3. General icons (for general tech)
+    const generalPath = `../assets/icons/general/${filename}.png`;
+    if (generalIcons[generalPath]) {
+        return generalPath;
+    }
+
+    return null;
+}
+
+/**
  * Get product icon URL
  * @param {Object} product - Product object from GameData
  * @returns {string|null} - Icon URL or null
@@ -184,6 +217,27 @@ export function getProductTypeIcon(typeName) {
 }
 
 /**
+ * NEW: Get research icon URL
+ * @param {Object} researchNode - Research node object from GameData
+ * @returns {string|null} - Icon URL or null
+ */
+export function getResearchIcon(researchNode) {
+    if (!researchNode || !researchNode.iconPath) return null;
+
+    const path = getResearchIconPath(researchNode.iconPath);
+    if (!path) return null;
+
+    // Try product icons first (most common)
+    if (productIcons[path]) return productIcons[path];
+    // Then layout entities
+    if (layoutEntityIcons[path]) return layoutEntityIcons[path];
+    // Finally general icons
+    if (generalIcons[path]) return generalIcons[path];
+
+    return null;
+}
+
+/**
  * Get building image URL (same as machine)
  */
 export function getBuildingImage(building) {
@@ -219,5 +273,6 @@ export default {
     getGeneralIcon,
     getProductTypeIcon,
     getEntityIcon,
-    getEntityIconTop// NEW: Added to default export
+    getEntityIconTop,
+    getResearchIcon 
 };

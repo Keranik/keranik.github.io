@@ -36,6 +36,7 @@ const Calculator = () => {
     const [useConsolidation, setUseConsolidation] = useState(false);
     const [showResourcePoolDetail, setShowResourcePoolDetail] = useState(false);
     const [selectedAlternative, setSelectedAlternative] = useState('best');
+    const [disabledRecipes, setDisabledRecipes] = useState(new Set());
 
     // Resource source management
     const [resourceSources, setResourceSources] = useState(new Map());
@@ -100,7 +101,9 @@ const Calculator = () => {
         if (selectedProduct) {
             const recipes = ProductionCalculator.getRecipesForProduct(selectedProduct);
             setAvailableRecipes(recipes);
-            if (recipes.length === 1) {
+
+            // ✅ ALWAYS set the first recipe as default, even if multiple exist
+            if (recipes.length > 0) {
                 setSelectedRecipe(recipes[0].id);
             } else {
                 setSelectedRecipe('');
@@ -190,6 +193,8 @@ const Calculator = () => {
         }
     };
 
+    
+
     const handleCalculate = () => {
         if (!selectedProduct || !targetRate) return;
 
@@ -204,9 +209,13 @@ const Calculator = () => {
             optimizationGoal: optimizationGoal,
             constraints: optimizationMode ? {
                 ...optimizationConstraints,
-                resourceLimits: resourceConstraints
-            } : {},
-            resourceConstraints: resourceConstraints
+                resourceLimits: resourceConstraints,
+                disabledRecipes: disabledRecipes
+            } : {
+                disabledRecipes: disabledRecipes
+            },
+            resourceConstraints: resourceConstraints,
+            disabledRecipes: disabledRecipes
         });
 
         if (result.error) {
@@ -529,6 +538,16 @@ const Calculator = () => {
         });
     };
 
+    // NEW: Handler for recipe constraints
+    const handleApplyRecipeConstraints = (newDisabledRecipes) => {
+        console.log('📝 Applying recipe constraints:', newDisabledRecipes.size, 'disabled');
+        setDisabledRecipes(newDisabledRecipes);
+
+        if (selectedProduct && targetRate) {
+            handleCalculate();
+        }
+    };
+
     const getRecipeTimeDisplay = (recipeId) => {
         const toggle = recipeTimeToggles.get(recipeId);
         return toggle !== undefined ? toggle : settings.showRecipeTimePerMinute;
@@ -769,6 +788,7 @@ const Calculator = () => {
                             setOptimizationResult(null);
                             setUseConsolidation(false);
                             setShowResourcePoolDetail(false);
+                            setDisabledRecipes(new Set());
                             setSelectedNode(null);
                             setSelectedAlternative('best');
                             setOptimizationConstraints({
@@ -829,6 +849,7 @@ const Calculator = () => {
                     resourceConstraints={resourceConstraints}
                     resourceInput={resourceInput}
                     optimizationResult={optimizationResult}
+                    disabledRecipes={disabledRecipes}
                     onToggleOptimization={() => setOptimizationMode(!optimizationMode)}
                     onChangeGoal={setOptimizationGoal}
                     onChangeConstraints={setOptimizationConstraints}
@@ -836,6 +857,7 @@ const Calculator = () => {
                     onAddResourceConstraint={addResourceConstraint}
                     onRemoveResourceConstraint={removeResourceConstraint}
                     onSelectAlternative={handleSelectAlternative}  
+                    onApplyRecipeConstraints={handleApplyRecipeConstraints}
                     currentAlternative={selectedAlternative}      
                 />
 

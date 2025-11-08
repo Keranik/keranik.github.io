@@ -401,23 +401,48 @@ const DetailsPanel = ({
                         Maintenance:
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        {Array.from(requirements.maintenance.entries()).map(([productId, perMonth]) => {
-                            const product = ProductionCalculator.getProduct(productId);
-                            return (
-                                <div key={productId} style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    backgroundColor: '#1a1a1a',
-                                    padding: '8px 12px',
-                                    borderRadius: '4px',
-                                    fontSize: '0.9rem'
-                                }}>
-                                    <span style={{ color: '#ddd' }}>{product?.name || productId}</span>
-                                    <span style={{ color: '#fff', fontWeight: 'bold' }}>{perMonth.toFixed(2)}/mo</span>
-                                </div>
-                            );
-                        })}
+                        {Array.from(requirements.maintenance.entries())
+                            .reverse()
+                            .map(([productId, perMonth], index) => {
+                                const product = ProductionCalculator.getProduct(productId);
+                                const maintenanceIcon = getProductIcon(product);
+                                const colors = ['#fff', '#FFD700', '#ff4444']; // white, yellow, red
+                                const amountColor = colors[index] || '#fff';
+                                return (
+                                    <div key={productId} style={{
+                                        backgroundColor: '#1a1a1a',
+                                        padding: '8px 12px',
+                                        borderRadius: '4px',
+                                        fontSize: '0.9rem'
+                                    }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            width: '100%'
+                                        }}>
+                                            {maintenanceIcon && (
+                                                <img
+                                                    src={maintenanceIcon}
+                                                    alt={product?.name}
+                                                    style={{ width: '20px', height: '20px', objectFit: 'contain' }}
+                                                />
+                                            )}
+                                            <span style={{
+                                                flex: 1,
+                                                textAlign: 'left',
+                                                color: '#ddd',
+                                                padding: '0 8px'
+                                            }}>
+                                                {product?.name || productId}
+                                            </span>
+                                            <span style={{ color: amountColor, fontWeight: 'bold' }}>
+                                                {perMonth.toFixed(2)}/mo
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                     </div>
                 </div>
             )}
