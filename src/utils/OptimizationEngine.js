@@ -2,7 +2,9 @@
  * OptimizationEngine.js
  * Heuristic constraint solver for production chain optimization
  * 
- * UPDATED: Now supports consolidation mode and resource sources
+ * UPDATED: Now supports consolidation mode, resource sources, and intelligent duplicate filtering
+ * FIXED: maximizeProduction now finds the highest achievable production rate
+ * FIXED: minimizeComputing properly handles zero-computing scenarios
  */
 
 import ResourceConsolidator from './ResourceConsolidator';
@@ -37,6 +39,18 @@ export class OptimizationEngine {
             useConsolidation = false,
             resourceSources = new Map()
         } = params;
+
+        // Special handling for maximizeProduction - find highest achievable rate
+        if (optimizationGoal === 'maximizeProduction') {
+            return this.optimizeMaxProduction(
+                targetProductId,
+                targetRate,
+                availableResources,
+                constraints,
+                resourceSources,
+                useConsolidation
+            );
+        }
 
         // Get all possible recipe combinations for this product
         const recipeCombinations = this.enumerateRecipeCombinations(
@@ -101,14 +115,20 @@ export class OptimizationEngine {
         validCombinations.sort((a, b) => a.score - b.score);
 
         const best = validCombinations[0];
-        const alternatives = validCombinations.slice(1, 4); // Top 3 alternatives
+
+        // Filter alternatives: remove duplicates and solutions too similar to best
+        const uniqueAlternatives = this.filterUniqueAlternatives(
+            validCombinations.slice(1),
+            best,
+            optimizationGoal
+        );
 
         return {
             chain: best.chain,
             score: best.score,
             metrics: best.metrics,
             recipeOverrides: best.recipeOverrides,
-            alternatives: alternatives.map(alt => ({
+            alternatives: uniqueAlternatives.slice(0, 3).map(alt => ({
                 score: alt.score,
                 metrics: alt.metrics,
                 recipeOverrides: alt.recipeOverrides,
@@ -116,6 +136,139 @@ export class OptimizationEngine {
             })),
             explanation: this.explainOptimization(best, optimizationGoal, constraints)
         };
+    }
+
+    /**
+     * NEW: Optimize for maximum production rate
+     * Finds the highest achievable production rate given constraints
+     */
+    optimizeMaxProduction(targetProductId, baseRate, availableResources, constraints, resourceSources, useConsolidation) {
+        // Test different production rates to find the maximum achievable
+        const testRates = [];
+
+        // Generate test rates: 10%, 25%, 50%, 75%, 100%, 150%, 200%, 300%, 500%, 1000% of base
+        const multipliers = [0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0];
+        multipliers.forEach(mult => testRates.push(baseRate * mult));
+
+        let bestValidRate = 0;
+        let bestValidChain = null;
+        let bestValidMetrics = null;
+        let bestValidOverrides = null;
+
+        for (const testRate of testRates) {
+            // Get recipe combinations for this rate
+            const recipeCombinations = this.enumerateRecipeCombinations(
+                targetProductId,
+                testRate,
+                availableResources,
+                constraints,
+                resourceSources,
+                useConsolidation,
+                200 // Limit combinations for performance
+            );
+
+            if (recipeCombinations.length === 0) continue;
+
+            // Score and filter
+            for (const combo of recipeCombinations) {
+                let chain = combo.chain;
+
+                if (useConsolidation) {
+                    chain = ResourceConsolidator.consolidateChain(chain, this.calculator);
+                }
+
+                const metrics = useConsolidation
+                    ? this.calculateMetricsFromConsolidated(chain)
+                    : this.calculateMetrics(chain);
+
+                const isValid = this.checkConstraints(metrics, constraints);
+
+                if (isValid && testRate > bestValidRate) {
+                    bestValidRate = testRate;
+                    bestValidChain = chain;
+                    bestValidMetrics = metrics;
+                    bestValidOverrides = combo.recipeOverrides;
+                }
+            }
+        }
+
+        if (!bestValidChain) {
+            return {
+                error: 'Could not find any production chain satisfying constraints for maximum production',
+                chain: null,
+                score: Infinity,
+                metrics: null,
+                alternatives: []
+            };
+        }
+
+        const percentOfBase = ((bestValidRate / baseRate) * 100).toFixed(0);
+
+        return {
+            chain: bestValidChain,
+            score: -bestValidRate, // Negative because higher = better
+            metrics: bestValidMetrics,
+            recipeOverrides: bestValidOverrides,
+            alternatives: [], // No alternatives in max production mode
+            explanation: `Maximum production: ${bestValidRate.toFixed(2)}/min (${percentOfBase}% of requested rate) | Workers: ${bestValidMetrics.workers} | Power: ${(bestValidMetrics.powerKw / 1000).toFixed(1)}MW | Machines: ${bestValidMetrics.machines}`
+        };
+    }
+
+    /**
+     * NEW: Filter out duplicate alternatives based on metrics
+     * Only keep alternatives that are meaningfully different
+     */
+    filterUniqueAlternatives(alternatives, best, optimizationGoal) {
+        const seen = new Set();
+        const unique = [];
+
+        for (const alt of alternatives) {
+            // Create a signature based on key metrics
+            const signature = this.createMetricSignature(alt.metrics);
+
+            // Skip if we've seen this exact combination
+            if (seen.has(signature)) {
+                continue;
+            }
+
+            // Skip if metrics are identical to best solution
+            if (this.metricsAreIdentical(alt.metrics, best.metrics)) {
+                continue;
+            }
+
+            seen.add(signature);
+            unique.push(alt);
+        }
+
+        return unique;
+    }
+
+    /**
+     * NEW: Create a unique signature for a metric set
+     */
+    createMetricSignature(metrics) {
+        return JSON.stringify({
+            workers: metrics.workers,
+            powerKw: Math.round(metrics.powerKw * 10) / 10,
+            machines: metrics.machines,
+            maintenance: Math.round(metrics.maintenancePerMonth * 10) / 10,
+            computing: Math.round(metrics.computingTFlops * 10) / 10
+        });
+    }
+
+    /**
+     * NEW: Check if two metric sets are effectively identical
+     */
+    metricsAreIdentical(metrics1, metrics2) {
+        const threshold = 0.001;
+
+        return (
+            Math.abs(metrics1.workers - metrics2.workers) < threshold &&
+            Math.abs(metrics1.powerKw - metrics2.powerKw) < threshold &&
+            Math.abs(metrics1.machines - metrics2.machines) < threshold &&
+            Math.abs(metrics1.maintenancePerMonth - metrics2.maintenancePerMonth) < threshold &&
+            Math.abs(metrics1.computingTFlops - metrics2.computingTFlops) < threshold
+        );
     }
 
     /**
@@ -142,14 +295,13 @@ export class OptimizationEngine {
                     const machines = this.calculator.getMachinesForRecipe(recipe.id);
                     if (machines.length === 0) return true;
                     const machine = machines[0];
-                    // Assuming tier is in machine.upgrades.tierNumber
                     const tier = machine.upgrades?.tierNumber || 1;
                     return constraints.tierRestrictions.includes(tier);
                 });
                 if (filteredRecipes.length > 0) {
                     recipeOptions.set(productId, filteredRecipes);
                 } else {
-                    recipeOptions.set(productId, recipes); // Fallback if no tier match
+                    recipeOptions.set(productId, recipes);
                 }
             } else {
                 recipeOptions.set(productId, recipes);
@@ -159,13 +311,12 @@ export class OptimizationEngine {
         // Generate combinations using recursive enumeration
         const generateCombinations = (productIndex, currentOverrides) => {
             if (productIndex >= involvedProducts.length) {
-                // Calculate chain with these overrides + resource sources
                 const chain = this.calculator.calculateProductionChain(
                     targetProductId,
                     targetRate,
                     currentOverrides.get(targetProductId) || null,
                     currentOverrides,
-                    resourceSources // PASS RESOURCE SOURCES HERE
+                    resourceSources
                 );
 
                 if (!chain.error) {
@@ -177,18 +328,16 @@ export class OptimizationEngine {
                 return;
             }
 
-            if (allCombinations.length >= maxCombinations) return; // Limit combinations
+            if (allCombinations.length >= maxCombinations) return;
 
             const productId = involvedProducts[productIndex];
             const recipes = recipeOptions.get(productId) || [];
 
             if (recipes.length === 0) {
-                // No recipe options, skip this product
                 generateCombinations(productIndex + 1, currentOverrides);
                 return;
             }
 
-            // Try each recipe for this product
             for (const recipe of recipes) {
                 const newOverrides = new Map(currentOverrides);
                 newOverrides.set(productId, recipe.id);
@@ -218,11 +367,10 @@ export class OptimizationEngine {
             visited.add(productId);
 
             const recipes = this.calculator.getRecipesForProduct(productId);
-            if (recipes.length === 0) continue; // Raw material
+            if (recipes.length === 0) continue;
 
             involved.add(productId);
 
-            // Add all input products from all recipes
             recipes.forEach(recipe => {
                 recipe.inputs.forEach(input => {
                     if (!visited.has(input.productId)) {
@@ -245,9 +393,9 @@ export class OptimizationEngine {
             machines: 0,
             maintenancePerMonth: 0,
             computingTFlops: 0,
-            rawMaterialsUsed: new Map(), // productId -> rate
-            machineBreakdown: new Map(), // machineId -> count
-            recipeUsage: new Map() // recipeId -> count
+            rawMaterialsUsed: new Map(),
+            machineBreakdown: new Map(),
+            recipeUsage: new Map()
         };
 
         const traverse = (node) => {
@@ -265,11 +413,9 @@ export class OptimizationEngine {
                     metrics.maintenancePerMonth += node.machine.maintenance.perMonth * machineCount;
                 }
 
-                // Track machine breakdown
                 const currentCount = metrics.machineBreakdown.get(node.machine.id) || 0;
                 metrics.machineBreakdown.set(node.machine.id, currentCount + machineCount);
 
-                // Track recipe usage
                 if (node.recipe) {
                     const recipeCount = metrics.recipeUsage.get(node.recipe.id) || 0;
                     metrics.recipeUsage.set(node.recipe.id, recipeCount + machineCount);
@@ -292,11 +438,10 @@ export class OptimizationEngine {
     }
 
     /**
-     * NEW: Calculate metrics from consolidated chain
+     * Calculate metrics from consolidated chain
      */
     calculateMetricsFromConsolidated(chain) {
         if (!chain.consolidatedResources) {
-            // Fallback to regular metrics if not consolidated
             return this.calculateMetrics(chain);
         }
 
@@ -311,7 +456,6 @@ export class OptimizationEngine {
             recipeUsage: new Map()
         };
 
-        // Process consolidated resources
         for (const [consolidationKey, resource] of chain.consolidatedResources.entries()) {
             if (resource.isRawMaterial) {
                 if (resource.resourceSource?.type !== 'storage') {
@@ -336,18 +480,15 @@ export class OptimizationEngine {
                 metrics.maintenancePerMonth += resource.machine.maintenance.perMonth * machineCount;
             }
 
-            // Track machine breakdown
             const currentCount = metrics.machineBreakdown.get(resource.machine.id) || 0;
             metrics.machineBreakdown.set(resource.machine.id, currentCount + machineCount);
 
-            // Track recipe usage
             if (resource.recipe) {
                 const recipeCount = metrics.recipeUsage.get(resource.recipe.id) || 0;
                 metrics.recipeUsage.set(resource.recipe.id, recipeCount + machineCount);
             }
         }
 
-        // Also process root node if it has a machine
         if (chain.machine && !chain.isRawMaterial) {
             const machineCount = chain.machineCount;
             metrics.workers += (chain.machine.workers || 0) * machineCount;
@@ -373,6 +514,7 @@ export class OptimizationEngine {
 
     /**
      * Score a chain based on optimization goal
+     * FIXED: minimizeComputing handles zero-computing scenarios
      */
     scoreChain(metrics, goal) {
         switch (goal) {
@@ -389,17 +531,15 @@ export class OptimizationEngine {
                 return metrics.maintenancePerMonth;
 
             case 'minimizeComputing':
-                return metrics.computingTFlops;
+                return metrics.computingTFlops || 0;
 
             case 'maximizeProduction':
-                // For maximize, we want LOWEST score = HIGHEST production
-                // So score = 1 / totalProduction (lower score = better)
-                const totalProduction = Array.from(metrics.rawMaterialsUsed.values())
-                    .reduce((sum, rate) => sum + rate, 0);
-                return totalProduction > 0 ? -totalProduction : Infinity; // Negative so higher production = lower score
+                // This case is handled by optimizeMaxProduction
+                // Fallback: minimize resource usage for efficiency
+                return metrics.workers + (metrics.powerKw * 0.01) + (metrics.machines * 2);
 
             default:
-                return metrics.workers; // Fallback
+                return metrics.workers;
         }
     }
 
@@ -440,12 +580,15 @@ export class OptimizationEngine {
             minimizeMachines: 'Machine Count',
             minimizeMaintenance: 'Maintenance Cost',
             minimizeComputing: 'Computing Power',
-            maximizeProduction: 'Production Rate'
+            maximizeProduction: 'Maximum Production Rate'
         };
 
         const parts = [];
         parts.push(`Optimized for: ${goalNames[goal] || goal}`);
-        parts.push(`Score: ${solution.score.toFixed(2)}`);
+
+        if (goal !== 'maximizeProduction') {
+            parts.push(`Score: ${solution.score.toFixed(2)}`);
+        }
 
         const activeConstraints = [];
         if (constraints.maxPower) activeConstraints.push(`Max Power: ${constraints.maxPower}kW`);
@@ -460,26 +603,78 @@ export class OptimizationEngine {
     }
 
     /**
-     * Explain difference between two solutions
+     * UPDATED: Explain difference between two solutions with intelligent comparison
      */
     explainDifference(best, alternative, goal) {
-        const diff = alternative.score - best.score;
-        const pct = ((diff / best.score) * 100).toFixed(1);
+        const bestMetrics = best.metrics;
+        const altMetrics = alternative.metrics;
 
-        const goalMetrics = {
+        const primaryMetricKey = this.getMetricKeyForGoal(goal);
+        const primaryDiff = altMetrics[primaryMetricKey] - bestMetrics[primaryMetricKey];
+
+        if (Math.abs(primaryDiff) < 0.001) {
+            return this.explainSecondaryDifferences(bestMetrics, altMetrics, goal);
+        }
+
+        const pct = ((primaryDiff / bestMetrics[primaryMetricKey]) * 100).toFixed(1);
+        const metricName = this.getMetricDisplayName(primaryMetricKey);
+
+        return `+${pct}% ${metricName}`;
+    }
+
+    /**
+     * Get metric key for optimization goal
+     */
+    getMetricKeyForGoal(goal) {
+        const goalToMetric = {
             minimizeWorkers: 'workers',
             minimizePower: 'powerKw',
             minimizeMachines: 'machines',
             minimizeMaintenance: 'maintenancePerMonth',
-            minimizeComputing: 'computingTFlops'
+            minimizeComputing: 'computingTFlops',
+            maximizeProduction: 'workers'
         };
+        return goalToMetric[goal] || 'workers';
+    }
 
-        const metric = goalMetrics[goal];
-        if (metric) {
-            return `+${pct}% ${metric.replace(/([A-Z])/g, ' $1').toLowerCase()}`;
+    /**
+     * Get display name for metric
+     */
+    getMetricDisplayName(metricKey) {
+        const displayNames = {
+            workers: 'workers',
+            powerKw: 'power',
+            machines: 'machines',
+            maintenancePerMonth: 'maintenance',
+            computingTFlops: 'computing'
+        };
+        return displayNames[metricKey] || metricKey;
+    }
+
+    /**
+     * Explain differences when primary metric is equal
+     */
+    explainSecondaryDifferences(bestMetrics, altMetrics, goal) {
+        const secondaryOrder = ['workers', 'powerKw', 'machines', 'maintenancePerMonth', 'computingTFlops'];
+        const primaryKey = this.getMetricKeyForGoal(goal);
+
+        for (const key of secondaryOrder) {
+            if (key === primaryKey) continue;
+
+            const diff = altMetrics[key] - bestMetrics[key];
+            if (Math.abs(diff) > 0.001) {
+                const pct = ((diff / bestMetrics[key]) * 100).toFixed(1);
+                const metricName = this.getMetricDisplayName(key);
+
+                if (diff > 0) {
+                    return `Same ${this.getMetricDisplayName(primaryKey)}, but +${pct}% ${metricName}`;
+                } else {
+                    return `Same ${this.getMetricDisplayName(primaryKey)}, but ${pct}% less ${metricName}`;
+                }
+            }
         }
 
-        return `+${pct}% worse`;
+        return 'Alternative recipe configuration';
     }
 }
 

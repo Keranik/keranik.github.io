@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { getProductIcon, getGeneralIcon } from '../utils/AssetHelper';
 import ProductionCalculator from '../utils/ProductionCalculator';
-import ProductSelectorModal from './ProductSelectorModal'; // Adjust path as necessary
+import ProductSelectorModal from './ProductSelectorModal';
 
 const CONSTRAINT_RANGES = {
     maxWorkers: { min: 1, max: 1000, step: 1 },
@@ -80,39 +80,51 @@ const OptimizationControls = ({
 
     return (
         <div style={{
-            backgroundColor: '#2a4a2a',
-            padding: '1.5rem',
+            backgroundColor: '#2a2a2a',
+            padding: '2rem',
             borderRadius: '10px',
-            marginBottom: '1.5rem',
-            border: '2px solid #50C878',
-            boxShadow: '0 4px 12px rgba(80, 200, 120, 0.2)'
+            marginBottom: '2rem',
+            border: '1px solid #444',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
         }}>
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.2rem', fontWeight: '700', color: '#50C878', display: 'flex', alignItems: 'center' }}>
+            <h3 style={{
+                marginBottom: '1.5rem',
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                color: '#50C878',
+                display: 'flex',
+                alignItems: 'center'
+            }}>
                 {getGeneralIcon('Stats') && (
                     <img
                         src={getGeneralIcon('Stats')}
                         alt="Settings"
                         style={{
-                            width: '20px',
-                            height: '20px',
+                            width: '24px',
+                            height: '24px',
                             objectFit: 'contain',
-                            marginRight: '8px'
+                            marginRight: '12px'
                         }}
                     />
                 )}
                 Optimization Settings
             </h3>
+
             {/* Optimization Goal Grid */}
             <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.75rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
+                <label style={{
+                    display: 'block',
+                    marginBottom: '0.75rem',
+                    color: '#ccc',
+                    fontWeight: '600',
+                    fontSize: '0.95rem'
+                }}>
                     Optimization Goal
                 </label>
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                    gap: '1rem',
-                    justifyItems: 'stretch',
-                    alignItems: 'start'
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                    gap: '1rem'
                 }}>
                     {GOAL_OPTIONS.map(goal => {
                         const isSelected = goal.value === optimizationGoal;
@@ -125,28 +137,25 @@ const OptimizationControls = ({
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    backgroundColor: isSelected ? '#2a5a3a' : '#1a1a1a',
-                                    border: isSelected ? '2px solid #50C878' : '1px solid #444',
+                                    backgroundColor: isSelected ? 'rgba(74, 144, 226, 0.1)' : '#1a1a1a',
+                                    border: isSelected ? '2px solid #4a90e2' : '1px solid #333',
                                     borderRadius: '8px',
-                                    padding: '12px 8px',
+                                    padding: '14px 10px',
                                     cursor: 'pointer',
                                     transition: 'all 0.2s',
                                     textAlign: 'center',
-                                    fontSize: '0.9rem',
-                                    minHeight: '90px'
+                                    minHeight: '100px'
                                 }}
                                 onMouseEnter={(e) => {
                                     if (!isSelected) {
                                         e.currentTarget.style.backgroundColor = '#252525';
-                                        e.currentTarget.style.borderColor = '#666';
-                                        e.currentTarget.style.transform = 'scale(1.05)';
+                                        e.currentTarget.style.borderColor = '#555';
                                     }
                                 }}
                                 onMouseLeave={(e) => {
                                     if (!isSelected) {
                                         e.currentTarget.style.backgroundColor = '#1a1a1a';
-                                        e.currentTarget.style.borderColor = '#444';
-                                        e.currentTarget.style.transform = 'scale(1)';
+                                        e.currentTarget.style.borderColor = '#333';
                                     }
                                 }}
                             >
@@ -155,49 +164,51 @@ const OptimizationControls = ({
                                         src={goalIcon}
                                         alt={goal.label}
                                         style={{
-                                            width: '42px',
-                                            height: '42px',
+                                            width: '48px',
+                                            height: '48px',
                                             objectFit: 'contain',
-                                            marginBottom: '4px'
+                                            marginBottom: '8px',
+                                            opacity: isSelected ? 1 : 0.7
                                         }}
                                     />
                                 )}
                                 <span style={{
-                                    color: '#fff',
-                                    fontWeight: isSelected ? '700' : '500',
-                                    lineHeight: '1.2',
-                                    wordBreak: 'break-word',
-                                    height: '20px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    marginBottom: '4px'
+                                    color: isSelected ? '#4a90e2' : '#ddd',
+                                    fontWeight: isSelected ? '700' : '600',
+                                    fontSize: '0.9rem',
+                                    lineHeight: '1.3'
                                 }}>
                                     {goal.label}
                                 </span>
-                                <div style={{ height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {isSelected && (
-                                        <div style={{
-                                            padding: '2px 4px',
-                                            backgroundColor: 'rgba(80, 200, 120, 0.2)',
-                                            borderRadius: '4px',
-                                            fontSize: '0.65rem',
-                                            color: '#50C878',
-                                            fontWeight: '700',
-                                            border: '1px solid rgba(80, 200, 120, 0.3)'
-                                        }}>
-                                            ✓ SELECTED
-                                        </div>
-                                    )}
-                                </div>
+                                {isSelected && (
+                                    <div style={{
+                                        marginTop: '6px',
+                                        padding: '2px 6px',
+                                        backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                                        borderRadius: '4px',
+                                        fontSize: '0.7rem',
+                                        color: '#4a90e2',
+                                        fontWeight: '700',
+                                        border: '1px solid rgba(74, 144, 226, 0.4)'
+                                    }}>
+                                        ✓ SELECTED
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
                 </div>
             </div>
+
             {/* Constraints Sliders */}
             <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
+                <label style={{
+                    display: 'block',
+                    marginBottom: '0.75rem',
+                    color: '#ccc',
+                    fontWeight: '600',
+                    fontSize: '0.95rem'
+                }}>
                     Constraints (Optional)
                 </label>
                 <div style={{
@@ -207,86 +218,232 @@ const OptimizationControls = ({
                 }}>
                     {Object.entries(CONSTRAINT_RANGES).map(([key, range]) => {
                         const currentValue = optimizationConstraints[key];
-                        const displayValue = currentValue || range.min;
+                        const isEnabled = currentValue !== null && currentValue !== undefined;
+                        const displayValue = isEnabled ? currentValue : range.min;
                         const constraintIconKey = CONSTRAINT_ICON_MAP[key];
                         const constraintIcon = constraintIconKey ? getGeneralIcon(constraintIconKey) : null;
                         const labelText = key.replace('max', '').replace(/([A-Z])/g, ' $1').trim();
+
                         return (
-                            <div key={key} style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '8px', border: '1px solid #444' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                    {constraintIcon && (
-                                        <img
-                                            src={constraintIcon}
-                                            alt={labelText}
-                                            style={{
-                                                width: '20px',
-                                                height: '20px',
-                                                objectFit: 'contain',
-                                                marginRight: '8px'
-                                            }}
-                                        />
-                                    )}
-                                    <label style={{ color: '#fff', fontWeight: '600', fontSize: '0.85rem', margin: 0 }}>
-                                        Max {labelText}
-                                    </label>
+                            <div
+                                key={key}
+                                style={{
+                                    backgroundColor: isEnabled ? 'rgba(80, 200, 120, 0.05)' : '#1a1a1a',
+                                    padding: '1rem',
+                                    borderRadius: '6px',
+                                    border: isEnabled ? '1px solid rgba(80, 200, 120, 0.3)' : '1px solid #444',
+                                    transition: 'all 0.3s',
+                                    boxShadow: isEnabled ? '0 0 8px rgba(80, 200, 120, 0.15)' : 'none'
+                                }}
+                            >
+                                {/* Header with toggle */}
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    marginBottom: '0.75rem'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        {constraintIcon && (
+                                            <img
+                                                src={constraintIcon}
+                                                alt={labelText}
+                                                style={{
+                                                    width: '20px',
+                                                    height: '20px',
+                                                    objectFit: 'contain',
+                                                    marginRight: '8px',
+                                                    opacity: isEnabled ? 1 : 0.5
+                                                }}
+                                            />
+                                        )}
+                                        <label style={{
+                                            color: isEnabled ? '#50C878' : '#888',
+                                            fontWeight: '600',
+                                            fontSize: '0.9rem',
+                                            margin: 0,
+                                            transition: 'color 0.3s'
+                                        }}>
+                                            Max {labelText}
+                                        </label>
+                                    </div>
+
+                                    {/* Toggle Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (isEnabled) {
+                                                // Disable: set to null
+                                                handleConstraintChange(key, null);
+                                            } else {
+                                                // Enable: set to current display value
+                                                handleConstraintChange(key, displayValue);
+                                            }
+                                        }}
+                                        style={{
+                                            padding: '4px 10px',
+                                            backgroundColor: isEnabled ? 'rgba(80, 200, 120, 0.2)' : '#333',
+                                            color: isEnabled ? '#50C878' : '#888',
+                                            border: isEnabled ? '1px solid rgba(80, 200, 120, 0.4)' : '1px solid #555',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.75rem',
+                                            fontWeight: '700',
+                                            transition: 'all 0.2s',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.5px'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (isEnabled) {
+                                                e.target.style.backgroundColor = 'rgba(80, 200, 120, 0.3)';
+                                                e.target.style.borderColor = 'rgba(80, 200, 120, 0.6)';
+                                            } else {
+                                                e.target.style.backgroundColor = '#3a3a3a';
+                                                e.target.style.borderColor = '#666';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (isEnabled) {
+                                                e.target.style.backgroundColor = 'rgba(80, 200, 120, 0.2)';
+                                                e.target.style.borderColor = 'rgba(80, 200, 120, 0.4)';
+                                            } else {
+                                                e.target.style.backgroundColor = '#333';
+                                                e.target.style.borderColor = '#555';
+                                            }
+                                        }}
+                                    >
+                                        {isEnabled ? '✓ On' : 'Off'}
+                                    </button>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+
+                                {/* Slider */}
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    marginBottom: '0.75rem',
+                                    opacity: isEnabled ? 1 : 0.4,
+                                    transition: 'opacity 0.3s'
+                                }}>
                                     <input
                                         type="range"
                                         min={range.min}
                                         max={range.max}
                                         step={range.step}
                                         value={displayValue}
-                                        onChange={(e) => handleConstraintChange(key, e.target.value)}
+                                        onChange={(e) => {
+                                            const newValue = parseFloat(e.target.value);
+                                            handleConstraintChange(key, newValue);
+                                        }}
+                                        disabled={!isEnabled}
                                         style={{
                                             flex: 1,
                                             height: '6px',
-                                            backgroundColor: '#444',
+                                            backgroundColor: isEnabled ? 'rgba(80, 200, 120, 0.2)' : '#333',
                                             borderRadius: '3px',
                                             outline: 'none',
-                                            appearance: 'none'
-                                        }}
-                                        onMouseOver={(e) => {
-                                            e.target.style.backgroundColor = '#50C878';
-                                        }}
-                                        onMouseOut={(e) => {
-                                            e.target.style.backgroundColor = '#444';
+                                            appearance: 'none',
+                                            cursor: isEnabled ? 'pointer' : 'not-allowed',
+                                            transition: 'background-color 0.3s'
                                         }}
                                     />
-                                    <span style={{ color: '#50C878', fontWeight: '600', minWidth: '70px', textAlign: 'right', flexShrink: 0 }}>
-                                        {displayValue}
+                                    <span style={{
+                                        color: isEnabled ? '#50C878' : '#666',
+                                        fontWeight: '700',
+                                        minWidth: '80px',
+                                        textAlign: 'right',
+                                        fontSize: '0.95rem',
+                                        transition: 'color 0.3s'
+                                    }}>
+                                        {isEnabled ? displayValue : '—'}
                                     </span>
                                 </div>
+
+                                {/* Number Input */}
                                 <input
                                     type="number"
                                     min={range.min}
                                     max={range.max}
                                     step={range.step}
-                                    value={currentValue || ''}
-                                    onChange={(e) => handleConstraintChange(key, e.target.value)}
-                                    placeholder={range.min}
+                                    value={isEnabled ? currentValue : ''}
+                                    onChange={(e) => {
+                                        const newValue = e.target.value ? parseFloat(e.target.value) : range.min;
+                                        handleConstraintChange(key, newValue);
+                                    }}
+                                    placeholder={isEnabled ? `${range.min}` : 'Disabled'}
+                                    disabled={!isEnabled}
                                     style={{
                                         width: '100%',
                                         boxSizing: 'border-box',
-                                        padding: '6px 8px',
-                                        backgroundColor: '#333',
-                                        color: 'white',
-                                        border: '1px solid #555',
-                                        borderRadius: '4px',
-                                        fontSize: '0.9rem'
+                                        padding: '8px 10px',
+                                        backgroundColor: isEnabled ? '#333' : '#2a2a2a',
+                                        color: isEnabled ? 'white' : '#666',
+                                        border: isEnabled ? '2px solid rgba(80, 200, 120, 0.3)' : '2px solid #444',
+                                        borderRadius: '6px',
+                                        fontSize: '0.95rem',
+                                        transition: 'all 0.3s',
+                                        cursor: isEnabled ? 'text' : 'not-allowed'
+                                    }}
+                                    onFocus={(e) => {
+                                        if (isEnabled) {
+                                            e.target.style.borderColor = '#50C878';
+                                            e.target.style.backgroundColor = '#3a3a3a';
+                                        }
+                                    }}
+                                    onBlur={(e) => {
+                                        if (isEnabled) {
+                                            e.target.style.borderColor = 'rgba(80, 200, 120, 0.3)';
+                                            e.target.style.backgroundColor = '#333';
+                                        }
                                     }}
                                 />
+
+                                {/* Status indicator */}
+                                {isEnabled && (
+                                    <div style={{
+                                        marginTop: '8px',
+                                        fontSize: '0.75rem',
+                                        color: '#50C878',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px'
+                                    }}>
+                                        <span style={{
+                                            width: '6px',
+                                            height: '6px',
+                                            backgroundColor: '#50C878',
+                                            borderRadius: '50%',
+                                            display: 'inline-block',
+                                            boxShadow: '0 0 6px rgba(80, 200, 120, 0.6)'
+                                        }}></span>
+                                        Active Constraint
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
                 </div>
             </div>
+
             {/* Resource Constraints Section */}
-            <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{
+                    display: 'block',
+                    marginBottom: '0.75rem',
+                    color: '#ccc',
+                    fontWeight: '600',
+                    fontSize: '0.95rem'
+                }}>
                     Resource Limits (Optional)
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px auto', gap: '1rem', alignItems: 'end', marginBottom: '1rem' }}>
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 140px auto',
+                    gap: '1rem',
+                    alignItems: 'end',
+                    marginBottom: '1rem'
+                }}>
                     <button
                         type="button"
                         onClick={() => setIsResourceModalOpen(true)}
@@ -299,24 +456,32 @@ const OptimizationControls = ({
                             borderRadius: '6px',
                             fontSize: '1rem',
                             cursor: 'pointer',
-                            transition: 'all 0.2s'
+                            textAlign: 'left',
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
                         }}
                         onMouseEnter={(e) => {
-                            e.target.style.borderColor = '#50C878';
-                            e.target.style.backgroundColor = '#252525';
+                            e.target.style.borderColor = '#4a90e2';
+                            e.target.style.backgroundColor = '#3a3a3a';
                         }}
                         onMouseLeave={(e) => {
                             e.target.style.borderColor = '#555';
                             e.target.style.backgroundColor = '#333';
                         }}
                     >
-                        {resourceInput.productName || 'Select resource...'}
+                        <span>{resourceInput.productName || 'Select resource...'}</span>
+                        <span style={{ color: '#4a90e2' }}>▼</span>
                     </button>
                     <input
                         type="number"
-                        placeholder="Max/min"
+                        placeholder="Max rate"
                         value={resourceInput.quantity || ''}
-                        onChange={(e) => onChangeResourceInput({ ...resourceInput, quantity: parseFloat(e.target.value) || null })}
+                        onChange={(e) => onChangeResourceInput({
+                            ...resourceInput,
+                            quantity: parseFloat(e.target.value) || null
+                        })}
                         min="0"
                         step="1"
                         style={{
@@ -325,8 +490,11 @@ const OptimizationControls = ({
                             color: 'white',
                             border: '2px solid #555',
                             borderRadius: '6px',
-                            fontSize: '1rem'
+                            fontSize: '1rem',
+                            transition: 'border-color 0.2s'
                         }}
+                        onFocus={(e) => e.target.style.borderColor = '#4a90e2'}
+                        onBlur={(e) => e.target.style.borderColor = '#555'}
                     />
                     <button
                         type="button"
@@ -334,38 +502,74 @@ const OptimizationControls = ({
                         disabled={!resourceInput.productId || !resourceInput.quantity}
                         style={{
                             padding: '12px 24px',
-                            backgroundColor: resourceInput.productId && resourceInput.quantity ? '#50C878' : '#555',
+                            backgroundColor: resourceInput.productId && resourceInput.quantity ? '#4a90e2' : '#555',
                             color: 'white',
                             border: 'none',
                             borderRadius: '6px',
                             fontSize: '1rem',
                             cursor: resourceInput.productId && resourceInput.quantity ? 'pointer' : 'not-allowed',
-                            fontWeight: '600'
+                            fontWeight: '700',
+                            transition: 'all 0.2s',
+                            boxShadow: resourceInput.productId && resourceInput.quantity
+                                ? '0 2px 8px rgba(74, 144, 226, 0.3)'
+                                : 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                            if (resourceInput.productId && resourceInput.quantity) {
+                                e.target.style.backgroundColor = '#5aa0f2';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (resourceInput.productId && resourceInput.quantity) {
+                                e.target.style.backgroundColor = '#4a90e2';
+                            }
                         }}
                     >
                         Add Limit
                     </button>
                 </div>
+
                 {/* Resource Constraint List */}
                 {resourceConstraints.size > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '10px'
+                    }}>
                         {Array.from(resourceConstraints.entries()).map(([productId, maxRate]) => {
                             const product = ProductionCalculator.getProduct(productId);
                             const icon = getProductIcon(product);
                             return (
-                                <div key={productId} style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    backgroundColor: '#1a1a1a',
-                                    padding: '8px 12px',
-                                    borderRadius: '6px',
-                                    border: '1px solid #50C878'
-                                }}>
-                                    {icon && <img src={icon} alt={product?.name} style={{ width: '24px', height: '24px', objectFit: 'contain' }} />}
-                                    <span style={{ color: '#fff', fontWeight: '600' }}>{product?.name}</span>
+                                <div
+                                    key={productId}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        backgroundColor: '#1a1a1a',
+                                        padding: '8px 12px',
+                                        borderRadius: '6px',
+                                        border: '1px solid #444'
+                                    }}
+                                >
+                                    {icon && (
+                                        <img
+                                            src={icon}
+                                            alt={product?.name}
+                                            style={{
+                                                width: '24px',
+                                                height: '24px',
+                                                objectFit: 'contain'
+                                            }}
+                                        />
+                                    )}
+                                    <span style={{ color: '#ddd', fontWeight: '600', fontSize: '0.9rem' }}>
+                                        {product?.name}
+                                    </span>
                                     <span style={{ color: '#888' }}>≤</span>
-                                    <span style={{ color: '#50C878', fontWeight: 'bold' }}>{maxRate}/min</span>
+                                    <span style={{ color: '#4a90e2', fontWeight: 'bold' }}>
+                                        {maxRate}/min
+                                    </span>
                                     <button
                                         type="button"
                                         onClick={(e) => {
@@ -380,8 +584,12 @@ const OptimizationControls = ({
                                             border: 'none',
                                             borderRadius: '4px',
                                             cursor: 'pointer',
-                                            fontSize: '0.85rem'
+                                            fontSize: '0.85rem',
+                                            fontWeight: '600',
+                                            transition: 'background-color 0.2s'
                                         }}
+                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#ff5252'}
+                                        onMouseLeave={(e) => e.target.style.backgroundColor = '#ff6b6b'}
                                     >
                                         ×
                                     </button>
@@ -391,16 +599,17 @@ const OptimizationControls = ({
                     </div>
                 )}
             </div>
-            {/* Optimization Result Summary with Alternatives */}
+
+            {/* Optimization Result Summary */}
             {optimizationResult && !optimizationResult.error && (
-                <div style={{ marginTop: '1rem' }}>
+                <div>
                     {/* Main success message */}
                     <div style={{
-                        padding: '12px',
+                        padding: '12px 16px',
                         backgroundColor: 'rgba(80, 200, 120, 0.1)',
                         border: '1px solid rgba(80, 200, 120, 0.3)',
                         borderRadius: '6px',
-                        fontSize: '0.9rem',
+                        fontSize: '0.95rem',
                         color: '#50C878',
                         display: 'flex',
                         alignItems: 'center',
@@ -411,14 +620,15 @@ const OptimizationControls = ({
                                 src={getGeneralIcon('Checkmark')}
                                 alt="Success"
                                 style={{
-                                    width: '16px',
-                                    height: '16px',
+                                    width: '18px',
+                                    height: '18px',
                                     objectFit: 'contain',
-                                    marginRight: '8px'
+                                    marginRight: '10px',
+                                    flexShrink: 0
                                 }}
                             />
                         )}
-                        <span>
+                        <span style={{ fontWeight: '600' }}>
                             {optimizationResult.explanation}
                         </span>
                     </div>
@@ -436,12 +646,11 @@ const OptimizationControls = ({
 
             {optimizationResult?.error && (
                 <div style={{
-                    marginTop: '1rem',
-                    padding: '12px',
+                    padding: '12px 16px',
                     backgroundColor: 'rgba(255, 107, 107, 0.1)',
                     border: '1px solid rgba(255, 107, 107, 0.3)',
                     borderRadius: '6px',
-                    fontSize: '0.9rem',
+                    fontSize: '0.95rem',
                     color: '#ff6b6b',
                     display: 'flex',
                     alignItems: 'center'
@@ -451,49 +660,24 @@ const OptimizationControls = ({
                             src={getGeneralIcon('Warning')}
                             alt="Warning"
                             style={{
-                                width: '16px',
-                                height: '16px',
+                                width: '18px',
+                                height: '18px',
                                 objectFit: 'contain',
-                                marginRight: '8px'
+                                marginRight: '10px',
+                                flexShrink: 0
                             }}
                         />
                     )}
-                    <span>{optimizationResult.error}</span>
+                    <span style={{ fontWeight: '600' }}>
+                        {optimizationResult.error}
+                    </span>
                 </div>
             )}
-            {optimizationResult?.error && (
-                <div style={{
-                    marginTop: '1rem',
-                    padding: '12px',
-                    backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                    border: '1px solid rgba(255, 107, 107, 0.3)',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    color: '#ff6b6b',
-                    display: 'flex',
-                    alignItems: 'center'
-                }}>
-                    {getGeneralIcon('Warning') && (
-                        <img
-                            src={getGeneralIcon('Warning')}
-                            alt="Warning"
-                            style={{
-                                width: '16px',
-                                height: '16px',
-                                objectFit: 'contain',
-                                marginRight: '8px'
-                            }}
-                        />
-                    )}
-                    <span>{optimizationResult.error}</span>
-                </div>
-            )}
+
             {/* Resource Product Selector Modal */}
             <ProductSelectorModal
                 isOpen={isResourceModalOpen}
-                onClose={() => {
-                    setIsResourceModalOpen(false);
-                }}
+                onClose={() => setIsResourceModalOpen(false)}
                 onSelectProduct={handleResourceProductSelect}
                 products={productsForModal}
                 currentProductId={resourceInput.productId}
@@ -513,7 +697,7 @@ const AlternativesSection = ({ optimizationResult, onSelectAlternative, currentA
     return (
         <div style={{
             backgroundColor: '#1a1a1a',
-            border: '1px solid #444',
+            border: '1px solid #333',
             borderRadius: '6px',
             overflow: 'hidden'
         }}>
@@ -529,17 +713,18 @@ const AlternativesSection = ({ optimizationResult, onSelectAlternative, currentA
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     cursor: 'pointer',
-                    transition: 'background-color 0.2s'
+                    transition: 'background-color 0.2s',
+                    color: '#ddd'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#252525'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span style={{
-                        fontSize: '0.9rem',
+                        fontSize: '1rem',
                         transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
                         transition: 'transform 0.2s',
-                        color: '#50C878'
+                        color: '#888'
                     }}>
                         ▶
                     </span>
@@ -557,8 +742,9 @@ const AlternativesSection = ({ optimizationResult, onSelectAlternative, currentA
                         color: '#4a90e2',
                         fontWeight: '600',
                         padding: '4px 8px',
-                        backgroundColor: 'rgba(74, 144, 226, 0.15)',
-                        borderRadius: '4px'
+                        backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                        borderRadius: '4px',
+                        border: '1px solid rgba(74, 144, 226, 0.3)'
                     }}>
                         Alternative Active
                     </span>
@@ -614,8 +800,8 @@ const SolutionCard = ({ solution, index, isBest, isSelected, onSelect }) => {
             style={{
                 marginBottom: '10px',
                 padding: '12px',
-                backgroundColor: isSelected ? 'rgba(74, 144, 226, 0.1)' : '#0a0a0a',
-                border: isSelected ? '2px solid #4a90e2' : '1px solid #333',
+                backgroundColor: isSelected ? 'rgba(74, 144, 226, 0.08)' : '#0a0a0a',
+                border: isSelected ? '1px solid rgba(74, 144, 226, 0.4)' : '1px solid #333',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
@@ -623,7 +809,7 @@ const SolutionCard = ({ solution, index, isBest, isSelected, onSelect }) => {
             }}
             onMouseEnter={(e) => {
                 if (!isSelected) {
-                    e.currentTarget.style.borderColor = '#555';
+                    e.currentTarget.style.borderColor = '#444';
                     e.currentTarget.style.backgroundColor = '#151515';
                 }
             }}
@@ -641,12 +827,12 @@ const SolutionCard = ({ solution, index, isBest, isSelected, onSelect }) => {
                     top: '8px',
                     right: '8px',
                     padding: '3px 8px',
-                    backgroundColor: 'rgba(80, 200, 120, 0.2)',
+                    backgroundColor: 'rgba(80, 200, 120, 0.15)',
                     color: '#50C878',
                     borderRadius: '4px',
                     fontSize: '0.7rem',
                     fontWeight: '700',
-                    border: '1px solid rgba(80, 200, 120, 0.4)'
+                    border: '1px solid rgba(80, 200, 120, 0.3)'
                 }}>
                     ★ BEST
                 </div>
@@ -656,7 +842,7 @@ const SolutionCard = ({ solution, index, isBest, isSelected, onSelect }) => {
             <div style={{
                 fontSize: '0.9rem',
                 fontWeight: '700',
-                color: isSelected ? '#4a90e2' : '#fff',
+                color: isSelected ? '#4a90e2' : '#ddd',
                 marginBottom: '8px',
                 paddingRight: isBest ? '70px' : '0'
             }}>
@@ -690,7 +876,8 @@ const SolutionCard = ({ solution, index, isBest, isSelected, onSelect }) => {
             <div style={{
                 fontSize: '0.8rem',
                 color: '#888',
-                fontStyle: 'italic'
+                fontStyle: 'italic',
+                lineHeight: '1.4'
             }}>
                 {solution.reason}
             </div>
@@ -704,9 +891,10 @@ const SolutionCard = ({ solution, index, isBest, isSelected, onSelect }) => {
 const MetricBadge = ({ label, value, highlight }) => (
     <div style={{
         padding: '6px',
-        backgroundColor: highlight ? 'rgba(80, 200, 120, 0.1)' : '#1a1a1a',
+        backgroundColor: highlight ? 'rgba(80, 200, 120, 0.08)' : '#1a1a1a',
         borderRadius: '4px',
-        textAlign: 'center'
+        textAlign: 'center',
+        border: '1px solid #333'
     }}>
         <div style={{ fontSize: '0.65rem', color: '#666', marginBottom: '2px' }}>{label}</div>
         <div style={{ fontSize: '0.85rem', fontWeight: '700', color: highlight ? '#50C878' : '#ddd' }}>

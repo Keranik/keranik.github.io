@@ -66,7 +66,7 @@ const Calculator = () => {
     const [viewMode, setViewMode] = useState('compact');
     const [selectedNode, setSelectedNode] = useState(null);
     const [optimizationMode, setOptimizationMode] = useState(false);
-    const [optimizationGoal, setOptimizationGoal] = useState('minimizeWorkers');
+    const [optimizationGoal, setOptimizationGoal] = useState('maximizeProduction');
     const [optimizationConstraints, setOptimizationConstraints] = useState({
         maxPower: null,
         maxWorkers: null,
@@ -213,7 +213,10 @@ const Calculator = () => {
             console.error('Calculation error:', result.error);
             setProductionChain({ error: result.error });
             setRequirements(null);
-            setOptimizationResult(null);
+            setOptimizationResult({
+                error: result.error,
+                alternatives: []
+            });
             setSelectedAlternative('best');
             return;
         }
