@@ -5,7 +5,7 @@ const Home = () => {
     const [activeTab, setActiveTab] = useState('calculator');
 
     useEffect(() => {
-        document.title = 'Captain of Industry Tools - Professional Factory Planning & Optimization';
+        document.title = 'Captain of Industry Calculator & Tools - Factory Planning & Optimization';
     }, []);
 
     return (
