@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Production Calculator Engine - REWRITTEN FOR EXCELLENCE
  * Handles all production chain calculations, recipe optimization, and resource requirements
  * Now with per-minute normalization, resource source management, storage calculations, and SMART RAW MATERIAL DETECTION

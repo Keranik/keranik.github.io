@@ -127,11 +127,11 @@ export class OptimizationEngine {
             chain: best.chain,
             score: best.score,
             metrics: best.metrics,
-            recipeOverrides: best.recipeOverrides,
+            recipeOverrides: best.recipeOverrides || new Map(),
             alternatives: uniqueAlternatives.slice(0, 3).map(alt => ({
                 score: alt.score,
                 metrics: alt.metrics,
-                recipeOverrides: alt.recipeOverrides,
+                recipeOverrides: alt.recipeOverrides || new Map(),
                 reason: this.explainDifference(best, alt, optimizationGoal)
             })),
             explanation: this.explainOptimization(best, optimizationGoal, constraints)
@@ -208,7 +208,7 @@ export class OptimizationEngine {
             chain: bestValidChain,
             score: -bestValidRate, // Negative because higher = better
             metrics: bestValidMetrics,
-            recipeOverrides: bestValidOverrides,
+            recipeOverrides: bestValidOverrides || new Map(),
             alternatives: [], // No alternatives in max production mode
             explanation: `Maximum production: ${bestValidRate.toFixed(2)}/min (${percentOfBase}% of requested rate) | Workers: ${bestValidMetrics.workers} | Power: ${(bestValidMetrics.powerKw / 1000).toFixed(1)}MW | Machines: ${bestValidMetrics.machines}`
         };

@@ -70,9 +70,22 @@ const OptimizationControls = ({
     };
 
     const handleConstraintChange = (key, value) => {
+        // If value is explicitly null, disable the constraint
+        if (value === null) {
+            onChangeConstraints({
+                ...optimizationConstraints,
+                [key]: null
+            });
+            return;
+        }
+
+        // Convert to number, keep 0 as valid
+        const numValue = typeof value === 'number' ? value : parseFloat(value);
+
+        // Only set null if the value is NaN or empty string
         onChangeConstraints({
             ...optimizationConstraints,
-            [key]: value ? parseFloat(value) : null
+            [key]: isNaN(numValue) ? null : numValue
         });
     };
 

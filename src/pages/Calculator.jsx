@@ -237,21 +237,27 @@ const Calculator = () => {
         }
     };
 
-    const handleSelectAlternative = (alternativeId, recipeOverrides) => {
+    const handleSelectAlternative = (alternativeId, alternativeRecipeOverrides) => {
+        console.log('Selecting alternative:', alternativeId, 'with overrides:', alternativeRecipeOverrides);
+
         setSelectedAlternative(alternativeId);
 
-        // Apply the alternative's recipe overrides
-        setRecipeOverrides(recipeOverrides);
+        // Ensure recipeOverrides is always a Map, never undefined
+        const overrides = alternativeRecipeOverrides instanceof Map
+            ? alternativeRecipeOverrides
+            : new Map(Object.entries(alternativeRecipeOverrides || {}));
 
-        // Recalculate with these overrides
+        setRecipeOverrides(overrides);
+
+        // Recalculate immediately with the alternative's recipe overrides
         if (selectedProduct && targetRate) {
             const result = solver.solve({
                 targetProductId: selectedProduct,
                 targetRate: targetRate,
                 useConsolidation: useConsolidation,
                 resourceSources: resourceSources,
-                recipeOverrides: recipeOverrides,
-                optimizationMode: false, // Switch to manual mode with these recipes
+                recipeOverrides: overrides,
+                optimizationMode: false,
                 optimizationGoal: optimizationGoal,
                 constraints: {},
                 resourceConstraints: new Map()
@@ -260,6 +266,11 @@ const Calculator = () => {
             if (!result.error) {
                 setProductionChain(result.chain);
                 setRequirements(result.requirements);
+
+                // Keep the optimization result visible but mark which alternative is active
+                // DON'T clear optimizationResult here - it stays visible
+            } else {
+                console.error('Error recalculating with alternative:', result.error);
             }
         }
     };
@@ -824,6 +835,8 @@ const Calculator = () => {
                     onChangeResourceInput={setResourceInput}
                     onAddResourceConstraint={addResourceConstraint}
                     onRemoveResourceConstraint={removeResourceConstraint}
+                    onSelectAlternative={handleSelectAlternative}  
+                    currentAlternative={selectedAlternative}      
                 />
 
                 {/* Input Section */}
@@ -1184,7 +1197,8 @@ const Calculator = () => {
                                                 collapsedNodes={collapsedNodes}
                                                 onToggleCollapse={toggleNodeCollapse}
                                                 onSelectNode={handleNodeClick}
-                                                selectedNodeKey={selectedNode?.nodeKey}
+                                                        selectedNodeKey={selectedNode?.nodeKey}
+                                                selectedNode={selectedNode}
                                                 onOpenResourceSourceModal={openResourceSourceModal}
                                                 onOpenRecipeModal={openRecipeModal}
                                                 recipeOverrides={recipeOverrides}

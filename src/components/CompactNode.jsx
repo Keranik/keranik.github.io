@@ -51,7 +51,11 @@ const CompactNode = ({
     };
 
     const subtreeMetrics = calculateSubtreeMetrics(node);
-    const isSelected = selectedNode?.nodeKey === node.nodeKey;
+    // More robust selection check
+    const isSelected = selectedNode && (
+        selectedNode.nodeKey === node.nodeKey ||
+            (selectedNode.productId === node.productId && selectedNode.depth === node.depth)
+    );
 
     // Resource source info
     const currentSource = node.resourceSource || { type: 'mining' };
@@ -138,8 +142,30 @@ const CompactNode = ({
                         <span style={{ fontWeight: '600', color: '#fff', fontSize: '0.95rem' }}>
                             {product?.name || node.productId}
                             {node.isRawMaterial && (
-                                <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: '#FFD700', backgroundColor: 'rgba(255,215,0,0.15)', padding: '2px 6px', borderRadius: '3px' }}>
+                                <span style={{
+                                    marginLeft: '6px',
+                                    fontSize: '0.7rem',
+                                    color: '#FFD700',
+                                    backgroundColor: 'rgba(255,215,0,0.15)',
+                                    padding: '2px 6px',
+                                    borderRadius: '3px',
+                                    border: '1px solid rgba(255,215,0,0.3)'
+                                }}>
                                     RAW
+                                </span>
+                            )}
+                            {node.consolidationInfo && node.consolidationInfo.isShared && (
+                                <span style={{
+                                    marginLeft: '6px',
+                                    fontSize: '0.7rem',
+                                    color: '#4a90e2',
+                                    backgroundColor: 'rgba(74, 144, 226, 0.15)',
+                                    padding: '2px 6px',
+                                    borderRadius: '3px',
+                                    border: '1px solid rgba(74, 144, 226, 0.3)',
+                                    fontWeight: '700'
+                                }}>
+                                     SHARED
                                 </span>
                             )}
                         </span>
