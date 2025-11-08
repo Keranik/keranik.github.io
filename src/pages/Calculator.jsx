@@ -14,6 +14,7 @@ import CompactNode from '../components/CompactNode';
 import ProductionSolver from '../utils/ProductionSolver';
 import ConsolidatedResourcesPanel from '../components/ConsolidatedResourcesPanel';
 import OptimizationAlternativesPanel from '../components/OptimizationAlternativesPanel';
+import ResourceConsolidator from '../utils/ResourceConsolidator';
 
 const Calculator = () => {
     const { settings } = useSettings();
@@ -198,13 +199,19 @@ const Calculator = () => {
     const handleCalculate = () => {
         if (!selectedProduct || !targetRate) return;
 
+        // Create recipe overrides that includes the main product's selected recipe
+        const effectiveOverrides = new Map(recipeOverrides);
+        if (selectedRecipe && !effectiveOverrides.has(selectedProduct)) {
+            effectiveOverrides.set(selectedProduct, selectedRecipe);
+        }
+
         // Use ProductionSolver for all calculations
         const result = solver.solve({
             targetProductId: selectedProduct,
             targetRate: targetRate,
             useConsolidation: useConsolidation,
             resourceSources: resourceSources,
-            recipeOverrides: recipeOverrides,
+            recipeOverrides: effectiveOverrides, // Use effective overrides
             optimizationMode: optimizationMode,
             optimizationGoal: optimizationGoal,
             constraints: optimizationMode ? {
@@ -301,10 +308,11 @@ const Calculator = () => {
                 useConsolidation: useConsolidation,
                 resourceSources: resourceSources,
                 recipeOverrides: newOverrides,
-                optimizationMode: false, // Recipe override = manual mode
+                optimizationMode: false,
                 optimizationGoal: optimizationGoal,
                 constraints: {},
-                resourceConstraints: new Map()
+                resourceConstraints: new Map(),
+                disabledRecipes: disabledRecipes // ✅ ADD THIS LINE
             });
 
             if (!result.error) {
@@ -351,27 +359,22 @@ const Calculator = () => {
                     currentSource: null
                 });
 
-                // Recalculate chain
-                if (selectedProduct && targetRate) {
-                    let newChain = solver.solve(
-                        selectedProduct,
-                        targetRate,
-                        selectedRecipe || null,
-                        recipeOverrides,
-                        newSources
-                    );
+                // ✅ Recalculate chain with new source
+                if (selectedProduct && targetRate && targetRate > 0) {
+                    const result = solver.solve({
+                        targetProductId: selectedProduct,
+                        targetRate: targetRate,
+                        useConsolidation: useConsolidation,
+                        resourceSources: newSources,
+                        recipeOverrides: recipeOverrides,
+                        optimizationMode: false,
+                        disabledRecipes: disabledRecipes
+                    });
 
-                    // Apply consolidation if enabled
-                    if (useConsolidation) {
-                        newChain = ResourceConsolidator.consolidateChain(newChain, ProductionCalculator);
+                    if (!result.error) {
+                        setProductionChain(result.chain);
+                        setRequirements(result.requirements);
                     }
-
-                    const newReqs = useConsolidation
-                        ? ResourceConsolidator.calculateConsolidatedRequirements(newChain)
-                        : ProductionCalculator.calculateTotalRequirements(newChain);
-
-                    setProductionChain(newChain);
-                    setRequirements(newReqs);
                 }
             } else if (recipeModalProductId === selectedProduct) {
                 // Main product recipe selection
@@ -380,26 +383,27 @@ const Calculator = () => {
                 setRecipeModalProductId(null);
                 setRecipeModalRecipes([]);
 
-                if (targetRate) {
-                    let newChain = solver.solve(
-                        selectedProduct,
-                        targetRate,
-                        recipeId,
-                        recipeOverrides,
-                        resourceSources
-                    );
+                // ✅ Update recipe overrides for main product
+                const newOverrides = new Map(recipeOverrides);
+                newOverrides.set(selectedProduct, recipeId);
+                setRecipeOverrides(newOverrides);
 
-                    // Apply consolidation if enabled
-                    if (useConsolidation) {
-                        newChain = ResourceConsolidator.consolidateChain(newChain, ProductionCalculator);
+                // ✅ Auto-recalculate if chain exists (user is changing recipe in existing chain)
+                if (targetRate && targetRate > 0 && selectedProduct && productionChain) {
+                    const result = solver.solve({
+                        targetProductId: selectedProduct,
+                        targetRate: targetRate,
+                        useConsolidation: useConsolidation,
+                        resourceSources: resourceSources,
+                        recipeOverrides: newOverrides, // Use the NEW overrides
+                        optimizationMode: false,
+                        disabledRecipes: disabledRecipes
+                    });
+
+                    if (!result.error) {
+                        setProductionChain(result.chain);
+                        setRequirements(result.requirements);
                     }
-
-                    const newReqs = useConsolidation
-                        ? ResourceConsolidator.calculateConsolidatedRequirements(newChain)
-                        : ProductionCalculator.calculateTotalRequirements(newChain);
-
-                    setProductionChain(newChain);
-                    setRequirements(newReqs);
                 }
             } else {
                 // Recipe override for a node (intermediate product in chain)
@@ -450,26 +454,22 @@ const Calculator = () => {
             setResourceSources(newSources);
             setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
 
-            if (selectedProduct && targetRate) {
-                let newChain = solver.solve(
-                    selectedProduct,
-                    targetRate,
-                    selectedRecipe || null,
-                    recipeOverrides,
-                    newSources
-                );
+            // ✅ Recalculate with new source
+            if (selectedProduct && targetRate && targetRate > 0) {
+                const result = solver.solve({
+                    targetProductId: selectedProduct,
+                    targetRate: targetRate,
+                    useConsolidation: useConsolidation,
+                    resourceSources: newSources,
+                    recipeOverrides: recipeOverrides,
+                    optimizationMode: false,
+                    disabledRecipes: disabledRecipes
+                });
 
-                // Apply consolidation if enabled
-                if (useConsolidation) {
-                    newChain = ResourceConsolidator.consolidateChain(newChain, ProductionCalculator);
+                if (!result.error) {
+                    setProductionChain(result.chain);
+                    setRequirements(result.requirements);
                 }
-
-                const newReqs = useConsolidation
-                    ? ResourceConsolidator.calculateConsolidatedRequirements(newChain)
-                    : ProductionCalculator.calculateTotalRequirements(newChain);
-
-                setProductionChain(newChain);
-                setRequirements(newReqs);
             }
         }
     };
@@ -487,26 +487,22 @@ const Calculator = () => {
         setStorageTierModal({ open: false, product: null, requiredRate: 0, tiers: [], selectedTier: null });
         setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
 
-        if (selectedProduct && targetRate) {
-            let newChain = solver.solve(
-                selectedProduct,
-                targetRate,
-                selectedRecipe || null,
-                recipeOverrides,
-                newSources
-            );
+        // ✅ Recalculate with new storage source
+        if (selectedProduct && targetRate && targetRate > 0) {
+            const result = solver.solve({
+                targetProductId: selectedProduct,
+                targetRate: targetRate,
+                useConsolidation: useConsolidation,
+                resourceSources: newSources,
+                recipeOverrides: recipeOverrides,
+                optimizationMode: false,
+                disabledRecipes: disabledRecipes
+            });
 
-            // Apply consolidation if enabled
-            if (useConsolidation) {
-                newChain = ResourceConsolidator.consolidateChain(newChain, ProductionCalculator);
+            if (!result.error) {
+                setProductionChain(result.chain);
+                setRequirements(result.requirements);
             }
-
-            const newReqs = useConsolidation
-                ? ResourceConsolidator.calculateConsolidatedRequirements(newChain)
-                : ProductionCalculator.calculateTotalRequirements(newChain);
-
-            setProductionChain(newChain);
-            setRequirements(newReqs);
         }
     };
 
@@ -637,27 +633,27 @@ const Calculator = () => {
                         setSelectedRecipe(recipeId);
                         setRecipeSelectionModalOpen(false);
 
-                        // Recalculate the chain with the new recipe
-                        if (targetRate && selectedProduct) {
-                            let newChain = solver.solve(
-                                selectedProduct,
-                                targetRate,
-                                recipeId,
-                                recipeOverrides,
-                                resourceSources
-                            );
+                        // Update recipe overrides for main product
+                        const newOverrides = new Map(recipeOverrides);
+                        newOverrides.set(selectedProduct, recipeId);
+                        setRecipeOverrides(newOverrides);
 
-                            // Apply consolidation if enabled
-                            if (useConsolidation) {
-                                newChain = ResourceConsolidator.consolidateChain(newChain, ProductionCalculator);
+                        // Auto-recalculate if chain exists
+                        if (targetRate && targetRate > 0 && selectedProduct && productionChain) {
+                            const result = solver.solve({
+                                targetProductId: selectedProduct,
+                                targetRate: targetRate,
+                                useConsolidation: useConsolidation,
+                                resourceSources: resourceSources,
+                                recipeOverrides: newOverrides, // Use the NEW overrides
+                                optimizationMode: false,
+                                disabledRecipes: disabledRecipes
+                            });
+
+                            if (!result.error) {
+                                setProductionChain(result.chain);
+                                setRequirements(result.requirements);
                             }
-
-                            const newReqs = useConsolidation
-                                ? ResourceConsolidator.calculateConsolidatedRequirements(newChain)
-                                : ProductionCalculator.calculateTotalRequirements(newChain);
-
-                            setProductionChain(newChain);
-                            setRequirements(newReqs);
                         }
                     }}
                     getRecipeTimeDisplay={getRecipeTimeDisplay}
