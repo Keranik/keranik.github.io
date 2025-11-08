@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
@@ -15,6 +15,7 @@ import ProductionSolver from '../utils/ProductionSolver';
 import ConsolidatedResourcesPanel from '../components/ConsolidatedResourcesPanel';
 import OptimizationAlternativesPanel from '../components/OptimizationAlternativesPanel';
 import ResourceConsolidator from '../utils/ResourceConsolidator';
+import LoadingOverlay from '../components/LoadingOverlay';
 
 const Calculator = () => {
     const { settings } = useSettings();
@@ -38,6 +39,7 @@ const Calculator = () => {
     const [showResourcePoolDetail, setShowResourcePoolDetail] = useState(false);
     const [selectedAlternative, setSelectedAlternative] = useState('best');
     const [disabledRecipes, setDisabledRecipes] = useState(new Set());
+    const [isCalculating, setIsCalculating] = useState(false);
 
     // Resource source management
     const [resourceSources, setResourceSources] = useState(new Map());
@@ -83,6 +85,82 @@ const Calculator = () => {
 
     const [recipeSelectionModalOpen, setRecipeSelectionModalOpen] = useState(false);
 
+    const handleCalculate = useCallback(async () => {
+        if (!selectedProduct || !targetRate) return;
+
+        setIsCalculating(true);
+
+        setTimeout(() => {
+            try {
+                const effectiveOverrides = new Map(recipeOverrides);
+                if (selectedRecipe && !effectiveOverrides.has(selectedProduct)) {
+                    effectiveOverrides.set(selectedProduct, selectedRecipe);
+                }
+
+                const result = solver.solve({
+                    targetProductId: selectedProduct,
+                    targetRate: targetRate,
+                    useConsolidation: useConsolidation,
+                    resourceSources: resourceSources,
+                    recipeOverrides: effectiveOverrides,
+                    optimizationMode: optimizationMode,
+                    optimizationGoal: optimizationGoal,
+                    constraints: optimizationMode ? {
+                        ...optimizationConstraints,
+                        resourceLimits: resourceConstraints,
+                        disabledRecipes: disabledRecipes
+                    } : {
+                        disabledRecipes: disabledRecipes
+                    },
+                    resourceConstraints: resourceConstraints,
+                    disabledRecipes: disabledRecipes
+                });
+
+                if (result.error) {
+                    console.error('Calculation error:', result.error);
+                    setProductionChain({ error: result.error });
+                    setRequirements(null);
+                    setOptimizationResult({
+                        error: result.error,
+                        alternatives: []
+                    });
+                    setSelectedAlternative('best');
+                    return;
+                }
+
+                setProductionChain(result.chain);
+                setRequirements(result.requirements);
+
+                if (result.optimized) {
+                    setOptimizationResult({
+                        score: result.score,
+                        metrics: result.metrics,
+                        alternatives: result.alternatives,
+                        explanation: result.explanation
+                    });
+                    setRecipeOverrides(result.recipeOverrides || new Map());
+                } else {
+                    setOptimizationResult(null);
+                }
+            } finally {
+                setIsCalculating(false);
+            }
+        }, 10);
+    }, [
+        selectedProduct,
+        targetRate,
+        selectedRecipe,
+        recipeOverrides,
+        useConsolidation,
+        resourceSources,
+        optimizationMode,
+        optimizationGoal,
+        optimizationConstraints,
+        resourceConstraints,
+        disabledRecipes,
+        solver
+    ]);
+
     // Load game data on mount
     useEffect(() => {
         document.title = 'Production Calculator - Captain of Industry Tools';
@@ -96,6 +174,8 @@ const Calculator = () => {
 
         loadData();
     }, [settings.enableModdedContent, settings.enabledMods]);
+
+    
 
     // When product changes, update available recipes
     useEffect(() => {
@@ -114,6 +194,14 @@ const Calculator = () => {
             setSelectedRecipe('');
         }
     }, [selectedProduct]);
+
+    // ✅ NEW: Recalculate when consolidation toggle changes
+    useEffect(() => {
+        // Only trigger when consolidation changes AND we have an existing chain
+        if (productionChain && !productionChain.error && selectedProduct && targetRate) {
+            handleCalculate();
+        }
+    }, [useConsolidation]); 
 
     if (!dataLoaded) {
         return (
@@ -191,65 +279,6 @@ const Calculator = () => {
             setSelectedNode(null);
         } else {
             setSelectedNode(node);
-        }
-    };
-
-    
-
-    const handleCalculate = () => {
-        if (!selectedProduct || !targetRate) return;
-
-        // Create recipe overrides that includes the main product's selected recipe
-        const effectiveOverrides = new Map(recipeOverrides);
-        if (selectedRecipe && !effectiveOverrides.has(selectedProduct)) {
-            effectiveOverrides.set(selectedProduct, selectedRecipe);
-        }
-
-        // Use ProductionSolver for all calculations
-        const result = solver.solve({
-            targetProductId: selectedProduct,
-            targetRate: targetRate,
-            useConsolidation: useConsolidation,
-            resourceSources: resourceSources,
-            recipeOverrides: effectiveOverrides, // Use effective overrides
-            optimizationMode: optimizationMode,
-            optimizationGoal: optimizationGoal,
-            constraints: optimizationMode ? {
-                ...optimizationConstraints,
-                resourceLimits: resourceConstraints,
-                disabledRecipes: disabledRecipes
-            } : {
-                disabledRecipes: disabledRecipes
-            },
-            resourceConstraints: resourceConstraints,
-            disabledRecipes: disabledRecipes
-        });
-
-        if (result.error) {
-            console.error('Calculation error:', result.error);
-            setProductionChain({ error: result.error });
-            setRequirements(null);
-            setOptimizationResult({
-                error: result.error,
-                alternatives: []
-            });
-            setSelectedAlternative('best');
-            return;
-        }
-
-        setProductionChain(result.chain);
-        setRequirements(result.requirements);
-
-        if (result.optimized) {
-            setOptimizationResult({
-                score: result.score,
-                metrics: result.metrics,
-                alternatives: result.alternatives,
-                explanation: result.explanation
-            });
-            setRecipeOverrides(result.recipeOverrides || new Map());
-        } else {
-            setOptimizationResult(null);
         }
     };
 
@@ -572,6 +601,15 @@ const Calculator = () => {
             margin: '0 auto',
             minHeight: '100vh'
         }}>
+        <LoadingOverlay
+            isVisible={isCalculating}
+            title={optimizationMode ? 'Optimizing Production Chains...' : 'Calculating Production Chains...'}
+            message={optimizationMode
+                    ? 'Finding optimal machine combinations and recipe selections...'
+                    : 'Processing production requirements and resource dependencies...'}
+            showOptimizationTip={optimizationMode}
+            icon={optimizationMode ? '🔍' : '⚙️'}
+        />
             <div style={{
                 padding: '1.5rem 2rem',
                 backgroundColor: '#2a2a2a',
