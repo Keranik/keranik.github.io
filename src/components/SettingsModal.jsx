@@ -3,8 +3,20 @@ import { useSettings } from '../contexts/SettingsContext';
 import { getGeneralIcon } from '../utils/AssetHelper';
 
 const SettingsModal = ({ isOpen, onClose }) => {
-    const { settings, availableMods, updateSetting, updateNestedSetting, resetSettings, exportSettings, importSettings } = useSettings();
-    const [activeTab, setActiveTab] = useState('gameplay');
+    const {
+        settings,
+        availableMods,
+        researchDefinitions,
+        isLoadingData,
+        updateSetting,
+        updateNestedSetting,
+        updateResearchValue,
+        resetSettings,
+        exportSettings,
+        importSettings,
+        getResearchByCategory
+    } = useSettings();
+    const [activeTab, setActiveTab] = useState('research');
 
     if (!isOpen) return null;
 
@@ -47,7 +59,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
             <div style={{
                 backgroundColor: '#2a2a2a',
                 borderRadius: '12px',
-                maxWidth: '800px',
+                maxWidth: '1000px',
                 width: '100%',
                 maxHeight: '90vh',
                 overflow: 'hidden',
@@ -63,9 +75,18 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     justifyContent: 'space-between',
                     alignItems: 'center'
                 }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>
-                        ⚙️ Settings
-                    </h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        {getGeneralIcon('Settings') && (
+                            <img
+                                src={getGeneralIcon('Settings')}
+                                alt="Settings"
+                                style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+                            />
+                        )}
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>
+                            Settings
+                        </h2>
+                    </div>
                     <button
                         onClick={onClose}
                         style={{
@@ -91,28 +112,41 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     backgroundColor: '#1a1a1a'
                 }}>
                     {[
-                        { id: 'gameplay', label: '🎮 Gameplay' },
-                        { id: 'data', label: '📦 Data & Mods' },
-                        { id: 'display', label: '🎨 Display' },
-                        { id: 'advanced', label: '⚡ Advanced' }
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            style={{
-                                padding: '0.75rem 1.25rem',
-                                backgroundColor: activeTab === tab.id ? '#4a90e2' : '#333',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                fontWeight: activeTab === tab.id ? '700' : '500',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+                        { id: 'research', label: 'Research', icon: 'ResearchUnlocked' },
+                        { id: 'data', label: 'Data & Mods', icon: 'Countable' },
+                        { id: 'display', label: 'Display', icon: 'Display' },
+                        { id: 'advanced', label: 'Advanced', icon: 'Configure' }
+                    ].map(tab => {
+                        const tabIcon = getGeneralIcon(tab.icon);
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                style={{
+                                    padding: '0.75rem 1.25rem',
+                                    backgroundColor: activeTab === tab.id ? '#4a90e2' : '#333',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontWeight: activeTab === tab.id ? '700' : '500',
+                                    transition: 'all 0.2s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
+                                }}
+                            >
+                                {tabIcon && (
+                                    <img
+                                        src={tabIcon}
+                                        alt={tab.label}
+                                        style={{ width: '18px', height: '18px', objectFit: 'contain' }}
+                                    />
+                                )}
+                                {tab.label}
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* Content */}
@@ -121,82 +155,185 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     overflow: 'auto',
                     flex: 1
                 }}>
-                    {activeTab === 'gameplay' && (
+                    {activeTab === 'research' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <h3 style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                                Gameplay Defaults
-                            </h3>
-
-                            {/* Food Consumption */}
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                                    Food Consumption Multiplier
-                                </label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <input
-                                        type="range"
-                                        min="0.5"
-                                        max="2"
-                                        step="0.1"
-                                        value={settings.foodConsumptionMultiplier}
-                                        onChange={(e) => updateSetting('foodConsumptionMultiplier', parseFloat(e.target.value))}
-                                        style={{ flex: 1 }}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                {getGeneralIcon('Research') && (
+                                    <img
+                                        src={getGeneralIcon('Research')}
+                                        alt="Research"
+                                        style={{ width: '28px', height: '28px', objectFit: 'contain' }}
                                     />
-                                    <span style={{
-                                        minWidth: '60px',
-                                        fontWeight: '700',
-                                        color: '#4a90e2',
-                                        fontSize: '1.1rem'
-                                    }}>
-                                        {settings.foodConsumptionMultiplier.toFixed(1)}x
-                                    </span>
-                                </div>
-                                <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.25rem' }}>
-                                    Applied to all food calculations (difficulty setting)
-                                </div>
+                                )}
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '600', margin: 0 }}>
+                                    Repeatable Research Settings
+                                </h3>
                             </div>
 
-                            {/* Default Research Levels */}
+                            {/* Dynamic Research Settings */}
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.75rem' }}>
-                                    Default Research Levels
-                                </label>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                    <div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                            <span style={{ fontSize: '0.85rem' }}>Crop Yield Increase</span>
-                                            <span style={{ color: '#4a90e2', fontWeight: '600' }}>+{settings.defaultResearch.cropYield}%</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max="250"
-                                            step="10"
-                                            value={settings.defaultResearch.cropYield}
-                                            onChange={(e) => updateNestedSetting('defaultResearch.cropYield', parseInt(e.target.value))}
-                                            style={{ width: '100%' }}
-                                        />
+                                {Object.keys(researchDefinitions).length === 0 ? (
+                                    <div style={{
+                                        padding: '1rem',
+                                        backgroundColor: '#1a1a1a',
+                                        borderRadius: '6px',
+                                        color: '#888',
+                                        fontSize: '0.85rem',
+                                        fontStyle: 'italic',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem'
+                                    }}>
+                                        {isLoadingData ? (
+                                            <>
+                                                <div style={{
+                                                    width: '16px',
+                                                    height: '16px',
+                                                    border: '2px solid #333',
+                                                    borderTop: '2px solid #4a90e2',
+                                                    borderRadius: '50%',
+                                                    animation: 'spin 1s linear infinite'
+                                                }}></div>
+                                                Loading research data...
+                                            </>
+                                        ) : (
+                                            'No research data found. Please refresh the page.'
+                                        )}
                                     </div>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        {/* Group by category */}
+                                        {[
+                                            { id: 'farming', label: 'Farming', icon: 'Farms' },
+                                            { id: 'vehicles', label: 'Vehicles', icon: 'Vehicles' },
+                                            { id: 'production', label: 'Production', icon: 'Machines' },
+                                            { id: 'efficiency', label: 'Efficiency', icon: 'Battery' },
+                                            { id: 'general', label: 'General', icon: 'Buildings' }
+                                        ].map(category => {
+                                            const categoryResearch = getResearchByCategory(category.id);
+                                            if (categoryResearch.length === 0) return null;
 
-                                    <div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                            <span style={{ fontSize: '0.85rem' }}>Water Saver</span>
-                                            <span style={{ color: '#50C878', fontWeight: '600' }}>-{settings.defaultResearch.waterSaver}%</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max="40"
-                                            step="5"
-                                            value={settings.defaultResearch.waterSaver}
-                                            onChange={(e) => updateNestedSetting('defaultResearch.waterSaver', parseInt(e.target.value))}
-                                            style={{ width: '100%' }}
-                                        />
+                                            const categoryIcon = getGeneralIcon(category.icon);
+
+                                            return (
+                                                <div key={category.id}>
+                                                    <div style={{
+                                                        fontSize: '1rem',
+                                                        fontWeight: '600',
+                                                        color: '#4a90e2',
+                                                        marginBottom: '0.75rem',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.5rem'
+                                                    }}>
+                                                        {categoryIcon && (
+                                                            <img
+                                                                src={categoryIcon}
+                                                                alt={category.label}
+                                                                style={{ width: '20px', height: '20px', objectFit: 'contain' }}
+                                                            />
+                                                        )}
+                                                        {category.label}
+                                                    </div>
+                                                    <div style={{
+                                                        display: 'grid',
+                                                        gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))',
+                                                        gap: '1rem'
+                                                    }}>
+                                                        {categoryResearch.map(research => {
+                                                            const icon = getGeneralIcon(research.icon);
+                                                            return (
+                                                                <div key={research.id} style={{
+                                                                    padding: '0.75rem',
+                                                                    backgroundColor: '#1a1a1a',
+                                                                    borderRadius: '6px',
+                                                                    border: '1px solid #333'
+                                                                }}>
+                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', alignItems: 'center' }}>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                            {icon && (
+                                                                                <img
+                                                                                    src={icon}
+                                                                                    alt={research.name}
+                                                                                    style={{
+                                                                                        width: '18px',
+                                                                                        height: '18px',
+                                                                                        objectFit: 'contain'
+                                                                                    }}
+                                                                                />
+                                                                            )}
+                                                                            <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>
+                                                                                {research.name}
+                                                                            </span>
+                                                                        </div>
+                                                                        <span style={{
+                                                                            color: research.currentValue === 0 ? '#888' :
+                                                                                research.isNegative ? '#50C878' :
+                                                                                    '#4a90e2',
+                                                                            fontWeight: '700',
+                                                                            fontSize: '0.95rem'
+                                                                        }}>
+                                                                            {research.isNegative && research.currentValue > 0 ? '-' :
+                                                                                !research.isNegative && research.currentValue > 0 ? '+' : ''}
+                                                                            {research.currentValue}
+                                                                            {research.unit}
+                                                                        </span>
+                                                                    </div>
+                                                                    {research.description && (
+                                                                        <div style={{
+                                                                            fontSize: '0.7rem',
+                                                                            color: '#888',
+                                                                            marginBottom: '0.4rem'
+                                                                        }}>
+                                                                            {research.description}
+                                                                        </div>
+                                                                    )}
+                                                                    <input
+                                                                        type="range"
+                                                                        min={research.minValue}
+                                                                        max={research.maxValue}
+                                                                        step={research.step}
+                                                                        value={research.currentValue}
+                                                                        onChange={(e) => updateResearchValue(research.id, parseInt(e.target.value))}
+                                                                        style={{ width: '100%' }}
+                                                                    />
+                                                                    <div style={{
+                                                                        display: 'flex',
+                                                                        justifyContent: 'space-between',
+                                                                        fontSize: '0.65rem',
+                                                                        color: '#666',
+                                                                        marginTop: '0.2rem'
+                                                                    }}>
+                                                                        <span>{research.minValue}{research.unit}</span>
+                                                                        <span>{research.maxValue}{research.unit}</span>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                </div>
-                                <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>
-                                    These values will be pre-filled in calculators
+                                )}
+
+                                <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.75rem' }}>
+                                    <img
+                                        src={getGeneralIcon('Tip')}
+                                        alt="Change recipe"
+                                        style={{
+                                            width: '16px',
+                                            height: '16px',
+                                            objectFit: 'contain',
+                                            paddingRight: '4px',
+                                            filter: `
+      brightness(0) saturate(100%)
+      invert(100%) sepia(100%) saturate(5000%) hue-rotate(40deg)
+      brightness(120%) contrast(110%)
+      drop-shadow(2px 2px 0px rgba(0,0,0,0.5))
+    `.trim(),
+                                        }}
+                                    /> These values will be pre-populated in calculators that support repeatable research bonuses.
                                 </div>
                             </div>
                         </div>
@@ -204,9 +341,18 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
                     {activeTab === 'data' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <h3 style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                                Data Sources & Mods
-                            </h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                {getGeneralIcon('Data') && (
+                                    <img
+                                        src={getGeneralIcon('Data')}
+                                        alt="Data"
+                                        style={{ width: '28px', height: '28px', objectFit: 'contain' }}
+                                    />
+                                )}
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '600', margin: 0 }}>
+                                    Data Sources & Mods
+                                </h3>
+                            </div>
 
                             {/* Enable Modded Content */}
                             <div style={{
@@ -334,8 +480,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
                                 borderRadius: '8px',
                                 border: '1px solid #4a7a4a'
                             }}>
-                                <div style={{ fontSize: '0.9rem', color: '#88dd88', marginBottom: '0.5rem' }}>
-                                    💡 <strong>How mods work:</strong>
+                                <div style={{ fontSize: '0.9rem', color: '#88dd88', marginBottom: '0.5rem', fontWeight: '600' }}>
+                                    💡 How mods work
                                 </div>
                                 <div style={{ fontSize: '0.85rem', color: '#aaddaa', lineHeight: '1.6' }}>
                                     • Official mod support provided by Keranik<br />
@@ -349,11 +495,20 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
                     {activeTab === 'display' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <h3 style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                                Display Preferences
-                            </h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                {getGeneralIcon('Display') && (
+                                    <img
+                                        src={getGeneralIcon('Display')}
+                                        alt="Display"
+                                        style={{ width: '28px', height: '28px', objectFit: 'contain' }}
+                                    />
+                                )}
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '600', margin: 0 }}>
+                                    Display Preferences
+                                </h3>
+                            </div>
 
-                            {/* NEW: Recipe Time Display */}
+                            {/* Recipe Time Display */}
                             <div style={{
                                 padding: '1rem',
                                 backgroundColor: '#1a1a1a',
@@ -374,9 +529,6 @@ const SettingsModal = ({ isOpen, onClose }) => {
                                         <div style={{ fontSize: '0.85rem', color: '#888' }}>
                                             Display recipe inputs/outputs normalized to per-minute rates (recommended)
                                         </div>
-                                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem', fontStyle: 'italic' }}>
-                                            You can still toggle individual recipes using the {clockIcon && <img src={clockIcon} alt="Clock" style={{ width: '12px', height: '12px', objectFit: 'contain', display: 'inline', marginLeft: '2px' }} />} button on each card
-                                        </div>
                                     </div>
                                     <input
                                         type="checkbox"
@@ -394,7 +546,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
                             {/* Decimal Precision */}
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem', fontWeight: '600' }}>
                                     Decimal Precision
                                 </label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -421,7 +573,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                                 </div>
                             </div>
 
-                            {/* Theme (placeholder for future) */}
+                            {/* Theme (placeholder) */}
                             <div style={{
                                 padding: '1rem',
                                 backgroundColor: '#1a1a1a',
@@ -452,48 +604,23 @@ const SettingsModal = ({ isOpen, onClose }) => {
                                     ))}
                                 </div>
                             </div>
-
-                            {/* Colorblind Mode (placeholder) */}
-                            <div style={{
-                                padding: '1rem',
-                                backgroundColor: '#1a1a1a',
-                                borderRadius: '8px',
-                                border: '1px solid #333',
-                                opacity: 0.5
-                            }}>
-                                <label style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    cursor: 'not-allowed',
-                                    justifyContent: 'space-between'
-                                }}>
-                                    <div>
-                                        <div style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-                                            Colorblind Mode <span style={{ fontSize: '0.8rem', color: '#888' }}>(Coming Soon)</span>
-                                        </div>
-                                        <div style={{ fontSize: '0.85rem', color: '#888' }}>
-                                            Adjust colors for better accessibility
-                                        </div>
-                                    </div>
-                                    <input
-                                        type="checkbox"
-                                        disabled
-                                        style={{
-                                            width: '24px',
-                                            height: '24px',
-                                            cursor: 'not-allowed'
-                                        }}
-                                    />
-                                </label>
-                            </div>
                         </div>
                     )}
 
                     {activeTab === 'advanced' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <h3 style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                                Advanced Options
-                            </h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                {getGeneralIcon('Settings') && (
+                                    <img
+                                        src={getGeneralIcon('Settings')}
+                                        alt="Advanced"
+                                        style={{ width: '28px', height: '28px', objectFit: 'contain' }}
+                                    />
+                                )}
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '600', margin: 0 }}>
+                                    Advanced Options
+                                </h3>
+                            </div>
 
                             {/* Export/Import */}
                             <div style={{
@@ -590,7 +717,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                                     User: Keranik<br />
                                     Browser: {window.navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other'}<br />
                                     Storage: {typeof localStorage !== 'undefined' ? 'Available' : 'Unavailable'}<br />
-                                    Settings Version: 1.1.0
+                                    Settings Version: 1.2.0
                                 </div>
                             </div>
                         </div>

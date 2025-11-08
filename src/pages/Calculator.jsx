@@ -1150,46 +1150,136 @@ const Calculator = () => {
                                     )}
                                 </h3>
 
-                                <div style={{
-                                    display: 'flex',
-                                    gap: '0.5rem',
-                                    backgroundColor: '#1a1a1a',
-                                    padding: '0.3rem',
-                                    borderRadius: '6px',
-                                    border: '1px solid #444'
-                                }}>
-                                    <button
-                                        onClick={() => setViewMode('compact')}
-                                        style={{
-                                            padding: '6px 16px',
-                                            backgroundColor: viewMode === 'compact' ? '#4a90e2' : 'transparent',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            fontSize: '0.85rem',
-                                            cursor: 'pointer',
-                                            fontWeight: '600',
-                                            transition: 'all 0.2s'
-                                        }}
-                                    >
-                                        Compact
-                                    </button>
-                                    <button
-                                        onClick={() => setViewMode('detailed')}
-                                        style={{
-                                            padding: '6px 16px',
-                                            backgroundColor: viewMode === 'detailed' ? '#4a90e2' : 'transparent',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            fontSize: '0.85rem',
-                                            cursor: 'pointer',
-                                            fontWeight: '600',
-                                            transition: 'all 0.2s'
-                                        }}
-                                    >
-                                        Detailed
-                                    </button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    {/* Expand/Collapse All - Subtle controls */}
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        fontSize: '0.85rem',
+                                        color: '#888'
+                                    }}>
+                                        <button
+                                            onClick={() => setCollapsedNodes(new Set())}
+                                            title="Expand all nodes"
+                                            style={{
+                                                padding: '4px 8px',
+                                                backgroundColor: 'transparent',
+                                                color: '#50C878',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                fontSize: '1.1rem',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.15s',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                lineHeight: 1
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = 'rgba(80, 200, 120, 0.15)';
+                                                e.currentTarget.style.transform = 'scale(1.15)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = 'transparent';
+                                                e.currentTarget.style.transform = 'scale(1)';
+                                            }}
+                                        >
+                                            ⊞
+                                        </button>
+
+                                        <span style={{ color: '#444', fontSize: '1rem' }}>|</span>
+
+                                        <button
+                                            onClick={() => {
+                                                // Collapse all nodes by collecting all node IDs from the chain
+                                                const getAllNodeIds = (node, path = '', level = 0) => {
+                                                    const ids = new Set();
+                                                    const nodeId = `${path}-${node.productId}-${level}`;
+                                                    ids.add(nodeId);
+
+                                                    if (node.inputChains && node.inputChains.length > 0) {
+                                                        node.inputChains.forEach((child, idx) => {
+                                                            const childIds = getAllNodeIds(child, nodeId, level + 1);
+                                                            childIds.forEach(id => ids.add(id));
+                                                        });
+                                                    }
+                                                    return ids;
+                                                };
+
+                                                if (productionChain) {
+                                                    const allIds = getAllNodeIds(productionChain);
+                                                    setCollapsedNodes(allIds);
+                                                }
+                                            }}
+                                            title="Collapse all nodes"
+                                            style={{
+                                                padding: '4px 8px',
+                                                backgroundColor: 'transparent',
+                                                color: '#ff6b6b',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                fontSize: '1.1rem',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.15s',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                lineHeight: 1
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.15)';
+                                                e.currentTarget.style.transform = 'scale(1.15)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = 'transparent';
+                                                e.currentTarget.style.transform = 'scale(1)';
+                                            }}
+                                        >
+                                            ⊟
+                                        </button>
+                                    </div>
+
+                                    {/* View Mode Toggle */}
+                                    <div style={{
+                                        display: 'flex',
+                                        gap: '0.5rem',
+                                        backgroundColor: '#1a1a1a',
+                                        padding: '0.3rem',
+                                        borderRadius: '6px',
+                                        border: '1px solid #444'
+                                    }}>
+                                        <button
+                                            onClick={() => setViewMode('compact')}
+                                            style={{
+                                                padding: '6px 16px',
+                                                backgroundColor: viewMode === 'compact' ? '#4a90e2' : 'transparent',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                fontSize: '0.85rem',
+                                                cursor: 'pointer',
+                                                fontWeight: '600',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            Compact
+                                        </button>
+                                        <button
+                                            onClick={() => setViewMode('detailed')}
+                                            style={{
+                                                padding: '6px 16px',
+                                                backgroundColor: viewMode === 'detailed' ? '#4a90e2' : 'transparent',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                fontSize: '0.85rem',
+                                                cursor: 'pointer',
+                                                fontWeight: '600',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            Detailed
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
