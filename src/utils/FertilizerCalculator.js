@@ -1,56 +1,112 @@
-﻿// src/utils/FertilizerCalculator.js
+﻿// src/utils/FertilizerCalculator.js - DYNAMIC VERSION WITH SMART RANGE DETECTION
+
 import ProductionCalculator from './ProductionCalculator';
+import { FertilizerProductionAnalyzer } from './FertilizerProductionAnalyzer';
 
 export class FertilizerCalculator {
-    // Production costs for fertilizers (worker-months per unit of fertilizer produced)
-    static FERTILIZER_PRODUCTION_COSTS = {
-        'Product_FertilizerOrganic': {
-            unitsPerWorkerMonth: 12,
-            fertilityPerWorkerMonth: 12,
-            workerMonthsPerUnit: 1 / 12  // 0.083
-        },
-        'Product_Fertilizer': {
-            unitsPerWorkerMonth: 4.29,
-            fertilityPerWorkerMonth: 8.58,
-            workerMonthsPerUnit: 1 / 4.29  // 0.233
-        },
-        'Product_Fertilizer2': {
-            unitsPerWorkerMonth: 3.27,
-            fertilityPerWorkerMonth: 8.18,
-            workerMonthsPerUnit: 1 / 3.27  // 0.306
-        }
-    };
+    static FERTILIZER_PRODUCTION_COSTS = null;
+    static isInitialized = false;
+    static maxFertilityCapByFertilizers = 200; // ✅ Will be set dynamically
 
-    /**
-     * Get the fertility boost per unit for a given fertilizer product
-     * @param {string} fertilizerId - Product ID of the fertilizer
-     * @returns {number} - Fertility boost percentage per unit
-     */
-    static getFertilityBoost(fertilizerId) {
-        const product = ProductionCalculator.products?.find(p => p.id === fertilizerId);
-
-        if (product && product.fertilizer && product.fertilizer.fertilityPerQuantityPercent !== undefined) {
-            return product.fertilizer.fertilityPerQuantityPercent;
+    static initialize() {
+        if (this.isInitialized) {
+            return;
         }
 
-        // Fallback to default values if not found in game data
-        const defaultBoosts = {
-            'Product_FertilizerOrganic': 10,
-            'Product_Fertilizer': 20,
-            'Product_Fertilizer2': 30
+        const allFertilizers = (ProductionCalculator.products || []).filter(p =>
+            p.fertilizer &&
+            p.fertilizer.fertilityPerQuantityPercent !== undefined &&
+            p.fertilizer.maxFertilityPercent !== undefined
+        );
+
+        if (allFertilizers.length === 0) {
+            this.FERTILIZER_PRODUCTION_COSTS = this.getFallbackCosts();
+            this.maxFertilityCapByFertilizers = 200;
+            this.isInitialized = true;
+            return;
+        }
+
+        // ✅ Calculate the max fertility cap from available fertilizers
+        this.maxFertilityCapByFertilizers = Math.max(
+            ...allFertilizers.map(f => f.fertilizer.maxFertilityPercent || 140)
+        );
+
+        console.log(`✅ Max fertility cap from fertilizers: ${this.maxFertilityCapByFertilizers}%`);
+
+        const fertilizerIds = allFertilizers.map(f => f.id);
+
+        try {
+            const { replacementData } = FertilizerProductionAnalyzer.generateReplacementData(fertilizerIds);
+            this.FERTILIZER_PRODUCTION_COSTS = replacementData;
+            this.isInitialized = true;
+        } catch (error) {
+            console.error('Error initializing FertilizerCalculator:', error);
+            this.FERTILIZER_PRODUCTION_COSTS = this.getFallbackCosts();
+            this.isInitialized = true;
+        }
+    }
+
+    static getFallbackCosts() {
+        return {
+            'Product_FertilizerOrganic': {
+                unitsPerWorkerMonth: 16,
+                fertilityPerWorkerMonth: 16,
+                workerMonthsPerUnit: 0.0625
+            },
+            'Product_Fertilizer': {
+                unitsPerWorkerMonth: 4,
+                fertilityPerWorkerMonth: 8,
+                workerMonthsPerUnit: 0.25
+            },
+            'Product_Fertilizer2': {
+                unitsPerWorkerMonth: 3.2,
+                fertilityPerWorkerMonth: 8,
+                workerMonthsPerUnit: 0.3125
+            }
         };
-
-        return defaultBoosts[fertilizerId] || 10;
     }
 
     /**
-     * Get the production chain data for a fertilizer
-     * @param {string} fertilizerId - Product ID of the fertilizer
-     * @returns {object} - Production chain data
+     * Get the maximum fertility cap based on available fertilizers
+     * @param {Array<string>} allowedFertilizerIds - Optional: filter by allowed fertilizers
+     * @returns {number} - Maximum fertility percentage achievable
      */
-    static getProductionChain(fertilizerId) {
-        const costData = this.FERTILIZER_PRODUCTION_COSTS[fertilizerId];
+    static getMaxFertilityCap(allowedFertilizerIds = null) {
+        if (!this.isInitialized) {
+            this.initialize();
+        }
 
+        // If specific fertilizers are allowed, calculate cap from those
+        if (allowedFertilizerIds && allowedFertilizerIds.length > 0) {
+            const allowedFertilizers = (ProductionCalculator.products || []).filter(p =>
+                p.fertilizer &&
+                p.fertilizer.maxFertilityPercent !== undefined &&
+                allowedFertilizerIds.includes(p.id)
+            );
+
+            if (allowedFertilizers.length > 0) {
+                return Math.max(...allowedFertilizers.map(f => f.fertilizer.maxFertilityPercent));
+            }
+        }
+
+        // Return global cap
+        return this.maxFertilityCapByFertilizers;
+    }
+
+    static getFertilityBoost(fertilizerId) {
+        const product = ProductionCalculator.products?.find(p => p.id === fertilizerId);
+        if (product && product.fertilizer && product.fertilizer.fertilityPerQuantityPercent !== undefined) {
+            return product.fertilizer.fertilityPerQuantityPercent;
+        }
+        return 10;
+    }
+
+    static getProductionChain(fertilizerId) {
+        if (!this.isInitialized) {
+            this.initialize();
+        }
+
+        const costData = this.FERTILIZER_PRODUCTION_COSTS[fertilizerId];
         if (costData) {
             return {
                 workerMonthsPerUnit: costData.workerMonthsPerUnit,
@@ -60,7 +116,6 @@ export class FertilizerCalculator {
             };
         }
 
-        // Fallback
         return {
             workerMonthsPerUnit: 0.5,
             unitsPerWorkerMonth: 2,
@@ -69,11 +124,6 @@ export class FertilizerCalculator {
         };
     }
 
-    /**
-     * Get complexity level of fertilizer production
-     * @param {string} fertilizerId - Product ID
-     * @returns {string} - Complexity level
-     */
     static getComplexity(fertilizerId) {
         const complexityMap = {
             'Product_FertilizerOrganic': 'low',
@@ -83,82 +133,35 @@ export class FertilizerCalculator {
         return complexityMap[fertilizerId] || 'unknown';
     }
 
-    /**
-     * Get human-readable fertilizer name
-     * @param {string} fertilizerId - Product ID
-     * @returns {string} - Display name
-     */
     static getFertilizerName(fertilizerId) {
         const product = ProductionCalculator.products?.find(p => p.id === fertilizerId);
-        if (product) {
-            return product.name;
-        }
-
-        // Fallback names
-        const names = {
-            'Product_FertilizerOrganic': 'Compost',
-            'Product_Fertilizer': 'Fertilizer I',
-            'Product_Fertilizer2': 'Fertilizer II'
-        };
-        return names[fertilizerId] || 'Unknown Fertilizer';
+        return product ? product.name : 'Unknown Fertilizer';
     }
 
-    /**
-     * Calculate fertilizer options for a farm
-     * @param {number} naturalEquilibrium - Natural fertility equilibrium
-     * @param {number} targetFertility - Target fertility level
-     * @param {number} farmPeopleFed - Current people fed by the farm
-     * @param {Array<string>} allowedFertilizerIds - List of allowed fertilizer IDs
-     * @returns {Array<object>} - Array of fertilizer options with calculations
-     */
     static calculateFertilizerOptions(naturalEquilibrium, targetFertility, farmPeopleFed, allowedFertilizerIds) {
+        if (!this.isInitialized) {
+            this.initialize();
+        }
+
         const extraFertilityNeeded = Math.max(0, targetFertility - naturalEquilibrium);
-
-        console.log('FertilizerCalculator Debug:', {
-            naturalEquilibrium,
-            targetFertility,
-            extraFertilityNeeded,
-            farmPeopleFed,
-            allowedFertilizerIds
-        });
-
         if (extraFertilityNeeded === 0) {
-            console.log('No extra fertility needed');
             return [];
         }
 
-        // Get all products that have fertilizer data
         const allFertilizers = (ProductionCalculator.products || []).filter(p => {
             const hasFertilizer = p.fertilizer &&
                 p.fertilizer.fertilityPerQuantityPercent !== undefined &&
                 p.fertilizer.maxFertilityPercent !== undefined;
-
-            const isAllowed = allowedFertilizerIds.includes(p.id);
-
-            if (hasFertilizer && !isAllowed) {
-                console.log(`Fertilizer ${p.id} (${p.name}) found but not in allowed list`);
-            }
-
-            return hasFertilizer && isAllowed;
+            return hasFertilizer && allowedFertilizerIds.includes(p.id);
         });
 
-        console.log('Found fertilizers:', allFertilizers.map(f => ({
-            id: f.id,
-            name: f.name,
-            fertPerQuantity: f.fertilizer.fertilityPerQuantityPercent,
-            maxFert: f.fertilizer.maxFertilityPercent
-        })));
-
         if (allFertilizers.length === 0) {
-            console.warn('No fertilizers found! Check if fertilizer data is loaded in ProductionCalculator.products');
             return [];
         }
 
         const options = allFertilizers.map(fertilizer => {
             const isViable = fertilizer.fertilizer.maxFertilityPercent >= targetFertility;
-
             if (!isViable) {
-                console.log(`Fertilizer ${fertilizer.name} not viable (max ${fertilizer.fertilizer.maxFertilityPercent}% < target ${targetFertility}%)`);
                 return null;
             }
 
@@ -168,22 +171,17 @@ export class FertilizerCalculator {
             const quantityPerYear = quantityPerDay * 360;
 
             const productionCost = this.FERTILIZER_PRODUCTION_COSTS[fertilizer.id];
-
             let workerMonthsPerYear;
             if (productionCost) {
                 workerMonthsPerYear = quantityPerYear / productionCost.unitsPerWorkerMonth;
             } else {
-                console.warn(`No production cost data for fertilizer: ${fertilizer.id}`);
-                // Use conservative estimate: assume 1 unit per 10 worker-months
                 workerMonthsPerYear = quantityPerYear / 10;
             }
 
-            // Calculate yield increase from fertility boost
             const yieldMultiplier = targetFertility / naturalEquilibrium;
             const newYield = farmPeopleFed * yieldMultiplier;
             const yieldIncrease = newYield - farmPeopleFed;
 
-            // Net benefit = people fed increase - workers consumed
             const workersNeeded = workerMonthsPerYear / 12;
             const netPeopleFed = yieldIncrease - workersNeeded;
 
@@ -206,12 +204,7 @@ export class FertilizerCalculator {
             };
         }).filter(opt => opt !== null);
 
-        console.log('Viable fertilizer options:', options.length);
-
-        // Sort by net people fed (best efficiency)
         options.sort((a, b) => b.netPeopleFed - a.netPeopleFed);
-
-        // Mark the best option
         if (options.length > 0) {
             options[0].isBest = true;
         }
@@ -219,43 +212,40 @@ export class FertilizerCalculator {
         return options;
     }
 
-    /**
-     * Get the recommended fertilizer for a farm
-     * @param {number} naturalEquilibrium - Natural fertility equilibrium
-     * @param {number} targetFertility - Target fertility level
-     * @param {number} farmPeopleFed - Current people fed by the farm
-     * @param {Array<string>} allowedFertilizerIds - List of allowed fertilizer IDs
-     * @returns {object|null} - Best fertilizer option or null
-     */
     static getRecommendedFertilizer(naturalEquilibrium, targetFertility, farmPeopleFed, allowedFertilizerIds) {
         const options = this.calculateFertilizerOptions(naturalEquilibrium, targetFertility, farmPeopleFed, allowedFertilizerIds);
         return options[0] || null;
     }
 
     /**
- * Find the optimal fertilizer and target fertility across all possibilities
- * Tests multiple fertility targets and returns the option with highest net benefit
- * @param {number} naturalEquilibrium - Natural fertility equilibrium
- * @param {number} farmPeopleFed - Current people fed by the farm
- * @param {Array<string>} allowedFertilizerIds - List of allowed fertilizer IDs
- * @returns {Object|null} Best fertilizer option with targetFertility property, or null
- */
+     * ✅ SMART RANGE TESTING: Only test from natural equilibrium to max fertilizer cap
+     * Tests all viable targets in 10% increments to find true optimal
+     */
     static findOptimalFertilizer(naturalEquilibrium, farmPeopleFed, allowedFertilizerIds) {
+        if (!this.isInitialized) {
+            this.initialize();
+        }
+
         if (allowedFertilizerIds.length === 0) return null;
 
-        // Test fertility targets in 10% increments
-        const testTargets = [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200];
+        // ✅ Get the max fertility from the allowed fertilizers
+        const maxFertilityCap = this.getMaxFertilityCap(allowedFertilizerIds);
 
-        // Only test targets above natural equilibrium
-        const viableTargets = testTargets.filter(t => t > naturalEquilibrium);
+        // ✅ Generate test targets from (naturalEquilibrium + 10%) to maxFertilityCap
+        const minTarget = Math.ceil(naturalEquilibrium / 10) * 10 + 10; // Round up to next 10%
+        const testTargets = [];
 
-        if (viableTargets.length === 0) return null;
+        for (let target = minTarget; target <= maxFertilityCap; target += 10) {
+            testTargets.push(target);
+        }
+
+        if (testTargets.length === 0) return null;
 
         let bestOption = null;
         let bestNetBenefit = 0;
 
-        // Test each target and find the absolute best
-        viableTargets.forEach(target => {
+        // Test each viable target
+        testTargets.forEach(target => {
             const options = this.calculateFertilizerOptions(
                 naturalEquilibrium,
                 target,
@@ -263,10 +253,7 @@ export class FertilizerCalculator {
                 allowedFertilizerIds
             );
 
-            // Find the best fertilizer for this target (marked with isBest)
             const best = options.find(opt => opt.isBest);
-
-            // Only consider if it has positive net benefit
             if (best && best.netPeopleFed > 0) {
                 if (best.netPeopleFed > bestNetBenefit) {
                     bestNetBenefit = best.netPeopleFed;
@@ -281,12 +268,6 @@ export class FertilizerCalculator {
         return bestOption;
     }
 
-    /**
-     * Calculate total fertilizer needs across all farms
-     * @param {Array<object>} farmResults - Array of farm result objects
-     * @param {Array<string>} allowedFertilizerIds - List of allowed fertilizer IDs
-     * @returns {Array<object>} - Aggregated fertilizer totals by type
-     */
     static calculateTotalFertilizerNeeds(farmResults, allowedFertilizerIds) {
         const fertilizerTotals = new Map();
 
@@ -321,12 +302,6 @@ export class FertilizerCalculator {
         return Array.from(fertilizerTotals.values());
     }
 
-    /**
-     * Calculate global fertilizer usage summary across multiple farms
-     * @param {Array<object>} farmResults - Array of farm result objects
-     * @param {Array<string>} allowedFertilizerIds - List of allowed fertilizer IDs
-     * @returns {object} - Global fertilizer summary
-     */
     static calculateGlobalUsage(farmResults, allowedFertilizerIds) {
         const summary = {
             totalFertilizerUsed: {},
@@ -349,11 +324,9 @@ export class FertilizerCalculator {
                 const unitsNeeded = Math.ceil(fertilityGap / fertilityBoost);
                 const unitsPerYear = unitsNeeded * 12;
 
-                // Add to totals
                 summary.totalFertilizerUsed[fertilizerId] =
                     (summary.totalFertilizerUsed[fertilizerId] || 0) + unitsPerYear;
 
-                // Calculate benefit
                 const baseYield = farmResult.peopleFed;
                 const yieldMultiplier = targetFertility / naturalEquilibrium;
                 const yieldIncrease = baseYield * (yieldMultiplier - 1);
@@ -367,7 +340,6 @@ export class FertilizerCalculator {
             }
         });
 
-        // Build by-type breakdown
         summary.byType = Object.entries(summary.totalFertilizerUsed).map(([id, amount]) => ({
             id,
             name: this.getFertilizerName(id),

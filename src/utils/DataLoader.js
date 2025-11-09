@@ -2,10 +2,14 @@
  * DataLoader - Handles loading and merging base game + mod data
  */
 
+import { FertilizerCalculator } from './FertilizerCalculator';
+import ProductionCalculator from './ProductionCalculator';
+
 export class DataLoader {
     static baseGameData = null;
     static loadedMods = new Map();
     static manifestCache = null;
+    static isInitialized = false; // ✅ Add this
 
     /**
      * Load base game data
@@ -22,7 +26,7 @@ export class DataLoader {
                 products: this.baseGameData.products?.length || 0,
                 recipes: this.baseGameData.recipes?.length || 0,
                 machines: this.baseGameData.machines?.length || 0,
-                research: this.baseGameData.research?.length || 0 // NEW
+                research: this.baseGameData.research?.length || 0
             });
             return this.baseGameData;
         } catch (error) {
@@ -49,7 +53,7 @@ export class DataLoader {
                 products: modData.products?.length || 0,
                 recipes: modData.recipes?.length || 0,
                 machines: modData.machines?.length || 0,
-                research: modData.research?.length || 0 // NEW
+                research: modData.research?.length || 0
             });
 
             return modData;
@@ -89,6 +93,10 @@ export class DataLoader {
         // If no mods enabled, return base game only
         if (!enabledModIds || enabledModIds.length === 0) {
             console.log('📦 Using base game data only');
+
+            // ✅ Initialize calculators with base game data
+            this.initializeCalculators(baseData);
+
             return baseData;
         }
 
@@ -109,6 +117,10 @@ export class DataLoader {
 
         if (modDataArray.length === 0) {
             console.log('📦 No mods loaded, using base game data only');
+
+            // ✅ Initialize calculators with base game data
+            this.initializeCalculators(baseData);
+
             return baseData;
         }
 
@@ -122,10 +134,42 @@ export class DataLoader {
             totalMachines: merged.machines?.length || 0,
             totalFarms: merged.farms?.length || 0,
             totalCrops: merged.crops?.length || 0,
-            totalResearch: merged.research?.length || 0 // NEW
+            totalResearch: merged.research?.length || 0
         });
 
+        // ✅ Initialize calculators with merged data
+        this.initializeCalculators(merged);
+
         return merged;
+    }
+
+    /**
+     * ✅ NEW: Initialize all calculators after data is loaded
+     * @param {object} gameData - The loaded/merged game data
+     */
+    static initializeCalculators(gameData) {
+        if (this.isInitialized) {
+            console.log('⏭️ Calculators already initialized, skipping...');
+            return;
+        }
+
+        console.log('🔧 Initializing calculators...');
+
+        try {
+            // Initialize ProductionCalculator first
+            ProductionCalculator.initialize(gameData);
+            console.log('✅ ProductionCalculator initialized');
+
+            // Then initialize FertilizerCalculator (depends on ProductionCalculator)
+            FertilizerCalculator.initialize();
+            console.log('✅ FertilizerCalculator initialized');
+
+            this.isInitialized = true;
+            console.log('✅ All calculators initialized successfully');
+        } catch (error) {
+            console.error('❌ Failed to initialize calculators:', error);
+            // Don't throw - let the app continue with fallback values
+        }
     }
 
     /**
@@ -143,7 +187,7 @@ export class DataLoader {
             const arrayFields = [
                 'products', 'recipes', 'machines', 'buildings',
                 'farms', 'crops', 'foods', 'foodCategories',
-                'resources', 'farmResearch', 'research' // NEW: Added research
+                'resources', 'farmResearch', 'research'
             ];
 
             arrayFields.forEach(field => {
@@ -178,6 +222,7 @@ export class DataLoader {
         this.baseGameData = null;
         this.loadedMods.clear();
         this.manifestCache = null;
+        this.isInitialized = false; // ✅ Add this
         console.log('🗑️ Data cache cleared');
     }
 }

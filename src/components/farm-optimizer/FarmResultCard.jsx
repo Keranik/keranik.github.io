@@ -1,4 +1,4 @@
-﻿// src/components/farm-optimizer/FarmResultCard.jsx
+﻿// src/components/farm-optimizer/FarmResultCard.jsx - COMPLETE FIXED VERSION
 import { useState, useEffect } from 'react';
 import { getCropIcon, getProductIcon, getGeneralIcon } from '../../utils/AssetHelper';
 import ProductionCalculator from '../../utils/ProductionCalculator';
@@ -35,12 +35,13 @@ const FarmResultCard = ({
         processingWaterPerDay,
         totalRotationMonths,
         processingChains,
-        slotDetails
+        slotDetails,
+        bestFertilizerOption,
+        autoAppliedFertilizer
     } = farmResult;
 
     const naturalEquilibrium = fertilityInfo.naturalEquilibrium;
 
-    // Get available fertilizers
     const availableFertilizers = allowedFertilizerIds
         .map(id => {
             const product = ProductionCalculator.getProduct(id);
@@ -56,30 +57,44 @@ const FarmResultCard = ({
         })
         .filter(f => f !== null);
 
-    // State for fertilizer planning
+    const maxFertilityCap = FertilizerCalculator.getMaxFertilityCap(allowedFertilizerIds);
+
     const [selectedFertilizerId, setSelectedFertilizerId] = useState(
         farm.selectedFertilizerId || availableFertilizers[0]?.id || null
     );
 
-    // Round to nearest 10 for fertility target
     const roundToTen = (value) => Math.round(value / 10) * 10;
 
     const [targetFertility, setTargetFertility] = useState(
         roundToTen(actualFertility || Math.ceil(naturalEquilibrium / 10) * 10 + 10)
     );
 
-    // Sync state with props when farmResult changes
+    const bestOption = bestFertilizerOption ? {
+        ...bestFertilizerOption,
+        fertilizer: {
+            id: bestFertilizerOption.fertilizerId,
+            name: bestFertilizerOption.fertilizerName,
+            icon: availableFertilizers.find(f => f.id === bestFertilizerOption.fertilizerId)?.icon,
+            fertilityPerUnit: bestFertilizerOption.fertilityPerQuantity
+        },
+        actualFertility: bestFertilizerOption.targetFertility
+    } : null;
+
     useEffect(() => {
         if (farm.selectedFertilizerId !== selectedFertilizerId) {
+            console.log(`Farm ${farmNumber}: Syncing selectedFertilizerId:`, farm.selectedFertilizerId);
             setSelectedFertilizerId(farm.selectedFertilizerId || availableFertilizers[0]?.id || null);
         }
+    }, [farm.selectedFertilizerId, farmNumber]);
+
+    useEffect(() => {
         const roundedActual = roundToTen(actualFertility || Math.ceil(naturalEquilibrium / 10) * 10 + 10);
         if (Math.abs(roundedActual - targetFertility) > 5) {
+            console.log(`Farm ${farmNumber}: Syncing targetFertility:`, roundedActual);
             setTargetFertility(roundedActual);
         }
-    }, [farm.selectedFertilizerId, actualFertility]);
+    }, [actualFertility, farmNumber]);
 
-    // Calculate adjusted production based on CURRENT fertility settings
     const calculateAdjustedProduction = () => {
         const baseYield = peopleFed / (actualFertility / naturalEquilibrium);
         const yieldMultiplier = actualFertility / naturalEquilibrium;
@@ -88,7 +103,6 @@ const FarmResultCard = ({
 
     const adjustedPeopleFed = calculateAdjustedProduction();
 
-    // ✅ FIXED: Calculate fertilizer needs - ALWAYS compare against natural equilibrium
     const calculateFertilizerNeeds = (fertilizerId, target) => {
         if (!fertilizerId || target <= naturalEquilibrium) {
             return null;
@@ -101,17 +115,15 @@ const FarmResultCard = ({
         const unitsNeeded = Math.ceil(fertilityGap / fertilizer.fertilityPerUnit);
         const actualFertilityTarget = naturalEquilibrium + (unitsNeeded * fertilizer.fertilityPerUnit);
 
-        // Calculate production chain cost
         const productionChain = FertilizerCalculator.getProductionChain(fertilizerId);
         const workerMonthsPerUnit = productionChain?.workerMonthsPerUnit || 0.5;
-        const totalWorkerMonths = unitsNeeded * workerMonthsPerUnit * 12; // Per year
+        const totalWorkerMonths = unitsNeeded * workerMonthsPerUnit * 12;
 
-        // ✅ FIXED: Calculate people fed increase from NATURAL BASE (not current)
         const baseYield = peopleFed / (actualFertility / naturalEquilibrium);
-        const naturalYield = baseYield; // This is yield at natural equilibrium
+        const naturalYield = baseYield;
         const targetYieldMultiplier = actualFertilityTarget / naturalEquilibrium;
         const newYield = baseYield * targetYieldMultiplier;
-        const yieldIncrease = newYield - naturalYield; // Compare to NATURAL, not current
+        const yieldIncrease = newYield - naturalYield;
 
         const workersNeeded = totalWorkerMonths / 12;
         const netPeopleFed = yieldIncrease - workersNeeded;
@@ -134,31 +146,11 @@ const FarmResultCard = ({
         };
     };
 
-    // Get current fertilizer needs (what's actually being used)
     const currentFertilizerNeeds = usingFertilizer && farm.selectedFertilizerId
         ? calculateFertilizerNeeds(farm.selectedFertilizerId, actualFertility)
         : null;
 
-    // Get planned fertilizer needs (what user is configuring)
     const plannedFertilizerNeeds = calculateFertilizerNeeds(selectedFertilizerId, targetFertility);
-
-    // ✅ FIXED: Get best option using the shared calculator method
-    const bestOptionRaw = FertilizerCalculator.findOptimalFertilizer(
-        naturalEquilibrium,
-        peopleFed / (actualFertility / naturalEquilibrium), // Pass natural base yield
-        allowedFertilizerIds
-    );
-
-    const bestOption = bestOptionRaw ? {
-        ...bestOptionRaw,
-        fertilizer: {
-            id: bestOptionRaw.fertilizerId,
-            name: bestOptionRaw.fertilizerName,
-            icon: availableFertilizers.find(f => f.id === bestOptionRaw.fertilizerId)?.icon,
-            fertilityPerUnit: bestOptionRaw.fertilityPerQuantity
-        },
-        actualFertility: bestOptionRaw.targetFertility
-    } : null;
 
     const toggleSection = (section) => {
         setExpandedSections(prev => ({
@@ -168,8 +160,8 @@ const FarmResultCard = ({
     };
 
     const handleApplyFertilizer = () => {
-        console.log('Applying fertilizer:', {
-            farmNumber: farmNumber - 1,
+        console.log(`Farm ${farmNumber}: Applying fertilizer:`, {
+            farmIndex: farmNumber - 1,
             selectedFertilizerId,
             targetFertility: roundToTen(targetFertility),
             farmId: farm.id
@@ -181,12 +173,19 @@ const FarmResultCard = ({
 
     const handleUseBestOption = () => {
         if (bestOption) {
+            console.log(`Farm ${farmNumber}: Using best option:`, bestOption.fertilizer.name, 'at', bestOption.actualFertility + '%');
             setSelectedFertilizerId(bestOption.fertilizer.id);
             setTargetFertility(roundToTen(bestOption.actualFertility));
         }
     };
 
-    // Icons
+    const handleRemoveFertilizer = () => {
+        console.log(`Farm ${farmNumber}: Removing fertilizer`);
+        onFertilizerSelect(farmNumber - 1, null);
+        onCustomFertilityChange(farm.id, null);
+        setShowFertilizerSettings(false);
+    };
+
     const fertilizerIcon = getGeneralIcon('Fertilizer');
     const infoIcon = getGeneralIcon('Info');
     const calculatorIcon = getGeneralIcon('Calculator');
@@ -202,7 +201,6 @@ const FarmResultCard = ({
             borderRadius: '8px',
             border: '1px solid #333'
         }}>
-            {/* Farm Header */}
             <div style={{ marginBottom: '1rem' }}>
                 <h4 style={{ fontSize: '1.3rem', fontWeight: '700', color: '#4a90e2', marginBottom: '0.5rem' }}>
                     Farm #{farmNumber} - {effectiveFarm.name}
@@ -217,7 +215,6 @@ const FarmResultCard = ({
                 </div>
             </div>
 
-            {/* Crop Rotation Display */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(4, 1fr)',
@@ -272,7 +269,6 @@ const FarmResultCard = ({
                 })}
             </div>
 
-            {/* Processing Chains */}
             {processingChains && processingChains.some(c => !c.isDirect) && (
                 <div style={{
                     padding: '1rem',
@@ -318,7 +314,6 @@ const FarmResultCard = ({
                 </div>
             )}
 
-            {/* Fertility Stats */}
             <div style={{
                 padding: '1rem',
                 backgroundColor: '#2a2a2a',
@@ -380,7 +375,6 @@ const FarmResultCard = ({
                 )}
             </div>
 
-            {/* ✅ FIXED: FERTILIZER CURRENT STATUS & SETTINGS - No yellow border on main container */}
             <div style={{
                 padding: '1rem',
                 backgroundColor: '#2a2a2a',
@@ -388,7 +382,6 @@ const FarmResultCard = ({
                 border: '1px solid #444',
                 marginBottom: '1rem'
             }}>
-                {/* Current Fertilizer Status (Always Visible) */}
                 <div style={{ marginBottom: '1rem' }}>
                     <div style={{
                         display: 'flex',
@@ -402,6 +395,30 @@ const FarmResultCard = ({
                         <span style={{ fontSize: '1rem', fontWeight: '700', color: usingFertilizer ? '#FFD700' : '#ddd' }}>
                             Fertilizer Status
                         </span>
+                        {autoAppliedFertilizer && (
+                            <span style={{
+                                fontSize: '0.7rem',
+                                padding: '0.25rem 0.5rem',
+                                backgroundColor: 'rgba(80, 200, 120, 0.2)',
+                                color: '#50C878',
+                                borderRadius: '3px',
+                                fontWeight: '600'
+                            }}>
+                                ✓ Auto-Applied
+                            </span>
+                        )}
+                        {usingFertilizer && !autoAppliedFertilizer && (
+                            <span style={{
+                                fontSize: '0.7rem',
+                                padding: '0.25rem 0.5rem',
+                                backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                                color: '#4a90e2',
+                                borderRadius: '3px',
+                                fontWeight: '600'
+                            }}>
+                                ✓ Manual Override
+                            </span>
+                        )}
                     </div>
 
                     {usingFertilizer && currentFertilizerNeeds ? (
@@ -488,7 +505,6 @@ const FarmResultCard = ({
                     )}
                 </div>
 
-                {/* Change Settings Button */}
                 <button
                     onClick={() => setShowFertilizerSettings(!showFertilizerSettings)}
                     style={{
@@ -521,13 +537,11 @@ const FarmResultCard = ({
                     {settingsIcon && (
                         <img src={settingsIcon} alt="Settings" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
                     )}
-                    {showFertilizerSettings ? '▼ Hide Settings' : '⚙️ Change Fertilizer Settings'}
+                    {showFertilizerSettings ? '▼ Hide Settings' : 'Change Fertilizer Settings'}
                 </button>
 
-                {/* Expanded Settings Panel */}
                 {showFertilizerSettings && (
                     <div style={{ marginTop: '1rem' }}>
-                        {/* ✅ Best Option Banner - Keep yellow highlight here */}
                         {bestOption && (
                             <div style={{
                                 padding: '0.75rem',
@@ -573,7 +587,6 @@ const FarmResultCard = ({
                             </div>
                         )}
 
-                        {/* Fertilizer Type Selector */}
                         <div style={{ marginBottom: '1rem' }}>
                             <label style={{
                                 display: 'block',
@@ -643,7 +656,6 @@ const FarmResultCard = ({
                             </div>
                         </div>
 
-                        {/* Target Fertility Slider (10% increments only) */}
                         <div style={{ marginBottom: '1rem' }}>
                             <label style={{
                                 display: 'flex',
@@ -662,7 +674,7 @@ const FarmResultCard = ({
                             <input
                                 type="range"
                                 min={Math.ceil(naturalEquilibrium / 10) * 10}
-                                max="200"
+                                max={maxFertilityCap}
                                 step="10"
                                 value={targetFertility}
                                 onChange={(e) => setTargetFertility(parseInt(e.target.value))}
@@ -684,11 +696,10 @@ const FarmResultCard = ({
                             }}>
                                 <span>{Math.ceil(naturalEquilibrium / 10) * 10}%</span>
                                 <span style={{ fontStyle: 'italic' }}>Steps of 10% only</span>
-                                <span>200%</span>
+                                <span>{maxFertilityCap}%</span>
                             </div>
                         </div>
 
-                        {/* Requirements Display */}
                         {plannedFertilizerNeeds && (
                             <div style={{
                                 padding: '1rem',
@@ -744,29 +755,49 @@ const FarmResultCard = ({
                             </div>
                         )}
 
-                        {/* Apply Button */}
-                        <button
-                            onClick={handleApplyFertilizer}
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                backgroundColor: '#4a90e2',
-                                color: '#fff',
-                                border: 'none',
-                                borderRadius: '6px',
-                                fontSize: '0.9rem',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                marginBottom: '1rem'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5aa0f2'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
-                        >
-                            ✓ Apply Fertilizer Settings
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                            <button
+                                onClick={handleApplyFertilizer}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.75rem',
+                                    backgroundColor: '#4a90e2',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5aa0f2'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
+                            >
+                                ✓ Apply Settings
+                            </button>
+                            {usingFertilizer && (
+                                <button
+                                    onClick={handleRemoveFertilizer}
+                                    style={{
+                                        padding: '0.75rem 1rem',
+                                        backgroundColor: '#ff6b6b',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        fontSize: '0.9rem',
+                                        fontWeight: '700',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff5555'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ff6b6b'}
+                                >
+                                    Remove
+                                </button>
+                            )}
+                        </div>
 
-                        {/* Expandable Details */}
                         <ExpandableSection
                             title="How It Works"
                             icon={infoIcon}
@@ -808,7 +839,6 @@ const FarmResultCard = ({
                 )}
             </div>
 
-            {/* Production Summary - WITH ADJUSTED VALUES */}
             {Object.keys(production).length > 0 && (
                 <div style={{ marginTop: '1rem' }}>
                     <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem', fontWeight: '600' }}>
@@ -818,7 +848,6 @@ const FarmResultCard = ({
                         {Object.entries(production).map(([productId, quantity]) => {
                             const product = ProductionCalculator.getProduct(productId);
                             const icon = getProductIcon(product);
-                            // Adjust production based on current fertility
                             const adjustedQuantity = quantity * (actualFertility / naturalEquilibrium) / (farmResult.actualFertility / naturalEquilibrium);
                             return (
                                 <div
@@ -856,7 +885,6 @@ const FarmResultCard = ({
     );
 };
 
-// Helper Components
 const ExpandableSection = ({ title, icon, isExpanded, onToggle, children }) => (
     <div style={{
         marginBottom: '0.75rem',
