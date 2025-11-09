@@ -1,8 +1,8 @@
 ﻿// src/components/farm-optimizer/FarmResultCard.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getCropIcon, getProductIcon, getGeneralIcon } from '../../utils/AssetHelper';
 import ProductionCalculator from '../../utils/ProductionCalculator';
-import FertilizerSelector from './FertilizerSelector';
+import { FertilizerCalculator } from '../../utils/FertilizerCalculator';
 import FertilityBreakdownPanel from './FertilityBreakdownPanel';
 
 const FarmResultCard = ({
@@ -10,9 +10,16 @@ const FarmResultCard = ({
     farmResult,
     research,
     onFertilizerSelect,
-    onCustomFertilityChange
+    onCustomFertilityChange,
+    allowedFertilizerIds = ['Product_FertilizerOrganic', 'Product_Fertilizer', 'Product_Fertilizer2']
 }) => {
     const [showFertilityBreakdown, setShowFertilityBreakdown] = useState(false);
+    const [showFertilizerSettings, setShowFertilizerSettings] = useState(false);
+    const [expandedSections, setExpandedSections] = useState({
+        howItWorks: false,
+        calculations: false,
+        comparison: false
+    });
 
     const {
         farm,
@@ -28,9 +35,159 @@ const FarmResultCard = ({
         processingWaterPerDay,
         totalRotationMonths,
         processingChains,
-        slotDetails,
-        fertilizerOptions
+        slotDetails
     } = farmResult;
+
+    const naturalEquilibrium = fertilityInfo.naturalEquilibrium;
+
+    // Get available fertilizers
+    const availableFertilizers = allowedFertilizerIds
+        .map(id => {
+            const product = ProductionCalculator.getProduct(id);
+            if (!product) return null;
+
+            const fertilityBoost = FertilizerCalculator.getFertilityBoost(id);
+            return {
+                id: product.id,
+                name: product.name,
+                icon: getProductIcon(product),
+                fertilityPerUnit: fertilityBoost
+            };
+        })
+        .filter(f => f !== null);
+
+    // State for fertilizer planning
+    const [selectedFertilizerId, setSelectedFertilizerId] = useState(
+        farm.selectedFertilizerId || availableFertilizers[0]?.id || null
+    );
+
+    // Round to nearest 10 for fertility target
+    const roundToTen = (value) => Math.round(value / 10) * 10;
+
+    const [targetFertility, setTargetFertility] = useState(
+        roundToTen(actualFertility || Math.ceil(naturalEquilibrium / 10) * 10 + 10)
+    );
+
+    // Sync state with props when farmResult changes
+    useEffect(() => {
+        if (farm.selectedFertilizerId !== selectedFertilizerId) {
+            setSelectedFertilizerId(farm.selectedFertilizerId || availableFertilizers[0]?.id || null);
+        }
+        const roundedActual = roundToTen(actualFertility || Math.ceil(naturalEquilibrium / 10) * 10 + 10);
+        if (Math.abs(roundedActual - targetFertility) > 5) {
+            setTargetFertility(roundedActual);
+        }
+    }, [farm.selectedFertilizerId, actualFertility]);
+
+    // Calculate adjusted production based on CURRENT fertility settings
+    const calculateAdjustedProduction = () => {
+        const baseYield = peopleFed / (actualFertility / naturalEquilibrium);
+        const yieldMultiplier = actualFertility / naturalEquilibrium;
+        return baseYield * yieldMultiplier;
+    };
+
+    const adjustedPeopleFed = calculateAdjustedProduction();
+
+    // Calculate fertilizer needs
+    const calculateFertilizerNeeds = (fertilizerId, target) => {
+        if (!fertilizerId || target <= naturalEquilibrium) {
+            return null;
+        }
+
+        const fertilizer = availableFertilizers.find(f => f.id === fertilizerId);
+        if (!fertilizer) return null;
+
+        const fertilityGap = target - naturalEquilibrium;
+        const unitsNeeded = Math.ceil(fertilityGap / fertilizer.fertilityPerUnit);
+        const actualFertilityTarget = naturalEquilibrium + (unitsNeeded * fertilizer.fertilityPerUnit);
+
+        // Calculate production chain cost
+        const productionChain = FertilizerCalculator.getProductionChain(fertilizerId);
+        const workerMonthsPerUnit = productionChain?.workerMonthsPerUnit || 0.5;
+        const totalWorkerMonths = unitsNeeded * workerMonthsPerUnit * 12; // Per year
+
+        // Calculate people fed increase from CURRENT base yield
+        const baseYield = peopleFed / (actualFertility / naturalEquilibrium);
+        const yieldMultiplier = actualFertilityTarget / naturalEquilibrium;
+        const newYield = baseYield * yieldMultiplier;
+        const yieldIncrease = newYield - peopleFed;
+
+        const workersNeeded = totalWorkerMonths / 12;
+        const netPeopleFed = yieldIncrease - workersNeeded;
+
+        return {
+            fertilizer,
+            unitsNeeded,
+            unitsPerMonth: unitsNeeded,
+            unitsPerYear: unitsNeeded * 12,
+            actualFertility: actualFertilityTarget,
+            fertilityGap,
+            yieldMultiplier,
+            baseYield,
+            newYield,
+            yieldIncrease,
+            workerMonthsPerYear: totalWorkerMonths,
+            workersNeeded,
+            netPeopleFed,
+            efficiency: yieldIncrease / workersNeeded
+        };
+    };
+
+    // Get current fertilizer needs (what's actually being used)
+    const currentFertilizerNeeds = usingFertilizer && farm.selectedFertilizerId
+        ? calculateFertilizerNeeds(farm.selectedFertilizerId, actualFertility)
+        : null;
+
+    // Get planned fertilizer needs (what user is configuring)
+    const plannedFertilizerNeeds = calculateFertilizerNeeds(selectedFertilizerId, targetFertility);
+
+    // Find the best fertilizer option
+    const getBestFertilizerOption = () => {
+        const roundedTarget = roundToTen(Math.ceil(naturalEquilibrium / 10) * 10 + 10);
+        const options = availableFertilizers
+            .map(fert => calculateFertilizerNeeds(fert.id, roundedTarget))
+            .filter(opt => opt !== null);
+
+        if (options.length === 0) return null;
+        options.sort((a, b) => b.netPeopleFed - a.netPeopleFed);
+        return options[0];
+    };
+
+    const bestOption = getBestFertilizerOption();
+
+    const toggleSection = (section) => {
+        setExpandedSections(prev => ({
+            ...prev,
+            [section]: !prev[section]
+        }));
+    };
+
+    const handleApplyFertilizer = () => {
+        console.log('Applying fertilizer:', {
+            farmNumber: farmNumber - 1,
+            selectedFertilizerId,
+            targetFertility: roundToTen(targetFertility),
+            farmId: farm.id
+        });
+        onFertilizerSelect(farmNumber - 1, selectedFertilizerId);
+        onCustomFertilityChange(farm.id, roundToTen(targetFertility));
+        setShowFertilizerSettings(false);
+    };
+
+    const handleUseBestOption = () => {
+        if (bestOption) {
+            setSelectedFertilizerId(bestOption.fertilizer.id);
+            setTargetFertility(roundToTen(bestOption.actualFertility));
+        }
+    };
+
+    // Icons
+    const fertilizerIcon = getGeneralIcon('Fertilizer');
+    const infoIcon = getGeneralIcon('Info');
+    const calculatorIcon = getGeneralIcon('Calculator');
+    const compareIcon = getGeneralIcon('Compare');
+    const settingsIcon = getGeneralIcon('Settings');
+    const starIcon = getGeneralIcon('Star');
 
     return (
         <div style={{
@@ -40,12 +197,13 @@ const FarmResultCard = ({
             borderRadius: '8px',
             border: '1px solid #333'
         }}>
+            {/* Farm Header */}
             <div style={{ marginBottom: '1rem' }}>
                 <h4 style={{ fontSize: '1.3rem', fontWeight: '700', color: '#4a90e2', marginBottom: '0.5rem' }}>
                     Farm #{farmNumber} - {effectiveFarm.name}
                 </h4>
                 <div style={{ fontSize: '0.85rem', color: '#888' }}>
-                    Feeds {peopleFed.toFixed(1)} people/month • {totalWaterPerDay.toFixed(1)} water/day
+                    Feeds {adjustedPeopleFed.toFixed(1)} people/month • {totalWaterPerDay.toFixed(1)} water/day
                     {processingWaterPerDay > 0 && (
                         <span style={{ color: '#666', marginLeft: '8px' }}>
                             (Farm: {farmWaterPerDay.toFixed(1)} + Processing: {processingWaterPerDay.toFixed(1)})
@@ -100,30 +258,8 @@ const FarmResultCard = ({
                                                 style={{ width: '12px', height: '12px', objectFit: 'contain' }}
                                             />
                                         )}
-                                        {slotDetail.peopleFed.toFixed(0)} /mo
+                                        {(slotDetail.peopleFed * (actualFertility / naturalEquilibrium) / (farmResult.actualFertility / naturalEquilibrium)).toFixed(0)} /mo
                                     </div>
-                                    <div style={{ color: '#50C878', marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
-                                        {getProductIcon(ProductionCalculator.products?.find(p => p.name?.toLowerCase() === 'water')) && (
-                                            <img
-                                                src={getProductIcon(ProductionCalculator.products?.find(p => p.name?.toLowerCase() === 'water'))}
-                                                alt="Water"
-                                                style={{ width: '12px', height: '12px', objectFit: 'contain' }}
-                                            />
-                                        )}
-                                        {(slotDetail.waterPerDay * 30).toFixed(0)} /mo
-                                    </div>
-                                    {slotDetail.processingChain && !slotDetail.processingChain.isDirect && (
-                                        <div style={{ color: '#FFD700', marginTop: '2px', fontSize: '0.65rem' }}>
-                                            {getGeneralIcon('Machines') && (
-                                                <img
-                                                    src={getGeneralIcon('Machines')}
-                                                    alt="Processed"
-                                                    style={{ width: '10px', height: '10px', objectFit: 'contain', display: 'inline', marginRight: '2px' }}
-                                                />
-                                            )}
-                                            Processed
-                                        </div>
-                                    )}
                                 </div>
                             )}
                         </div>
@@ -192,7 +328,7 @@ const FarmResultCard = ({
                 }}>
                     <div>
                         <div style={{ color: '#888', marginBottom: '0.25rem' }}>Natural Equilibrium</div>
-                        <div style={{ color: '#FFD700', fontWeight: '700', fontSize: '1rem' }}>
+                        <div style={{ color: '#50C878', fontWeight: '700', fontSize: '1rem' }}>
                             {fertilityInfo.naturalEquilibrium.toFixed(1)}%
                         </div>
                     </div>
@@ -201,7 +337,7 @@ const FarmResultCard = ({
                             {usingFertilizer ? 'With Fertilizer' : 'Actual Fertility'}
                         </div>
                         <div style={{
-                            color: usingFertilizer ? '#4a90e2' : '#50C878',
+                            color: usingFertilizer ? '#FFD700' : '#50C878',
                             fontWeight: '700',
                             fontSize: '1rem',
                             display: 'flex',
@@ -209,80 +345,465 @@ const FarmResultCard = ({
                             gap: '4px'
                         }}>
                             {actualFertility.toFixed(1)}%
-                            {usingFertilizer && getGeneralIcon('Fertilizer') && (
+                            {usingFertilizer && fertilizerIcon && (
                                 <img
-                                    src={getGeneralIcon('Fertilizer')}
+                                    src={fertilizerIcon}
                                     alt="Fertilizer"
                                     style={{ width: '14px', height: '14px', objectFit: 'contain' }}
                                 />
                             )}
                         </div>
-                        {usingFertilizer && (
-                            <div style={{ fontSize: '0.65rem', color: '#4a90e2', marginTop: '2px' }}>
-                                Using fertilizer
-                            </div>
-                        )}
                     </div>
                     <div>
                         <div style={{ color: '#888', marginBottom: '0.25rem' }}>Rotation Length</div>
-                        <div style={{ color: '#50C878', fontWeight: '700', fontSize: '1rem' }}>
-                            {totalRotationMonths > 0
-                                ? `${totalRotationMonths.toFixed(1)} ${totalRotationMonths === 1 ? 'month' : 'months'}`
-                                : '0 months'}
+                        <div style={{ color: '#4a90e2', fontWeight: '700', fontSize: '1rem' }}>
+                            {totalRotationMonths.toFixed(1)} mo
                         </div>
                     </div>
                 </div>
 
-                {/* Toggle Fertility Breakdown */}
+                {showFertilityBreakdown && (
+                    <div style={{ marginTop: '1rem' }}>
+                        <FertilityBreakdownPanel
+                            farmResult={farmResult}
+                            effectiveFarm={effectiveFarm}
+                            rotation={rotation}
+                            research={research}
+                            onFertilityChange={onCustomFertilityChange}
+                        />
+                    </div>
+                )}
+            </div>
+
+            {/* FERTILIZER CURRENT STATUS & SETTINGS */}
+            <div style={{
+                padding: '1rem',
+                backgroundColor: usingFertilizer ? 'rgba(255, 215, 0, 0.1)' : '#2a2a2a',
+                borderRadius: '6px',
+                border: usingFertilizer ? '2px solid #FFD700' : '1px solid #444',
+                marginBottom: '1rem'
+            }}>
+                {/* Current Fertilizer Status (Always Visible) */}
+                <div style={{ marginBottom: '1rem' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        marginBottom: '0.75rem'
+                    }}>
+                        {fertilizerIcon && (
+                            <img src={fertilizerIcon} alt="Fertilizer" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                        )}
+                        <span style={{ fontSize: '1rem', fontWeight: '700', color: usingFertilizer ? '#FFD700' : '#888' }}>
+                            Fertilizer Status
+                        </span>
+                    </div>
+
+                    {usingFertilizer && currentFertilizerNeeds ? (
+                        <div style={{
+                            padding: '0.75rem',
+                            backgroundColor: '#1a1a1a',
+                            borderRadius: '6px',
+                            border: '1px solid rgba(255, 215, 0, 0.3)'
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                marginBottom: '0.75rem'
+                            }}>
+                                {currentFertilizerNeeds.fertilizer.icon && (
+                                    <img
+                                        src={currentFertilizerNeeds.fertilizer.icon}
+                                        alt={currentFertilizerNeeds.fertilizer.name}
+                                        style={{ width: '20px', height: '20px', objectFit: 'contain' }}
+                                    />
+                                )}
+                                <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#FFD700' }}>
+                                    {currentFertilizerNeeds.fertilizer.name}
+                                </span>
+                                <span style={{ fontSize: '0.75rem', color: '#888' }}>
+                                    (Target: {actualFertility.toFixed(0)}% fertility)
+                                </span>
+                            </div>
+
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(4, 1fr)',
+                                gap: '0.5rem',
+                                fontSize: '0.75rem'
+                            }}>
+                                <div>
+                                    <div style={{ color: '#888' }}>Usage</div>
+                                    <div style={{ color: '#FFD700', fontWeight: '700', fontSize: '0.85rem' }}>
+                                        {currentFertilizerNeeds.unitsPerMonth.toFixed(1)}/mo
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style={{ color: '#888' }}>Per Year</div>
+                                    <div style={{ color: '#FFD700', fontWeight: '700', fontSize: '0.85rem' }}>
+                                        {currentFertilizerNeeds.unitsPerYear.toFixed(0)}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style={{ color: '#888' }}>+People</div>
+                                    <div style={{ color: '#50C878', fontWeight: '700', fontSize: '0.85rem' }}>
+                                        +{currentFertilizerNeeds.yieldIncrease.toFixed(1)}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style={{ color: '#888' }}>Net</div>
+                                    <div style={{
+                                        color: currentFertilizerNeeds.netPeopleFed > 0 ? '#50C878' : '#ff6b6b',
+                                        fontWeight: '700',
+                                        fontSize: '0.85rem'
+                                    }}>
+                                        {currentFertilizerNeeds.netPeopleFed > 0 ? '+' : ''}{currentFertilizerNeeds.netPeopleFed.toFixed(1)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div style={{
+                            padding: '0.75rem',
+                            backgroundColor: '#1a1a1a',
+                            borderRadius: '6px',
+                            border: '1px solid #333',
+                            textAlign: 'center'
+                        }}>
+                            <div style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem' }}>
+                                No fertilizer currently applied
+                            </div>
+                            {bestOption && (
+                                <div style={{ fontSize: '0.75rem', color: '#666', fontStyle: 'italic' }}>
+                                    💡 Recommended: {bestOption.fertilizer.name} (+{bestOption.netPeopleFed.toFixed(1)} net people)
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Change Settings Button */}
                 <button
-                    onClick={() => setShowFertilityBreakdown(!showFertilityBreakdown)}
+                    onClick={() => setShowFertilizerSettings(!showFertilizerSettings)}
                     style={{
-                        marginTop: '1rem',
-                        padding: '0.5rem 1rem',
-                        backgroundColor: '#1a1a1a',
-                        color: '#4a90e2',
-                        border: '1px solid #4a90e2',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '0.85rem',
-                        fontWeight: '600',
                         width: '100%',
+                        padding: '0.75rem',
+                        backgroundColor: showFertilizerSettings ? 'rgba(255, 215, 0, 0.15)' : '#1a1a1a',
+                        border: showFertilizerSettings ? '2px solid #FFD700' : '1px solid #444',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '0.5rem'
+                        gap: '0.5rem',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                        color: showFertilizerSettings ? '#FFD700' : '#ddd',
+                        transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                        if (!showFertilizerSettings) {
+                            e.currentTarget.style.backgroundColor = '#222';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (!showFertilizerSettings) {
+                            e.currentTarget.style.backgroundColor = '#1a1a1a';
+                        }
                     }}
                 >
-                    {showFertilityBreakdown ? '▼' : '▶'} {showFertilityBreakdown ? 'Hide' : 'Show'} Fertility Breakdown
+                    {settingsIcon && (
+                        <img src={settingsIcon} alt="Settings" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                    )}
+                    {showFertilizerSettings ? '▼ Hide Settings' : 'Change Fertilizer Settings'}
                 </button>
+
+                {/* Expanded Settings Panel */}
+                {showFertilizerSettings && (
+                    <div style={{ marginTop: '1rem' }}>
+                        {/* Best Option Banner */}
+                        {bestOption && (
+                            <div style={{
+                                padding: '0.75rem',
+                                backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                                border: '1px solid rgba(255, 215, 0, 0.3)',
+                                borderRadius: '6px',
+                                marginBottom: '1rem',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                        {starIcon && (
+                                            <img src={starIcon} alt="Best" style={{ width: '14px', height: '14px' }} />
+                                        )}
+                                        <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#FFD700' }}>
+                                            Recommended: {bestOption.fertilizer.name}
+                                        </span>
+                                    </div>
+                                    <div style={{ fontSize: '0.7rem', color: '#888' }}>
+                                        {bestOption.actualFertility}% fertility • Net: +{bestOption.netPeopleFed.toFixed(1)} people
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleUseBestOption}
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        backgroundColor: '#FFD700',
+                                        color: '#000',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '700',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFED4E'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFD700'}
+                                >
+                                    Use Best
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Fertilizer Type Selector */}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{
+                                display: 'block',
+                                marginBottom: '0.5rem',
+                                fontSize: '0.85rem',
+                                fontWeight: '600',
+                                color: '#ddd'
+                            }}>
+                                Fertilizer Type
+                            </label>
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: `repeat(${Math.min(availableFertilizers.length, 3)}, 1fr)`,
+                                gap: '0.5rem'
+                            }}>
+                                {availableFertilizers.map(fert => {
+                                    const isSelected = selectedFertilizerId === fert.id;
+                                    const isBest = bestOption && bestOption.fertilizer.id === fert.id;
+                                    return (
+                                        <button
+                                            key={fert.id}
+                                            onClick={() => setSelectedFertilizerId(fert.id)}
+                                            style={{
+                                                padding: '0.75rem',
+                                                backgroundColor: isSelected ? 'rgba(255, 215, 0, 0.15)' : '#1a1a1a',
+                                                border: isSelected ? '2px solid #FFD700' : '1px solid #444',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                gap: '0.25rem',
+                                                position: 'relative'
+                                            }}
+                                        >
+                                            {isBest && starIcon && (
+                                                <img
+                                                    src={starIcon}
+                                                    alt="Best"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '4px',
+                                                        right: '4px',
+                                                        width: '12px',
+                                                        height: '12px'
+                                                    }}
+                                                />
+                                            )}
+                                            {fert.icon && (
+                                                <img src={fert.icon} alt={fert.name} style={{ width: '24px', height: '24px' }} />
+                                            )}
+                                            <span style={{
+                                                fontSize: '0.75rem',
+                                                fontWeight: '600',
+                                                color: isSelected ? '#FFD700' : '#ddd',
+                                                textAlign: 'center'
+                                            }}>
+                                                {fert.name}
+                                            </span>
+                                            <span style={{ fontSize: '0.65rem', color: '#888' }}>
+                                                +{fert.fertilityPerUnit}%/unit
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Target Fertility Slider (10% increments only) */}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginBottom: '0.5rem',
+                                fontSize: '0.85rem',
+                                fontWeight: '600',
+                                color: '#ddd'
+                            }}>
+                                <span>Target Fertility</span>
+                                <span style={{ fontSize: '1.1rem', color: '#FFD700' }}>
+                                    {targetFertility}%
+                                </span>
+                            </label>
+                            <input
+                                type="range"
+                                min={Math.ceil(naturalEquilibrium / 10) * 10}
+                                max="200"
+                                step="10"
+                                value={targetFertility}
+                                onChange={(e) => setTargetFertility(parseInt(e.target.value))}
+                                style={{
+                                    width: '100%',
+                                    height: '6px',
+                                    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                                    borderRadius: '3px',
+                                    cursor: 'pointer',
+                                    accentColor: '#FFD700'
+                                }}
+                            />
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                fontSize: '0.65rem',
+                                color: '#666',
+                                marginTop: '0.25rem'
+                            }}>
+                                <span>{Math.ceil(naturalEquilibrium / 10) * 10}%</span>
+                                <span style={{ fontStyle: 'italic' }}>Steps of 10% only</span>
+                                <span>200%</span>
+                            </div>
+                        </div>
+
+                        {/* Requirements Display */}
+                        {plannedFertilizerNeeds && (
+                            <div style={{
+                                padding: '1rem',
+                                backgroundColor: '#1a1a1a',
+                                borderRadius: '6px',
+                                border: '1px solid #FFD700',
+                                marginBottom: '1rem'
+                            }}>
+                                <div style={{
+                                    fontSize: '0.8rem',
+                                    color: '#FFD700',
+                                    fontWeight: '700',
+                                    marginBottom: '0.75rem',
+                                    textTransform: 'uppercase'
+                                }}>
+                                    📊 Requirements
+                                </div>
+
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(2, 1fr)',
+                                    gap: '0.75rem'
+                                }}>
+                                    <div style={{ padding: '0.5rem', backgroundColor: '#0f0f0f', borderRadius: '4px' }}>
+                                        <div style={{ fontSize: '0.65rem', color: '#888' }}>Units/Month</div>
+                                        <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#FFD700' }}>
+                                            {plannedFertilizerNeeds.unitsPerMonth.toFixed(1)}
+                                        </div>
+                                    </div>
+                                    <div style={{ padding: '0.5rem', backgroundColor: '#0f0f0f', borderRadius: '4px' }}>
+                                        <div style={{ fontSize: '0.65rem', color: '#888' }}>Units/Year</div>
+                                        <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#FFD700' }}>
+                                            {plannedFertilizerNeeds.unitsPerYear.toFixed(0)}
+                                        </div>
+                                    </div>
+                                    <div style={{ padding: '0.5rem', backgroundColor: '#0f0f0f', borderRadius: '4px' }}>
+                                        <div style={{ fontSize: '0.65rem', color: '#888' }}>People +</div>
+                                        <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#50C878' }}>
+                                            +{plannedFertilizerNeeds.yieldIncrease.toFixed(1)}
+                                        </div>
+                                    </div>
+                                    <div style={{ padding: '0.5rem', backgroundColor: '#0f0f0f', borderRadius: '4px' }}>
+                                        <div style={{ fontSize: '0.65rem', color: '#888' }}>Net Benefit</div>
+                                        <div style={{
+                                            fontSize: '1.1rem',
+                                            fontWeight: '700',
+                                            color: plannedFertilizerNeeds.netPeopleFed > 0 ? '#50C878' : '#ff6b6b'
+                                        }}>
+                                            {plannedFertilizerNeeds.netPeopleFed > 0 ? '+' : ''}{plannedFertilizerNeeds.netPeopleFed.toFixed(1)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Apply Button */}
+                        <button
+                            onClick={handleApplyFertilizer}
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem',
+                                backgroundColor: '#FFD700',
+                                color: '#000',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontSize: '0.9rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                marginBottom: '1rem'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFED4E'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFD700'}
+                        >
+                            ✓ Apply Fertilizer Settings
+                        </button>
+
+                        {/* Expandable Details */}
+                        <ExpandableSection
+                            title="How It Works"
+                            icon={infoIcon}
+                            isExpanded={expandedSections.howItWorks}
+                            onToggle={() => toggleSection('howItWorks')}
+                        >
+                            <HowItWorksContent />
+                        </ExpandableSection>
+
+                        <ExpandableSection
+                            title="Detailed Calculations"
+                            icon={calculatorIcon}
+                            isExpanded={expandedSections.calculations}
+                            onToggle={() => toggleSection('calculations')}
+                        >
+                            {plannedFertilizerNeeds && (
+                                <CalculationsContent
+                                    needs={plannedFertilizerNeeds}
+                                    naturalEquilibrium={naturalEquilibrium}
+                                    targetFertility={targetFertility}
+                                    baseYield={peopleFed}
+                                />
+                            )}
+                        </ExpandableSection>
+
+                        <ExpandableSection
+                            title="Compare Options"
+                            icon={compareIcon}
+                            isExpanded={expandedSections.comparison}
+                            onToggle={() => toggleSection('comparison')}
+                        >
+                            <ComparisonTable
+                                availableFertilizers={availableFertilizers}
+                                targetFertility={targetFertility}
+                                calculateFertilizerNeeds={calculateFertilizerNeeds}
+                            />
+                        </ExpandableSection>
+                    </div>
+                )}
             </div>
 
-            {/* Fertility Breakdown Panel */}
-            {showFertilityBreakdown && (
-                <FertilityBreakdownPanel
-                    farmResult={farmResult}
-                    effectiveFarm={effectiveFarm}
-                    rotation={rotation}
-                    research={research}
-                    onFertilityChange={(farmId, newFertility) => {
-                        onCustomFertilityChange(farmId, newFertility);
-                    }}
-                />
-            )}
-
-            {/* Fertilizer Options - ALWAYS show for planning */}
-            {fertilizerOptions && fertilizerOptions.length > 0 && (
-                <FertilizerSelector
-                    farmIndex={farmNumber - 1}
-                    fertilizerOptions={fertilizerOptions}
-                    selectedFertilizerId={farm.selectedFertilizerId}
-                    onSelectFertilizer={onFertilizerSelect}
-                    isActivelyUsed={usingFertilizer}
-                    naturalEquilibrium={fertilityInfo.naturalEquilibrium}
-                />
-            )}
-
-            {/* Production */}
+            {/* Production Summary - WITH ADJUSTED VALUES */}
             {Object.keys(production).length > 0 && (
                 <div style={{ marginTop: '1rem' }}>
                     <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '0.5rem', fontWeight: '600' }}>
@@ -292,6 +813,8 @@ const FarmResultCard = ({
                         {Object.entries(production).map(([productId, quantity]) => {
                             const product = ProductionCalculator.getProduct(productId);
                             const icon = getProductIcon(product);
+                            // Adjust production based on current fertility
+                            const adjustedQuantity = quantity * (actualFertility / naturalEquilibrium) / (farmResult.actualFertility / naturalEquilibrium);
                             return (
                                 <div
                                     key={productId}
@@ -316,7 +839,7 @@ const FarmResultCard = ({
                                         {product?.name}
                                     </span>
                                     <span style={{ color: '#4a90e2', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                                        {quantity.toFixed(0)}
+                                        {adjustedQuantity.toFixed(0)}
                                     </span>
                                 </div>
                             );
@@ -327,5 +850,144 @@ const FarmResultCard = ({
         </div>
     );
 };
+
+// Helper Components (ExpandableSection, HowItWorksContent, CalculationsContent, ComparisonTable - same as before)
+const ExpandableSection = ({ title, icon, isExpanded, onToggle, children }) => (
+    <div style={{
+        marginBottom: '0.75rem',
+        backgroundColor: '#0f0f0f',
+        borderRadius: '4px',
+        border: '1px solid #222',
+        overflow: 'hidden'
+    }}>
+        <button
+            onClick={onToggle}
+            style={{
+                width: '100%',
+                padding: '0.75rem',
+                backgroundColor: 'transparent',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer'
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {icon && <img src={icon} alt="" style={{ width: '14px', height: '14px' }} />}
+                <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#ddd' }}>{title}</span>
+            </div>
+            <span style={{
+                fontSize: '0.9rem',
+                color: '#888',
+                transition: 'transform 0.2s',
+                transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)'
+            }}>
+                ▶
+            </span>
+        </button>
+        {isExpanded && (
+            <div style={{ padding: '0.75rem', borderTop: '1px solid #222', fontSize: '0.75rem', color: '#ddd' }}>
+                {children}
+            </div>
+        )}
+    </div>
+);
+
+const HowItWorksContent = () => (
+    <div style={{ lineHeight: '1.6' }}>
+        <p><strong>Fertility System:</strong></p>
+        <ul style={{ marginLeft: '1.5rem', color: '#aaa' }}>
+            <li>Each crop consumes fertility when growing</li>
+            <li>Natural fertility regenerates to an equilibrium point</li>
+            <li>Fertilizer boosts fertility above natural levels</li>
+            <li>Higher fertility = higher crop yields</li>
+        </ul>
+        <p style={{ marginTop: '0.75rem' }}><strong>Yield Formula:</strong></p>
+        <div style={{
+            padding: '0.5rem',
+            backgroundColor: '#000',
+            borderRadius: '3px',
+            fontFamily: 'monospace',
+            color: '#50C878',
+            fontSize: '0.7rem'
+        }}>
+            Yield = Base × (Fertility / Natural) × (1 + Research)
+        </div>
+    </div>
+);
+
+const CalculationsContent = ({ needs, naturalEquilibrium, targetFertility, baseYield }) => (
+    <div style={{ lineHeight: '1.8', fontFamily: 'monospace', fontSize: '0.7rem' }}>
+        <div style={{ marginBottom: '0.75rem' }}>
+            <strong style={{ color: '#FFD700' }}>Step 1: Fertility Gap</strong>
+            <div style={{ padding: '0.5rem', backgroundColor: '#000', borderRadius: '3px', marginTop: '0.25rem' }}>
+                {targetFertility}% - {naturalEquilibrium.toFixed(1)}% = {needs.fertilityGap.toFixed(1)}%
+            </div>
+        </div>
+        <div style={{ marginBottom: '0.75rem' }}>
+            <strong style={{ color: '#FFD700' }}>Step 2: Units Needed</strong>
+            <div style={{ padding: '0.5rem', backgroundColor: '#000', borderRadius: '3px', marginTop: '0.25rem' }}>
+                {needs.fertilityGap.toFixed(1)}% / {needs.fertilizer.fertilityPerUnit}% = {needs.unitsNeeded} units
+            </div>
+        </div>
+        <div style={{ marginBottom: '0.75rem' }}>
+            <strong style={{ color: '#FFD700' }}>Step 3: Yield Increase</strong>
+            <div style={{ padding: '0.5rem', backgroundColor: '#000', borderRadius: '3px', marginTop: '0.25rem' }}>
+                {baseYield.toFixed(1)} × {needs.yieldMultiplier.toFixed(2)} = {needs.newYield.toFixed(1)}
+                <br />
+                Increase: +{needs.yieldIncrease.toFixed(1)} people/month
+            </div>
+        </div>
+        <div>
+            <strong style={{ color: '#FFD700' }}>Step 4: Net Benefit</strong>
+            <div style={{ padding: '0.5rem', backgroundColor: '#000', borderRadius: '3px', marginTop: '0.25rem' }}>
+                Workers: {needs.workersNeeded.toFixed(1)}
+                <br />
+                Net: {needs.yieldIncrease.toFixed(1)} - {needs.workersNeeded.toFixed(1)} = {needs.netPeopleFed.toFixed(1)}
+            </div>
+        </div>
+    </div>
+);
+
+const ComparisonTable = ({ availableFertilizers, targetFertility, calculateFertilizerNeeds }) => (
+    <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', fontSize: '0.7rem', borderCollapse: 'collapse' }}>
+            <thead>
+                <tr style={{ backgroundColor: '#000' }}>
+                    <th style={{ padding: '0.5rem', textAlign: 'left', color: '#888' }}>Type</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'right', color: '#888' }}>Units/Mo</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'right', color: '#888' }}>+People</th>
+                    <th style={{ padding: '0.5rem', textAlign: 'right', color: '#888' }}>Net</th>
+                </tr>
+            </thead>
+            <tbody>
+                {availableFertilizers.map(fert => {
+                    const needs = calculateFertilizerNeeds(fert.id, targetFertility);
+                    if (!needs) return null;
+                    return (
+                        <tr key={fert.id} style={{ borderBottom: '1px solid #222' }}>
+                            <td style={{ padding: '0.5rem', color: '#ddd' }}>{fert.name}</td>
+                            <td style={{ padding: '0.5rem', textAlign: 'right', color: '#FFD700' }}>
+                                {needs.unitsPerMonth.toFixed(1)}
+                            </td>
+                            <td style={{ padding: '0.5rem', textAlign: 'right', color: '#50C878' }}>
+                                +{needs.yieldIncrease.toFixed(1)}
+                            </td>
+                            <td style={{
+                                padding: '0.5rem',
+                                textAlign: 'right',
+                                color: needs.netPeopleFed > 0 ? '#50C878' : '#ff6b6b',
+                                fontWeight: '700'
+                            }}>
+                                {needs.netPeopleFed > 0 ? '+' : ''}{needs.netPeopleFed.toFixed(1)}
+                            </td>
+                        </tr>
+                    );
+                })}
+            </tbody>
+        </table>
+    </div>
+);
 
 export default FarmResultCard;

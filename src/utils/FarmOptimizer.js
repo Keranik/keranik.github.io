@@ -1,18 +1,19 @@
-﻿import ProductionCalculator from './ProductionCalculator';
+﻿// src/utils/FarmOptimizer.js - COMPLETE UPDATED VERSION
+import ProductionCalculator from './ProductionCalculator';
 import { FoodChainResolver } from './FoodChainResolver';
 import { FarmConstants } from './FarmConstants';
 
 export class FarmOptimizer {
 
     /**
- * Calculate people fed with automatic chain optimization
- * @param {Object} production - Map of productId to quantity per month
- * @param {number} farmWaterPerDay - Water consumed by farm per day
- * @param {number} foodConsumptionMult - Food consumption multiplier
- * @param {Array|null} allowedIntermediates - Allowed intermediate products
- * @param {Array|null} allowedRecipes - Optional filter for allowed recipes
- * @returns {Object} People fed, processing chains, water usage
- */
+     * Calculate people fed with automatic chain optimization
+     * @param {Object} production - Map of productId to quantity per month
+     * @param {number} farmWaterPerDay - Water consumed by farm per day
+     * @param {number} foodConsumptionMult - Food consumption multiplier
+     * @param {Array|null} allowedIntermediates - Allowed intermediate products
+     * @param {Array|null} allowedRecipes - Optional filter for allowed recipes
+     * @returns {Object} People fed, processing chains, water usage
+     */
     static calculatePeopleFedWithChains(production, farmWaterPerDay, foodConsumptionMult = 1.0, allowedIntermediates = null, allowedRecipes = null) {
         let totalPeopleFed = 0;
         let totalProcessingWater = 0;
@@ -203,14 +204,14 @@ export class FarmOptimizer {
     }
 
     /**
- * Calculate people fed in manual mode with specific recipe selections
- * @param {Object} production - Map of productId to quantity per month
- * @param {Object} selectedRecipes - Map of productId to selected recipeId
- * @param {number} farmWaterPerDay - Water consumed by farm per day
- * @param {number} foodConsumptionMult - Food consumption multiplier
- * @param {Array|null} allowedRecipes - Optional filter for allowed recipes
- * @returns {Object} People fed, processing chains, water usage
- */
+     * Calculate people fed in manual mode with specific recipe selections
+     * @param {Object} production - Map of productId to quantity per month
+     * @param {Object} selectedRecipes - Map of productId to selected recipeId
+     * @param {number} farmWaterPerDay - Water consumed by farm per day
+     * @param {number} foodConsumptionMult - Food consumption multiplier
+     * @param {Array|null} allowedRecipes - Optional filter for allowed recipes
+     * @returns {Object} People fed, processing chains, water usage
+     */
     static calculatePeopleFedManual(production, selectedRecipes, farmWaterPerDay, foodConsumptionMult = 1.0, allowedRecipes = null) {
         let totalPeopleFed = 0;
         let totalProcessingWater = 0;
@@ -402,6 +403,7 @@ export class FarmOptimizer {
 
         return {
             ...farmProto,
+            name: farmProto.name,
             originalYield: farmProto.yieldMultiplierPercent,
             originalWater: farmProto.demandsMultiplierPercent,
             effectiveYieldMult: yieldMult / 100, // Convert to decimal
@@ -430,19 +432,28 @@ export class FarmOptimizer {
     }
 
     /**
-     * Calculate crop production per month for a farm
-     * CHANGED: Now accepts targetFertility parameter for fertility-based yield calculation
+     * ✅ UPDATED: Calculate crop production per month for a farm
+     * Now properly uses fertility parameter for yield calculation
+     * @param {Object} crop - Crop data from ProductionCalculator
+     * @param {Object} farm - Effective farm stats with multipliers
+     * @param {number} fertility - Current fertility level (0-200%)
+     * @returns {number} Production per month
      */
-    static calculateCropYield(crop, farm, targetFertility = 100) {
+    static calculateCropYield(crop, farm, fertility = 100) {
         // Use fertility-adjusted yield calculation
-        return this.calculateActualYield(crop, farm, targetFertility);
+        return this.calculateActualYield(crop, farm, fertility);
     }
 
     /**
-     * Calculate actual yield based on fertility
+     * ✅ UPDATED: Calculate actual yield based on fertility
      * Formula from Farm.cs recomputeYieldEstimates():
      * YieldPerYear = baseYield × (360 / growthDays) × (fertility / 100) × yieldMult
      * YieldPerMonth = YieldPerYear / 12
+     * 
+     * @param {Object} crop - Crop data
+     * @param {Object} farm - Farm with effective multipliers
+     * @param {number} fertility - Fertility percentage (0-200)
+     * @returns {number} Yield per month
      */
     static calculateActualYield(crop, farm, fertility) {
         // Base production: crop output × farm yield multiplier
@@ -465,17 +476,20 @@ export class FarmOptimizer {
 
     /**
      * Calculate water needs per day for a crop on a farm
+     * @param {Object} crop - Crop data
+     * @param {Object} farm - Farm with effective multipliers
+     * @returns {number} Water per day
      */
     static calculateWaterPerDay(crop, farm) {
         return crop.waterPerDay * farm.effectiveWaterMult;
     }
 
     /**
- * Calculate water requirements for a processing chain
- * @param {Object} path - Food chain path from FoodChainResolver
- * @param {number} inputQuantity - Input crop quantity per month
- * @returns {number} Water per day
- */
+     * Calculate water requirements for a processing chain
+     * @param {Object} path - Food chain path from FoodChainResolver
+     * @param {number} inputQuantity - Input crop quantity per month
+     * @returns {number} Water per day
+     */
     static calculateChainWater(path, inputQuantity) {
         let totalWaterPerMonth = 0;
 
@@ -506,11 +520,11 @@ export class FarmOptimizer {
     }
 
     /**
- * Calculate machine requirements for a processing chain
- * @param {Object} path - Food chain path from FoodChainResolver
- * @param {number} inputQuantity - Input crop quantity per month
- * @returns {Array} Machine requirements
- */
+     * Calculate machine requirements for a processing chain
+     * @param {Object} path - Food chain path from FoodChainResolver
+     * @param {number} inputQuantity - Input crop quantity per month
+     * @returns {Array} Machine requirements
+     */
     static calculateChainMachines(path, inputQuantity) {
         const machineMap = new Map();
 
@@ -548,6 +562,11 @@ export class FarmOptimizer {
     /**
      * ✅ CORRECT: Calculate fertility equilibrium for a rotation
      * Matches Farm.cs recomputeRotationStats() exactly
+     * Accounts for monoculture penalty (50% extra consumption for same crop)
+     * 
+     * @param {Array} rotation - Array of crop IDs (can include nulls)
+     * @param {Object} farm - Farm with effective stats
+     * @returns {Object} Fertility equilibrium data
      */
     static calculateFertilityEquilibrium(rotation, farm) {
         // Filter out empty slots
@@ -604,9 +623,9 @@ export class FarmOptimizer {
         const replenishRate = farm.effectiveFertilityReplenish; // 1.0%
 
         // ✅ From Farm.cs line 777:
-        // NaturalFertilityEquilibrium = (Percent.Hundred - m_avgFertilityUsedPerDay / Prototype.FertilityReplenishPerDay).Max(Percent.Zero)
+        // NaturalFertilityEquilibrium = (Percent.Hundred - m_avgFertilityUsedPerDay / Prototype.FertilityReplenish PerDay).Max(Percent.Zero)
         const naturalEquilibrium = Math.max(0, Math.min(200,
-            100 - ((avgFertilityPerDay / replenishRate) *100)
+            100 - ((avgFertilityPerDay / replenishRate) * 100)
         ));
 
         return {
@@ -618,9 +637,12 @@ export class FarmOptimizer {
     }
 
     /**
-     * Calculate fertilizer requirements for target fertility
+     * ✅ DEPRECATED: Use FertilizerCalculator.calculateFertilizerOptions() instead
+     * This function is kept for backwards compatibility only
      */
     static calculateFertilizerNeeds(targetFertility, naturalEquilibrium, avgFertilityPerDay, farmCount = 1) {
+        console.warn('FarmOptimizer.calculateFertilizerNeeds() is deprecated. Use FertilizerCalculator.calculateFertilizerOptions() instead.');
+
         if (targetFertility <= naturalEquilibrium) {
             return {
                 needed: false,
@@ -633,9 +655,9 @@ export class FarmOptimizer {
         const extraFertilityNeeded = (targetFertility - naturalEquilibrium);
 
         // Find best fertilizer that can reach target
-        const fertilizers = ProductionCalculator.fertilizers
-            ?.filter(f => f.maxFertility >= targetFertility)
-            .sort((a, b) => b.fertilityPerQuantity - a.fertilityPerQuantity);
+        const fertilizers = ProductionCalculator.products
+            ?.filter(p => p.fertilizer && p.fertilizer.maxFertilityPercent >= targetFertility)
+            .sort((a, b) => b.fertilizer.fertilityPerQuantityPercent - a.fertilizer.fertilityPerQuantityPercent);
 
         if (!fertilizers || fertilizers.length === 0) {
             return {
@@ -648,7 +670,7 @@ export class FarmOptimizer {
         const fertilizer = fertilizers[0];
 
         // Calculate quantity needed per day per farm
-        const quantityPerDayPerFarm = extraFertilityNeeded / fertilizer.fertilityPerQuantity;
+        const quantityPerDayPerFarm = extraFertilityNeeded / fertilizer.fertilizer.fertilityPerQuantityPercent;
         const totalQuantityPerDay = quantityPerDayPerFarm * farmCount;
 
         return {

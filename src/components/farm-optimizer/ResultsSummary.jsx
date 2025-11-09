@@ -1,13 +1,13 @@
 ﻿// src/components/farm-optimizer/ResultsSummary.jsx
 import { useState } from 'react';
-import { getGeneralIcon } from '../../utils/AssetHelper';
+import { getGeneralIcon, getProductIcon } from '../../utils/AssetHelper';
 import ProductionCalculator from '../../utils/ProductionCalculator';
 import { RainwaterEstimator } from '../../utils/RainwaterEstimator';
 import RainwaterEstimatorModal from './RainwaterEstimatorModal';
 import ToggleSwitch from '../common/ToggleSwitch';
 
 const ResultsSummary = ({ results, research }) => {
-    // Rainwater collection state (moved from parent component)
+    // Rainwater collection state
     const [rainwaterEnabled, setRainwaterEnabled] = useState(false);
     const [rainwaterSettings, setRainwaterSettings] = useState({
         difficulty: 'Normal',
@@ -23,7 +23,7 @@ const ResultsSummary = ({ results, research }) => {
         ? RainwaterEstimator.estimateMonthlyRainwater(
             rainwaterSettings.difficulty,
             rainwaterSettings.year,
-            actualFarmCount, // Use actual farm count from results
+            actualFarmCount,
             research.rainYield
         )
         : null;
@@ -60,6 +60,12 @@ const ResultsSummary = ({ results, research }) => {
     const workersIcon = getGeneralIcon('Workers');
     const rainIcon = getGeneralIcon('Rain');
     const settingsIcon = getGeneralIcon('Settings');
+    const fertilizerIcon = getGeneralIcon('Fertilizer');
+    const healthIcon = getGeneralIcon('Health');
+
+    // Check if fertilizer is being used
+    const fertilizerData = results.totals.fertilizer;
+    const isFertilizerActive = fertilizerData && fertilizerData.farmsUsingFertilizer > 0;
 
     return (
         <>
@@ -348,7 +354,7 @@ const ResultsSummary = ({ results, research }) => {
                     )}
                 </div>
 
-                {/* Food Categories */}
+                {/* Food Diversity (with Health & Unity nested inside) */}
                 <div style={{
                     backgroundColor: '#1a1a1a',
                     padding: '1rem',
@@ -367,15 +373,67 @@ const ResultsSummary = ({ results, research }) => {
                         )}
                         <span style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: '600' }}>Food Diversity</span>
                     </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f39c12', marginBottom: '0.5rem' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f39c12', marginBottom: '0.75rem' }}>
                         {results.totals.foodCategories.count} Categories
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#666' }}>
-                        {results.totals.foodCategories.healthBonuses} Health Bonus{results.totals.foodCategories.healthBonuses !== 1 ? 'es' : ''}
+
+                    {/* Health & Unity Grid (nested inside Food Diversity) */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '0.5rem',
+                        marginBottom: '0.75rem',
+                        padding: '0.75rem',
+                        backgroundColor: '#0f0f0f',
+                        borderRadius: '6px'
+                    }}>
+                        {/* Health Bonuses */}
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                                marginBottom: '0.35rem'
+                            }}>
+                                {healthIcon && (
+                                    <img src={healthIcon} alt="Health" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                )}
+                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: '600' }}>Health</span>
+                            </div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#f39c12' }}>
+                                {results.totals.foodCategories.healthBonuses}
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#666' }}>
+                                Bonus{results.totals.foodCategories.healthBonuses !== 1 ? 'es' : ''}
+                            </div>
+                        </div>
+
+                        {/* Unity Production */}
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                                marginBottom: '0.35rem'
+                            }}>
+                                {unityIcon && (
+                                    <img src={unityIcon} alt="Unity" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                )}
+                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: '600' }}>Unity</span>
+                            </div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#e74c3c' }}>
+                                {results.totals.foodCategories.totalUnity.toFixed(1)}
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#666' }}>
+                                per month
+                            </div>
+                        </div>
                     </div>
 
                     {/* Food Categories Breakdown */}
-                    <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                         {results.totals.foodCategories.categories.map(cat => (
                             <div
                                 key={cat.id}
@@ -403,41 +461,13 @@ const ResultsSummary = ({ results, research }) => {
                     </div>
                 </div>
 
-                {/* Unity Production */}
-                {results.totals.foodCategories.totalUnity > 0 && (
-                    <div style={{
-                        backgroundColor: '#1a1a1a',
-                        padding: '1rem',
-                        borderRadius: '8px',
-                        marginBottom: '1rem',
-                        border: '1px solid #333'
-                    }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            marginBottom: '0.5rem'
-                        }}>
-                            {unityIcon && (
-                                <img src={unityIcon} alt="Unity" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
-                            )}
-                            <span style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: '600' }}>Unity Production</span>
-                        </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#e74c3c', marginBottom: '0.25rem' }}>
-                            {results.totals.foodCategories.totalUnity.toFixed(1)} <span style={{ fontSize: '0.6em', fontWeight: '400' }}>/ month</span>
-                        </div>
-                        <div style={{ fontSize: '0.7rem', color: '#666' }}>
-                            From {results.totals.foodCategories.unityBreakdown.length} food source{results.totals.foodCategories.unityBreakdown.length !== 1 ? 's' : ''}
-                        </div>
-                    </div>
-                )}
-
                 {/* Processing Requirements */}
                 {results.totals.processingMachines.length > 0 && (
                     <div style={{
                         backgroundColor: '#1a1a1a',
                         padding: '1rem',
                         borderRadius: '8px',
+                        marginBottom: '1rem',
                         border: '1px solid #333'
                     }}>
                         <div style={{
@@ -517,6 +547,134 @@ const ResultsSummary = ({ results, research }) => {
                         </div>
                     </div>
                 )}
+
+                {/* Fertilizer Usage Summary */}
+                {isFertilizerActive && (
+                    <div style={{
+                        backgroundColor: '#1a1a1a',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        border: '2px solid #FFD700'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            marginBottom: '0.75rem'
+                        }}>
+                            {fertilizerIcon && (
+                                <img src={fertilizerIcon} alt="Fertilizer" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                            )}
+                            <span style={{ fontSize: '0.85rem', color: '#FFD700', fontWeight: '600' }}>Fertilizer Usage</span>
+                            <span style={{
+                                marginLeft: 'auto',
+                                fontSize: '0.7rem',
+                                color: '#FFD700',
+                                backgroundColor: 'rgba(255, 215, 0, 0.15)',
+                                padding: '2px 6px',
+                                borderRadius: '3px',
+                                fontWeight: '600'
+                            }}>
+                                {fertilizerData.farmsUsingFertilizer} / {actualFarmCount} farms
+                            </span>
+                        </div>
+
+                        {/* Fertilizer Types */}
+                        {fertilizerData.byType && fertilizerData.byType.length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                                {fertilizerData.byType.map(fert => {
+                                    const product = ProductionCalculator.getProduct(fert.id);
+                                    const icon = getProductIcon(product);
+                                    return (
+                                        <div
+                                            key={fert.id}
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                padding: '0.5rem',
+                                                backgroundColor: '#0f0f0f',
+                                                borderRadius: '4px',
+                                                border: '1px solid rgba(255, 215, 0, 0.2)'
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                {icon && (
+                                                    <img src={icon} alt={fert.name} style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                                                )}
+                                                <span style={{ fontSize: '0.8rem', color: '#ddd', fontWeight: '600' }}>
+                                                    {fert.name}
+                                                </span>
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                                <span style={{ fontSize: '0.85rem', color: '#FFD700', fontWeight: '700' }}>
+                                                    {fert.unitsPerYear.toFixed(0)}
+                                                </span>
+                                                <span style={{ fontSize: '0.65rem', color: '#888' }}>
+                                                    units/year
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Impact Summary */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr 1fr',
+                            gap: '0.5rem',
+                            paddingTop: '0.75rem',
+                            borderTop: '1px solid rgba(255, 215, 0, 0.2)'
+                        }}>
+                            <div style={{
+                                padding: '0.5rem',
+                                backgroundColor: '#0f0f0f',
+                                borderRadius: '4px',
+                                textAlign: 'center'
+                            }}>
+                                <div style={{ fontSize: '0.65rem', color: '#888', marginBottom: '0.25rem' }}>
+                                    Yield +
+                                </div>
+                                <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#50C878' }}>
+                                    +{fertilizerData.totalPeopleFedIncrease.toFixed(1)}
+                                </div>
+                            </div>
+                            <div style={{
+                                padding: '0.5rem',
+                                backgroundColor: '#0f0f0f',
+                                borderRadius: '4px',
+                                textAlign: 'center'
+                            }}>
+                                <div style={{ fontSize: '0.65rem', color: '#888', marginBottom: '0.25rem' }}>
+                                    Workers
+                                </div>
+                                <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#ff8c42' }}>
+                                    -{(fertilizerData.totalWorkerMonths / 12).toFixed(1)}
+                                </div>
+                            </div>
+                            <div style={{
+                                padding: '0.5rem',
+                                backgroundColor: '#0f0f0f',
+                                borderRadius: '4px',
+                                textAlign: 'center'
+                            }}>
+                                <div style={{ fontSize: '0.65rem', color: '#888', marginBottom: '0.25rem' }}>
+                                    Net
+                                </div>
+                                <div style={{
+                                    fontSize: '0.95rem',
+                                    fontWeight: '700',
+                                    color: (fertilizerData.totalPeopleFedIncrease - (fertilizerData.totalWorkerMonths / 12)) > 0 ? '#50C878' : '#ff6b6b'
+                                }}>
+                                    {(fertilizerData.totalPeopleFedIncrease - (fertilizerData.totalWorkerMonths / 12)) > 0 ? '+' : ''}
+                                    {(fertilizerData.totalPeopleFedIncrease - (fertilizerData.totalWorkerMonths / 12)).toFixed(1)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Rainwater Estimator Modal */}
@@ -526,7 +684,7 @@ const ResultsSummary = ({ results, research }) => {
                 onApply={handleRainwaterModalApply}
                 initialSettings={{
                     ...rainwaterSettings,
-                    farmCount: actualFarmCount // Pass actual farm count to modal for display only
+                    farmCount: actualFarmCount
                 }}
                 research={research}
             />

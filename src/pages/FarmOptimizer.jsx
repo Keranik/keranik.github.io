@@ -1,4 +1,5 @@
-// src/pages/FarmOptimizer.jsx
+// src/pages/FarmOptimizer.jsx - FULL FILE with corrections
+
 import { useEffect, useState } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import { DataLoader } from '../utils/DataLoader';
@@ -165,6 +166,16 @@ const FarmOptimizerPage = () => {
         });
     }, [settings.research, getResearchValue]);
 
+    // Auto-recalculate when constraints change (if results exist)
+    useEffect(() => {
+        if (results && !loading) {
+            const timer = setTimeout(() => {
+                handleCalculate();
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [constraints.naturalFertilityOnly]);
+
     if (!dataLoaded) {
         return (
             <div style={{
@@ -300,7 +311,43 @@ const FarmOptimizerPage = () => {
         setRecipeSelectionModal({ open: false, productId: null, productName: null, availableRecipes: [] });
     };
 
+    // Fertilizer handlers - update farm state AND trigger recalculation
+    const handleFertilizerSelect = (farmIndex, fertilizerId) => {
+        console.log('handleFertilizerSelect called:', { farmIndex, fertilizerId });
+        setFarms(prevFarms => {
+            const newFarms = prevFarms.map((farm, idx) =>
+                idx === farmIndex ? { ...farm, selectedFertilizerId: fertilizerId } : farm
+            );
+            console.log('Updated farms:', newFarms);
+            return newFarms;
+        });
+
+        // Trigger recalculation immediately
+        setTimeout(() => {
+            console.log('Triggering recalculation after fertilizer select');
+            handleCalculate();
+        }, 100);
+    };
+
+    const handleCustomFertilityChange = (farmId, newFertility) => {
+        console.log('handleCustomFertilityChange called:', { farmId, newFertility });
+        setFarms(prevFarms => {
+            const newFarms = prevFarms.map(farm =>
+                farm.id === farmId ? { ...farm, customFertility: newFertility } : farm
+            );
+            console.log('Updated farms:', newFarms);
+            return newFarms;
+        });
+
+        // Trigger recalculation immediately
+        setTimeout(() => {
+            console.log('Triggering recalculation after fertility change');
+            handleCalculate();
+        }, 100);
+    };
+
     const handleCalculate = () => {
+        console.log('=== STARTING CALCULATION ===');
         setLoading(true);
 
         try {
@@ -308,11 +355,15 @@ const FarmOptimizerPage = () => {
 
             if (optimizationMode === 'manual') {
                 farmsToCalculate = farms;
+                console.log('Manual mode - using farms:', farmsToCalculate);
             } else {
                 farmsToCalculate = runOptimization();
+                console.log('Optimization mode - generated farms:', farmsToCalculate);
             }
 
             const detailedResults = farmsToCalculate.map((farm, farmIdx) => {
+                console.log(`Processing farm ${farmIdx}:`, farm);
+
                 const farmProto = availableFarms.find(f => f.id === farm.farmId);
                 if (!farmProto) {
                     throw new Error(`Farm ${farm.farmId} not found`);
@@ -331,6 +382,7 @@ const FarmOptimizerPage = () => {
                     effectiveFarm
                 );
 
+                // Determine actual fertility based on settings
                 let actualFertility;
                 if (constraints.naturalFertilityOnly) {
                     actualFertility = fertilityInfo.naturalEquilibrium;
@@ -339,6 +391,13 @@ const FarmOptimizerPage = () => {
                 } else {
                     actualFertility = fertilityInfo.naturalEquilibrium;
                 }
+
+                console.log(`Farm ${farmIdx} fertility:`, {
+                    natural: fertilityInfo.naturalEquilibrium,
+                    custom: farm.customFertility,
+                    actual: actualFertility,
+                    selectedFertilizer: farm.selectedFertilizerId
+                });
 
                 const slotDetails = rotation.map(cropId => {
                     if (!cropId) return null;
@@ -427,7 +486,7 @@ const FarmOptimizerPage = () => {
                     };
                 });
 
-                const fertilizerTargets = [100, 120, 140];
+                const fertilizerTargets = [100, 120, 140, 160, 180, 200];
                 const optimalTarget = fertilizerTargets.find(t => t > fertilityInfo.naturalEquilibrium) || 100;
 
                 const fertilizerOptions = FertilizerCalculator.calculateFertilizerOptions(
@@ -438,7 +497,10 @@ const FarmOptimizerPage = () => {
                 );
 
                 const usingFertilizer = !constraints.naturalFertilityOnly &&
-                    actualFertility > fertilityInfo.naturalEquilibrium;
+                    actualFertility > fertilityInfo.naturalEquilibrium &&
+                    farm.selectedFertilizerId !== null;
+
+                console.log(`Farm ${farmIdx} usingFertilizer:`, usingFertilizer);
 
                 return {
                     farm,
@@ -543,6 +605,14 @@ const FarmOptimizerPage = () => {
                 });
             });
 
+            // Calculate global fertilizer summary - FIXED VERSION
+            console.log('Calculating fertilizer summary...');
+            const fertilizerSummary = FertilizerCalculator.calculateGlobalUsage(
+                detailedResults,
+                constraints.allowedFertilizers
+            );
+            console.log('Fertilizer summary:', fertilizerSummary);
+
             setResults({
                 farms: detailedResults,
                 totals: {
@@ -567,9 +637,12 @@ const FarmOptimizerPage = () => {
                         ...data
                     })),
                     processingElectricity: totalProcessingElectricity,
-                    processingWorkers: totalProcessingWorkers
+                    processingWorkers: totalProcessingWorkers,
+                    fertilizer: fertilizerSummary
                 }
             });
+
+            console.log('=== CALCULATION COMPLETE ===');
         } catch (error) {
             console.error('Optimization error:', error);
             alert('Error during optimization: ' + error.message);
@@ -607,18 +680,6 @@ const FarmOptimizerPage = () => {
     const optimizeRotationForGoal = (goal) => {
         const efficientCrops = availableFoodCrops.slice(0, 2).map(c => c.id);
         return [...efficientCrops, null, null];
-    };
-
-    const handleFertilizerSelect = (farmIndex, fertilizerId) => {
-        setFarms(farms.map((farm, idx) =>
-            idx === farmIndex ? { ...farm, selectedFertilizerId: fertilizerId } : farm
-        ));
-    };
-
-    const handleCustomFertilityChange = (farmId, newFertility) => {
-        setFarms(farms.map(farm =>
-            farm.id === farmId ? { ...farm, customFertility: newFertility } : farm
-        ));
     };
 
     // Icons
@@ -874,6 +935,7 @@ const FarmOptimizerPage = () => {
                                     farmNumber={index + 1}
                                     farmResult={farmResult}
                                     research={research}
+                                    allowedFertilizerIds={constraints.allowedFertilizers}
                                     onFertilizerSelect={handleFertilizerSelect}
                                     onCustomFertilityChange={handleCustomFertilityChange}
                                 />
