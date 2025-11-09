@@ -5,137 +5,119 @@ import { FarmConstants } from './FarmConstants';
 export class FarmOptimizer {
 
     /**
-     * Calculate people fed WITH full processing chain details
-     * Returns: { peopleFed, processingChains, totalProcessingWater, foodCategories }
-     */
-    static calculatePeopleFedWithChains(production, farmWaterUsage = 0, foodConsumptionMult = 1.0, allowedIntermediates = []) {
+ * Calculate people fed with automatic chain optimization
+ * @param {Object} production - Map of productId to quantity per month
+ * @param {number} farmWaterPerDay - Water consumed by farm per day
+ * @param {number} foodConsumptionMult - Food consumption multiplier
+ * @param {Array|null} allowedIntermediates - Allowed intermediate products
+ * @param {Array|null} allowedRecipes - Optional filter for allowed recipes
+ * @returns {Object} People fed, processing chains, water usage
+ */
+    static calculatePeopleFedWithChains(production, farmWaterPerDay, foodConsumptionMult = 1.0, allowedIntermediates = null, allowedRecipes = null) {
         let totalPeopleFed = 0;
-        const processingChains = [];
         let totalProcessingWater = 0;
-        const foodCategoriesUsed = new Set();
-        const foodCategoryDetails = new Map();
+        const processingChains = [];
+        const foodCategoriesMap = new Map();
 
-        for (const [productId, quantityPerMonth] of Object.entries(production)) {
-            // Check if directly edible
-            const directFood = ProductionCalculator.foods?.find(f => f.productId === productId);
+        Object.entries(production).forEach(([productId, quantity]) => {
+            // Get all possible food paths from this crop
+            const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
 
-            if (directFood) {
-                // Direct food - no processing needed
-                const consumptionPer100 = directFood.consumedPerHundredPopsPerMonth * foodConsumptionMult;
-                if (consumptionPer100 > 0) {
-                    const peopleFed = (quantityPerMonth / consumptionPer100) * 100;
-                    totalPeopleFed += peopleFed;
+            // Filter paths based on allowed intermediates and recipes
+            const viablePaths = foodPaths.filter(path => {
+                // Check intermediate filter
+                if (allowedIntermediates !== null) {
+                    const pathIntermediates = path.processingChain
+                        .map(step => step.outputProductId)
+                        .filter(prodId => {
+                            const isFood = ProductionCalculator.foods?.some(f => f.productId === prodId);
+                            return !isFood; // Only intermediates, not final foods
+                        });
 
-                    const category = ProductionCalculator.foodCategories?.find(c => c.id === directFood.categoryId);
-                    if (category) {
-                        foodCategoriesUsed.add(directFood.categoryId);
-                        const current = foodCategoryDetails.get(directFood.categoryId) || {
-                            name: category.name,
-                            hasHealthBenefit: category.hasHealthBenefit,
-                            peopleFed: 0
-                        };
-                        current.peopleFed += peopleFed;
-                        foodCategoryDetails.set(directFood.categoryId, current);
-                    }
-
-                    processingChains.push({
-                        cropProductId: productId,
-                        finalFoodProductId: productId,
-                        peopleFed: peopleFed,
-                        isDirect: true,
-                        recipes: [],
-                        machines: [],
-                        waterPerDay: 0,
-                        foodCategory: directFood.categoryId
-                    });
-                }
-            } else {
-                // Use forward search
-                const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
-
-                if (foodPaths.length > 0) {
-                    let bestPath = null;
-                    let bestValue = 0;
-
-                    for (const path of foodPaths) {
-                        if (allowedIntermediates !== null) {
-                            const usesDisallowedIntermediate = path.processingChain?.some(step => {
-                                const isFood = ProductionCalculator.foods?.some(f => f.productId === step.outputProductId);
-
-                                if (!isFood) {
-                                    return !allowedIntermediates.includes(step.outputProductId);
-                                }
-
-                                return false;
-                            });
-
-                            if (usesDisallowedIntermediate) {
-                                continue; // Skip this path
-                            }
-                        }
-
-                        const food = ProductionCalculator.foods?.find(f => f.productId === path.finalFoodProductId);
-                        if (!food) continue;
-
-                        const foodUnitsPerMonth = quantityPerMonth / path.conversionRatio;
-                        const peopleFed = FoodChainResolver.calculateFoodValue(food, foodUnitsPerMonth, foodConsumptionMult);
-
-                        const processingDetails = this.calculateProcessingRequirements(
-                            productId,
-                            quantityPerMonth,
-                            path.processingChain
-                        );
-
-                        if (peopleFed > bestValue) {
-                            bestValue = peopleFed;
-                            bestPath = {
-                                cropProductId: productId,
-                                finalFoodProductId: path.finalFoodProductId,
-                                peopleFed: peopleFed,
-                                isDirect: false,
-                                processingChain: path.processingChain,
-                                foodCategory: food.categoryId,
-                                ...processingDetails
-                            };
-                        }
-                    }
-
-                    if (bestPath) {
-                        totalPeopleFed += bestPath.peopleFed;
-                        processingChains.push(bestPath);
-                        totalProcessingWater += bestPath.waterPerDay || 0;
-
-                        const food = ProductionCalculator.foods?.find(f => f.productId === bestPath.finalFoodProductId);
-                        if (food) {
-                            const category = ProductionCalculator.foodCategories?.find(c => c.id === food.categoryId);
-                            if (category) {
-                                foodCategoriesUsed.add(food.categoryId);
-                                const current = foodCategoryDetails.get(food.categoryId) || {
-                                    name: category.name,
-                                    hasHealthBenefit: category.hasHealthBenefit,
-                                    peopleFed: 0
-                                };
-                                current.peopleFed += bestPath.peopleFed;
-                                foodCategoryDetails.set(food.categoryId, current);
-                            }
-                        }
+                    // If path requires intermediates not in allowed list, skip it
+                    if (pathIntermediates.some(interId => !allowedIntermediates.includes(interId))) {
+                        return false;
                     }
                 }
+
+                // Check recipe filter
+                if (allowedRecipes !== null) {
+                    // If any recipe in the chain is not allowed, skip this path
+                    if (path.recipeChain.some(recipeId => !allowedRecipes.includes(recipeId))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            if (viablePaths.length === 0) {
+                return; // No viable paths for this crop
             }
-        }
+
+            // Choose the best path (highest people fed per unit of crop)
+            let bestPath = null;
+            let bestPeopleFed = 0;
+
+            viablePaths.forEach(path => {
+                const foodProduct = ProductionCalculator.getProduct(path.finalFoodProductId);
+                const food = ProductionCalculator.foods?.find(f => f.productId === path.finalFoodProductId);
+
+                if (food) {
+                    const finalFoodQuantity = quantity * path.conversionRatio;
+                    const peopleFed = (finalFoodQuantity / food.consumedPerHundredPopsPerMonth) * 100 / foodConsumptionMult;
+
+                    if (peopleFed > bestPeopleFed) {
+                        bestPeopleFed = peopleFed;
+                        bestPath = path;
+                    }
+                }
+            });
+
+            if (bestPath) {
+                const food = ProductionCalculator.foods?.find(f => f.productId === bestPath.finalFoodProductId);
+                totalPeopleFed += bestPeopleFed;
+
+                // Calculate processing requirements
+                const chainWater = this.calculateChainWater(bestPath, quantity);
+                const chainMachines = this.calculateChainMachines(bestPath, quantity);
+                totalProcessingWater += chainWater;
+
+                // Track food category
+                const category = ProductionCalculator.foodCategories?.find(c => c.id === food.categoryId);
+                if (category) {
+                    const current = foodCategoriesMap.get(category.id) || {
+                        id: category.id,
+                        name: category.name,
+                        hasHealthBenefit: category.hasHealthBenefit,
+                        peopleFed: 0
+                    };
+                    current.peopleFed += bestPeopleFed;
+                    foodCategoriesMap.set(category.id, current);
+                }
+
+                processingChains.push({
+                    cropProductId: productId,
+                    finalFoodProductId: bestPath.finalFoodProductId,
+                    recipeChain: bestPath.recipeChain,
+                    conversionRatio: bestPath.conversionRatio,
+                    peopleFed: bestPeopleFed,
+                    machines: chainMachines,
+                    waterPerDay: chainWater,
+                    isDirect: bestPath.processingChain.length === 0,
+                    foodCategory: food.categoryId
+                });
+            }
+        });
 
         return {
             peopleFed: totalPeopleFed,
+            totalWaterPerDay: farmWaterPerDay + totalProcessingWater,
+            totalProcessingWater: totalProcessingWater,
             processingChains,
-            totalProcessingWater,
-            totalWaterPerDay: farmWaterUsage + totalProcessingWater,
             foodCategories: {
-                count: foodCategoriesUsed.size,
-                categories: Array.from(foodCategoryDetails.entries()).map(([id, data]) => ({
-                    id,
-                    ...data
-                })),
-                hasHealthBenefit: Array.from(foodCategoryDetails.values()).some(c => c.hasHealthBenefit)
+                categories: Array.from(foodCategoriesMap.values()),
+                count: foodCategoriesMap.size
             }
         };
     }
@@ -221,94 +203,121 @@ export class FarmOptimizer {
     }
 
     /**
-     * Manual mode: User specifies processing recipes
-     */
-    static calculatePeopleFedManual(production, selectedRecipes, farmWaterUsage = 0, foodConsumptionMult = 1.0) {
-        // selectedRecipes = { "Wheat": "RecipeBread", "Soybean": "RecipeSoybeanOil", ... }
-
+ * Calculate people fed in manual mode with specific recipe selections
+ * @param {Object} production - Map of productId to quantity per month
+ * @param {Object} selectedRecipes - Map of productId to selected recipeId
+ * @param {number} farmWaterPerDay - Water consumed by farm per day
+ * @param {number} foodConsumptionMult - Food consumption multiplier
+ * @param {Array|null} allowedRecipes - Optional filter for allowed recipes
+ * @returns {Object} People fed, processing chains, water usage
+ */
+    static calculatePeopleFedManual(production, selectedRecipes, farmWaterPerDay, foodConsumptionMult = 1.0, allowedRecipes = null) {
         let totalPeopleFed = 0;
-        const processingChains = [];
         let totalProcessingWater = 0;
-        const foodCategoriesUsed = new Set();
-        const foodCategoryDetails = new Map();
+        const processingChains = [];
+        const foodCategoriesMap = new Map();
 
-        for (const [productId, quantityPerMonth] of Object.entries(production)) {
-            const directFood = ProductionCalculator.foods?.find(f => f.productId === productId);
+        Object.entries(production).forEach(([productId, quantity]) => {
+            // Check if this crop has a manually selected recipe
+            const selectedRecipeId = selectedRecipes[productId];
 
-            if (directFood) {
-                // Direct food
-                const consumptionPer100 = directFood.consumedPerHundredPopsPerMonth * foodConsumptionMult;
-                if (consumptionPer100 > 0) {
-                    const peopleFed = (quantityPerMonth / consumptionPer100) * 100;
-                    totalPeopleFed += peopleFed;
+            if (selectedRecipeId) {
+                // Use the selected recipe chain
+                const recipe = ProductionCalculator.getRecipe(selectedRecipeId);
 
-                    // Track category
-                    const category = ProductionCalculator.foodCategories?.find(c => c.id === directFood.categoryId);
+                // Apply recipe filter if specified
+                if (allowedRecipes && !allowedRecipes.includes(selectedRecipeId)) {
+                    return; // Skip this recipe
+                }
+
+                if (recipe) {
+                    const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
+                    const matchingPath = foodPaths.find(path => path.recipeChain[0] === selectedRecipeId);
+
+                    if (matchingPath) {
+                        const foodProduct = ProductionCalculator.getProduct(matchingPath.finalFoodProductId);
+                        const food = ProductionCalculator.foods?.find(f => f.productId === matchingPath.finalFoodProductId);
+
+                        if (food) {
+                            const finalFoodQuantity = quantity * matchingPath.conversionRatio;
+                            const peopleFedByThisChain = (finalFoodQuantity / food.consumedPerHundredPopsPerMonth) * 100 / foodConsumptionMult;
+                            totalPeopleFed += peopleFedByThisChain;
+
+                            // Calculate processing requirements
+                            const chainWater = this.calculateChainWater(matchingPath, quantity);
+                            const chainMachines = this.calculateChainMachines(matchingPath, quantity);
+                            totalProcessingWater += chainWater;
+
+                            // Track food category
+                            const category = ProductionCalculator.foodCategories?.find(c => c.id === food.categoryId);
+                            if (category) {
+                                const current = foodCategoriesMap.get(category.id) || {
+                                    id: category.id,
+                                    name: category.name,
+                                    hasHealthBenefit: category.hasHealthBenefit,
+                                    peopleFed: 0
+                                };
+                                current.peopleFed += peopleFedByThisChain;
+                                foodCategoriesMap.set(category.id, current);
+                            }
+
+                            processingChains.push({
+                                cropProductId: productId,
+                                finalFoodProductId: matchingPath.finalFoodProductId,
+                                recipeChain: matchingPath.recipeChain,
+                                conversionRatio: matchingPath.conversionRatio,
+                                peopleFed: peopleFedByThisChain,
+                                machines: chainMachines,
+                                waterPerDay: chainWater,
+                                isDirect: false,
+                                foodCategory: food.categoryId
+                            });
+                        }
+                    }
+                }
+            } else {
+                // No recipe selected - check if it's directly edible
+                const food = ProductionCalculator.foods?.find(f => f.productId === productId);
+                if (food) {
+                    const peopleFedByThisFood = (quantity / food.consumedPerHundredPopsPerMonth) * 100 / foodConsumptionMult;
+                    totalPeopleFed += peopleFedByThisFood;
+
+                    // Track food category
+                    const category = ProductionCalculator.foodCategories?.find(c => c.id === food.categoryId);
                     if (category) {
-                        foodCategoriesUsed.add(directFood.categoryId);
-                        const current = foodCategoryDetails.get(directFood.categoryId) || {
+                        const current = foodCategoriesMap.get(category.id) || {
+                            id: category.id,
                             name: category.name,
                             hasHealthBenefit: category.hasHealthBenefit,
                             peopleFed: 0
                         };
-                        current.peopleFed += peopleFed;
-                        foodCategoryDetails.set(directFood.categoryId, current);
+                        current.peopleFed += peopleFedByThisFood;
+                        foodCategoriesMap.set(category.id, current);
                     }
 
                     processingChains.push({
                         cropProductId: productId,
                         finalFoodProductId: productId,
-                        peopleFed: peopleFed,
+                        recipeChain: [],
+                        conversionRatio: 1.0,
+                        peopleFed: peopleFedByThisFood,
+                        machines: [],
+                        waterPerDay: 0,
                         isDirect: true,
-                        foodCategory: directFood.categoryId
+                        foodCategory: food.categoryId
                     });
                 }
-            } else {
-                // Use user-selected recipe if available
-                const selectedRecipeId = selectedRecipes?.[productId];
-                if (!selectedRecipeId) {
-                    // No recipe selected - can't calculate, skip this product
-                    console.warn(`No recipe selected for ${productId}`);
-                    continue;
-                }
-
-                // Trace the selected recipe to final food
-                const result = this.traceRecipeToFood(productId, quantityPerMonth, selectedRecipeId, foodConsumptionMult);
-                if (result) {
-                    totalPeopleFed += result.peopleFed;
-                    processingChains.push(result);
-                    totalProcessingWater += result.waterPerDay || 0;
-
-                    // Track category
-                    if (result.foodCategory) {
-                        const category = ProductionCalculator.foodCategories?.find(c => c.id === result.foodCategory);
-                        if (category) {
-                            foodCategoriesUsed.add(result.foodCategory);
-                            const current = foodCategoryDetails.get(result.foodCategory) || {
-                                name: category.name,
-                                hasHealthBenefit: category.hasHealthBenefit,
-                                peopleFed: 0
-                            };
-                            current.peopleFed += result.peopleFed;
-                            foodCategoryDetails.set(result.foodCategory, current);
-                        }
-                    }
-                }
             }
-        }
+        });
 
         return {
             peopleFed: totalPeopleFed,
+            totalWaterPerDay: farmWaterPerDay + totalProcessingWater,
+            totalProcessingWater: totalProcessingWater,
             processingChains,
-            totalProcessingWater,
-            totalWaterPerDay: farmWaterUsage + totalProcessingWater,
             foodCategories: {
-                count: foodCategoriesUsed.size,
-                categories: Array.from(foodCategoryDetails.entries()).map(([id, data]) => ({
-                    id,
-                    ...data
-                })),
-                hasHealthBenefit: Array.from(foodCategoryDetails.values()).some(c => c.hasHealthBenefit)
+                categories: Array.from(foodCategoriesMap.values()),
+                count: foodCategoriesMap.size
             }
         };
     }
@@ -459,6 +468,81 @@ export class FarmOptimizer {
      */
     static calculateWaterPerDay(crop, farm) {
         return crop.waterPerDay * farm.effectiveWaterMult;
+    }
+
+    /**
+ * Calculate water requirements for a processing chain
+ * @param {Object} path - Food chain path from FoodChainResolver
+ * @param {number} inputQuantity - Input crop quantity per month
+ * @returns {number} Water per day
+ */
+    static calculateChainWater(path, inputQuantity) {
+        let totalWaterPerMonth = 0;
+
+        path.processingChain?.forEach(step => {
+            const recipe = ProductionCalculator.getRecipe(step.recipeId);
+            if (recipe) {
+                const machine = ProductionCalculator.getMachine(recipe.machineId);
+                if (machine) {
+                    // Calculate how many times this recipe runs per month
+                    const inputForThisStep = inputQuantity * step.inputRatio;
+                    const recipeInput = recipe.inputs.find(i => i.productId === step.inputProductId);
+                    if (recipeInput) {
+                        const recipesPerMonth = inputForThisStep / recipeInput.quantity;
+                        const monthsPerRecipe = recipe.durationSeconds / (30 * 24 * 60 * 60); // Convert to months
+                        const machineCount = recipesPerMonth * monthsPerRecipe;
+
+                        // Add water consumption if machine uses water
+                        const waterInput = recipe.inputs.find(i => i.productId === 'Product_Water');
+                        if (waterInput) {
+                            totalWaterPerMonth += waterInput.quantity * recipesPerMonth;
+                        }
+                    }
+                }
+            }
+        });
+
+        return totalWaterPerMonth / 30; // Convert to per day
+    }
+
+    /**
+ * Calculate machine requirements for a processing chain
+ * @param {Object} path - Food chain path from FoodChainResolver
+ * @param {number} inputQuantity - Input crop quantity per month
+ * @returns {Array} Machine requirements
+ */
+    static calculateChainMachines(path, inputQuantity) {
+        const machineMap = new Map();
+
+        path.processingChain?.forEach(step => {
+            const recipe = ProductionCalculator.getRecipe(step.recipeId);
+            if (recipe) {
+                const machine = ProductionCalculator.getMachine(recipe.machineId);
+                if (machine) {
+                    // Calculate how many times this recipe runs per month
+                    const inputForThisStep = inputQuantity * step.inputRatio;
+                    const recipeInput = recipe.inputs.find(i => i.productId === step.inputProductId);
+                    if (recipeInput) {
+                        const recipesPerMonth = inputForThisStep / recipeInput.quantity;
+                        const monthsPerRecipe = recipe.durationSeconds / (30 * 24 * 60 * 60); // Convert to months
+                        const machineCount = recipesPerMonth * monthsPerRecipe;
+
+                        // Aggregate machine counts
+                        const current = machineMap.get(machine.id) || {
+                            machineId: machine.id,
+                            machineName: machine.name,
+                            count: 0,
+                            electricityKw: machine.electricityKw || 0,
+                            workers: machine.workers || 0
+                        };
+                        current.count += machineCount;
+                        machineMap.set(machine.id, current);
+                    }
+                }
+            }
+        });
+
+        return Array.from(machineMap.values());
     }
 
     /**

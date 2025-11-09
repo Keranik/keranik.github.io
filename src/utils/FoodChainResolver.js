@@ -38,6 +38,8 @@ export class FoodChainResolver {
         return results;
     }
 
+
+
     /**
      * Recursively trace a product back to farmable crops
      */
@@ -337,6 +339,59 @@ export class FoodChainResolver {
         }
 
         return bestValue;
+    }
+
+    /**
+ * Get all food-related recipes (recipes that eventually produce food)
+ * @returns {Array} Array of recipe objects that lead to food production
+ */
+    static getAllFoodRecipes() {
+        const foodRecipes = new Set();
+
+        // Get all recipes
+        const allRecipes = ProductionCalculator.recipes || [];
+
+        // Check each recipe's outputs
+        allRecipes.forEach(recipe => {
+            // Check if any output leads to food
+            const leadsToFood = recipe.outputs.some(output => {
+                // Direct food check
+                if (ProductionCalculator.foods?.some(f => f.productId === output.productId)) {
+                    return true;
+                }
+
+                // Check if it's used in food chains
+                const paths = this.getFoodsFromCrop(output.productId);
+                return paths.length > 0;
+            });
+
+            if (leadsToFood) {
+                foodRecipes.add(recipe.id);
+            }
+        });
+
+        return Array.from(foodRecipes).map(id => ProductionCalculator.getRecipe(id)).filter(r => r !== null);
+    }
+
+    /**
+     * Group food recipes by their output product
+     * Useful for filtering UI
+     * @returns {Object} Map of productId to array of recipes
+     */
+    static getFoodRecipesByOutput() {
+        const foodRecipes = this.getAllFoodRecipes();
+        const grouped = {};
+
+        foodRecipes.forEach(recipe => {
+            recipe.outputs.forEach(output => {
+                if (!grouped[output.productId]) {
+                    grouped[output.productId] = [];
+                }
+                grouped[output.productId].push(recipe);
+            });
+        });
+
+        return grouped;
     }
 
     /**
