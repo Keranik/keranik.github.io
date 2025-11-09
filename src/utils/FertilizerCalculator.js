@@ -233,6 +233,55 @@ export class FertilizerCalculator {
     }
 
     /**
+ * Find the optimal fertilizer and target fertility across all possibilities
+ * Tests multiple fertility targets and returns the option with highest net benefit
+ * @param {number} naturalEquilibrium - Natural fertility equilibrium
+ * @param {number} farmPeopleFed - Current people fed by the farm
+ * @param {Array<string>} allowedFertilizerIds - List of allowed fertilizer IDs
+ * @returns {Object|null} Best fertilizer option with targetFertility property, or null
+ */
+    static findOptimalFertilizer(naturalEquilibrium, farmPeopleFed, allowedFertilizerIds) {
+        if (allowedFertilizerIds.length === 0) return null;
+
+        // Test fertility targets in 10% increments
+        const testTargets = [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200];
+
+        // Only test targets above natural equilibrium
+        const viableTargets = testTargets.filter(t => t > naturalEquilibrium);
+
+        if (viableTargets.length === 0) return null;
+
+        let bestOption = null;
+        let bestNetBenefit = 0;
+
+        // Test each target and find the absolute best
+        viableTargets.forEach(target => {
+            const options = this.calculateFertilizerOptions(
+                naturalEquilibrium,
+                target,
+                farmPeopleFed,
+                allowedFertilizerIds
+            );
+
+            // Find the best fertilizer for this target (marked with isBest)
+            const best = options.find(opt => opt.isBest);
+
+            // Only consider if it has positive net benefit
+            if (best && best.netPeopleFed > 0) {
+                if (best.netPeopleFed > bestNetBenefit) {
+                    bestNetBenefit = best.netPeopleFed;
+                    bestOption = {
+                        ...best,
+                        targetFertility: target
+                    };
+                }
+            }
+        });
+
+        return bestOption;
+    }
+
+    /**
      * Calculate total fertilizer needs across all farms
      * @param {Array<object>} farmResults - Array of farm result objects
      * @param {Array<string>} allowedFertilizerIds - List of allowed fertilizer IDs

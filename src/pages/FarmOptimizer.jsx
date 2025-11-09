@@ -1,6 +1,6 @@
-// src/pages/FarmOptimizer.jsx - FULL FILE with corrections
+// src/pages/FarmOptimizer.jsx - CORRECTED HOOK ORDER
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
@@ -85,6 +85,8 @@ const FarmOptimizerPage = () => {
     const [results, setResults] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    // ===== ALL HOOKS MUST COME FIRST =====
+
     // Load game data and initialize
     useEffect(() => {
         document.title = 'Farm Optimizer - Captain of Industry Tools';
@@ -166,15 +168,42 @@ const FarmOptimizerPage = () => {
         });
     }, [settings.research, getResearchValue]);
 
-    // Auto-recalculate when constraints change (if results exist)
+    // Auto-recalculate when constraints.naturalFertilityOnly changes
     useEffect(() => {
-        if (results && !loading) {
+        if (results && !loading && dataLoaded) {
+            console.log('naturalFertilityOnly changed, triggering recalculation');
             const timer = setTimeout(() => {
-                handleCalculate();
+                // Call the calculate function (defined below)
+                performCalculation();
             }, 300);
             return () => clearTimeout(timer);
         }
-    }, [constraints.naturalFertilityOnly]);
+    }, [constraints.naturalFertilityOnly, results, loading, dataLoaded]);
+
+    // Auto-recalculate when farms state changes
+    useEffect(() => {
+        if (results && farms.length > 0 && !loading && dataLoaded) {
+            console.log('Farms state changed, triggering recalculation');
+            const timer = setTimeout(() => {
+                // Call the calculate function (defined below)
+                performCalculation();
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [farms, results, loading, dataLoaded]);
+
+    // Auto-recalculate when allowedFertilizers changes
+    useEffect(() => {
+        if (results && !loading && dataLoaded) {
+            console.log('allowedFertilizers changed, triggering recalculation');
+            const timer = setTimeout(() => {
+                performCalculation();
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [constraints.allowedFertilizers, results, loading, dataLoaded]);
+
+    // ===== NOW DEFINE FUNCTIONS =====
 
     if (!dataLoaded) {
         return (
@@ -218,135 +247,42 @@ const FarmOptimizerPage = () => {
         ProductionCalculator.foodCropIds?.has(crop.id) ?? false
     );
 
-    // Manual mode farm management
-    const addFarm = () => {
-        const lastFarmType = farms.length > 0 ? farms[farms.length - 1].farmId : (availableFarms[0]?.id || 'FarmT1');
-        setFarms([...farms, {
-            id: Date.now(),
-            farmId: lastFarmType,
-            rotation: [null, null, null, null],
-            selectedFertilizerId: null,
-            customFertility: null
-        }]);
-    };
+    // Helper function for optimization
+    const runOptimization = () => {
+        const targetPop = constraints.targetPopulation;
+        const avgPeoplePerFarm = 400;
+        const estimatedFarms = Math.ceil(targetPop / avgPeoplePerFarm);
+        const farmCount = constraints.maxFarms ? Math.min(estimatedFarms, constraints.maxFarms) : estimatedFarms;
 
-    const removeFarm = (id) => {
-        setFarms(farms.filter(f => f.id !== id));
-    };
+        const optimizedFarms = [];
+        for (let i = 0; i < farmCount; i++) {
+            const farmType = constraints.allowedFarmTypes.length > 0
+                ? constraints.allowedFarmTypes[0]
+                : availableFarms[0]?.id || 'FarmT1';
 
-    const updateFarmType = (id, farmId) => {
-        setFarms(farms.map(f => f.id === id ? { ...f, farmId } : f));
-    };
+            const rotation = optimizeRotationForGoal(optimizationGoal);
 
-    const openCropModal = (farmIndex, slotIndex) => {
-        setCropModal({ open: true, farmIndex, slotIndex });
-    };
-
-    const selectCrop = (cropId) => {
-        const { farmIndex, slotIndex } = cropModal;
-        setFarms(farms.map((farm, idx) => {
-            if (idx === farmIndex) {
-                const newRotation = [...farm.rotation];
-                newRotation[slotIndex] = cropId;
-                return { ...farm, rotation: newRotation };
-            }
-            return farm;
-        }));
-        setCropModal({ open: false, farmIndex: null, slotIndex: null });
-    };
-
-    const openRecipeSelectionModal = (productId) => {
-        const product = ProductionCalculator.getProduct(productId);
-        const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
-
-        if (foodPaths.length === 0) {
-            alert(`No food recipes found for ${product?.name}. This crop cannot be processed into food.`);
-            return;
+            optimizedFarms.push({
+                id: Date.now() + i,
+                farmId: farmType,
+                rotation,
+                selectedFertilizerId: null,
+                customFertility: null
+            });
         }
 
-        const uniqueRecipeChains = new Map();
-
-        foodPaths.forEach(path => {
-            if (path.processingChain.length === 0) {
-                return;
-            }
-
-            const firstRecipe = path.processingChain[0];
-            const chainKey = path.recipeChain.join('->');
-
-            if (!uniqueRecipeChains.has(chainKey)) {
-                const recipe = ProductionCalculator.getRecipe(firstRecipe.recipeId);
-                if (recipe) {
-                    uniqueRecipeChains.set(chainKey, {
-                        ...recipe,
-                        finalFoodProductId: path.finalFoodProductId,
-                        fullChain: path.processingChain,
-                        conversionRatio: path.conversionRatio
-                    });
-                }
-            }
-        });
-
-        const recipes = Array.from(uniqueRecipeChains.values());
-
-        if (recipes.length === 0) {
-            alert(`${product?.name} is directly edible, no processing needed!`);
-            return;
-        }
-
-        setRecipeSelectionModal({
-            open: true,
-            productId,
-            productName: product?.name,
-            availableRecipes: recipes
-        });
+        return optimizedFarms;
     };
 
-    const selectProcessingRecipe = (productId, recipeId) => {
-        setSelectedProcessingRecipes(prev => {
-            const newMap = new Map(prev);
-            newMap.set(productId, recipeId);
-            return newMap;
-        });
-        setRecipeSelectionModal({ open: false, productId: null, productName: null, availableRecipes: [] });
+    const optimizeRotationForGoal = (goal) => {
+        const efficientCrops = availableFoodCrops.slice(0, 2).map(c => c.id);
+        return [...efficientCrops, null, null];
     };
 
-    // Fertilizer handlers - update farm state AND trigger recalculation
-    const handleFertilizerSelect = (farmIndex, fertilizerId) => {
-        console.log('handleFertilizerSelect called:', { farmIndex, fertilizerId });
-        setFarms(prevFarms => {
-            const newFarms = prevFarms.map((farm, idx) =>
-                idx === farmIndex ? { ...farm, selectedFertilizerId: fertilizerId } : farm
-            );
-            console.log('Updated farms:', newFarms);
-            return newFarms;
-        });
+    // Main calculation function (extracted to avoid duplication)
+    // In FarmOptimizer.jsx - Update the performCalculation function
 
-        // Trigger recalculation immediately
-        setTimeout(() => {
-            console.log('Triggering recalculation after fertilizer select');
-            handleCalculate();
-        }, 100);
-    };
-
-    const handleCustomFertilityChange = (farmId, newFertility) => {
-        console.log('handleCustomFertilityChange called:', { farmId, newFertility });
-        setFarms(prevFarms => {
-            const newFarms = prevFarms.map(farm =>
-                farm.id === farmId ? { ...farm, customFertility: newFertility } : farm
-            );
-            console.log('Updated farms:', newFarms);
-            return newFarms;
-        });
-
-        // Trigger recalculation immediately
-        setTimeout(() => {
-            console.log('Triggering recalculation after fertility change');
-            handleCalculate();
-        }, 100);
-    };
-
-    const handleCalculate = () => {
+    const performCalculation = () => {
         console.log('=== STARTING CALCULATION ===');
         setLoading(true);
 
@@ -385,10 +321,13 @@ const FarmOptimizerPage = () => {
                 // Determine actual fertility based on settings
                 let actualFertility;
                 if (constraints.naturalFertilityOnly) {
+                    // Natural fertility only - ignore any fertilizer settings
                     actualFertility = fertilityInfo.naturalEquilibrium;
                 } else if (farm.customFertility !== null && farm.customFertility !== undefined) {
+                    // User has set custom fertility via fertilizer planning
                     actualFertility = farm.customFertility;
                 } else {
+                    // Default to natural equilibrium
                     actualFertility = fertilityInfo.naturalEquilibrium;
                 }
 
@@ -486,21 +425,156 @@ const FarmOptimizerPage = () => {
                     };
                 });
 
-                const fertilizerTargets = [100, 120, 140, 160, 180, 200];
-                const optimalTarget = fertilizerTargets.find(t => t > fertilityInfo.naturalEquilibrium) || 100;
-
-                const fertilizerOptions = FertilizerCalculator.calculateFertilizerOptions(
+                // ✅ Calculate best fertilizer across multiple targets
+                // ✅ Find optimal fertilizer using the shared calculator method
+                const bestFertilizerOption = FertilizerCalculator.findOptimalFertilizer(
                     fertilityInfo.naturalEquilibrium,
-                    optimalTarget,
                     foodResult.peopleFed,
                     constraints.allowedFertilizers
                 );
 
+                // Get options for display (using the best target if found, or a default)
+                let fertilizerOptionsForDisplay = [];
+                if (bestFertilizerOption) {
+                    fertilizerOptionsForDisplay = FertilizerCalculator.calculateFertilizerOptions(
+                        fertilityInfo.naturalEquilibrium,
+                        bestFertilizerOption.targetFertility,
+                        foodResult.peopleFed,
+                        constraints.allowedFertilizers
+                    );
+                } else if (!constraints.naturalFertilityOnly && constraints.allowedFertilizers.length > 0) {
+                    // No beneficial option found, still show options for display
+                    const defaultTarget = Math.ceil(fertilityInfo.naturalEquilibrium / 10) * 10 + 10;
+                    fertilizerOptionsForDisplay = FertilizerCalculator.calculateFertilizerOptions(
+                        fertilityInfo.naturalEquilibrium,
+                        defaultTarget,
+                        foodResult.peopleFed,
+                        constraints.allowedFertilizers
+                    );
+                }
+
+                // ✅ Auto-apply best fertilizer if not already set
+                let autoAppliedFertilizer = false;
+                if (bestFertilizerOption &&
+                    !constraints.naturalFertilityOnly &&
+                    farm.selectedFertilizerId === null) {
+
+                    console.log(`Auto-applying best fertilizer to farm ${farmIdx}:`, {
+                        fertilizer: bestFertilizerOption.fertilizerId,
+                        targetFertility: bestFertilizerOption.targetFertility,
+                        netBenefit: bestFertilizerOption.netPeopleFed,
+                        yieldIncrease: bestFertilizerOption.yieldIncrease,
+                        workersNeeded: bestFertilizerOption.workersNeeded
+                    });
+
+                    // Update the farm
+                    farm.selectedFertilizerId = bestFertilizerOption.fertilizerId;
+                    farm.customFertility = bestFertilizerOption.targetFertility;
+                    actualFertility = bestFertilizerOption.targetFertility;
+                    autoAppliedFertilizer = true;
+
+                    // Recalculate production with the new fertility
+                    const updatedSlotDetails = rotation.map(cropId => {
+                        if (!cropId) return null;
+
+                        const crop = availableCrops.find(c => c.id === cropId);
+                        if (!crop) return null;
+
+                        const productionPerMonth = FarmOptimizer.calculateCropYield(crop, effectiveFarm, actualFertility);
+                        const waterPerDay = FarmOptimizer.calculateWaterPerDay(crop, effectiveFarm);
+
+                        return {
+                            cropId,
+                            cropName: crop.name,
+                            productionPerMonth,
+                            waterPerDay,
+                            productId: crop.output.productId,
+                            growthDays: crop.growthDays
+                        };
+                    }).filter(s => s !== null);
+
+                    // Recalculate total production
+                    const updatedProduction = {};
+                    let updatedFarmWaterPerDay = 0;
+
+                    updatedSlotDetails.forEach(slot => {
+                        const weight = totalRotationDays > 0 ? slot.growthDays / totalRotationDays : 0;
+                        const avgProductionPerMonth = slot.productionPerMonth * weight;
+                        updatedProduction[slot.productId] = (updatedProduction[slot.productId] || 0) + avgProductionPerMonth;
+                        updatedFarmWaterPerDay += slot.waterPerDay * weight;
+                    });
+
+                    // Update production and water
+                    Object.assign(production, updatedProduction);
+                    totalFarmWaterPerDay = updatedFarmWaterPerDay;
+
+                    // Recalculate food result with updated production
+                    if (optimizationMode === 'manual') {
+                        foodResult = FarmOptimizer.calculatePeopleFedManual(
+                            production,
+                            Object.fromEntries(selectedProcessingRecipes),
+                            totalFarmWaterPerDay,
+                            settings.foodConsumptionMultiplier || 1.0,
+                            allowedRecipesForCalc
+                        );
+                    } else {
+                        foodResult = FarmOptimizer.calculatePeopleFedWithChains(
+                            production,
+                            totalFarmWaterPerDay,
+                            settings.foodConsumptionMultiplier || 1.0,
+                            allowedIntermediatesForCalc,
+                            allowedRecipesForCalc
+                        );
+                    }
+
+                    // Update slot details
+                    slotDetails.length = 0;
+                    slotDetails.push(...updatedSlotDetails);
+
+                    // Recalculate slots with people fed
+                    slotsWithPeopleFed.length = 0;
+                    slotsWithPeopleFed.push(...updatedSlotDetails.map(slot => {
+                        const weight = totalRotationDays > 0 ? slot.growthDays / totalRotationDays : 0;
+                        const weightedProduction = slot.productionPerMonth * weight;
+                        const slotProduction = { [slot.productId]: weightedProduction };
+
+                        let slotFoodResult;
+                        if (optimizationMode === 'manual') {
+                            slotFoodResult = FarmOptimizer.calculatePeopleFedManual(
+                                slotProduction,
+                                Object.fromEntries(selectedProcessingRecipes),
+                                0,
+                                settings.foodConsumptionMultiplier || 1.0,
+                                allowedRecipesForCalc
+                            );
+                        } else {
+                            slotFoodResult = FarmOptimizer.calculatePeopleFedWithChains(
+                                slotProduction,
+                                0,
+                                settings.foodConsumptionMultiplier || 1.0,
+                                allowedIntermediatesForCalc,
+                                allowedRecipesForCalc
+                            );
+                        }
+
+                        return {
+                            ...slot,
+                            peopleFed: slotFoodResult.peopleFed,
+                            processingChain: slotFoodResult.processingChains[0] || null,
+                            weight: weight,
+                            weightedProduction: weightedProduction
+                        };
+                    }));
+                }
+
+                const fertilizerOptions = fertilizerOptionsForDisplay;
+
+                // Determine if actively using fertilizer
                 const usingFertilizer = !constraints.naturalFertilityOnly &&
                     actualFertility > fertilityInfo.naturalEquilibrium &&
                     farm.selectedFertilizerId !== null;
 
-                console.log(`Farm ${farmIdx} usingFertilizer:`, usingFertilizer);
+                console.log(`Farm ${farmIdx} usingFertilizer:`, usingFertilizer, 'autoApplied:', autoAppliedFertilizer);
 
                 return {
                     farm,
@@ -522,11 +596,33 @@ const FarmOptimizerPage = () => {
                 };
             });
 
+            // ✅ Update farms state with auto-applied fertilizers
+            if (optimizationMode === 'manual') {
+                const updatedFarms = farmsToCalculate.map((farm, idx) => ({
+                    ...farm,
+                    selectedFertilizerId: detailedResults[idx].farm.selectedFertilizerId,
+                    customFertility: detailedResults[idx].farm.customFertility
+                }));
+
+                // Check if any farms were updated
+                const hasChanges = updatedFarms.some((farm, idx) =>
+                    farm.selectedFertilizerId !== farms[idx]?.selectedFertilizerId ||
+                    farm.customFertility !== farms[idx]?.customFertility
+                );
+
+                if (hasChanges) {
+                    console.log('Auto-applied fertilizers, updating farms state');
+                    setFarms(updatedFarms);
+                }
+            }
+
+            // ✅ Calculate totals
             const totalPeopleFed = detailedResults.reduce((sum, r) => sum + r.peopleFed, 0);
             const totalWaterPerDay = detailedResults.reduce((sum, r) => sum + r.totalWaterPerDay, 0);
             const totalFarmWater = detailedResults.reduce((sum, r) => sum + r.farmWaterPerDay, 0);
             const totalProcessingWater = detailedResults.reduce((sum, r) => sum + r.processingWaterPerDay, 0);
 
+            // ✅ Aggregate all production
             const allProduction = {};
             detailedResults.forEach(result => {
                 Object.entries(result.production).forEach(([productId, quantity]) => {
@@ -534,6 +630,7 @@ const FarmOptimizerPage = () => {
                 });
             });
 
+            // ✅ Aggregate food categories
             const allFoodCategories = new Set();
             const categoryDetails = new Map();
             const uniqueFoods = new Set();
@@ -583,6 +680,7 @@ const FarmOptimizerPage = () => {
                 }
             });
 
+            // ✅ Aggregate processing machines
             const allProcessingMachines = new Map();
             let totalProcessingElectricity = 0;
             let totalProcessingWorkers = 0;
@@ -605,7 +703,7 @@ const FarmOptimizerPage = () => {
                 });
             });
 
-            // Calculate global fertilizer summary - FIXED VERSION
+            // ✅ Calculate global fertilizer summary
             console.log('Calculating fertilizer summary...');
             const fertilizerSummary = FertilizerCalculator.calculateGlobalUsage(
                 detailedResults,
@@ -613,6 +711,7 @@ const FarmOptimizerPage = () => {
             );
             console.log('Fertilizer summary:', fertilizerSummary);
 
+            // ✅ Set results
             setResults({
                 farms: detailedResults,
                 totals: {
@@ -651,35 +750,123 @@ const FarmOptimizerPage = () => {
         }
     };
 
-    const runOptimization = () => {
-        const targetPop = constraints.targetPopulation;
-        const avgPeoplePerFarm = 400;
-        const estimatedFarms = Math.ceil(targetPop / avgPeoplePerFarm);
-        const farmCount = constraints.maxFarms ? Math.min(estimatedFarms, constraints.maxFarms) : estimatedFarms;
-
-        const optimizedFarms = [];
-        for (let i = 0; i < farmCount; i++) {
-            const farmType = constraints.allowedFarmTypes.length > 0
-                ? constraints.allowedFarmTypes[0]
-                : availableFarms[0]?.id || 'FarmT1';
-
-            const rotation = optimizeRotationForGoal(optimizationGoal);
-
-            optimizedFarms.push({
-                id: Date.now() + i,
-                farmId: farmType,
-                rotation,
-                selectedFertilizerId: null,
-                customFertility: null
-            });
-        }
-
-        return optimizedFarms;
+    const handleCalculate = () => {
+        performCalculation();
     };
 
-    const optimizeRotationForGoal = (goal) => {
-        const efficientCrops = availableFoodCrops.slice(0, 2).map(c => c.id);
-        return [...efficientCrops, null, null];
+    // Manual mode farm management
+    const addFarm = () => {
+        const lastFarmType = farms.length > 0 ? farms[farms.length - 1].farmId : (availableFarms[0]?.id || 'FarmT1');
+        setFarms([...farms, {
+            id: Date.now(),
+            farmId: lastFarmType,
+            rotation: [null, null, null, null],
+            selectedFertilizerId: null,
+            customFertility: null
+        }]);
+    };
+
+    const removeFarm = (id) => {
+        setFarms(farms.filter(f => f.id !== id));
+    };
+
+    const updateFarmType = (id, farmId) => {
+        setFarms(farms.map(f => f.id === id ? { ...f, farmId } : f));
+    };
+
+    const openCropModal = (farmIndex, slotIndex) => {
+        setCropModal({ open: true, farmIndex, slotIndex });
+    };
+
+    const selectCrop = (cropId) => {
+        const { farmIndex, slotIndex } = cropModal;
+        setFarms(farms.map((farm, idx) => {
+            if (idx === farmIndex) {
+                const newRotation = [...farm.rotation];
+                newRotation[slotIndex] = cropId;
+                return { ...farm, rotation: newRotation };
+            }
+            return farm;
+        }));
+        setCropModal({ open: false, farmIndex: null, slotIndex: null });
+    };
+
+    const openRecipeSelectionModal = (productId) => {
+        const product = ProductionCalculator.getProduct(productId);
+        const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
+
+        if (foodPaths.length === 0) {
+            alert(`No food recipes found for ${product?.name}. This crop cannot be processed into food.`);
+            return;
+        }
+
+        const uniqueRecipeChains = new Map();
+
+        foodPaths.forEach(path => {
+            if (path.processingChain.length === 0) {
+                return;
+            }
+
+            const firstRecipe = path.processingChain[0];
+            const chainKey = path.recipeChain.join('->');
+
+            if (!uniqueRecipeChains.has(chainKey)) {
+                const recipe = ProductionCalculator.getRecipe(firstRecipe.recipeId);
+                if (recipe) {
+                    uniqueRecipeChains.set(chainKey, {
+                        ...recipe,
+                        finalFoodProductId: path.finalFoodProductId,
+                        fullChain: path.processingChain,
+                        conversionRatio: path.conversionRatio
+                    });
+                }
+            }
+        });
+
+        const recipes = Array.from(uniqueRecipeChains.values());
+
+        if (recipes.length === 0) {
+            alert(`${product?.name} is directly edible, no processing needed!`);
+            return;
+        }
+
+        setRecipeSelectionModal({
+            open: true,
+            productId,
+            productName: product?.name,
+            availableRecipes: recipes
+        });
+    };
+
+    const selectProcessingRecipe = (productId, recipeId) => {
+        setSelectedProcessingRecipes(prev => {
+            const newMap = new Map(prev);
+            newMap.set(productId, recipeId);
+            return newMap;
+        });
+        setRecipeSelectionModal({ open: false, productId: null, productName: null, availableRecipes: [] });
+    };
+
+    const handleFertilizerSelect = (farmIndex, fertilizerId) => {
+        console.log('handleFertilizerSelect called:', { farmIndex, fertilizerId });
+        setFarms(prevFarms => {
+            const newFarms = prevFarms.map((farm, idx) =>
+                idx === farmIndex ? { ...farm, selectedFertilizerId: fertilizerId } : farm
+            );
+            console.log('Updated farms after fertilizer select:', newFarms);
+            return newFarms;
+        });
+    };
+
+    const handleCustomFertilityChange = (farmId, newFertility) => {
+        console.log('handleCustomFertilityChange called:', { farmId, newFertility });
+        setFarms(prevFarms => {
+            const newFarms = prevFarms.map(farm =>
+                farm.id === farmId ? { ...farm, customFertility: newFertility } : farm
+            );
+            console.log('Updated farms after fertility change:', newFarms);
+            return newFarms;
+        });
     };
 
     // Icons

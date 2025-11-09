@@ -1,11 +1,11 @@
 ﻿// src/components/farm-optimizer/ConstraintsPanel.jsx
 import { useState } from 'react';
-import { getEntityIcon, getCropIcon, getGeneralIcon } from '../../utils/AssetHelper';
+import { getEntityIcon, getCropIcon, getGeneralIcon, getProductIcon } from '../../utils/AssetHelper';
 import RecipeConstraintModal from '../RecipeConstraintModal';
 import MiniRecipeCard from '../MiniRecipeCard';
 import { FoodChainResolver } from '../../utils/FoodChainResolver';
 import ProductionCalculator from '../../utils/ProductionCalculator';
-import ToggleSwitch from '../common/ToggleSwitch';  // Add at top of file
+import ToggleSwitch from '../common/ToggleSwitch';
 
 const ConstraintsPanel = ({
     constraints,
@@ -20,6 +20,68 @@ const ConstraintsPanel = ({
     const blockedIcon = getGeneralIcon('Blocked');
     const checkmarkIcon = getGeneralIcon('Checkmark');
     const plusIcon = getGeneralIcon('Plus');
+    const fertilizerIcon = getGeneralIcon('Fertilizer');
+
+    // Get all available fertilizers from game data
+    const getAllFertilizers = () => {
+        return (ProductionCalculator.products || [])
+            .filter(p => p.fertilizer &&
+                p.fertilizer.fertilityPerQuantityPercent !== undefined &&
+                p.fertilizer.maxFertilityPercent !== undefined)
+            .map(p => ({
+                id: p.id,
+                name: p.name,
+                icon: getProductIcon(p),
+                fertilityPerUnit: p.fertilizer.fertilityPerQuantityPercent,
+                maxFertility: p.fertilizer.maxFertilityPercent
+            }))
+            .sort((a, b) => a.fertilityPerUnit - b.fertilityPerUnit); // Sort by power (weakest first)
+    };
+
+    const availableFertilizers = getAllFertilizers();
+
+    // Toggle fertilizer selection
+    const toggleFertilizer = (fertilizerId) => {
+        const currentList = constraints.allowedFertilizers || [];
+        const isCurrentlyAllowed = currentList.includes(fertilizerId);
+
+        if (isCurrentlyAllowed) {
+            // Remove from list
+            const newList = currentList.filter(id => id !== fertilizerId);
+            onConstraintsChange({
+                ...constraints,
+                allowedFertilizers: newList,
+                naturalFertilityOnly: newList.length === 0 // Auto-enable natural only if no fertilizers
+            });
+        } else {
+            // Add to list
+            const newList = [...currentList, fertilizerId];
+            onConstraintsChange({
+                ...constraints,
+                allowedFertilizers: newList,
+                naturalFertilityOnly: false // Disable natural only when fertilizers are selected
+            });
+        }
+    };
+
+    // Clear all fertilizers (natural fertility only)
+    const clearAllFertilizers = () => {
+        onConstraintsChange({
+            ...constraints,
+            allowedFertilizers: [],
+            naturalFertilityOnly: true
+        });
+    };
+
+    // Enable all fertilizers
+    const enableAllFertilizers = () => {
+        const allIds = availableFertilizers.map(f => f.id);
+        onConstraintsChange({
+            ...constraints,
+            allowedFertilizers: allIds,
+            naturalFertilityOnly: false
+        });
+    };
 
     // Get all food-related recipes
     const getAllFoodRecipes = () => {
@@ -94,10 +156,12 @@ const ConstraintsPanel = ({
     const cropFilterActive = constraints.allowedCrops.length > 0 &&
         constraints.allowedCrops.length < availableFoodCrops.length;
 
+    const allowedFertilizerCount = (constraints.allowedFertilizers || []).length;
+    const fertilizerFilterActive = allowedFertilizerCount > 0 && allowedFertilizerCount < availableFertilizers.length;
+    const noFertilizersAllowed = allowedFertilizerCount === 0;
+
     return (
         <>
-            {/* NO outer container - part of parent controls */}
-
             {/* Section Header */}
             <div style={{
                 display: 'flex',
@@ -371,6 +435,193 @@ const ConstraintsPanel = ({
                 </div>
             </div>
 
+            {/* Available Fertilizers Section */}
+            <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.75rem'
+                }}>
+                    <label style={{ color: '#ccc', fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {fertilizerIcon && (
+                            <img src={fertilizerIcon} alt="Fertilizer" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                        )}
+                        Available Fertilizers
+                    </label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{
+                            fontSize: '0.8rem',
+                            color: noFertilizersAllowed ? '#ff6b6b' : (fertilizerFilterActive ? '#FFD700' : '#888'),
+                            fontWeight: '600'
+                        }}>
+                            {noFertilizersAllowed ? 'Natural Only' : `${allowedFertilizerCount} / ${availableFertilizers.length}`}
+                        </span>
+                        {allowedFertilizerCount > 0 && (
+                            <button
+                                onClick={clearAllFertilizers}
+                                style={{
+                                    padding: '3px 8px',
+                                    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+                                    border: '1px solid rgba(255, 107, 107, 0.4)',
+                                    borderRadius: '4px',
+                                    color: '#ff6b6b',
+                                    cursor: 'pointer',
+                                    fontSize: '0.7rem',
+                                    fontWeight: '700',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.25)'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.15)'}
+                            >
+                                None
+                            </button>
+                        )}
+                        {allowedFertilizerCount !== availableFertilizers.length && (
+                            <button
+                                onClick={enableAllFertilizers}
+                                style={{
+                                    padding: '3px 8px',
+                                    backgroundColor: 'rgba(80, 200, 120, 0.15)',
+                                    border: '1px solid rgba(80, 200, 120, 0.4)',
+                                    borderRadius: '4px',
+                                    color: '#50C878',
+                                    cursor: 'pointer',
+                                    fontSize: '0.7rem',
+                                    fontWeight: '700',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(80, 200, 120, 0.25)'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(80, 200, 120, 0.15)'}
+                            >
+                                All
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {availableFertilizers.length > 0 ? (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        {availableFertilizers.map(fert => {
+                            const isAllowed = (constraints.allowedFertilizers || []).includes(fert.id);
+
+                            return (
+                                <button
+                                    key={fert.id}
+                                    onClick={() => toggleFertilizer(fert.id)}
+                                    title={`${fert.name} - +${fert.fertilityPerUnit}% per unit (max ${fert.maxFertility}%)`}
+                                    style={{
+                                        padding: '0.65rem',
+                                        backgroundColor: isAllowed ? 'rgba(255, 215, 0, 0.15)' : 'transparent',
+                                        border: isAllowed ? '2px solid #FFD700' : '2px solid #444',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'all 0.15s ease',
+                                        opacity: isAllowed ? 1 : 0.5,
+                                        width: '90px',
+                                        height: '85px',
+                                        position: 'relative'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'scale(1.05)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'scale(1)';
+                                    }}
+                                >
+                                    {fert.icon && (
+                                        <img
+                                            src={fert.icon}
+                                            alt={fert.name}
+                                            style={{
+                                                width: '32px',
+                                                height: '32px',
+                                                objectFit: 'contain',
+                                                filter: isAllowed ? 'none' : 'grayscale(100%)',
+                                                marginBottom: '6px'
+                                            }}
+                                        />
+                                    )}
+                                    <span style={{
+                                        fontSize: '0.7rem',
+                                        color: isAllowed ? '#FFD700' : '#666',
+                                        fontWeight: '600',
+                                        textAlign: 'center',
+                                        lineHeight: '1.1',
+                                        marginBottom: '4px'
+                                    }}>
+                                        {fert.name}
+                                    </span>
+                                    <span style={{
+                                        fontSize: '0.65rem',
+                                        color: isAllowed ? '#888' : '#555',
+                                        fontWeight: '500'
+                                    }}>
+                                        +{fert.fertilityPerUnit}%/unit
+                                    </span>
+                                    {isAllowed && successIcon && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '4px',
+                                            right: '4px',
+                                            backgroundColor: '#FFD700',
+                                            borderRadius: '50%',
+                                            padding: '2px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}>
+                                            <img
+                                                src={successIcon}
+                                                alt="Selected"
+                                                style={{ width: '10px', height: '10px' }}
+                                            />
+                                        </div>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div style={{
+                        padding: '1rem',
+                        backgroundColor: '#1a1a1a',
+                        borderRadius: '6px',
+                        border: '1px solid #444',
+                        textAlign: 'center',
+                        color: '#888',
+                        fontSize: '0.85rem'
+                    }}>
+                        No fertilizers found in game data
+                    </div>
+                )}
+
+                {noFertilizersAllowed && (
+                    <div style={{
+                        marginTop: '0.75rem',
+                        padding: '0.75rem',
+                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                        border: '1px solid rgba(255, 107, 107, 0.3)',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        color: '#ff6b6b',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}>
+                        {blockedIcon && (
+                            <img src={blockedIcon} alt="Blocked" style={{ width: '16px', height: '16px' }} />
+                        )}
+                        Natural Fertility Only - No fertilizers will be used in calculations
+                    </div>
+                )}
+            </div>
+
             {/* Food Recipe Constraints Section */}
             <div style={{ marginBottom: '1.5rem' }}>
                 <div style={{
@@ -514,7 +765,7 @@ const ConstraintsPanel = ({
                 )}
             </div>
 
-            {/* Advanced Options Section */}
+            {/* Max Farms Constraint */}
             <div style={{ marginBottom: '1.5rem' }}>
                 <label style={{
                     display: 'block',
@@ -526,48 +777,94 @@ const ConstraintsPanel = ({
                     Advanced Options
                 </label>
                 <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '1rem'
+                    backgroundColor: constraints.maxFarms !== null ? 'rgba(80, 200, 120, 0.05)' : '#1a1a1a',
+                    padding: '1rem',
+                    borderRadius: '6px',
+                    border: constraints.maxFarms !== null ? '1px solid rgba(80, 200, 120, 0.3)' : '1px solid #444',
+                    transition: 'all 0.3s',
+                    boxShadow: constraints.maxFarms !== null ? '0 0 8px rgba(80, 200, 120, 0.15)' : 'none'
                 }}>
-                    {/* Natural Fertility Only */}
                     <div style={{
-                        backgroundColor: constraints.naturalFertilityOnly ? 'rgba(80, 200, 120, 0.05)' : '#1a1a1a',
-                        padding: '1rem',
-                        borderRadius: '6px',
-                        border: constraints.naturalFertilityOnly ? '1px solid rgba(80, 200, 120, 0.3)' : '1px solid #444',
-                        transition: 'all 0.3s',
-                        boxShadow: constraints.naturalFertilityOnly ? '0 0 8px rgba(80, 200, 120, 0.15)' : 'none'
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '0.5rem'
                     }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            marginBottom: '0.5rem'
+                        <label style={{
+                            color: constraints.maxFarms !== null ? '#50C878' : '#ddd',
+                            fontWeight: '600',
+                            fontSize: '0.85rem',
+                            transition: 'color 0.3s'
                         }}>
-                            <label style={{
-                                color: constraints.naturalFertilityOnly ? '#50C878' : '#ddd',
-                                fontWeight: '600',
-                                fontSize: '0.85rem',
-                                transition: 'color 0.3s'
+                            Max Farms
+                        </label>
+                        <ToggleSwitch
+                            value={constraints.maxFarms !== null}
+                            onChange={() => {
+                                if (constraints.maxFarms !== null) {
+                                    onConstraintsChange({ ...constraints, maxFarms: null });
+                                } else {
+                                    onConstraintsChange({ ...constraints, maxFarms: 5 });
+                                }
+                            }}
+                            size="sm"
+                            showIcons={false}
+                            onColor="#50C878"
+                        />
+                    </div>
+                    {constraints.maxFarms !== null ? (
+                        <>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                marginBottom: '0.75rem'
                             }}>
-                                Natural Fertility Only
-                            </label>
-                            <ToggleSwitch
-                                value={constraints.naturalFertilityOnly}
-                                onChange={() => onConstraintsChange({
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="20"
+                                    value={constraints.maxFarms}
+                                    onChange={(e) => onConstraintsChange({
+                                        ...constraints,
+                                        maxFarms: parseInt(e.target.value)
+                                    })}
+                                    style={{
+                                        flex: 1,
+                                        height: '6px',
+                                        backgroundColor: 'rgba(80, 200, 120, 0.2)',
+                                        borderRadius: '3px',
+                                        cursor: 'pointer'
+                                    }}
+                                />
+                                <span style={{
+                                    color: '#50C878',
+                                    fontWeight: '700',
+                                    minWidth: '30px',
+                                    textAlign: 'right'
+                                }}>
+                                    {constraints.maxFarms}
+                                </span>
+                            </div>
+                            <input
+                                type="number"
+                                min="1"
+                                max="20"
+                                value={constraints.maxFarms}
+                                onChange={(e) => onConstraintsChange({
                                     ...constraints,
-                                    naturalFertilityOnly: !constraints.naturalFertilityOnly
+                                    maxFarms: parseInt(e.target.value) || 1
                                 })}
-                                size="sm"
-                                showIcons={false}
-                                onColor="#50C878"
+                                style={{
+                                    width: '100%',
+                                    padding: '6px',
+                                    backgroundColor: '#333',
+                                    color: 'white',
+                                    border: '2px solid rgba(80, 200, 120, 0.3)',
+                                    borderRadius: '4px',
+                                    fontSize: '0.85rem'
+                                }}
                             />
-                        </div>
-                        <div style={{ fontSize: '0.7rem', color: '#888' }}>
-                            Don't use fertilizer in calculations
-                        </div>
-                        {constraints.naturalFertilityOnly && (
                             <div style={{
                                 marginTop: '8px',
                                 fontSize: '0.7rem',
@@ -586,124 +883,12 @@ const ConstraintsPanel = ({
                                 }}></span>
                                 Active Constraint
                             </div>
-                        )}
-                    </div>
-
-                    {/* Max Farms */}
-                    <div style={{
-                        backgroundColor: constraints.maxFarms !== null ? 'rgba(80, 200, 120, 0.05)' : '#1a1a1a',
-                        padding: '1rem',
-                        borderRadius: '6px',
-                        border: constraints.maxFarms !== null ? '1px solid rgba(80, 200, 120, 0.3)' : '1px solid #444',
-                        transition: 'all 0.3s',
-                        boxShadow: constraints.maxFarms !== null ? '0 0 8px rgba(80, 200, 120, 0.15)' : 'none'
-                    }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            marginBottom: '0.5rem'
-                        }}>
-                            <label style={{
-                                color: constraints.maxFarms !== null ? '#50C878' : '#ddd',
-                                fontWeight: '600',
-                                fontSize: '0.85rem',
-                                transition: 'color 0.3s'
-                            }}>
-                                Max Farms
-                            </label>
-                            <ToggleSwitch
-                                value={constraints.maxFarms !== null}
-                                onChange={() => {
-                                    if (constraints.maxFarms !== null) {
-                                        onConstraintsChange({ ...constraints, maxFarms: null });
-                                    } else {
-                                        onConstraintsChange({ ...constraints, maxFarms: 5 });
-                                    }
-                                }}
-                                size="sm"
-                                showIcons={false}
-                                onColor="#50C878"
-                            />
+                        </>
+                    ) : (
+                        <div style={{ fontSize: '0.7rem', color: '#888', fontStyle: 'italic' }}>
+                            No limit
                         </div>
-                        {constraints.maxFarms !== null ? (
-                            <>
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.75rem',
-                                    marginBottom: '0.75rem'
-                                }}>
-                                    <input
-                                        type="range"
-                                        min="1"
-                                        max="20"
-                                        value={constraints.maxFarms}
-                                        onChange={(e) => onConstraintsChange({
-                                            ...constraints,
-                                            maxFarms: parseInt(e.target.value)
-                                        })}
-                                        style={{
-                                            flex: 1,
-                                            height: '6px',
-                                            backgroundColor: 'rgba(80, 200, 120, 0.2)',
-                                            borderRadius: '3px',
-                                            cursor: 'pointer'
-                                        }}
-                                    />
-                                    <span style={{
-                                        color: '#50C878',
-                                        fontWeight: '700',
-                                        minWidth: '30px',
-                                        textAlign: 'right'
-                                    }}>
-                                        {constraints.maxFarms}
-                                    </span>
-                                </div>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max="20"
-                                    value={constraints.maxFarms}
-                                    onChange={(e) => onConstraintsChange({
-                                        ...constraints,
-                                        maxFarms: parseInt(e.target.value) || 1
-                                    })}
-                                    style={{
-                                        width: '100%',
-                                        padding: '6px',
-                                        backgroundColor: '#333',
-                                        color: 'white',
-                                        border: '2px solid rgba(80, 200, 120, 0.3)',
-                                        borderRadius: '4px',
-                                        fontSize: '0.85rem'
-                                    }}
-                                />
-                                <div style={{
-                                    marginTop: '8px',
-                                    fontSize: '0.7rem',
-                                    color: '#50C878',
-                                    fontWeight: '600',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px'
-                                }}>
-                                    <span style={{
-                                        width: '6px',
-                                        height: '6px',
-                                        backgroundColor: '#50C878',
-                                        borderRadius: '50%',
-                                        boxShadow: '0 0 6px rgba(80, 200, 120, 0.6)'
-                                    }}></span>
-                                    Active Constraint
-                                </div>
-                            </>
-                        ) : (
-                            <div style={{ fontSize: '0.7rem', color: '#888', fontStyle: 'italic' }}>
-                                No limit
-                            </div>
-                        )}
-                    </div>
+                    )}
                 </div>
             </div>
 

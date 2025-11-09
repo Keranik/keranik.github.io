@@ -88,7 +88,7 @@ const FarmResultCard = ({
 
     const adjustedPeopleFed = calculateAdjustedProduction();
 
-    // Calculate fertilizer needs
+    // ✅ FIXED: Calculate fertilizer needs - ALWAYS compare against natural equilibrium
     const calculateFertilizerNeeds = (fertilizerId, target) => {
         if (!fertilizerId || target <= naturalEquilibrium) {
             return null;
@@ -106,11 +106,12 @@ const FarmResultCard = ({
         const workerMonthsPerUnit = productionChain?.workerMonthsPerUnit || 0.5;
         const totalWorkerMonths = unitsNeeded * workerMonthsPerUnit * 12; // Per year
 
-        // Calculate people fed increase from CURRENT base yield
+        // ✅ FIXED: Calculate people fed increase from NATURAL BASE (not current)
         const baseYield = peopleFed / (actualFertility / naturalEquilibrium);
-        const yieldMultiplier = actualFertilityTarget / naturalEquilibrium;
-        const newYield = baseYield * yieldMultiplier;
-        const yieldIncrease = newYield - peopleFed;
+        const naturalYield = baseYield; // This is yield at natural equilibrium
+        const targetYieldMultiplier = actualFertilityTarget / naturalEquilibrium;
+        const newYield = baseYield * targetYieldMultiplier;
+        const yieldIncrease = newYield - naturalYield; // Compare to NATURAL, not current
 
         const workersNeeded = totalWorkerMonths / 12;
         const netPeopleFed = yieldIncrease - workersNeeded;
@@ -122,8 +123,8 @@ const FarmResultCard = ({
             unitsPerYear: unitsNeeded * 12,
             actualFertility: actualFertilityTarget,
             fertilityGap,
-            yieldMultiplier,
-            baseYield,
+            yieldMultiplier: targetYieldMultiplier,
+            baseYield: naturalYield,
             newYield,
             yieldIncrease,
             workerMonthsPerYear: totalWorkerMonths,
@@ -141,19 +142,23 @@ const FarmResultCard = ({
     // Get planned fertilizer needs (what user is configuring)
     const plannedFertilizerNeeds = calculateFertilizerNeeds(selectedFertilizerId, targetFertility);
 
-    // Find the best fertilizer option
-    const getBestFertilizerOption = () => {
-        const roundedTarget = roundToTen(Math.ceil(naturalEquilibrium / 10) * 10 + 10);
-        const options = availableFertilizers
-            .map(fert => calculateFertilizerNeeds(fert.id, roundedTarget))
-            .filter(opt => opt !== null);
+    // ✅ FIXED: Get best option using the shared calculator method
+    const bestOptionRaw = FertilizerCalculator.findOptimalFertilizer(
+        naturalEquilibrium,
+        peopleFed / (actualFertility / naturalEquilibrium), // Pass natural base yield
+        allowedFertilizerIds
+    );
 
-        if (options.length === 0) return null;
-        options.sort((a, b) => b.netPeopleFed - a.netPeopleFed);
-        return options[0];
-    };
-
-    const bestOption = getBestFertilizerOption();
+    const bestOption = bestOptionRaw ? {
+        ...bestOptionRaw,
+        fertilizer: {
+            id: bestOptionRaw.fertilizerId,
+            name: bestOptionRaw.fertilizerName,
+            icon: availableFertilizers.find(f => f.id === bestOptionRaw.fertilizerId)?.icon,
+            fertilityPerUnit: bestOptionRaw.fertilityPerQuantity
+        },
+        actualFertility: bestOptionRaw.targetFertility
+    } : null;
 
     const toggleSection = (section) => {
         setExpandedSections(prev => ({
@@ -375,12 +380,12 @@ const FarmResultCard = ({
                 )}
             </div>
 
-            {/* FERTILIZER CURRENT STATUS & SETTINGS */}
+            {/* ✅ FIXED: FERTILIZER CURRENT STATUS & SETTINGS - No yellow border on main container */}
             <div style={{
                 padding: '1rem',
-                backgroundColor: usingFertilizer ? 'rgba(255, 215, 0, 0.1)' : '#2a2a2a',
+                backgroundColor: '#2a2a2a',
                 borderRadius: '6px',
-                border: usingFertilizer ? '2px solid #FFD700' : '1px solid #444',
+                border: '1px solid #444',
                 marginBottom: '1rem'
             }}>
                 {/* Current Fertilizer Status (Always Visible) */}
@@ -394,7 +399,7 @@ const FarmResultCard = ({
                         {fertilizerIcon && (
                             <img src={fertilizerIcon} alt="Fertilizer" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
                         )}
-                        <span style={{ fontSize: '1rem', fontWeight: '700', color: usingFertilizer ? '#FFD700' : '#888' }}>
+                        <span style={{ fontSize: '1rem', fontWeight: '700', color: usingFertilizer ? '#FFD700' : '#ddd' }}>
                             Fertilizer Status
                         </span>
                     </div>
@@ -404,7 +409,7 @@ const FarmResultCard = ({
                             padding: '0.75rem',
                             backgroundColor: '#1a1a1a',
                             borderRadius: '6px',
-                            border: '1px solid rgba(255, 215, 0, 0.3)'
+                            border: '1px solid #333'
                         }}>
                             <div style={{
                                 display: 'flex',
@@ -435,13 +440,13 @@ const FarmResultCard = ({
                             }}>
                                 <div>
                                     <div style={{ color: '#888' }}>Usage</div>
-                                    <div style={{ color: '#FFD700', fontWeight: '700', fontSize: '0.85rem' }}>
+                                    <div style={{ color: '#ddd', fontWeight: '700', fontSize: '0.85rem' }}>
                                         {currentFertilizerNeeds.unitsPerMonth.toFixed(1)}/mo
                                     </div>
                                 </div>
                                 <div>
                                     <div style={{ color: '#888' }}>Per Year</div>
-                                    <div style={{ color: '#FFD700', fontWeight: '700', fontSize: '0.85rem' }}>
+                                    <div style={{ color: '#ddd', fontWeight: '700', fontSize: '0.85rem' }}>
                                         {currentFertilizerNeeds.unitsPerYear.toFixed(0)}
                                     </div>
                                 </div>
@@ -489,8 +494,8 @@ const FarmResultCard = ({
                     style={{
                         width: '100%',
                         padding: '0.75rem',
-                        backgroundColor: showFertilizerSettings ? 'rgba(255, 215, 0, 0.15)' : '#1a1a1a',
-                        border: showFertilizerSettings ? '2px solid #FFD700' : '1px solid #444',
+                        backgroundColor: showFertilizerSettings ? 'rgba(74, 144, 226, 0.15)' : '#1a1a1a',
+                        border: showFertilizerSettings ? '2px solid #4a90e2' : '1px solid #444',
                         borderRadius: '6px',
                         cursor: 'pointer',
                         display: 'flex',
@@ -499,7 +504,7 @@ const FarmResultCard = ({
                         gap: '0.5rem',
                         fontSize: '0.85rem',
                         fontWeight: '600',
-                        color: showFertilizerSettings ? '#FFD700' : '#ddd',
+                        color: showFertilizerSettings ? '#4a90e2' : '#ddd',
                         transition: 'all 0.2s'
                     }}
                     onMouseEnter={(e) => {
@@ -516,13 +521,13 @@ const FarmResultCard = ({
                     {settingsIcon && (
                         <img src={settingsIcon} alt="Settings" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
                     )}
-                    {showFertilizerSettings ? '▼ Hide Settings' : 'Change Fertilizer Settings'}
+                    {showFertilizerSettings ? '▼ Hide Settings' : '⚙️ Change Fertilizer Settings'}
                 </button>
 
                 {/* Expanded Settings Panel */}
                 {showFertilizerSettings && (
                     <div style={{ marginTop: '1rem' }}>
-                        {/* Best Option Banner */}
+                        {/* ✅ Best Option Banner - Keep yellow highlight here */}
                         {bestOption && (
                             <div style={{
                                 padding: '0.75rem',
@@ -593,8 +598,8 @@ const FarmResultCard = ({
                                             onClick={() => setSelectedFertilizerId(fert.id)}
                                             style={{
                                                 padding: '0.75rem',
-                                                backgroundColor: isSelected ? 'rgba(255, 215, 0, 0.15)' : '#1a1a1a',
-                                                border: isSelected ? '2px solid #FFD700' : '1px solid #444',
+                                                backgroundColor: isSelected ? 'rgba(74, 144, 226, 0.15)' : '#1a1a1a',
+                                                border: isSelected ? '2px solid #4a90e2' : '1px solid #444',
                                                 borderRadius: '6px',
                                                 cursor: 'pointer',
                                                 transition: 'all 0.2s',
@@ -624,7 +629,7 @@ const FarmResultCard = ({
                                             <span style={{
                                                 fontSize: '0.75rem',
                                                 fontWeight: '600',
-                                                color: isSelected ? '#FFD700' : '#ddd',
+                                                color: isSelected ? '#4a90e2' : '#ddd',
                                                 textAlign: 'center'
                                             }}>
                                                 {fert.name}
@@ -650,7 +655,7 @@ const FarmResultCard = ({
                                 color: '#ddd'
                             }}>
                                 <span>Target Fertility</span>
-                                <span style={{ fontSize: '1.1rem', color: '#FFD700' }}>
+                                <span style={{ fontSize: '1.1rem', color: '#4a90e2' }}>
                                     {targetFertility}%
                                 </span>
                             </label>
@@ -664,10 +669,10 @@ const FarmResultCard = ({
                                 style={{
                                     width: '100%',
                                     height: '6px',
-                                    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                                    backgroundColor: 'rgba(74, 144, 226, 0.2)',
                                     borderRadius: '3px',
                                     cursor: 'pointer',
-                                    accentColor: '#FFD700'
+                                    accentColor: '#4a90e2'
                                 }}
                             />
                             <div style={{
@@ -689,12 +694,12 @@ const FarmResultCard = ({
                                 padding: '1rem',
                                 backgroundColor: '#1a1a1a',
                                 borderRadius: '6px',
-                                border: '1px solid #FFD700',
+                                border: '1px solid #4a90e2',
                                 marginBottom: '1rem'
                             }}>
                                 <div style={{
                                     fontSize: '0.8rem',
-                                    color: '#FFD700',
+                                    color: '#4a90e2',
                                     fontWeight: '700',
                                     marginBottom: '0.75rem',
                                     textTransform: 'uppercase'
@@ -709,13 +714,13 @@ const FarmResultCard = ({
                                 }}>
                                     <div style={{ padding: '0.5rem', backgroundColor: '#0f0f0f', borderRadius: '4px' }}>
                                         <div style={{ fontSize: '0.65rem', color: '#888' }}>Units/Month</div>
-                                        <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#FFD700' }}>
+                                        <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#ddd' }}>
                                             {plannedFertilizerNeeds.unitsPerMonth.toFixed(1)}
                                         </div>
                                     </div>
                                     <div style={{ padding: '0.5rem', backgroundColor: '#0f0f0f', borderRadius: '4px' }}>
                                         <div style={{ fontSize: '0.65rem', color: '#888' }}>Units/Year</div>
-                                        <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#FFD700' }}>
+                                        <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#ddd' }}>
                                             {plannedFertilizerNeeds.unitsPerYear.toFixed(0)}
                                         </div>
                                     </div>
@@ -745,8 +750,8 @@ const FarmResultCard = ({
                             style={{
                                 width: '100%',
                                 padding: '0.75rem',
-                                backgroundColor: '#FFD700',
-                                color: '#000',
+                                backgroundColor: '#4a90e2',
+                                color: '#fff',
                                 border: 'none',
                                 borderRadius: '6px',
                                 fontSize: '0.9rem',
@@ -755,8 +760,8 @@ const FarmResultCard = ({
                                 transition: 'all 0.2s',
                                 marginBottom: '1rem'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFED4E'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFD700'}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5aa0f2'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
                         >
                             ✓ Apply Fertilizer Settings
                         </button>
@@ -782,7 +787,7 @@ const FarmResultCard = ({
                                     needs={plannedFertilizerNeeds}
                                     naturalEquilibrium={naturalEquilibrium}
                                     targetFertility={targetFertility}
-                                    baseYield={peopleFed}
+                                    baseYield={peopleFed / (actualFertility / naturalEquilibrium)}
                                 />
                             )}
                         </ExpandableSection>
@@ -851,7 +856,7 @@ const FarmResultCard = ({
     );
 };
 
-// Helper Components (ExpandableSection, HowItWorksContent, CalculationsContent, ComparisonTable - same as before)
+// Helper Components
 const ExpandableSection = ({ title, icon, isExpanded, onToggle, children }) => (
     <div style={{
         marginBottom: '0.75rem',
@@ -920,19 +925,19 @@ const HowItWorksContent = () => (
 const CalculationsContent = ({ needs, naturalEquilibrium, targetFertility, baseYield }) => (
     <div style={{ lineHeight: '1.8', fontFamily: 'monospace', fontSize: '0.7rem' }}>
         <div style={{ marginBottom: '0.75rem' }}>
-            <strong style={{ color: '#FFD700' }}>Step 1: Fertility Gap</strong>
+            <strong style={{ color: '#4a90e2' }}>Step 1: Fertility Gap</strong>
             <div style={{ padding: '0.5rem', backgroundColor: '#000', borderRadius: '3px', marginTop: '0.25rem' }}>
                 {targetFertility}% - {naturalEquilibrium.toFixed(1)}% = {needs.fertilityGap.toFixed(1)}%
             </div>
         </div>
         <div style={{ marginBottom: '0.75rem' }}>
-            <strong style={{ color: '#FFD700' }}>Step 2: Units Needed</strong>
+            <strong style={{ color: '#4a90e2' }}>Step 2: Units Needed</strong>
             <div style={{ padding: '0.5rem', backgroundColor: '#000', borderRadius: '3px', marginTop: '0.25rem' }}>
                 {needs.fertilityGap.toFixed(1)}% / {needs.fertilizer.fertilityPerUnit}% = {needs.unitsNeeded} units
             </div>
         </div>
         <div style={{ marginBottom: '0.75rem' }}>
-            <strong style={{ color: '#FFD700' }}>Step 3: Yield Increase</strong>
+            <strong style={{ color: '#4a90e2' }}>Step 3: Yield Increase</strong>
             <div style={{ padding: '0.5rem', backgroundColor: '#000', borderRadius: '3px', marginTop: '0.25rem' }}>
                 {baseYield.toFixed(1)} × {needs.yieldMultiplier.toFixed(2)} = {needs.newYield.toFixed(1)}
                 <br />
@@ -940,7 +945,7 @@ const CalculationsContent = ({ needs, naturalEquilibrium, targetFertility, baseY
             </div>
         </div>
         <div>
-            <strong style={{ color: '#FFD700' }}>Step 4: Net Benefit</strong>
+            <strong style={{ color: '#4a90e2' }}>Step 4: Net Benefit</strong>
             <div style={{ padding: '0.5rem', backgroundColor: '#000', borderRadius: '3px', marginTop: '0.25rem' }}>
                 Workers: {needs.workersNeeded.toFixed(1)}
                 <br />
@@ -968,7 +973,7 @@ const ComparisonTable = ({ availableFertilizers, targetFertility, calculateFerti
                     return (
                         <tr key={fert.id} style={{ borderBottom: '1px solid #222' }}>
                             <td style={{ padding: '0.5rem', color: '#ddd' }}>{fert.name}</td>
-                            <td style={{ padding: '0.5rem', textAlign: 'right', color: '#FFD700' }}>
+                            <td style={{ padding: '0.5rem', textAlign: 'right', color: '#ddd' }}>
                                 {needs.unitsPerMonth.toFixed(1)}
                             </td>
                             <td style={{ padding: '0.5rem', textAlign: 'right', color: '#50C878' }}>
