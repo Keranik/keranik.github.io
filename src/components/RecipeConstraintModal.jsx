@@ -7,7 +7,8 @@ const RecipeConstraintModal = ({
     isOpen,
     onClose,
     disabledRecipes = new Set(),
-    onApply
+    onApply,
+    availableRecipes = null
 }) => {
     const [localDisabledRecipes, setLocalDisabledRecipes] = useState(new Set(disabledRecipes));
     const [searchQuery, setSearchQuery] = useState('');
@@ -34,7 +35,7 @@ const RecipeConstraintModal = ({
     }, [isOpen, disabledRecipes]);
 
     // Get all recipes and machines
-    const allRecipes = ProductionCalculator.recipes;
+    const allRecipes = availableRecipes || ProductionCalculator.recipes;
     const allResearch = ProductionCalculator.getAllResearch();
 
     const allMachines = useMemo(() => {

@@ -1,3 +1,4 @@
+// src/pages/FarmOptimizer.jsx
 import { useEffect, useState } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import { DataLoader } from '../utils/DataLoader';
@@ -5,6 +6,8 @@ import { useSettings } from '../contexts/SettingsContext';
 import { FarmOptimizer } from '../utils/FarmOptimizer';
 import { FoodChainResolver } from '../utils/FoodChainResolver';
 import { FertilizerCalculator } from '../utils/FertilizerCalculator';
+import { RainwaterEstimator } from '../utils/RainwaterEstimator';
+import { getGeneralIcon } from '../utils/AssetHelper';
 
 import {
     OptimizationModeSelector,
@@ -35,33 +38,42 @@ const FarmOptimizerPage = () => {
             farmId: 'FarmT1',
             rotation: [null, null, null, null],
             selectedFertilizerId: null,
-            customFertility: null // User can override per farm
+            customFertility: null
         }
     ]);
 
     // Optimization mode and settings
-    const [optimizationMode, setOptimizationMode] = useState('manual'); // 'manual' or 'optimize'
-    const [optimizationGoal, setOptimizationGoal] = useState('minWater'); // 'minWater', 'minFertility', 'maxVariety', 'balanced'
+    const [optimizationMode, setOptimizationMode] = useState('manual');
+    const [optimizationGoal, setOptimizationGoal] = useState('minWater');
 
     // Constraints
     const [constraints, setConstraints] = useState({
         targetPopulation: 1000,
-        maxFarms: null,              // Optional limit
-        allowedCrops: [],            // Empty = all allowed
-        allowedIntermediates: null,  // null = all, [] = none, [ids] = specific
-        allowedRecipes: null,        // NEW: null = all, [ids] = specific
-        allowedFarmTypes: [],        // Empty = all allowed
-        allowedFertilizers: ['Product_FertilizerOrganic', 'Product_Fertilizer', 'Product_Fertilizer2'], // All by default
+        maxFarms: null,
+        allowedCrops: [],
+        allowedIntermediates: null,
+        allowedRecipes: null,
+        allowedFarmTypes: [],
+        allowedFertilizers: ['Product_FertilizerOrganic', 'Product_Fertilizer', 'Product_Fertilizer2'],
         maxWaterPerDay: null,
         maxFertilityPerDay: null,
-        naturalFertilityOnly: false  // Constraint: no fertilizer in calculations
+        naturalFertilityOnly: false
     });
 
-    // UI state
-    const [constraintsExpanded, setConstraintsExpanded] = useState(false);
-    const [activeConstraintTab, setActiveConstraintTab] = useState('farms');
-    const [selectedProcessingRecipes, setSelectedProcessingRecipes] = useState(new Map());
+    // Target population enabled state
+    const [targetPopulationEnabled, setTargetPopulationEnabled] = useState(true);
+
+    // Rainwater collection settings
+    const [rainwaterEnabled, setRainwaterEnabled] = useState(false);
+    const [rainwaterSettings, setRainwaterSettings] = useState({
+        difficulty: 'Normal',
+        year: 1,
+        farmCount: 1
+    });
     const [rainwaterEstimate, setRainwaterEstimate] = useState(null);
+
+    // UI state
+    const [selectedProcessingRecipes, setSelectedProcessingRecipes] = useState(new Map());
     const [showRainwaterModal, setShowRainwaterModal] = useState(false);
 
     // Modals
@@ -163,6 +175,21 @@ const FarmOptimizerPage = () => {
         });
     }, [settings.research, getResearchValue]);
 
+    // Auto-calculate rainwater when settings change
+    useEffect(() => {
+        if (rainwaterEnabled) {
+            const estimate = RainwaterEstimator.estimateMonthlyRainwater(
+                rainwaterSettings.difficulty,
+                rainwaterSettings.year,
+                rainwaterSettings.farmCount,
+                research.rainYield
+            );
+            setRainwaterEstimate(estimate);
+        } else {
+            setRainwaterEstimate(null);
+        }
+    }, [rainwaterEnabled, rainwaterSettings, research.rainYield]);
+
     if (!dataLoaded) {
         return (
             <div style={{
@@ -204,25 +231,6 @@ const FarmOptimizerPage = () => {
     const availableFoodCrops = availableCrops.filter(crop =>
         ProductionCalculator.foodCropIds?.has(crop.id) ?? false
     );
-
-    const allIntermediates = (() => {
-        const intermediateSet = new Set();
-        availableFoodCrops.forEach(crop => {
-            const paths = FoodChainResolver.getFoodsFromCrop(crop.output.productId);
-            paths.forEach(path => {
-                path.processingChain?.forEach(step => {
-                    const isFood = ProductionCalculator.foods?.some(f => f.productId === step.outputProductId);
-                    if (!isFood) {
-                        const product = ProductionCalculator.getProduct(step.outputProductId);
-                        if (product) {
-                            intermediateSet.add(product);
-                        }
-                    }
-                });
-            });
-        });
-        return Array.from(intermediateSet).sort((a, b) => a.name.localeCompare(b.name));
-    })();
 
     // Manual mode farm management
     const addFarm = () => {
@@ -324,14 +332,11 @@ const FarmOptimizerPage = () => {
             let farmsToCalculate = [];
 
             if (optimizationMode === 'manual') {
-                // Use manually configured farms
                 farmsToCalculate = farms;
             } else {
-                // Run optimization to generate farm configurations
                 farmsToCalculate = runOptimization();
             }
 
-            // Calculate detailed results for all farms
             const detailedResults = farmsToCalculate.map((farm, farmIdx) => {
                 const farmProto = availableFarms.find(f => f.id === farm.farmId);
                 if (!farmProto) {
@@ -351,16 +356,12 @@ const FarmOptimizerPage = () => {
                     effectiveFarm
                 );
 
-                // Determine actual fertility used in calculations
                 let actualFertility;
                 if (constraints.naturalFertilityOnly) {
-                    // Use only natural equilibrium
                     actualFertility = fertilityInfo.naturalEquilibrium;
                 } else if (farm.customFertility !== null && farm.customFertility !== undefined) {
-                    // User has manually set fertility for this farm
                     actualFertility = farm.customFertility;
                 } else {
-                    // Use natural equilibrium (default)
                     actualFertility = fertilityInfo.naturalEquilibrium;
                 }
 
@@ -451,8 +452,6 @@ const FarmOptimizerPage = () => {
                     };
                 });
 
-                // ALWAYS calculate fertilizer options for planning/informational purposes
-                // Show what would be needed to reach optimal fertility targets
                 const fertilizerTargets = [100, 120, 140];
                 const optimalTarget = fertilizerTargets.find(t => t > fertilityInfo.naturalEquilibrium) || 100;
 
@@ -463,7 +462,6 @@ const FarmOptimizerPage = () => {
                     constraints.allowedFertilizers
                 );
 
-                // Determine if fertilizer is actively being used in calculations
                 const usingFertilizer = !constraints.naturalFertilityOnly &&
                     actualFertility > fertilityInfo.naturalEquilibrium;
 
@@ -483,7 +481,7 @@ const FarmOptimizerPage = () => {
                     processingChains: foodResult.processingChains,
                     foodCategories: foodResult.foodCategories,
                     slotDetails: slotsWithPeopleFed,
-                    fertilizerOptions  // Always include for display
+                    fertilizerOptions
                 };
             });
 
@@ -499,7 +497,6 @@ const FarmOptimizerPage = () => {
                 });
             });
 
-            // Build aggregated results
             const allFoodCategories = new Set();
             const categoryDetails = new Map();
             const uniqueFoods = new Set();
@@ -571,10 +568,9 @@ const FarmOptimizerPage = () => {
                 });
             });
 
-            // Apply rainwater credit if estimated
             let adjustedWaterPerDay = totalWaterPerDay;
             let adjustedFarmWaterPerDay = totalFarmWater;
-            if (rainwaterEstimate) {
+            if (rainwaterEstimate && rainwaterEnabled) {
                 const dailyRainwaterCredit = rainwaterEstimate.totalPerMonth / 30;
                 adjustedFarmWaterPerDay = Math.max(0, totalFarmWater - dailyRainwaterCredit);
                 adjustedWaterPerDay = adjustedFarmWaterPerDay + totalProcessingWater;
@@ -606,7 +602,7 @@ const FarmOptimizerPage = () => {
                     processingElectricity: totalProcessingElectricity,
                     processingWorkers: totalProcessingWorkers
                 },
-                rainwaterEstimate
+                rainwaterEstimate: rainwaterEnabled ? rainwaterEstimate : null
             });
         } catch (error) {
             console.error('Optimization error:', error);
@@ -659,9 +655,21 @@ const FarmOptimizerPage = () => {
         ));
     };
 
-    const handleRainwaterApply = (estimate) => {
-        setRainwaterEstimate(estimate);
+    const handleRainwaterModalApply = (estimate) => {
+        setRainwaterSettings({
+            difficulty: estimate.difficulty,
+            year: estimate.year,
+            farmCount: estimate.farmCount
+        });
+        setShowRainwaterModal(false);
     };
+
+    // Icons
+    const statsIcon = getGeneralIcon('Stats');
+    const researchIcon = getGeneralIcon('Research');
+    const rainIcon = getGeneralIcon('Rain');
+    const settingsIcon = getGeneralIcon('Settings');
+    const infoIcon = getGeneralIcon('Info');
 
     return (
         <>
@@ -686,129 +694,246 @@ const FarmOptimizerPage = () => {
                         Farm Optimizer
                     </h2>
                     <p style={{ color: '#aaa', fontSize: '1rem', margin: 0 }}>
-                        Professional crop rotation optimizer • {ProductionCalculator.crops.length} crops • {availableFarms.length} farm types
+                        Professional crop rotation optimizer • {availableCrops.length} crops • {availableFarms.length} farm types
                     </p>
                 </div>
             </div>
 
             {/* Main Content */}
             <div style={{ maxWidth: '1920px', margin: '0 auto', padding: '0 2rem 2rem', minHeight: 'calc(100vh - 300px)' }}>
+                {/* Optimization Settings Panel */}
                 <div style={{
                     backgroundColor: '#2a2a2a',
-                    padding: '1.5rem',
-                    borderRadius: '8px',
+                    padding: '2rem',
+                    borderRadius: '10px',
                     marginBottom: '2rem',
                     border: '1px solid #444',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
                 }}>
+                    <h3 style={{
+                        marginBottom: '1.5rem',
+                        fontSize: '1.5rem',
+                        fontWeight: '700',
+                        color: '#50C878',
+                        display: 'flex',
+                        alignItems: 'center'
+                    }}>
+                        {statsIcon && (
+                            <img src={statsIcon} alt="Settings" style={{ width: '24px', height: '24px', objectFit: 'contain', marginRight: '12px' }} />
+                        )}
+                        Optimization Settings
+                    </h3>
+
+                    {/* Optimization Mode Selector */}
                     <OptimizationModeSelector
                         optimizationMode={optimizationMode}
                         optimizationGoal={optimizationGoal}
                         targetPopulation={constraints.targetPopulation}
+                        targetPopulationEnabled={targetPopulationEnabled}
                         onModeChange={setOptimizationMode}
                         onGoalChange={setOptimizationGoal}
                         onTargetPopulationChange={(pop) => setConstraints({ ...constraints, targetPopulation: pop })}
+                        onTargetPopulationToggle={setTargetPopulationEnabled}
                     />
 
+                    {/* Constraints Panel - NO box wrapper, part of controls */}
                     <ConstraintsPanel
                         constraints={constraints}
-                        constraintsExpanded={constraintsExpanded}
-                        activeConstraintTab={activeConstraintTab}
                         availableFarms={availableFarms}
                         availableFoodCrops={availableFoodCrops}
-                        allIntermediates={allIntermediates}
-                        onToggleExpand={() => setConstraintsExpanded(!constraintsExpanded)}
-                        onTabChange={setActiveConstraintTab}
                         onConstraintsChange={setConstraints}
                     />
 
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            color: '#aaa',
-                            marginBottom: '0.75rem',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px'
-                        }}>
-                            Research Bonuses (from Global Settings)
-                        </label>
-
+                    {/* Research & Environmental Settings - Info Boxes */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                        gap: '1rem',
+                        marginBottom: '1.5rem'
+                    }}>
+                        {/* Research Bonuses Info Box */}
                         <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                            gap: '1rem'
+                            backgroundColor: '#1a1a1a',
+                            padding: '1rem',
+                            borderRadius: '6px',
+                            border: '1px solid #444'
                         }}>
                             <div style={{
-                                padding: '0.75rem 1rem',
-                                backgroundColor: '#1a1a1a',
-                                borderRadius: '6px',
-                                border: '1px solid #333'
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                marginBottom: '0.75rem'
                             }}>
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    marginBottom: '0.25rem'
-                                }}>
-                                    <span style={{ color: '#ddd', fontSize: '0.85rem' }}>Crop Yield</span>
-                                    <span style={{ color: '#4a90e2', fontWeight: '700', fontSize: '0.85rem' }}>
-                                        +{research.cropYield}%
+                                {researchIcon && (
+                                    <img src={researchIcon} alt="Research" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                                )}
+                                <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#aaa' }}>
+                                    Active Research Bonuses
+                                </span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#888' }}>Crop Yield:</span>
+                                    <span style={{ color: research.cropYield > 0 ? '#50C878' : '#666', fontWeight: '600' }}>
+                                        {research.cropYield > 0 ? '+' : ''}{research.cropYield}%
                                     </span>
                                 </div>
-                                <div style={{ fontSize: '0.7rem', color: '#666' }}>
-                                    From global research settings
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#888' }}>Water Reduction:</span>
+                                    <span style={{ color: research.waterReduction > 0 ? '#50C878' : '#666', fontWeight: '600' }}>
+                                        {research.waterReduction > 0 ? '-' : ''}{research.waterReduction}%
+                                    </span>
                                 </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                    <span style={{ color: '#888' }}>Rain Yield:</span>
+                                    <span style={{ color: research.rainYield > 0 ? '#50C878' : '#666', fontWeight: '600' }}>
+                                        {research.rainYield > 0 ? '+' : ''}{research.rainYield}%
+                                    </span>
+                                </div>
+                            </div>
+                            <div style={{
+                                marginTop: '0.75rem',
+                                paddingTop: '0.75rem',
+                                borderTop: '1px solid #333',
+                                fontSize: '0.7rem',
+                                color: '#666',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                            }}>
+                                {infoIcon && (
+                                    <img src={infoIcon} alt="Info" style={{ width: '12px', height: '12px', objectFit: 'contain' }} />
+                                )}
+                                From Global Settings
+                            </div>
+                        </div>
+
+                        {/* Rainwater Collection Estimator - Prominent */}
+                        <div style={{
+                            backgroundColor: rainwaterEnabled ? 'rgba(74, 144, 226, 0.05)' : '#1a1a1a',
+                            padding: '1rem',
+                            borderRadius: '6px',
+                            border: rainwaterEnabled ? '1px solid rgba(74, 144, 226, 0.3)' : '1px solid #444',
+                            transition: 'all 0.3s'
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                marginBottom: '0.75rem'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {rainIcon && (
+                                        <img
+                                            src={rainIcon}
+                                            alt="Rain"
+                                            style={{
+                                                width: '18px',
+                                                height: '18px',
+                                                objectFit: 'contain',
+                                                opacity: rainwaterEnabled ? 1 : 0.5
+                                            }}
+                                        />
+                                    )}
+                                    <span style={{
+                                        fontSize: '0.9rem',
+                                        fontWeight: '600',
+                                        color: rainwaterEnabled ? '#4a90e2' : '#aaa'
+                                    }}>
+                                        Rainwater Collection
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => setRainwaterEnabled(!rainwaterEnabled)}
+                                    style={{
+                                        padding: '6px 12px',
+                                        backgroundColor: rainwaterEnabled ? 'rgba(74, 144, 226, 0.2)' : '#333',
+                                        color: rainwaterEnabled ? '#4a90e2' : '#888',
+                                        border: rainwaterEnabled ? '1px solid rgba(74, 144, 226, 0.4)' : '1px solid #555',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '700',
+                                        textTransform: 'uppercase',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (rainwaterEnabled) {
+                                            e.currentTarget.style.backgroundColor = 'rgba(74, 144, 226, 0.3)';
+                                        } else {
+                                            e.currentTarget.style.backgroundColor = '#3a3a3a';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (rainwaterEnabled) {
+                                            e.currentTarget.style.backgroundColor = 'rgba(74, 144, 226, 0.2)';
+                                        } else {
+                                            e.currentTarget.style.backgroundColor = '#333';
+                                        }
+                                    }}
+                                >
+                                    {rainwaterEnabled ? '✓ Enabled' : 'Disabled'}
+                                </button>
                             </div>
 
-                            <div style={{
-                                padding: '0.75rem 1rem',
-                                backgroundColor: '#1a1a1a',
-                                borderRadius: '6px',
-                                border: '1px solid #333'
-                            }}>
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    marginBottom: '0.25rem'
-                                }}>
-                                    <span style={{ color: '#ddd', fontSize: '0.85rem' }}>Water Reduction</span>
-                                    <span style={{ color: '#50C878', fontWeight: '700', fontSize: '0.85rem' }}>
-                                        -{research.waterReduction}%
-                                    </span>
+                            {rainwaterEnabled ? (
+                                <>
+                                    <div style={{
+                                        padding: '0.75rem',
+                                        backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                                        borderRadius: '4px',
+                                        marginBottom: '0.75rem'
+                                    }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center'
+                                        }}>
+                                            <span style={{ fontSize: '0.8rem', color: '#aaa' }}>Monthly Credit:</span>
+                                            <span style={{ fontSize: '1.1rem', fontWeight: '700', color: '#4a90e2' }}>
+                                                -{rainwaterEstimate?.totalPerMonth.toFixed(0) || 0} water
+                                            </span>
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: '#666', marginTop: '4px' }}>
+                                            {rainwaterEstimate?.difficulty} • Year {rainwaterEstimate?.year} • {rainwaterEstimate?.farmCount} farm{rainwaterEstimate?.farmCount !== 1 ? 's' : ''}
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowRainwaterModal(true)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px',
+                                            backgroundColor: '#4a90e2',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            color: 'white',
+                                            cursor: 'pointer',
+                                            fontSize: '0.85rem',
+                                            fontWeight: '600',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5aa0f2'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
+                                    >
+                                        {settingsIcon && (
+                                            <img src={settingsIcon} alt="Configure" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                                        )}
+                                        Configure Settings
+                                    </button>
+                                </>
+                            ) : (
+                                <div style={{ fontSize: '0.75rem', color: '#666', fontStyle: 'italic' }}>
+                                    Enable to credit natural rainwater collection in calculations
                                 </div>
-                                <div style={{ fontSize: '0.7rem', color: '#666' }}>
-                                    From global research settings
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <button
-                            onClick={() => setShowRainwaterModal(true)}
-                            style={{
-                                padding: '0.75rem 1.25rem',
-                                backgroundColor: '#1a4a7a',
-                                color: '#fff',
-                                border: '1px solid #4a90e2',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                fontWeight: '600',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
-                            }}
-                        >
-                            Estimate Rainwater Collection
-                            {rainwaterEstimate && (
-                                <span style={{ fontSize: '0.85rem', color: '#50C878' }}>
-                                    (Applied: -{rainwaterEstimate.totalPerMonth.toFixed(0)}/mo)
-                                </span>
-                            )}
-                        </button>
-                    </div>
-
+                    {/* Manual Mode - Farms */}
                     {optimizationMode === 'manual' && (
                         <div style={{ marginBottom: '1.5rem' }}>
                             <div style={{
@@ -817,7 +942,7 @@ const FarmOptimizerPage = () => {
                                 alignItems: 'center',
                                 marginBottom: '0.75rem'
                             }}>
-                                <label style={{ fontSize: '0.9rem', fontWeight: '600', color: '#ddd' }}>
+                                <label style={{ fontSize: '0.95rem', fontWeight: '600', color: '#ddd' }}>
                                     Farms ({farms.length})
                                 </label>
                                 <button
@@ -833,6 +958,8 @@ const FarmOptimizerPage = () => {
                                         fontWeight: '600',
                                         transition: 'all 0.15s'
                                     }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5aa0f2'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
                                 >
                                     + Add Farm
                                 </button>
@@ -858,6 +985,7 @@ const FarmOptimizerPage = () => {
                         </div>
                     )}
 
+                    {/* Calculate Button */}
                     <button
                         onClick={handleCalculate}
                         disabled={loading || (optimizationMode === 'manual' && farms.length === 0)}
@@ -874,11 +1002,24 @@ const FarmOptimizerPage = () => {
                             transition: 'all 0.2s',
                             boxShadow: loading ? 'none' : '0 4px 12px rgba(74, 144, 226, 0.4)'
                         }}
+                        onMouseEnter={(e) => {
+                            if (!loading) {
+                                e.currentTarget.style.backgroundColor = '#5aa0f2';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (!loading) {
+                                e.currentTarget.style.backgroundColor = '#4a90e2';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }
+                        }}
                     >
-                        {loading ? 'Calculating...' : optimizationMode === 'manual' ? 'Calculate Production' : 'Optimize & Calculate'}
+                        {loading ? '⏳ Calculating...' : optimizationMode === 'manual' ? '🚀 Calculate Production' : '🎯 Optimize & Calculate'}
                     </button>
                 </div>
 
+                {/* Results Section */}
                 {results && (
                     <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '2rem', alignItems: 'start' }}>
                         <ResultsSummary results={results} />
@@ -909,6 +1050,7 @@ const FarmOptimizerPage = () => {
                 )}
             </div>
 
+            {/* Modals */}
             <CropSelectionModal
                 isOpen={cropModal.open}
                 crops={availableCrops}
@@ -926,7 +1068,7 @@ const FarmOptimizerPage = () => {
             <RainwaterEstimatorModal
                 isOpen={showRainwaterModal}
                 onClose={() => setShowRainwaterModal(false)}
-                onApply={handleRainwaterApply}
+                onApply={handleRainwaterModalApply}
             />
         </>
     );
