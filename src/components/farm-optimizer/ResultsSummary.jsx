@@ -1,273 +1,536 @@
 ﻿// src/components/farm-optimizer/ResultsSummary.jsx
-import { getProductIcon, getGeneralIcon } from '../../utils/AssetHelper';
+import { useState } from 'react';
+import { getGeneralIcon } from '../../utils/AssetHelper';
 import ProductionCalculator from '../../utils/ProductionCalculator';
+import { RainwaterEstimator } from '../../utils/RainwaterEstimator';
+import RainwaterEstimatorModal from './RainwaterEstimatorModal';
+import ToggleSwitch from '../common/ToggleSwitch';
 
-const ResultsSummary = ({ results }) => {
+const ResultsSummary = ({ results, research }) => {
+    // Rainwater collection state (moved from parent component)
+    const [rainwaterEnabled, setRainwaterEnabled] = useState(false);
+    const [rainwaterSettings, setRainwaterSettings] = useState({
+        difficulty: 'Normal',
+        year: 1
+    });
+    const [showRainwaterModal, setShowRainwaterModal] = useState(false);
+
+    // Get actual farm count from results
+    const actualFarmCount = results.farms.length;
+
+    // Calculate rainwater estimate using ACTUAL farm count
+    const rainwaterEstimate = rainwaterEnabled
+        ? RainwaterEstimator.estimateMonthlyRainwater(
+            rainwaterSettings.difficulty,
+            rainwaterSettings.year,
+            actualFarmCount, // Use actual farm count from results
+            research.rainYield
+        )
+        : null;
+
+    // Calculate adjusted water values
+    const originalFarmWaterPerDay = results.totals.farmWaterPerDay;
+    const originalProcessingWaterPerDay = results.totals.processingWaterPerDay;
+    const originalTotalWaterPerDay = results.totals.waterPerDay;
+
+    const dailyRainwaterCredit = rainwaterEstimate ? rainwaterEstimate.totalPerMonth / 30 : 0;
+    const adjustedFarmWaterPerDay = rainwaterEnabled
+        ? Math.max(0, originalFarmWaterPerDay - dailyRainwaterCredit)
+        : originalFarmWaterPerDay;
+    const adjustedTotalWaterPerDay = adjustedFarmWaterPerDay + originalProcessingWaterPerDay;
+    const waterSavingsPercent = originalFarmWaterPerDay > 0
+        ? ((originalFarmWaterPerDay - adjustedFarmWaterPerDay) / originalFarmWaterPerDay) * 100
+        : 0;
+
+    const handleRainwaterModalApply = (estimate) => {
+        setRainwaterSettings({
+            difficulty: estimate.difficulty,
+            year: estimate.year
+        });
+        setShowRainwaterModal(false);
+    };
+
+    // Icons
+    const peopleIcon = getGeneralIcon('People');
+    const waterIcon = getGeneralIcon('Water');
+    const foodIcon = getGeneralIcon('Food');
+    const unityIcon = getGeneralIcon('Unity');
+    const machineIcon = getGeneralIcon('Machine');
+    const electricityIcon = getGeneralIcon('Electricity');
+    const workersIcon = getGeneralIcon('Workers');
+    const rainIcon = getGeneralIcon('Rain');
+    const settingsIcon = getGeneralIcon('Settings');
+
     return (
-        <div style={{ position: 'sticky', top: '2rem' }}>
+        <>
             <div style={{
                 backgroundColor: '#2a2a2a',
                 padding: '1.5rem',
                 borderRadius: '10px',
                 border: '1px solid #444',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+                position: 'sticky',
+                top: '20px'
             }}>
-                <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
-                    Summary
+                <h3 style={{
+                    marginBottom: '1.5rem',
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
+                    color: '#50C878'
+                }}>
+                    Results Summary
                 </h3>
 
                 {/* People Fed */}
                 <div style={{
-                    padding: '1rem',
                     backgroundColor: '#1a1a1a',
-                    borderRadius: '6px',
+                    padding: '1rem',
+                    borderRadius: '8px',
                     marginBottom: '1rem',
                     border: '1px solid #333'
                 }}>
-                    <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        {getGeneralIcon('Population') && (
-                            <img
-                                src={getGeneralIcon('Population')}
-                                alt="People"
-                                style={{ width: '16px', height: '16px', objectFit: 'contain' }}
-                            />
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '0.5rem'
+                    }}>
+                        {peopleIcon && (
+                            <img src={peopleIcon} alt="People" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
                         )}
-                        People Fed (per month)
+                        <span style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: '600' }}>People Fed</span>
                     </div>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4a90e2' }}>
-                        {results.totals.peopleFed.toLocaleString()}
+                    <div style={{ fontSize: '2rem', fontWeight: '700', color: '#50C878' }}>
+                        {results.totals.peopleFed.toFixed(0)}
                     </div>
                 </div>
 
-                {/* Food Variety Bonuses */}
-                {results.totals.foodCategories && results.totals.foodCategories.count > 0 && (
-                    <div style={{
-                        padding: '1rem',
-                        backgroundColor: '#1a1a1a',
-                        borderRadius: '6px',
-                        marginBottom: '1rem',
-                        border: results.totals.foodCategories.healthBonuses > 0 ? '2px solid #50C878' : '1px solid #333'
-                    }}>
-                        <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem' }}>
-                            Food Variety Bonuses
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
-                            <div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#FFD700' }}>
-                                    {results.totals.foodCategories.count}/4
-                                </div>
-                                <div style={{ fontSize: '0.7rem', color: '#888' }}>Categories</div>
-                            </div>
-
-                            {results.totals.foodCategories.healthBonuses > 0 && (
-                                <div>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#50C878' }}>
-                                        +{results.totals.foodCategories.healthBonuses}
-                                    </div>
-                                    <div style={{ fontSize: '0.7rem', color: '#888' }}>Health</div>
-                                </div>
-                            )}
-
-                            {results.totals.foodCategories.totalUnity > 0 && (
-                                <div>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#9b59b6' }}>
-                                        +{results.totals.foodCategories.totalUnity.toFixed(0)}
-                                    </div>
-                                    <div style={{ fontSize: '0.7rem', color: '#888' }}>Unity/mo</div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '0.75rem' }}>
-                            {results.totals.foodCategories.categories.map(cat => (
-                                <div key={cat.id} style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    fontSize: '0.8rem',
-                                    padding: '4px 8px',
-                                    backgroundColor: '#2a2a2a',
-                                    borderRadius: '4px'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <span style={{ color: '#ddd' }}>{cat.name}</span>
-                                        {cat.hasHealthBenefit && (
-                                            <span style={{ fontSize: '0.7rem', color: '#50C878', backgroundColor: 'rgba(80, 200, 120, 0.15)', padding: '1px 4px', borderRadius: '2px' }}>
-                                                +HP
-                                            </span>
-                                        )}
-                                    </div>
-                                    <span style={{ color: '#888', fontSize: '0.75rem' }}>
-                                        {cat.peopleFed.toFixed(0)} ppl
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-
-                        {results.totals.foodCategories.unityBreakdown && results.totals.foodCategories.unityBreakdown.length > 0 && (
-                            <details style={{ marginTop: '0.75rem', fontSize: '0.75rem' }}>
-                                <summary style={{ color: '#9b59b6', cursor: 'pointer', userSelect: 'none', padding: '4px' }}>
-                                    Unity Breakdown ({results.totals.foodCategories.unityBreakdown.length} foods)
-                                </summary>
-                                <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                    {results.totals.foodCategories.unityBreakdown.map((food, idx) => (
-                                        <div key={idx} style={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            padding: '2px 6px',
-                                            backgroundColor: '#1a1a1a',
-                                            borderRadius: '3px'
-                                        }}>
-                                            <span style={{ color: '#bbb' }}>{food.productName}</span>
-                                            <span style={{ color: '#9b59b6', fontWeight: '600' }}>+{food.unityProvided}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </details>
-                        )}
-                    </div>
-                )}
-
-                {/* Water Usage */}
+                {/* Water Usage Section */}
                 <div style={{
-                    padding: '1rem',
                     backgroundColor: '#1a1a1a',
-                    borderRadius: '6px',
+                    padding: '1rem',
+                    borderRadius: '8px',
                     marginBottom: '1rem',
                     border: '1px solid #333'
                 }}>
-                    <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        Water Usage
-                        {getProductIcon(ProductionCalculator.products?.find(p => p.name?.toLowerCase() === 'water')) && (
-                            <img
-                                src={getProductIcon(ProductionCalculator.products?.find(p => p.name?.toLowerCase() === 'water'))}
-                                alt="Water"
-                                style={{ width: '16px', height: '16px', objectFit: 'contain' }}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '0.75rem'
+                    }}>
+                        {waterIcon && (
+                            <img src={waterIcon} alt="Water" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                        )}
+                        <span style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: '600' }}>Water Usage</span>
+                    </div>
+
+                    {/* Original Water Requirements */}
+                    <div style={{
+                        padding: '0.75rem',
+                        backgroundColor: '#0f0f0f',
+                        borderRadius: '6px',
+                        marginBottom: '0.75rem',
+                        border: rainwaterEnabled ? '1px solid #555' : '1px solid #333'
+                    }}>
+                        <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.5rem' }}>
+                            {rainwaterEnabled ? 'Original Requirements:' : 'Total Required:'}
+                        </div>
+                        <div style={{
+                            fontSize: rainwaterEnabled ? '1.25rem' : '1.75rem',
+                            fontWeight: '700',
+                            color: rainwaterEnabled ? '#888' : '#4a90e2',
+                            marginBottom: '0.5rem',
+                            textDecoration: rainwaterEnabled ? 'line-through' : 'none',
+                            opacity: rainwaterEnabled ? 0.6 : 1
+                        }}>
+                            {originalTotalWaterPerDay.toFixed(1)} <span style={{ fontSize: '0.8em', fontWeight: '400' }}>/ day</span>
+                        </div>
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.25rem',
+                            fontSize: '0.75rem',
+                            color: '#666'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span>Farm Water:</span>
+                                <span style={{ color: '#888' }}>{originalFarmWaterPerDay.toFixed(1)}/day</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span>Processing Water:</span>
+                                <span style={{ color: '#888' }}>{originalProcessingWaterPerDay.toFixed(1)}/day</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Rainwater Collection Toggle */}
+                    <div style={{
+                        padding: '0.75rem',
+                        backgroundColor: rainwaterEnabled ? 'rgba(74, 144, 226, 0.08)' : '#0f0f0f',
+                        borderRadius: '6px',
+                        border: rainwaterEnabled ? '1px solid rgba(74, 144, 226, 0.3)' : '1px solid #333',
+                        marginBottom: rainwaterEnabled ? '0.75rem' : 0,
+                        transition: 'all 0.3s'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: rainwaterEnabled ? '0.75rem' : 0
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {rainIcon && (
+                                    <img
+                                        src={rainIcon}
+                                        alt="Rain"
+                                        style={{
+                                            width: '16px',
+                                            height: '16px',
+                                            objectFit: 'contain',
+                                            opacity: rainwaterEnabled ? 1 : 0.5
+                                        }}
+                                    />
+                                )}
+                                <span style={{
+                                    fontSize: '0.85rem',
+                                    fontWeight: '600',
+                                    color: rainwaterEnabled ? '#4a90e2' : '#888'
+                                }}>
+                                    Rainwater Collection
+                                </span>
+                            </div>
+                            <ToggleSwitch
+                                value={rainwaterEnabled}
+                                onChange={() => setRainwaterEnabled(!rainwaterEnabled)}
+                                size="sm"
+                                showIcons={false}
+                                onColor="#4a90e2"
                             />
+                        </div>
+
+                        {rainwaterEnabled && rainwaterEstimate && (
+                            <>
+                                {/* Rainwater Credit Display */}
+                                <div style={{
+                                    padding: '0.65rem',
+                                    backgroundColor: 'rgba(74, 144, 226, 0.12)',
+                                    borderRadius: '4px',
+                                    marginBottom: '0.65rem',
+                                    border: '1px solid rgba(74, 144, 226, 0.25)'
+                                }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        marginBottom: '0.35rem'
+                                    }}>
+                                        <span style={{ fontSize: '0.75rem', color: '#aaa' }}>Daily Credit:</span>
+                                        <span style={{ fontSize: '1.1rem', fontWeight: '700', color: '#4a90e2' }}>
+                                            -{dailyRainwaterCredit.toFixed(1)}
+                                        </span>
+                                    </div>
+                                    <div style={{
+                                        fontSize: '0.65rem',
+                                        color: '#666',
+                                        display: 'flex',
+                                        justifyContent: 'space-between'
+                                    }}>
+                                        <span>{rainwaterEstimate.difficulty} • Year {rainwaterEstimate.year}</span>
+                                        <span>{actualFarmCount} farm{actualFarmCount !== 1 ? 's' : ''}</span>
+                                    </div>
+                                    <div style={{
+                                        fontSize: '0.65rem',
+                                        color: '#555',
+                                        marginTop: '0.25rem',
+                                        fontStyle: 'italic'
+                                    }}>
+                                        Monthly: -{rainwaterEstimate.totalPerMonth.toFixed(0)}
+                                    </div>
+                                </div>
+
+                                {/* Configure Button */}
+                                <button
+                                    onClick={() => setShowRainwaterModal(true)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        backgroundColor: '#4a90e2',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        color: 'white',
+                                        cursor: 'pointer',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '6px',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5aa0f2'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4a90e2'}
+                                >
+                                    {settingsIcon && (
+                                        <img src={settingsIcon} alt="Configure" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                    )}
+                                    Adjust Settings
+                                </button>
+                            </>
+                        )}
+
+                        {!rainwaterEnabled && (
+                            <div style={{
+                                fontSize: '0.7rem',
+                                color: '#555',
+                                fontStyle: 'italic',
+                                marginTop: '0.5rem'
+                            }}>
+                                Enable to apply rainwater collection credits
+                            </div>
                         )}
                     </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#50C878' }}>
-                        {results.totals.waterPerMonth.toFixed(0)} /month
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        <div>Farm: {(results.totals.farmWaterPerDay * 30).toFixed(0)} /month</div>
-                        <div>Processing: {(results.totals.processingWaterPerDay * 30).toFixed(0)} /month</div>
-                    </div>
-                    {results.rainwaterEstimate && (
+
+                    {/* Adjusted Total (shown when rainwater is enabled) */}
+                    {rainwaterEnabled && rainwaterEstimate && (
                         <div style={{
-                            marginTop: '0.5rem',
-                            padding: '0.5rem',
-                            backgroundColor: 'rgba(74, 144, 226, 0.1)',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            color: '#4a90e2'
+                            padding: '0.75rem',
+                            backgroundColor: 'rgba(80, 200, 120, 0.08)',
+                            borderRadius: '6px',
+                            border: '1px solid rgba(80, 200, 120, 0.3)'
                         }}>
-                            🌧️ Rainwater credit applied: -{results.rainwaterEstimate.totalPerMonth.toFixed(0)}/mo
+                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.5rem' }}>
+                                Adjusted Total:
+                            </div>
+                            <div style={{
+                                fontSize: '1.75rem',
+                                fontWeight: '700',
+                                color: '#50C878',
+                                marginBottom: '0.5rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}>
+                                {adjustedTotalWaterPerDay.toFixed(1)}
+                                <span style={{ fontSize: '0.8em', fontWeight: '400' }}>/ day</span>
+                                {waterSavingsPercent > 0 && (
+                                    <span style={{
+                                        fontSize: '0.6em',
+                                        fontWeight: '600',
+                                        color: '#50C878',
+                                        backgroundColor: 'rgba(80, 200, 120, 0.15)',
+                                        padding: '2px 6px',
+                                        borderRadius: '3px'
+                                    }}>
+                                        ⬇️ {waterSavingsPercent.toFixed(0)}%
+                                    </span>
+                                )}
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.25rem',
+                                fontSize: '0.75rem',
+                                color: '#666'
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>Farm Water:</span>
+                                    <span style={{ color: '#50C878', fontWeight: '600' }}>
+                                        {adjustedFarmWaterPerDay.toFixed(1)}/day
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>Processing Water:</span>
+                                    <span style={{ color: '#888' }}>{originalProcessingWaterPerDay.toFixed(1)}/day</span>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
 
-                {/* Processing Machines */}
-                {results.totals.processingMachines && results.totals.processingMachines.length > 0 && (
+                {/* Food Categories */}
+                <div style={{
+                    backgroundColor: '#1a1a1a',
+                    padding: '1rem',
+                    borderRadius: '8px',
+                    marginBottom: '1rem',
+                    border: '1px solid #333'
+                }}>
                     <div style={{
-                        padding: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '0.5rem'
+                    }}>
+                        {foodIcon && (
+                            <img src={foodIcon} alt="Food" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                        )}
+                        <span style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: '600' }}>Food Diversity</span>
+                    </div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f39c12', marginBottom: '0.5rem' }}>
+                        {results.totals.foodCategories.count} Categories
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                        {results.totals.foodCategories.healthBonuses} Health Bonus{results.totals.foodCategories.healthBonuses !== 1 ? 'es' : ''}
+                    </div>
+
+                    {/* Food Categories Breakdown */}
+                    <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                        {results.totals.foodCategories.categories.map(cat => (
+                            <div
+                                key={cat.id}
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    fontSize: '0.7rem',
+                                    padding: '0.35rem 0.5rem',
+                                    backgroundColor: '#0f0f0f',
+                                    borderRadius: '4px'
+                                }}
+                            >
+                                <span style={{ color: '#aaa' }}>
+                                    {cat.name}
+                                    {cat.hasHealthBenefit && (
+                                        <span style={{ color: '#50C878', marginLeft: '4px' }}>★</span>
+                                    )}
+                                </span>
+                                <span style={{ color: '#888', fontWeight: '600' }}>
+                                    {cat.peopleFed.toFixed(0)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Unity Production */}
+                {results.totals.foodCategories.totalUnity > 0 && (
+                    <div style={{
                         backgroundColor: '#1a1a1a',
-                        borderRadius: '6px',
+                        padding: '1rem',
+                        borderRadius: '8px',
                         marginBottom: '1rem',
                         border: '1px solid #333'
                     }}>
-                        <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            {getGeneralIcon('Machines') && (
-                                <img
-                                    src={getGeneralIcon('Machines')}
-                                    alt="Machines"
-                                    style={{ width: '16px', height: '16px', objectFit: 'contain' }}
-                                />
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            marginBottom: '0.5rem'
+                        }}>
+                            {unityIcon && (
+                                <img src={unityIcon} alt="Unity" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
                             )}
-                            Processing Machines
+                            <span style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: '600' }}>Unity Production</span>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            {results.totals.processingMachines.map(machine => (
-                                <div key={machine.id} style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    fontSize: '0.8rem',
-                                    padding: '4px 8px',
-                                    backgroundColor: '#2a2a2a',
-                                    borderRadius: '4px'
-                                }}>
-                                    <span style={{ color: '#ddd' }}>{machine.name}</span>
-                                    <span style={{ color: '#fff', fontWeight: '700' }}>×{machine.count}</span>
-                                </div>
-                            ))}
+                        <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#e74c3c', marginBottom: '0.25rem' }}>
+                            {results.totals.foodCategories.totalUnity.toFixed(1)} <span style={{ fontSize: '0.6em', fontWeight: '400' }}>/ month</span>
                         </div>
-                        <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #444', fontSize: '0.75rem', color: '#888' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                                {getGeneralIcon('Electricity') && (
-                                    <img
-                                        src={getGeneralIcon('Electricity')}
-                                        alt="Electricity"
-                                        style={{ width: '12px', height: '12px', objectFit: 'contain' }}
-                                    />
-                                )}
-                                {results.totals.processingElectricity.toFixed(0)} kW
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
-                                {getGeneralIcon('Worker') && (
-                                    <img
-                                        src={getGeneralIcon('Worker')}
-                                        alt="Workers"
-                                        style={{ width: '12px', height: '12px', objectFit: 'contain' }}
-                                    />
-                                )}
-                                {results.totals.processingWorkers} workers
-                            </div>
+                        <div style={{ fontSize: '0.7rem', color: '#666' }}>
+                            From {results.totals.foodCategories.unityBreakdown.length} food source{results.totals.foodCategories.unityBreakdown.length !== 1 ? 's' : ''}
                         </div>
                     </div>
                 )}
 
-                {/* Production Summary */}
-                <div>
-                    <h4 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#ddd', marginBottom: '0.75rem' }}>
-                        Production (per month)
-                    </h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {Object.entries(results.totals.production).map(([productId, quantity]) => {
-                            const product = ProductionCalculator.getProduct(productId);
-                            const icon = getProductIcon(product);
-                            return (
+                {/* Processing Requirements */}
+                {results.totals.processingMachines.length > 0 && (
+                    <div style={{
+                        backgroundColor: '#1a1a1a',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        border: '1px solid #333'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            marginBottom: '0.75rem'
+                        }}>
+                            {machineIcon && (
+                                <img src={machineIcon} alt="Machines" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                            )}
+                            <span style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: '600' }}>Processing</span>
+                        </div>
+
+                        {/* Electricity & Workers Summary */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '0.5rem',
+                            marginBottom: '0.75rem'
+                        }}>
+                            <div style={{
+                                padding: '0.5rem',
+                                backgroundColor: '#0f0f0f',
+                                borderRadius: '4px',
+                                textAlign: 'center'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: '0.25rem' }}>
+                                    {electricityIcon && (
+                                        <img src={electricityIcon} alt="Electricity" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                    )}
+                                    <span style={{ fontSize: '0.7rem', color: '#888' }}>Power</span>
+                                </div>
+                                <div style={{ fontSize: '1rem', fontWeight: '700', color: '#f1c40f' }}>
+                                    {results.totals.processingElectricity.toFixed(0)} kW
+                                </div>
+                            </div>
+                            <div style={{
+                                padding: '0.5rem',
+                                backgroundColor: '#0f0f0f',
+                                borderRadius: '4px',
+                                textAlign: 'center'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: '0.25rem' }}>
+                                    {workersIcon && (
+                                        <img src={workersIcon} alt="Workers" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                    )}
+                                    <span style={{ fontSize: '0.7rem', color: '#888' }}>Workers</span>
+                                </div>
+                                <div style={{ fontSize: '1rem', fontWeight: '700', color: '#3498db' }}>
+                                    {results.totals.processingWorkers.toFixed(0)}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Machine Breakdown */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                            {results.totals.processingMachines.map(machine => (
                                 <div
-                                    key={productId}
+                                    key={machine.id}
                                     style={{
                                         display: 'flex',
+                                        justifyContent: 'space-between',
                                         alignItems: 'center',
-                                        gap: '0.75rem',
-                                        padding: '0.5rem',
-                                        backgroundColor: '#1a1a1a',
+                                        fontSize: '0.7rem',
+                                        padding: '0.35rem 0.5rem',
+                                        backgroundColor: '#0f0f0f',
                                         borderRadius: '4px'
                                     }}
                                 >
-                                    {icon && (
-                                        <img
-                                            src={icon}
-                                            alt={product?.name}
-                                            style={{ width: '24px', height: '24px', objectFit: 'contain' }}
-                                        />
-                                    )}
-                                    <span style={{ flex: 1, color: '#ddd', fontSize: '0.9rem' }}>
-                                        {product?.name || productId}
-                                    </span>
-                                    <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                                        {quantity.toFixed(0)}
+                                    <span style={{ color: '#aaa' }}>{machine.name}</span>
+                                    <span style={{ color: '#888', fontWeight: '600' }}>
+                                        ×{machine.count.toFixed(1)}
                                     </span>
                                 </div>
-                            );
-                        })}
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
-        </div>
+
+            {/* Rainwater Estimator Modal */}
+            <RainwaterEstimatorModal
+                isOpen={showRainwaterModal}
+                onClose={() => setShowRainwaterModal(false)}
+                onApply={handleRainwaterModalApply}
+                initialSettings={{
+                    ...rainwaterSettings,
+                    farmCount: actualFarmCount // Pass actual farm count to modal for display only
+                }}
+                research={research}
+            />
+        </>
     );
 };
 

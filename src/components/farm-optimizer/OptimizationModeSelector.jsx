@@ -1,5 +1,6 @@
 ﻿// src/components/farm-optimizer/OptimizationModeSelector.jsx
 import { getGeneralIcon } from '../../utils/AssetHelper';
+import ToggleSwitch from '../common/ToggleSwitch';
 
 const OPTIMIZATION_GOALS = [
     { value: 'minWater', label: 'Min Water', icon: 'Water' },
@@ -230,43 +231,13 @@ const OptimizationModeSelector = ({
                                             Target Population
                                         </label>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => onTargetPopulationToggle(!targetPopulationEnabled)}
-                                        style={{
-                                            padding: '4px 10px',
-                                            backgroundColor: targetPopulationEnabled ? 'rgba(80, 200, 120, 0.2)' : '#333',
-                                            color: targetPopulationEnabled ? '#50C878' : '#888',
-                                            border: targetPopulationEnabled ? '1px solid rgba(80, 200, 120, 0.4)' : '1px solid #555',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.75rem',
-                                            fontWeight: '700',
-                                            transition: 'all 0.2s',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.5px'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            if (targetPopulationEnabled) {
-                                                e.target.style.backgroundColor = 'rgba(80, 200, 120, 0.3)';
-                                                e.target.style.borderColor = 'rgba(80, 200, 120, 0.6)';
-                                            } else {
-                                                e.target.style.backgroundColor = '#3a3a3a';
-                                                e.target.style.borderColor = '#666';
-                                            }
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            if (targetPopulationEnabled) {
-                                                e.target.style.backgroundColor = 'rgba(80, 200, 120, 0.2)';
-                                                e.target.style.borderColor = 'rgba(80, 200, 120, 0.4)';
-                                            } else {
-                                                e.target.style.backgroundColor = '#333';
-                                                e.target.style.borderColor = '#555';
-                                            }
-                                        }}
-                                    >
-                                        {targetPopulationEnabled ? '✓ On' : 'Off'}
-                                    </button>
+                                    <ToggleSwitch
+                                        value={targetPopulationEnabled}
+                                        onChange={() => onTargetPopulationToggle(!targetPopulationEnabled)}
+                                        size="sm"
+                                        showIcons={false}
+                                        onColor="#50C878"
+                                    />
                                 </div>
 
                                 {/* Slider - only visible when enabled */}

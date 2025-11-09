@@ -5,6 +5,7 @@ import RecipeConstraintModal from '../RecipeConstraintModal';
 import MiniRecipeCard from '../MiniRecipeCard';
 import { FoodChainResolver } from '../../utils/FoodChainResolver';
 import ProductionCalculator from '../../utils/ProductionCalculator';
+import ToggleSwitch from '../common/ToggleSwitch';  // Add at top of file
 
 const ConstraintsPanel = ({
     constraints,
@@ -552,26 +553,16 @@ const ConstraintsPanel = ({
                             }}>
                                 Natural Fertility Only
                             </label>
-                            <button
-                                onClick={() => onConstraintsChange({
+                            <ToggleSwitch
+                                value={constraints.naturalFertilityOnly}
+                                onChange={() => onConstraintsChange({
                                     ...constraints,
                                     naturalFertilityOnly: !constraints.naturalFertilityOnly
                                 })}
-                                style={{
-                                    padding: '4px 10px',
-                                    backgroundColor: constraints.naturalFertilityOnly ? 'rgba(80, 200, 120, 0.2)' : '#333',
-                                    color: constraints.naturalFertilityOnly ? '#50C878' : '#888',
-                                    border: constraints.naturalFertilityOnly ? '1px solid rgba(80, 200, 120, 0.4)' : '1px solid #555',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.7rem',
-                                    fontWeight: '700',
-                                    transition: 'all 0.2s',
-                                    textTransform: 'uppercase'
-                                }}
-                            >
-                                {constraints.naturalFertilityOnly ? '✓ On' : 'Off'}
-                            </button>
+                                size="sm"
+                                showIcons={false}
+                                onColor="#50C878"
+                            />
                         </div>
                         <div style={{ fontSize: '0.7rem', color: '#888' }}>
                             Don't use fertilizer in calculations
@@ -621,29 +612,19 @@ const ConstraintsPanel = ({
                             }}>
                                 Max Farms
                             </label>
-                            <button
-                                onClick={() => {
+                            <ToggleSwitch
+                                value={constraints.maxFarms !== null}
+                                onChange={() => {
                                     if (constraints.maxFarms !== null) {
                                         onConstraintsChange({ ...constraints, maxFarms: null });
                                     } else {
                                         onConstraintsChange({ ...constraints, maxFarms: 5 });
                                     }
                                 }}
-                                style={{
-                                    padding: '4px 10px',
-                                    backgroundColor: constraints.maxFarms !== null ? 'rgba(80, 200, 120, 0.2)' : '#333',
-                                    color: constraints.maxFarms !== null ? '#50C878' : '#888',
-                                    border: constraints.maxFarms !== null ? '1px solid rgba(80, 200, 120, 0.4)' : '1px solid #555',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.7rem',
-                                    fontWeight: '700',
-                                    transition: 'all 0.2s',
-                                    textTransform: 'uppercase'
-                                }}
-                            >
-                                {constraints.maxFarms !== null ? '✓ On' : 'Off'}
-                            </button>
+                                size="sm"
+                                showIcons={false}
+                                onColor="#50C878"
+                            />
                         </div>
                         {constraints.maxFarms !== null ? (
                             <>

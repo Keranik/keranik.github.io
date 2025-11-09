@@ -4,6 +4,7 @@ import ProductionCalculator from '../utils/ProductionCalculator';
 import ProductSelectorModal from './ProductSelectorModal';
 import RecipeConstraintModal from './RecipeConstraintModal'; // NEW
 import MiniRecipeCard from './MiniRecipeCard'; // NEW
+import ToggleSwitch from './common/ToggleSwitch';  // ← ADD THIS LINE
 
 const CONSTRAINT_RANGES = {
     maxWorkers: { min: 1, max: 1000, step: 1 },
@@ -470,9 +471,9 @@ const OptimizationControls = ({
                                     </div>
 
                                     {/* Toggle Button */}
-                                    <button
-                                        type="button"
-                                        onClick={() => {
+                                    <ToggleSwitch
+                                        value={isEnabled}
+                                        onChange={() => {
                                             if (isEnabled) {
                                                 // Disable: set to null
                                                 handleConstraintChange(key, null);
@@ -481,40 +482,13 @@ const OptimizationControls = ({
                                                 handleConstraintChange(key, displayValue);
                                             }
                                         }}
-                                        style={{
-                                            padding: '4px 10px',
-                                            backgroundColor: isEnabled ? 'rgba(80, 200, 120, 0.2)' : '#333',
-                                            color: isEnabled ? '#50C878' : '#888',
-                                            border: isEnabled ? '1px solid rgba(80, 200, 120, 0.4)' : '1px solid #555',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            fontSize: '0.75rem',
-                                            fontWeight: '700',
-                                            transition: 'all 0.2s',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.5px'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            if (isEnabled) {
-                                                e.target.style.backgroundColor = 'rgba(80, 200, 120, 0.3)';
-                                                e.target.style.borderColor = 'rgba(80, 200, 120, 0.6)';
-                                            } else {
-                                                e.target.style.backgroundColor = '#3a3a3a';
-                                                e.target.style.borderColor = '#666';
-                                            }
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            if (isEnabled) {
-                                                e.target.style.backgroundColor = 'rgba(80, 200, 120, 0.2)';
-                                                e.target.style.borderColor = 'rgba(80, 200, 120, 0.4)';
-                                            } else {
-                                                e.target.style.backgroundColor = '#333';
-                                                e.target.style.borderColor = '#555';
-                                            }
-                                        }}
-                                    >
-                                        {isEnabled ? '✓ On' : 'Off'}
-                                    </button>
+                                        size="sm"
+                                        onColor="#50C878"
+                                        offColor="#888"
+                                        showIcons={false}
+                                        onIcon={null}
+                                        offIcon={null}
+                                    />
                                 </div>
 
                                 {/* Slider */}

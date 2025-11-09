@@ -16,6 +16,7 @@ import ConsolidatedResourcesPanel from '../components/ConsolidatedResourcesPanel
 import OptimizationAlternativesPanel from '../components/OptimizationAlternativesPanel';
 import ResourceConsolidator from '../utils/ResourceConsolidator';
 import LoadingOverlay from '../components/LoadingOverlay';
+import ToggleSwitch from '../components/common/ToggleSwitch';
 
 const Calculator = () => {
     const { settings } = useSettings();
