@@ -738,142 +738,152 @@ const Calculator = () => {
 
                 {/* Mode Toggle and Controls */}
                 <div style={{
+                    backgroundColor: '#2a2a2a',
+                    padding: '1.5rem',
+                    borderRadius: '10px',
+                    border: '1px solid #444',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
                     marginBottom: '1.5rem',
-                    display: 'flex',
-                    gap: '1rem',
-                    alignItems: 'center',
-                    flexWrap: 'wrap'
+                    width: 'fit-content'
                 }}>
-                    <button
-                        onClick={() => setOptimizationMode(!optimizationMode)}
-                        style={{
-                            padding: '10px 24px',
-                            backgroundColor: optimizationMode ? '#50C878' : '#555',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontSize: '1rem',
-                            cursor: 'pointer',
-                            fontWeight: '700',
-                            transition: 'all 0.2s',
-                            boxShadow: optimizationMode
-                                ? '0 4px 10px rgba(80, 200, 120, 0.4)'
-                                : '0 2px 6px rgba(0, 0, 0, 0.3)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            filter: 'drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.4))'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = optimizationMode
-                                ? '0 6px 14px rgba(80, 200, 120, 0.5)'
-                                : '0 4px 10px rgba(0, 0, 0, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = optimizationMode
-                                ? '0 4px 10px rgba(80, 200, 120, 0.4)'
-                                : '0 2px 6px rgba(0, 0, 0, 0.3)';
-                        }}
-                    >
-                        {optimizationMode ? (
-                            <>
-                                <img
-                                    src={optimizationOff}
-                                    alt="Off"
-                                    style={{
-                                        width: '43px',
-                                        height: '24px',
-                                        filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4))'
-                                    }}
-                                />
-                                Disable Optimization
-                            </>
-                        ) : (
-                            <>
-                                <img
-                                    src={optimizationOn}
-                                    alt="On"
-                                    style={{
-                                        width: '43px',
-                                        height: '24px',
-                                        filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4))'
-                                    }}
-                                />
-                                Enable Optimization
-                            </>
-                        )}
-                    </button>
-
-                    <button
-                        onClick={() => {
-                            setSelectedProduct('');
-                            setSelectedRecipe('');
-                            setTargetRate(60);
-                            setResourceConstraints(new Map());
-                            setResourceInput({ productId: '', productName: '', quantity: 0 });
-                            setProductionChain(null);
-                            setRequirements(null);
-                            setRecipeOverrides(new Map());
-                            setResourceSources(new Map());
-                            setRecipeTimeToggles(new Map());
-                            setCollapsedNodes(new Set());
-                            setOptimizationMode(false);
-                            setOptimizationResult(null);
-                            setUseConsolidation(false);
-                            setShowResourcePoolDetail(false);
-                            setDisabledRecipes(new Set());
-                            setSelectedNode(null);
-                            setSelectedAlternative('best');
-                            setOptimizationConstraints({
-                                maxPower: null,
-                                maxWorkers: null,
-                                maxMachines: null,
-                                maxMaintenance: null,
-                                maxComputing: null,
-                                excludedRecipes: [],
-                                tierRestrictions: null
-                            });
-                        }}
-                        style={{
-                            padding: '10px 24px',
-                            backgroundColor: '#ff6b6b',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontSize: '1rem',
-                            cursor: 'pointer',
-                            fontWeight: '700',
-                            transition: 'all 0.2s',
-                            boxShadow: '0 4px 10px rgba(255, 107, 107, 0.4)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            filter: 'drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.4))'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#ff5252';
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(255, 107, 107, 0.5)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = '#ff6b6b';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 4px 10px rgba(255, 107, 107, 0.4)';
-                        }}
-                    >
-                        <img
-                            src={trashIcon}
-                            alt="Trash"
+                    <div style={{
+                        display: 'flex',
+                        gap: '1rem',
+                        alignItems: 'center',
+                        flexWrap: 'wrap'
+                    }}>
+                        <button
+                            onClick={() => setOptimizationMode(!optimizationMode)}
                             style={{
-                                width: '24px',
-                                height: '24px',
-                                filter: 'drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.4))'
+                                padding: '10px 24px',
+                                backgroundColor: optimizationMode ? '#50C878' : '#555',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '1rem',
+                                cursor: 'pointer',
+                                fontWeight: '700',
+                                transition: 'all 0.2s',
+                                boxShadow: optimizationMode
+                                    ? '0 4px 10px rgba(80, 200, 120, 0.4)'
+                                    : '0 2px 6px rgba(0, 0, 0, 0.3)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                filter: 'drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.4))',
+                                flex: '0 0 auto'
                             }}
-                        />
-                        Clear All
-                    </button>
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = optimizationMode
+                                    ? '0 6px 14px rgba(80, 200, 120, 0.5)'
+                                    : '0 4px 10px rgba(0, 0, 0, 0.4)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = optimizationMode
+                                    ? '0 4px 10px rgba(80, 200, 120, 0.4)'
+                                    : '0 2px 6px rgba(0, 0, 0, 0.3)';
+                            }}
+                        >
+                            {optimizationMode ? (
+                                <>
+                                    <img
+                                        src={optimizationOff}
+                                        alt="Off"
+                                        style={{
+                                            width: '43px',
+                                            height: '24px',
+                                            filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4))'
+                                        }}
+                                    />
+                                    Disable Optimization
+                                </>
+                            ) : (
+                                <>
+                                    <img
+                                        src={optimizationOn}
+                                        alt="On"
+                                        style={{
+                                            width: '43px',
+                                            height: '24px',
+                                            filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4))'
+                                        }}
+                                    />
+                                    Enable Optimization
+                                </>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => {
+                                setSelectedProduct('');
+                                setSelectedRecipe('');
+                                setTargetRate(60);
+                                setResourceConstraints(new Map());
+                                setResourceInput({ productId: '', productName: '', quantity: 0 });
+                                setProductionChain(null);
+                                setRequirements(null);
+                                setRecipeOverrides(new Map());
+                                setResourceSources(new Map());
+                                setRecipeTimeToggles(new Map());
+                                setCollapsedNodes(new Set());
+                                setOptimizationMode(false);
+                                setOptimizationResult(null);
+                                setUseConsolidation(false);
+                                setShowResourcePoolDetail(false);
+                                setDisabledRecipes(new Set());
+                                setSelectedNode(null);
+                                setSelectedAlternative('best');
+                                setOptimizationConstraints({
+                                    maxPower: null,
+                                    maxWorkers: null,
+                                    maxMachines: null,
+                                    maxMaintenance: null,
+                                    maxComputing: null,
+                                    excludedRecipes: [],
+                                    tierRestrictions: null
+                                });
+                            }}
+                            style={{
+                                padding: '10px 24px',
+                                backgroundColor: '#ff6b6b',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '1rem',
+                                cursor: 'pointer',
+                                fontWeight: '700',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                filter: 'drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.4))',
+                                flex: '0 0 auto'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#ff5252';
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.4)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#ff6b6b';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)';
+                            }}
+                        >
+                            <img
+                                src={trashIcon}
+                                alt="Trash"
+                                style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    filter: 'drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.4))'
+                                }}
+                            />
+                            Clear All
+                        </button>
+                    </div>
                 </div>
 
                 {/* Optimization Controls Component */}
