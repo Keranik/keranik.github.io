@@ -1,4 +1,4 @@
-// src/pages/FarmOptimizer.jsx - CLEAN ORCHESTRATOR VERSION
+// src/pages/FarmOptimizer.jsx - USING CACHED CHAIN METRICS
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductionCalculator from '../utils/ProductionCalculator';
@@ -12,6 +12,7 @@ import LoadingOverlay from '../components/LoadingOverlay';
 // Import calculation engines
 import { FarmCalculationEngine } from '../utils/FarmCalculationEngine';
 import { FarmStateManager } from '../utils/FarmStateManager';
+import { FarmOptimizationEngine } from '../utils/FarmOptimizationEngine';
 
 // Import UI components
 import {
@@ -28,6 +29,7 @@ import {
 const FarmOptimizerPage = () => {
     const { settings, getResearchValue, openSettings } = useSettings();
     const navigate = useNavigate();
+
     // ===== Core State =====
     const [dataLoaded, setDataLoaded] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -86,9 +88,9 @@ const FarmOptimizerPage = () => {
 
     // ===== Refs for State Management =====
     const pendingRecalculation = useRef(false);
-    const userTriggeredCalculation = useRef(false);  // ✅ NEW: Track if user clicked Calculate
+    const userTriggeredCalculation = useRef(false);
     const loadingTimerRef = useRef(null);
-    const settingsIcon = getGeneralIcon('Settings'); 
+    const settingsIcon = getGeneralIcon('Settings');
 
     // ===== Data Loading =====
     useEffect(() => {
@@ -102,6 +104,9 @@ const FarmOptimizerPage = () => {
             const gameData = await DataLoader.loadGameData(enabledMods);
 
             ProductionCalculator.initialize(gameData);
+
+            // ✅ Initialize FoodChainResolver with chain cache building
+            // This builds the comprehensive chain cost cache synchronously
             FoodChainResolver.initialize(
                 ProductionCalculator.recipes || [],
                 ProductionCalculator.foods || [],
@@ -183,14 +188,14 @@ const FarmOptimizerPage = () => {
         if (pendingRecalculation.current && !loading && dataLoaded && results) {
             console.log('🔄 Pending recalculation detected, executing now...');
             pendingRecalculation.current = false;
-            performCalculation(false);  // ✅ Auto-triggered (fertilizer apply)
+            performCalculation(false);
         }
     }, [farms, loading, dataLoaded, results]);
 
     useEffect(() => {
         if (results && !loading && dataLoaded) {
             console.log('naturalFertilityOnly changed, triggering recalculation');
-            const timer = setTimeout(() => performCalculation(false), 300);  // ✅ Auto-triggered
+            const timer = setTimeout(() => performCalculation(false), 300);
             return () => clearTimeout(timer);
         }
     }, [constraints.naturalFertilityOnly]);
@@ -198,7 +203,7 @@ const FarmOptimizerPage = () => {
     useEffect(() => {
         if (results && !loading && dataLoaded) {
             console.log('allowedFertilizers changed, triggering recalculation');
-            const timer = setTimeout(() => performCalculation(false), 300);  // ✅ Auto-triggered
+            const timer = setTimeout(() => performCalculation(false), 300);
             return () => clearTimeout(timer);
         }
     }, [constraints.allowedFertilizers]);
@@ -208,25 +213,10 @@ const FarmOptimizerPage = () => {
         console.log('=== FarmOptimizerPage: Starting calculation ===', { userTriggered });
         setLoading(true);
         setIsCalculating(true);
+        setShowLoadingOverlay(true);
 
-        // Wrap in setTimeout to allow UI to update
         setTimeout(() => {
-            let calculationComplete = false;
-
-            // ✅ Start loading timer INSIDE the setTimeout
-            loadingTimerRef.current = setTimeout(() => {
-                if (!calculationComplete) {
-                    console.log('⏱️ Calculation taking longer than 300ms, showing overlay');
-                    setShowLoadingOverlay(true);
-                }
-            }, 300);
-
-            // Add artificial delay to ensure calculations actually take time
-            const startTime = performance.now();
-
             try {
-                // ... all your calculation logic stays the same ...
-
                 let farmsToCalculate;
 
                 if (optimizationMode === 'manual') {
@@ -273,32 +263,51 @@ const FarmOptimizerPage = () => {
                 }
 
                 setResults(calculationResults);
-
-                const elapsed = performance.now() - startTime;
-                console.log(`=== Calculation complete in ${elapsed.toFixed(2)}ms ===`);
+                console.log('=== FarmOptimizerPage: Calculation complete ===');
             } catch (error) {
                 console.error('Optimization error:', error);
                 alert('Error during optimization: ' + error.message);
             } finally {
-                calculationComplete = true;
-
-                if (loadingTimerRef.current) {
-                    clearTimeout(loadingTimerRef.current);
-                    loadingTimerRef.current = null;
-                }
-
                 setLoading(false);
                 setIsCalculating(false);
                 setShowLoadingOverlay(false);
             }
-        }, 10);
+        }, 250);
     };
 
     const generateOptimizedFarms = () => {
+        console.log('🎯 Generating optimized farms with goal:', optimizationGoal);
+
+        try {
+            // ✅ Use the optimization engine with cached chain metrics
+            const optimizedFarms = FarmOptimizationEngine.optimize({
+                optimizationGoal,
+                constraints,
+                research,
+                selectedProcessingRecipes,
+                foodConsumptionMultiplier: settings.foodConsumptionMultiplier || 1.0
+            });
+
+            console.log(`✅ Generated ${optimizedFarms.length} optimized farms`);
+            return optimizedFarms;
+        } catch (error) {
+            console.error('❌ Optimization failed:', error);
+            alert(`Optimization error: ${error.message}`);
+            return generateFallbackFarms();
+        }
+    };
+
+    const generateFallbackFarms = () => {
+        console.log('⚠️ Using fallback farm generation');
+
         const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
         const availableFoodCrops = (ProductionCalculator.crops || []).filter(crop =>
             ProductionCalculator.foodCropIds?.has(crop.id) ?? false
         );
+
+        const filteredCrops = constraints.allowedCrops && constraints.allowedCrops.length > 0
+            ? availableFoodCrops.filter(c => constraints.allowedCrops.includes(c.id))
+            : availableFoodCrops;
 
         const targetPop = constraints.targetPopulation;
         const avgPeoplePerFarm = 400;
@@ -309,11 +318,14 @@ const FarmOptimizerPage = () => {
 
         const optimizedFarms = [];
         for (let i = 0; i < farmCount; i++) {
-            const farmType = constraints.allowedFarmTypes.length > 0
-                ? constraints.allowedFarmTypes[0]
-                : availableFarms[0]?.id || 'FarmT1';
+            let farmType;
+            if (constraints.allowedFarmTypes && constraints.allowedFarmTypes.length > 0) {
+                farmType = constraints.allowedFarmTypes[0];
+            } else {
+                farmType = availableFarms[0]?.id || 'FarmT1';
+            }
 
-            const efficientCrops = availableFoodCrops.slice(0, 2).map(c => c.id);
+            const efficientCrops = filteredCrops.slice(0, 2).map(c => c.id);
             const rotation = [...efficientCrops, null, null];
 
             optimizedFarms.push({
@@ -330,7 +342,7 @@ const FarmOptimizerPage = () => {
 
     // ===== User Actions - Calculation =====
     const handleCalculate = () => {
-        performCalculation(true);  // ✅ User-triggered (Calculate button)
+        performCalculation(true);
     };
 
     // ===== User Actions - Farm Management =====
@@ -378,6 +390,8 @@ const FarmOptimizerPage = () => {
     // ===== User Actions - Recipe Selection =====
     const openRecipeSelectionModal = (productId) => {
         const product = ProductionCalculator.getProduct(productId);
+
+        // ✅ Use FoodChainResolver to get cached food paths
         const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
 
         if (foodPaths.length === 0) {
@@ -506,8 +520,8 @@ const FarmOptimizerPage = () => {
     // ===== Render =====
     return (
         <>
-<LoadingOverlay
-                isVisible={showLoadingOverlay}  // ✅ CHANGED from isCalculating
+            <LoadingOverlay
+                isVisible={showLoadingOverlay}
                 title="Calculating Farm Production..."
                 message="Processing crop rotations, fertility calculations, and food production chains..."
                 showOptimizationTip={false}
@@ -545,14 +559,14 @@ const FarmOptimizerPage = () => {
                 {/* Settings Panel */}
                 <div style={{
                     backgroundColor: '#2a2a2a',
-                    padding: '1.5rem',  // ✅ Reduced from 2rem
+                    padding: '1.5rem',
                     borderRadius: '10px',
-                    marginBottom: '1.5rem',  // ✅ Reduced from 2rem
+                    marginBottom: '1.5rem',
                     border: '1px solid #444',
                     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
                 }}>
                     <h3 style={{
-                        marginBottom: '1rem',  // ✅ Reduced from 1.5rem
+                        marginBottom: '1rem',
                         fontSize: '1.5rem',
                         fontWeight: '700',
                         color: '#50C878',
@@ -565,12 +579,12 @@ const FarmOptimizerPage = () => {
                         Optimization Settings
                     </h3>
 
-                    {/* ✅ COMPACT: Mode + Constraints in 2-column grid */}
+                    {/* Mode + Constraints in 2-column grid */}
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: '1fr 1fr',
                         gap: '1rem',
-                        marginBottom: '1rem'  // ✅ Reduced spacing
+                        marginBottom: '1rem'
                     }}>
                         <div>
                             <OptimizationModeSelector
@@ -597,18 +611,18 @@ const FarmOptimizerPage = () => {
                         </div>
                     </div>
 
-                    {/* ✅ COMPACT: Research Display - smaller, inline */}
+                    {/* Research Display */}
                     <div style={{
                         backgroundColor: '#1a1a1a',
-                        padding: '0.75rem 1rem',  // ✅ Tighter padding
+                        padding: '0.75rem 1rem',
                         borderRadius: '6px',
                         border: '1px solid #444',
-                        marginBottom: '1rem'  // ✅ Reduced from 1.5rem
+                        marginBottom: '1rem'
                     }}>
                         <div style={{
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'space-between',  // ✅ Spread out horizontally
+                            justifyContent: 'space-between',
                             flexWrap: 'wrap',
                             gap: '1rem'
                         }}>
@@ -625,7 +639,6 @@ const FarmOptimizerPage = () => {
                                 </span>
                             </div>
 
-                            {/* ✅ COMPACT: Inline research stats */}
                             <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <span style={{ color: '#888' }}>Crop Yield:</span>
@@ -648,7 +661,7 @@ const FarmOptimizerPage = () => {
                             </div>
 
                             <button
-                                onClick={openSettings}  // ✅ Use context function
+                                onClick={openSettings}
                                 style={{
                                     fontSize: '0.7rem',
                                     color: '#666',
@@ -694,40 +707,42 @@ const FarmOptimizerPage = () => {
                                 }}>
                                     From <strong>Global Settings</strong>
                                 </span>
-                                <span style={{ fontSize: '0.65rem', opacity: 0.8 }}><img
-                                    src={settingsIcon}
-                                    alt="Settings"
-                                    style={{
-                                        width: '12px',
-                                        height: '12px',
-                                        objectFit: 'contain'
-                                    }}
-                                /></span>
+                                <span style={{ fontSize: '0.65rem', opacity: 0.8 }}>
+                                    <img
+                                        src={settingsIcon}
+                                        alt="Settings"
+                                        style={{
+                                            width: '12px',
+                                            height: '12px',
+                                            objectFit: 'contain'
+                                        }}
+                                    />
+                                </span>
                             </button>
                         </div>
                     </div>
 
                     {/* Manual Mode - Farm Configuration */}
                     {optimizationMode === 'manual' && (
-                        <div style={{ marginBottom: '1rem' }}>  {/* ✅ Reduced from 1.5rem */}
+                        <div style={{ marginBottom: '1rem' }}>
                             <div style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
-                                marginBottom: '0.5rem'  // ✅ Reduced from 0.75rem
+                                marginBottom: '0.5rem'
                             }}>
-                                <label style={{ fontSize: '0.9rem', fontWeight: '600', color: '#ddd' }}>  {/* ✅ Smaller font */}
+                                <label style={{ fontSize: '0.9rem', fontWeight: '600', color: '#ddd' }}>
                                     Farms ({farms.length})
                                 </label>
                                 <button
                                     onClick={addFarm}
                                     style={{
-                                        padding: '0.4rem 0.8rem',  // ✅ Tighter padding
+                                        padding: '0.4rem 0.8rem',
                                         backgroundColor: '#4a90e2',
                                         color: '#fff',
                                         border: 'none',
                                         borderRadius: '4px',
-                                        fontSize: '0.8rem',  // ✅ Smaller font
+                                        fontSize: '0.8rem',
                                         cursor: 'pointer',
                                         fontWeight: '600',
                                         transition: 'all 0.15s'
@@ -739,7 +754,7 @@ const FarmOptimizerPage = () => {
                                 </button>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>  {/* ✅ Reduced from 1rem */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                 {farms.map((farm, farmIndex) => (
                                     <FarmConfigCard
                                         key={farm.id}
@@ -765,12 +780,12 @@ const FarmOptimizerPage = () => {
                         disabled={loading || (optimizationMode === 'manual' && farms.length === 0)}
                         style={{
                             width: '100%',
-                            padding: '0.85rem',  // ✅ Reduced from 1rem
+                            padding: '0.85rem',
                             backgroundColor: loading ? '#555' : '#4a90e2',
                             color: '#fff',
                             border: 'none',
                             borderRadius: '6px',
-                            fontSize: '1rem',  // ✅ Slightly smaller
+                            fontSize: '1rem',
                             cursor: loading ? 'not-allowed' : 'pointer',
                             fontWeight: '700',
                             transition: 'all 0.2s',
@@ -795,7 +810,7 @@ const FarmOptimizerPage = () => {
 
                 {/* Results */}
                 {results && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '1.5rem', alignItems: 'start' }}>  {/* ✅ Narrower sidebar, tighter gap */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '1.5rem', alignItems: 'start' }}>
                         <ResultsSummary
                             results={results}
                             research={research}
@@ -803,12 +818,12 @@ const FarmOptimizerPage = () => {
 
                         <div style={{
                             backgroundColor: '#2a2a2a',
-                            padding: '1.25rem',  // ✅ Reduced from 1.5rem
+                            padding: '1.25rem',
                             borderRadius: '10px',
                             border: '1px solid #444',
                             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
                         }}>
-                            <h3 style={{ marginBottom: '1rem', fontSize: '1.4rem', fontWeight: '700' }}>  {/* ✅ Tighter */}
+                            <h3 style={{ marginBottom: '1rem', fontSize: '1.4rem', fontWeight: '700' }}>
                                 Farm Details
                             </h3>
 

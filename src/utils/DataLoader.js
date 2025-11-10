@@ -4,12 +4,13 @@
 
 import { FertilizerCalculator } from './FertilizerCalculator';
 import ProductionCalculator from './ProductionCalculator';
+import { FoodChainResolver } from './FoodChainResolver';  // ✅ Add this import
 
 export class DataLoader {
     static baseGameData = null;
     static loadedMods = new Map();
     static manifestCache = null;
-    static isInitialized = false; // ✅ Add this
+    static isInitialized = false;
 
     /**
      * Load base game data
@@ -26,7 +27,9 @@ export class DataLoader {
                 products: this.baseGameData.products?.length || 0,
                 recipes: this.baseGameData.recipes?.length || 0,
                 machines: this.baseGameData.machines?.length || 0,
-                research: this.baseGameData.research?.length || 0
+                research: this.baseGameData.research?.length || 0,
+                foods: this.baseGameData.foods?.length || 0,
+                crops: this.baseGameData.crops?.length || 0
             });
             return this.baseGameData;
         } catch (error) {
@@ -44,7 +47,6 @@ export class DataLoader {
         }
 
         try {
-            // Import from src/ directory (same as GameData.js)
             const module = await import(`../${dataFile}`);
             const modData = module.default;
             this.loadedMods.set(modId, modData);
@@ -87,23 +89,16 @@ export class DataLoader {
      * @param {string[]} enabledModIds - Array of mod IDs to load
      */
     static async loadGameData(enabledModIds = []) {
-        // Load base game
         const baseData = await this.loadBaseGame();
 
-        // If no mods enabled, return base game only
         if (!enabledModIds || enabledModIds.length === 0) {
             console.log('📦 Using base game data only');
-
-            // ✅ Initialize calculators with base game data
             this.initializeCalculators(baseData);
-
             return baseData;
         }
 
-        // Load manifest to get mod file names
         const manifest = await this.loadModManifest();
 
-        // Load all enabled mods
         const modDataPromises = enabledModIds.map(modId => {
             const modInfo = manifest.mods.find(m => m.id === modId);
             if (!modInfo) {
@@ -117,14 +112,10 @@ export class DataLoader {
 
         if (modDataArray.length === 0) {
             console.log('📦 No mods loaded, using base game data only');
-
-            // ✅ Initialize calculators with base game data
             this.initializeCalculators(baseData);
-
             return baseData;
         }
 
-        // Merge base game + mods
         const merged = this.mergeGameData(baseData, modDataArray);
 
         console.log('📦 Merged game data:', {
@@ -137,14 +128,12 @@ export class DataLoader {
             totalResearch: merged.research?.length || 0
         });
 
-        // ✅ Initialize calculators with merged data
         this.initializeCalculators(merged);
-
         return merged;
     }
 
     /**
-     * ✅ NEW: Initialize all calculators after data is loaded
+     * Initialize all calculators after data is loaded
      * @param {object} gameData - The loaded/merged game data
      */
     static initializeCalculators(gameData) {
@@ -160,7 +149,15 @@ export class DataLoader {
             ProductionCalculator.initialize(gameData);
             console.log('✅ ProductionCalculator initialized');
 
-            // Then initialize FertilizerCalculator (depends on ProductionCalculator)
+            // ✅ Initialize FoodChainResolver with chain cost cache
+            FoodChainResolver.initialize(
+                gameData.recipes || [],
+                gameData.foods || [],
+                gameData.crops || []
+            );
+            console.log('✅ FoodChainResolver initialized with chain cost cache');
+
+            // Initialize FertilizerCalculator
             FertilizerCalculator.initialize();
             console.log('✅ FertilizerCalculator initialized');
 
@@ -168,7 +165,6 @@ export class DataLoader {
             console.log('✅ All calculators initialized successfully');
         } catch (error) {
             console.error('❌ Failed to initialize calculators:', error);
-            // Don't throw - let the app continue with fallback values
         }
     }
 
@@ -176,14 +172,11 @@ export class DataLoader {
      * Merge base game data with mod data
      */
     static mergeGameData(baseData, modDataArray) {
-        // Deep clone base data
         const merged = JSON.parse(JSON.stringify(baseData));
 
-        // Merge each mod
         modDataArray.forEach(modData => {
             if (!modData) return;
 
-            // Merge arrays (products, recipes, machines, etc.)
             const arrayFields = [
                 'products', 'recipes', 'machines', 'buildings',
                 'farms', 'crops', 'foods', 'foodCategories',
@@ -196,15 +189,12 @@ export class DataLoader {
                         merged[field] = [];
                     }
 
-                    // Add mod items (avoiding duplicates by ID)
                     modData[field].forEach(item => {
                         const existingIndex = merged[field].findIndex(existing => existing.id === item.id);
                         if (existingIndex >= 0) {
-                            // Replace existing item (mod overrides base game)
                             merged[field][existingIndex] = item;
                             console.log(`🔄 Mod overrides ${field}: ${item.id}`);
                         } else {
-                            // Add new item
                             merged[field].push(item);
                         }
                     });
@@ -222,7 +212,18 @@ export class DataLoader {
         this.baseGameData = null;
         this.loadedMods.clear();
         this.manifestCache = null;
-        this.isInitialized = false; // ✅ Add this
+        this.isInitialized = false;
+
+        // ✅ Clear FoodChainResolver cache
+        if (FoodChainResolver.chainEfficiencyCache) {
+            FoodChainResolver.chainEfficiencyCache.clear();
+        }
+
+        // ✅ Reset ProductionCalculator
+        if (ProductionCalculator.reset) {
+            ProductionCalculator.reset();
+        }
+
         console.log('🗑️ Data cache cleared');
     }
 }
