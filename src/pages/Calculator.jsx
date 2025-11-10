@@ -176,7 +176,12 @@ const Calculator = () => {
         loadData();
     }, [settings.enableModdedContent, settings.enabledMods]);
 
-    
+    useEffect(() => {
+        if (dataLoaded && !selectedProduct) {
+            const defaultProductId = 'Product_ConstructionParts'; 
+            setSelectedProduct(defaultProductId);
+        }
+    }, [dataLoaded, selectedProduct]);
 
     // When product changes, update available recipes
     useEffect(() => {
