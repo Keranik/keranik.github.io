@@ -196,6 +196,24 @@ const Calculator = () => {
         }
     }, [selectedProduct]);
 
+    useEffect(() => {
+        if (dataLoaded && !selectedProduct) {
+            // Recreate producibleProducts logic here to avoid scope error
+            const allProducts = ProductionCalculator.products || [];
+            const filteredAndSorted = allProducts
+                .filter(product => {
+                    const recipes = ProductionCalculator.getRecipesForProduct(product.id);
+                    return recipes.length > 0;
+                })
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const defaultProductId = filteredAndSorted[30]?.id;  // 'acid' (alphabetically first)
+            if (defaultProductId) {
+                setSelectedProduct(defaultProductId);  // Triggers the recipe useEffect above
+            }
+        }
+    }, [dataLoaded, selectedProduct]);
+
     // ✅ NEW: Recalculate when consolidation toggle changes
     useEffect(() => {
         // Only trigger when consolidation changes AND we have an existing chain
@@ -595,6 +613,7 @@ const Calculator = () => {
 
         return search(chain);
     };
+
 
     return (
         <div style={{
