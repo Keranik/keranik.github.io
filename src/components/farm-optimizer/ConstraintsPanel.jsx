@@ -1,6 +1,5 @@
 ﻿// src/components/farm-optimizer/ConstraintsPanel.jsx
-import { useState, useMemo } from 'react';
-import { useData } from '../../contexts/DataContext';
+import { useState } from 'react';
 import { getEntityIcon, getCropIcon, getGeneralIcon, getProductIcon } from '../../utils/AssetHelper';
 import RecipeConstraintModal from '../RecipeConstraintModal';
 import MiniRecipeCard from '../MiniRecipeCard';
@@ -16,9 +15,6 @@ const ConstraintsPanel = ({
 }) => {
     const [recipeFilterOpen, setRecipeFilterOpen] = useState(false);
 
-    // ✅ Get pre-computed fertilizers from DataContext
-    const { availableFertilizers } = useData();
-
     const filterIcon = getGeneralIcon('Filter');
     const successIcon = getGeneralIcon('Success');
     const blockedIcon = getGeneralIcon('Blocked');
@@ -26,28 +22,49 @@ const ConstraintsPanel = ({
     const plusIcon = getGeneralIcon('Plus');
     const fertilizerIcon = getGeneralIcon('Fertilizer');
 
+    // Get all available fertilizers from game data
+    const getAllFertilizers = () => {
+        return (ProductionCalculator.products || [])
+            .filter(p => p.fertilizer &&
+                p.fertilizer.fertilityPerQuantityPercent !== undefined &&
+                p.fertilizer.maxFertilityPercent !== undefined)
+            .map(p => ({
+                id: p.id,
+                name: p.name,
+                icon: getProductIcon(p),
+                fertilityPerUnit: p.fertilizer.fertilityPerQuantityPercent,
+                maxFertility: p.fertilizer.maxFertilityPercent
+            }))
+            .sort((a, b) => a.fertilityPerUnit - b.fertilityPerUnit); // Sort by power (weakest first)
+    };
+
+    const availableFertilizers = getAllFertilizers();
+
     // Toggle fertilizer selection
     const toggleFertilizer = (fertilizerId) => {
         const currentList = constraints.allowedFertilizers || [];
         const isCurrentlyAllowed = currentList.includes(fertilizerId);
 
         if (isCurrentlyAllowed) {
+            // Remove from list
             const newList = currentList.filter(id => id !== fertilizerId);
             onConstraintsChange({
                 ...constraints,
                 allowedFertilizers: newList,
-                naturalFertilityOnly: newList.length === 0
+                naturalFertilityOnly: newList.length === 0 // Auto-enable natural only if no fertilizers
             });
         } else {
+            // Add to list
             const newList = [...currentList, fertilizerId];
             onConstraintsChange({
                 ...constraints,
                 allowedFertilizers: newList,
-                naturalFertilityOnly: false
+                naturalFertilityOnly: false // Disable natural only when fertilizers are selected
             });
         }
     };
 
+    // Clear all fertilizers (natural fertility only)
     const clearAllFertilizers = () => {
         onConstraintsChange({
             ...constraints,
@@ -56,6 +73,7 @@ const ConstraintsPanel = ({
         });
     };
 
+    // Enable all fertilizers
     const enableAllFertilizers = () => {
         const allIds = availableFertilizers.map(f => f.id);
         onConstraintsChange({
@@ -65,17 +83,11 @@ const ConstraintsPanel = ({
         });
     };
 
-    // ✅ Get food recipes based on SELECTED crops (or all if none selected)
-    const allFoodRecipes = useMemo(() => {
-        if (!FoodChainResolver.isInitialized) return [];
-
-        const cropsToCheck = constraints.allowedCrops.length > 0
-            ? availableFoodCrops.filter(c => constraints.allowedCrops.includes(c.id))
-            : availableFoodCrops;
-
+    // Get all food-related recipes
+    const getAllFoodRecipes = () => {
         const foodRecipeIds = new Set();
 
-        cropsToCheck.forEach(crop => {
+        availableFoodCrops.forEach(crop => {
             const paths = FoodChainResolver.getFoodsFromCrop(crop.output.productId);
             paths.forEach(path => {
                 path.recipeChain?.forEach(recipeId => {
@@ -87,12 +99,12 @@ const ConstraintsPanel = ({
         return Array.from(foodRecipeIds)
             .map(id => ProductionCalculator.getRecipe(id))
             .filter(recipe => recipe !== null);
-    }, [availableFoodCrops, constraints.allowedCrops]);
+    };
 
-    const allFoodRecipeIds = useMemo(() => {
-        return new Set(allFoodRecipes.map(r => r.id));
-    }, [allFoodRecipes]);
+    const allFoodRecipes = getAllFoodRecipes();
+    const allFoodRecipeIds = new Set(allFoodRecipes.map(r => r.id));
 
+    // Convert allowedRecipes to disabled recipes format
     const getDisabledRecipes = () => {
         if (constraints.allowedRecipes === null) {
             return new Set();
@@ -138,6 +150,7 @@ const ConstraintsPanel = ({
         onConstraintsChange({ ...constraints, allowedCrops: newAllowed });
     };
 
+    // Determine if filters are active
     const farmFilterActive = constraints.allowedFarmTypes.length > 0 &&
         constraints.allowedFarmTypes.length < availableFarms.length;
     const cropFilterActive = constraints.allowedCrops.length > 0 &&
@@ -197,8 +210,12 @@ const ConstraintsPanel = ({
                                     fontWeight: '700',
                                     transition: 'all 0.2s'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.25)'}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.15)'}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.25)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.15)';
+                                }}
                             >
                                 Clear
                             </button>
@@ -238,8 +255,12 @@ const ConstraintsPanel = ({
                                     height: '72px',
                                     position: 'relative'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                }}
                             >
                                 {farmIcon && (
                                     <img
@@ -275,7 +296,11 @@ const ConstraintsPanel = ({
                                         alignItems: 'center',
                                         justifyContent: 'center'
                                     }}>
-                                        <img src={successIcon} alt="Selected" style={{ width: '10px', height: '10px' }} />
+                                        <img
+                                            src={successIcon}
+                                            alt="Selected"
+                                            style={{ width: '10px', height: '10px' }}
+                                        />
                                     </div>
                                 )}
                             </button>
@@ -317,8 +342,12 @@ const ConstraintsPanel = ({
                                     fontWeight: '700',
                                     transition: 'all 0.2s'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.25)'}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.15)'}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.25)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'rgba(255, 107, 107, 0.15)';
+                                }}
                             >
                                 Clear
                             </button>
@@ -352,8 +381,12 @@ const ConstraintsPanel = ({
                                     height: '72px',
                                     position: 'relative'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                }}
                             >
                                 {cropIcon && (
                                     <img
@@ -389,7 +422,11 @@ const ConstraintsPanel = ({
                                         alignItems: 'center',
                                         justifyContent: 'center'
                                     }}>
-                                        <img src={successIcon} alt="Selected" style={{ width: '10px', height: '10px' }} />
+                                        <img
+                                            src={successIcon}
+                                            alt="Selected"
+                                            style={{ width: '10px', height: '10px' }}
+                                        />
                                     </div>
                                 )}
                             </button>
@@ -489,12 +526,16 @@ const ConstraintsPanel = ({
                                         height: '85px',
                                         position: 'relative'
                                     }}
-                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'scale(1.05)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'scale(1)';
+                                    }}
                                 >
                                     {fert.icon && (
                                         <img
-                                            src={getProductIcon({ id: fert.id })}
+                                            src={fert.icon}
                                             alt={fert.name}
                                             style={{
                                                 width: '32px',
@@ -534,7 +575,11 @@ const ConstraintsPanel = ({
                                             alignItems: 'center',
                                             justifyContent: 'center'
                                         }}>
-                                            <img src={successIcon} alt="Selected" style={{ width: '10px', height: '10px' }} />
+                                            <img
+                                                src={successIcon}
+                                                alt="Selected"
+                                                style={{ width: '10px', height: '10px' }}
+                                            />
                                         </div>
                                     )}
                                 </button>
@@ -629,6 +674,7 @@ const ConstraintsPanel = ({
                     </button>
                 </div>
 
+                {/* Recipe Preview */}
                 {disabledRecipes.size > 0 ? (
                     <div style={{
                         backgroundColor: '#1a1a1a',
@@ -846,6 +892,7 @@ const ConstraintsPanel = ({
                 </div>
             </div>
 
+            {/* Recipe Constraint Modal */}
             <RecipeConstraintModal
                 isOpen={recipeFilterOpen}
                 onClose={() => setRecipeFilterOpen(false)}

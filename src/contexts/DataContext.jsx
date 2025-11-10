@@ -195,6 +195,8 @@ export const DataProvider = ({ children }) => {
             .map(p => ({
                 id: p.id,
                 name: p.name,
+                // ✅ ADD THIS LINE - include the full product for icon lookup
+                product: p,
                 fertilityPerUnit: p.fertilizer.fertilityPerQuantityPercent,
                 maxFertility: p.fertilizer.maxFertilityPercent
             }))

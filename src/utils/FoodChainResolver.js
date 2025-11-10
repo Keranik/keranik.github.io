@@ -1,541 +1,406 @@
 /**
  * FoodChainResolver - Traces food production chains from crops through processing
- * NOW WITH: Comprehensive cost calculation for all chains
+ * Handles cases like: Wheat → Flour → Bread
  */
-import ProductionCalculator from './ProductionCalculator';
-
-
 export class FoodChainResolver {
     static recipes = [];
     static foods = [];
     static crops = [];
-    static machines = [];
-
-    // ✅ Pre-calculated efficiency cache
-    static chainEfficiencyCache = new Map();
-    static baselineFarmWorkerProductivity = 0;
-    static isInitialized = false;
 
     static initialize(recipes, foods, crops) {
-        // ✅ Just store the data, don't build the cache yet
         this.recipes = recipes;
         this.foods = foods;
         this.crops = crops;
-        this.isInitialized = true;
-
-        console.log('✅ FoodChainResolver initialized (lazy cache mode)');
     }
 
     /**
-     * ✅ Calculate baseline farm worker productivity
-     * Uses the BEST direct-consumption crop as baseline
-     * This represents opportunity cost: "What could this worker produce if farming instead?"
-     */
-    static calculateBaselineFarmProductivity() {
-        const directCrops = this.crops.filter(crop => {
-            // Check if crop output is directly edible
-            const isDirectFood = this.foods.some(f => f.productId === crop.output.productId);
-            return isDirectFood;
-        });
-
-        if (directCrops.length === 0) {
-            console.warn('⚠️ No direct food crops found, using fallback baseline');
-            return 75; // Fallback baseline
-        }
-
-        // Calculate people fed per crop unit for direct crops
-        let bestEfficiency = 0;
-
-        directCrops.forEach(crop => {
-            const food = this.foods.find(f => f.productId === crop.output.productId);
-            if (!food) return;
-
-            // People fed per 100 units of crop (at 1.0 consumption multiplier)
-            const peopleFedPer100Units = (100 / food.consumedPerHundredPopsPerMonth) * 100;
-
-            if (peopleFedPer100Units > bestEfficiency) {
-                bestEfficiency = peopleFedPer100Units;
-            }
-        });
-
-        // Assume 1 farm worker can tend ~4-5 crop slots effectively
-        // This is an approximation - actual farm workers vary by farm type
-        const workerProductivity = bestEfficiency / 4; // Conservative estimate
-
-        return workerProductivity;
-    }
-
-    /**
-     * ✅ Build comprehensive chain cost cache
-     * For EVERY crop → food combination, calculate ALL metrics
-     */
-    static buildChainEfficiencyCache() {
-        this.chainEfficiencyCache.clear();
-
-        this.crops.forEach(crop => {
-            const paths = this.getFoodsFromCrop(crop.output.productId);
-
-            paths.forEach(path => {
-                const cacheKey = `${crop.id}_${path.finalFoodProductId}`;
-
-                // Calculate comprehensive metrics for this chain
-                const chainMetrics = this.calculateComprehensiveChainMetrics(
-                    crop,
-                    path,
-                    100 // Calculate per 100 units of crop for consistency
-                );
-
-                if (chainMetrics) {
-                    this.chainEfficiencyCache.set(cacheKey, chainMetrics);
-                }
-            });
-        });
-    }
-
-    /**
-     * ✅ Calculate ALL metrics for a processing chain
-     * This is the ONE SOURCE OF TRUTH for chain costs
-     */
-    static calculateComprehensiveChainMetrics(crop, path, inputQuantityPerMonth) {
-        const food = this.foods.find(f => f.productId === path.finalFoodProductId);
-        if (!food) {
-            return null;
-        }
-
-        // 1. PEOPLE FED (base calculation)
-        const finalFoodQuantity = inputQuantityPerMonth * path.conversionRatio;
-        const peopleFed = (finalFoodQuantity / food.consumedPerHundredPopsPerMonth) * 100;
-
-        // 2. PROCESSING CHAIN COSTS
-        const chainCosts = this.calculateProcessingChainCosts(path.processingChain, inputQuantityPerMonth);
-
-        // 3. WORKER OPPORTUNITY COST
-        const workerOpportunityCost = chainCosts.totalWorkerMonths * this.baselineFarmWorkerProductivity;
-
-        // 4. NET PEOPLE FED (after subtracting opportunity cost)
-        const netPeopleFed = peopleFed - workerOpportunityCost;
-
-        // 5. EFFICIENCY RATIOS (for sorting by optimization modes)
-        const waterEfficiency = chainCosts.totalWaterPerDay > 0
-            ? netPeopleFed / chainCosts.totalWaterPerDay
-            : netPeopleFed;
-
-        const workerEfficiency = chainCosts.totalWorkerMonths > 0
-            ? netPeopleFed / chainCosts.totalWorkerMonths
-            : netPeopleFed;
-
-        const timeEfficiency = chainCosts.totalProcessingTimeHours > 0
-            ? netPeopleFed / chainCosts.totalProcessingTimeHours
-            : netPeopleFed;
-
-        const electricityEfficiency = chainCosts.totalElectricityKw > 0
-            ? netPeopleFed / chainCosts.totalElectricityKw
-            : netPeopleFed;
-
-        return {
-            // Identifiers
-            cropId: crop.id,
-            cropName: crop.name,
-            foodProductId: path.finalFoodProductId,
-            foodName: food.name,
-            isDirect: path.processingChain.length === 0,
-
-            // Base metrics
-            conversionRatio: path.conversionRatio,
-            peopleFed: peopleFed,
-
-            // Processing costs (absolute values)
-            processingWorkerMonths: chainCosts.totalWorkerMonths,
-            processingWaterPerDay: chainCosts.totalWaterPerDay,
-            processingTimeHours: chainCosts.totalProcessingTimeHours,
-            processingElectricityKw: chainCosts.totalElectricityKw,
-            processingMachines: chainCosts.machines,
-
-            // Opportunity cost
-            workerOpportunityCost: workerOpportunityCost,
-            netPeopleFed: netPeopleFed,
-
-            // Efficiency scores (for optimization mode sorting)
-            efficiencies: {
-                water: waterEfficiency,
-                workers: workerEfficiency,
-                time: timeEfficiency,
-                electricity: electricityEfficiency,
-                overall: netPeopleFed // Can be used for "balanced" mode
-            },
-
-            // Chain details (for display)
-            processingChain: path.processingChain,
-            recipeChain: path.recipeChain
-        };
-    }
-
-    /**
-     * ✅ Calculate processing chain costs
-     * Returns absolute costs for the given input quantity
-     */
-    static calculateProcessingChainCosts(processingChain, inputQuantityPerMonth) {
-        if (!processingChain || processingChain.length === 0) {
-            return {
-                totalWorkerMonths: 0,
-                totalWaterPerDay: 0,
-                totalProcessingTimeHours: 0,
-                totalElectricityKw: 0,
-                machines: []
-            };
-        }
-
-        let totalWorkerMonths = 0;
-        let totalWaterPerDay = 0;
-        let totalProcessingTimeHours = 0;
-        let totalElectricityKw = 0;
-        const machines = [];
-
-        let currentQuantityPerMonth = inputQuantityPerMonth;
-
-        processingChain.forEach((step, stepIndex) => {
-            const recipe = this.recipes.find(r => r.id === step.recipeId);
-            if (!recipe) {
-                console.warn(`Recipe ${step.recipeId} not found`);
-                return;
-            }
-
-            // Find machine that can run this recipe
-            const machine = this.findMachineForRecipe(recipe.id);
-            if (!machine) {
-                console.warn(`No machine found for recipe ${recipe.id}`);
-                return;
-            }
-
-            // Calculate how much output this step needs to produce
-            const requiredOutputPerMonth = currentQuantityPerMonth * (step.outputQuantity / step.inputQuantity);
-
-            // How many cycles of this recipe are needed per month?
-            const cyclesNeededPerMonth = requiredOutputPerMonth / step.outputQuantity;
-
-            // How long does each cycle take?
-            const cycleDurationSeconds = recipe.durationSeconds;
-            const cycleDurationMonths = cycleDurationSeconds / (30 * 24 * 60 * 60);
-
-            // How many "machine-months" are needed? (1 machine running for 1 month = 1 machine-month)
-            const machineMonthsNeeded = cyclesNeededPerMonth * cycleDurationMonths;
-
-            // Worker-months = machine-months × workers per machine
-            const workersPerMachine = machine.workers || 0;
-            const workerMonthsForThisStep = machineMonthsNeeded * workersPerMachine;
-            totalWorkerMonths += workerMonthsForThisStep;
-
-            // Processing time in hours (for time efficiency metric)
-            const processingTimeHours = (cycleDurationSeconds / 3600) * cyclesNeededPerMonth;
-            totalProcessingTimeHours += processingTimeHours;
-
-            // Electricity consumption (continuous draw while running)
-            const electricityKw = (machine.electricityKw || 0) * machineMonthsNeeded;
-            totalElectricityKw += electricityKw;
-
-            // Water consumption from recipe inputs
-            const waterInput = recipe.inputs.find(input => {
-                const product = this.getProduct(input.productId);
-                return product?.name?.toLowerCase().includes('water');
-            });
-
-            if (waterInput) {
-                const waterPerCycle = waterInput.quantity;
-                const waterPerMonth = waterPerCycle * cyclesNeededPerMonth;
-                const waterPerDay = waterPerMonth / 30;
-                totalWaterPerDay += waterPerDay;
-            }
-
-            // Track machine details
-            machines.push({
-                stepIndex,
-                recipeId: recipe.id,
-                recipeName: recipe.name,
-                machineId: machine.id,
-                machineName: machine.name,
-                machineCount: machineMonthsNeeded,
-                workers: workersPerMachine,
-                electricityKw: machine.electricityKw || 0,
-                cycleDuration: cycleDurationSeconds,
-                cyclesNeeded: cyclesNeededPerMonth
-            });
-
-            // Update quantity for next step
-            currentQuantityPerMonth = requiredOutputPerMonth;
-        });
-
-        return {
-            totalWorkerMonths,
-            totalWaterPerDay,
-            totalProcessingTimeHours,
-            totalElectricityKw,
-            machines
-        };
-    }
-
-    /**
- * Find machine that can run a specific recipe
- */
-    static findMachineForRecipe(recipeId) {
-        const machines = ProductionCalculator.getMachinesForRecipe(recipeId);
-        return machines && machines.length > 0 ? machines[0] : null;
-    }
-
-
-    /**
-     * Get product by ID
-     */
-    static getProduct(productId) {
-        return ProductionCalculator.getProduct(productId);
-    }
-
-    /**
-     * ✅ Get cached chain metrics
-     * Used by optimization engine instead of calculating on-the-fly
-     */
-    static getChainMetrics(cropId, foodProductId) {
-        const cacheKey = `${cropId}_${foodProductId}`;
-
-        // ✅ Check if already cached
-        if (this.chainEfficiencyCache.has(cacheKey)) {
-            return this.chainEfficiencyCache.get(cacheKey);
-        }
-
-        // ✅ Not cached yet - build it now
-        const crop = this.crops.find(c => c.id === cropId);
-        if (!crop) return null;
-
-        const paths = this.getFoodsFromCrop(crop.output.productId);
-        const path = paths.find(p => p.finalFoodProductId === foodProductId);
-        if (!path) return null;
-
-        // Calculate baseline if needed
-        if (this.baselineFarmWorkerProductivity === 0) {
-            this.baselineFarmWorkerProductivity = this.calculateBaselineFarmProductivity();
-        }
-
-        // Calculate and cache this specific chain
-        const chainMetrics = this.calculateComprehensiveChainMetrics(crop, path, 100);
-        if (chainMetrics) {
-            this.chainEfficiencyCache.set(cacheKey, chainMetrics);
-        }
-
-        return chainMetrics;
-    }
-
-    /**
-     * ✅ Get all cached chains for a crop
-     * Returns all possible food outputs with their metrics
-     */
-    static getAllChainsForCrop(cropId) {
-        const crop = this.crops.find(c => c.id === cropId);
-        if (!crop) return [];
-
-        const paths = this.getFoodsFromCrop(crop.output.productId);
-
-        // Calculate baseline if needed
-        if (this.baselineFarmWorkerProductivity === 0) {
-            this.baselineFarmWorkerProductivity = this.calculateBaselineFarmProductivity();
-        }
-
-        // Build cache for all paths of this crop
-        const chains = [];
-        paths.forEach(path => {
-            const cacheKey = `${cropId}_${path.finalFoodProductId}`;
-
-            // Check cache first
-            if (this.chainEfficiencyCache.has(cacheKey)) {
-                chains.push(this.chainEfficiencyCache.get(cacheKey));
-            } else {
-                // Calculate and cache
-                const chainMetrics = this.calculateComprehensiveChainMetrics(crop, path, 100);
-                if (chainMetrics) {
-                    this.chainEfficiencyCache.set(cacheKey, chainMetrics);
-                    chains.push(chainMetrics);
-                }
-            }
-        });
-
-        return chains;
-    }
-
-    /**
-     * ✅ Get best chain for a crop based on optimization mode
-     * This is what the optimizer will use
-     */
-    static getBestChainForCrop(cropId, optimizationMode) {
-        const chains = this.getAllChainsForCrop(cropId);
-
-        if (chains.length === 0) return null;
-
-        // Sort by appropriate metric based on optimization mode
-        const sorted = [...chains].sort((a, b) => {
-            switch (optimizationMode) {
-                case 'minWater':
-                    return b.efficiencies.water - a.efficiencies.water;
-
-                case 'minWorkers':
-                    return b.efficiencies.workers - a.efficiencies.workers;
-
-                case 'minFertility':
-                    // For fertility, we want highest net people fed (to minimize farms needed)
-                    return b.netPeopleFed - a.netPeopleFed;
-
-                case 'maxVariety':
-                    // Prefer direct foods for variety
-                    if (a.isDirect !== b.isDirect) return a.isDirect ? -1 : 1;
-                    return b.netPeopleFed - a.netPeopleFed;
-
-                case 'balanced':
-                default:
-                    return b.efficiencies.overall - a.efficiencies.overall;
-            }
-        });
-
-        return sorted[0];
-    }
-
-    // ===== EXISTING METHODS (keep for backwards compatibility) =====
-
-    /**
-     * Find all possible food outputs from a crop (with processing chains)
-     */
-    static getFoodsFromCrop(cropProductId) {
-        const results = [];
-
-        // Check if crop output is directly edible
-        const directFood = this.foods.find(f => f.productId === cropProductId);
-        if (directFood) {
-            results.push({
-                cropProductId: cropProductId,
-                finalFoodProductId: directFood.productId,
-                conversionRatio: 1.0,
-                processingChain: [],
-                recipeChain: [],
-                isDirect: true
-            });
-        }
-
-        // Find all recipes that can process this crop into food
-        const processingPaths = this.traceToFood(cropProductId);
-        results.push(...processingPaths);
-
-        return results;
-    }
-
-    /**
-     * Trace a product to all possible food outputs through recipes
-     */
-    static traceToFood(startProductId, depth = 0, maxDepth = 5, visited = new Set()) {
-        if (depth > maxDepth || visited.has(startProductId)) {
-            return [];
-        }
-
-        visited.add(startProductId);
-        const results = [];
-
-        // Find all recipes that USE this product as input
-        const consumingRecipes = this.recipes.filter(recipe =>
-            recipe.inputs.some(input => input.productId === startProductId)
-        );
-
-        consumingRecipes.forEach(recipe => {
-            const inputData = recipe.inputs.find(input => input.productId === startProductId);
-
-            recipe.outputs.forEach(output => {
-                const outputProductId = output.productId;
-
-                // Is this output a food?
-                const isFood = this.foods.some(f => f.productId === outputProductId);
-
-                if (isFood) {
-                    // Found a food! Calculate conversion ratio
-                    const conversionRatio = output.quantity / inputData.quantity;
-
-                    results.push({
-                        cropProductId: startProductId,
-                        finalFoodProductId: outputProductId,
-                        conversionRatio: conversionRatio,
-                        processingChain: [{
-                            recipeId: recipe.id,
-                            recipeName: recipe.name,
-                            inputProductId: startProductId,
-                            outputProductId: outputProductId,
-                            inputQuantity: inputData.quantity,
-                            outputQuantity: output.quantity,
-                            inputRatio: 1.0
-                        }],
-                        recipeChain: [recipe.id],
-                        isDirect: false
-                    });
-                } else {
-                    // Not a food yet, continue tracing
-                    const deeperPaths = this.traceToFood(
-                        outputProductId,
-                        depth + 1,
-                        maxDepth,
-                        new Set(visited)
-                    );
-
-                    // Combine this step with deeper paths
-                    deeperPaths.forEach(deepPath => {
-                        const combinedRatio = (output.quantity / inputData.quantity) * deepPath.conversionRatio;
-
-                        results.push({
-                            cropProductId: startProductId,
-                            finalFoodProductId: deepPath.finalFoodProductId,
-                            conversionRatio: combinedRatio,
-                            processingChain: [
-                                {
-                                    recipeId: recipe.id,
-                                    recipeName: recipe.name,
-                                    inputProductId: startProductId,
-                                    outputProductId: outputProductId,
-                                    inputQuantity: inputData.quantity,
-                                    outputQuantity: output.quantity,
-                                    inputRatio: 1.0
-                                },
-                                ...deepPath.processingChain
-                            ],
-                            recipeChain: [recipe.id, ...deepPath.recipeChain],
-                            isDirect: false
-                        });
-                    });
-                }
-            });
-        });
-
-        return results;
-    }
-
-    /**
-     * Get all crops that can produce a specific food (reverse lookup)
+     * Find all crops that can ultimately produce a given food (directly or via processing)
+     * Returns: Array of { cropId, conversionRatio, processingChain }
      */
     static getCropsForFood(foodProductId) {
         const results = [];
 
-        this.crops.forEach(crop => {
-            const chains = this.getFoodsFromCrop(crop.output.productId);
-            const matchingChains = chains.filter(chain => chain.finalFoodProductId === foodProductId);
-
-            matchingChains.forEach(chain => {
-                results.push({
-                    cropId: crop.id,
-                    cropName: crop.name,
-                    ...chain
-                });
+        // Check direct crop → food (e.g., Corn → Corn food)
+        const directCrop = this.crops.find(c => c.output.productId === foodProductId);
+        if (directCrop) {
+            results.push({
+                cropId: directCrop.id,
+                conversionRatio: 1.0, // Direct 1:1
+                processingChain: [],
+                finalProductId: foodProductId
             });
+        }
+
+        // Check indirect via recipes (e.g., Wheat → Flour → Bread)
+        const indirectPaths = this.traceBackToFarmable(foodProductId);
+        results.push(...indirectPaths);
+
+        return results;
+    }
+
+
+
+    /**
+     * Recursively trace a product back to farmable crops
+     */
+    static traceBackToFarmable(targetProductId, depth = 0, maxDepth = 5, visitedProducts = new Set()) {
+        if (depth > maxDepth || visitedProducts.has(targetProductId)) {
+            return [];
+        }
+
+        visitedProducts.add(targetProductId);
+        const paths = [];
+
+        // Find all recipes that OUTPUT this product
+        const producingRecipes = this.recipes.filter(recipe =>
+            recipe.outputs.some(o => o.productId === targetProductId)
+        );
+
+        for (const recipe of producingRecipes) {
+            const targetOutput = recipe.outputs.find(o => o.productId === targetProductId);
+            const outputQuantity = targetOutput.quantity;
+
+            // Check each input to see if it's farmable or needs further tracing
+            for (const input of recipe.inputs) {
+                const inputProductId = input.productId;
+
+                // Is this input directly farmable?
+                const farmableCrop = this.crops.find(c => c.output.productId === inputProductId);
+
+                if (farmableCrop) {
+                    // Found a crop! Calculate conversion ratio
+                    // Example: 4 Wheat → 2 Flour, 2 Flour → 1 Bread
+                    // Ratio = (input.quantity / output.quantity) = how much crop per final product
+                    const conversionRatio = input.quantity / outputQuantity;
+
+                    paths.push({
+                        cropId: farmableCrop.id,
+                        conversionRatio: conversionRatio,
+                        processingChain: [{
+                            recipeId: recipe.id,
+                            recipeName: recipe.name,
+                            inputProductId: inputProductId,
+                            outputProductId: targetProductId,
+                            inputQuantity: input.quantity,
+                            outputQuantity: outputQuantity
+                        }],
+                        finalProductId: targetProductId
+                    });
+                } else {
+                    // Need to trace further back
+                    const deeperPaths = this.traceBackToFarmable(
+                        inputProductId,
+                        depth + 1,
+                        maxDepth,
+                        new Set(visitedProducts)
+                    );
+
+                    // Combine this step with deeper paths
+                    for (const deepPath of deeperPaths) {
+                        const combinedRatio = deepPath.conversionRatio * (input.quantity / outputQuantity);
+
+                        paths.push({
+                            cropId: deepPath.cropId,
+                            conversionRatio: combinedRatio,
+                            processingChain: [
+                                ...deepPath.processingChain,
+                                {
+                                    recipeId: recipe.id,
+                                    recipeName: recipe.name,
+                                    inputProductId: inputProductId,
+                                    outputProductId: targetProductId,
+                                    inputQuantity: input.quantity,
+                                    outputQuantity: outputQuantity
+                                }
+                            ],
+                            finalProductId: targetProductId
+                        });
+                    }
+                }
+            }
+        }
+
+        return paths;
+    }
+
+    /**
+     * Find all food products that can be made from a crop product (forward search)
+     * Example: Wheat → Flour → Bread
+     */
+    static getFoodsFromCrop(cropProductId) {
+        const results = [];
+        const visited = new Set();
+
+        // Check if crop output is directly a food
+        const directFood = this.foods.find(f => f.productId === cropProductId);
+        if (directFood) {
+            results.push({
+                finalFoodProductId: cropProductId,
+                processingChain: [],
+                conversionRatio: 1.0,
+                recipeChain: [],
+                isMultiInput: false,
+                requiresOtherInputs: false
+            });
+        }
+
+        // Trace forward through recipes to find foods
+        // Max depth is controlled by traceForwardToFood
+        const paths = this.traceForwardToFood(cropProductId, 1.0, [], 0, 5, visited);
+
+        // Remove duplicates
+        const uniquePaths = new Map();
+        paths.forEach(path => {
+            const key = `${path.finalFoodProductId}-${path.recipeChain.join('->')}`;
+            if (!uniquePaths.has(key)) {
+                uniquePaths.set(key, path);
+            }
         });
+
+        results.push(...Array.from(uniquePaths.values()));
+
+        console.log(`Found ${results.length} valid food paths for product ${cropProductId}:`,
+            results.map(r => {
+                const food = this.foods.find(f => f.productId === r.finalFoodProductId);
+                return food?.productId;
+            })
+        );
 
         return results;
     }
 
     /**
-     * ✅ Clear cache (for when data changes)
+     * Recursively trace forward from a product through recipes to find food
+     * SMART RULES: Only follow paths where intermediates lead to actual edible food
      */
-    static clearCache() {
-        this.chainEfficiencyCache.clear();
-        this.isInitialized = false;
-        console.log('🗑️ FoodChainResolver cache cleared');
+    static traceForwardToFood(currentProductId, currentRatio, chainSoFar, depth, maxDepth, visited, originalCropId = null) {
+        if (depth > maxDepth) return [];
+
+        if (originalCropId === null) {
+            originalCropId = currentProductId;
+        }
+
+        const visitKey = `${currentProductId}-${chainSoFar.map(c => c.recipeId).join('-')}`;
+        if (visited.has(visitKey)) return [];
+        visited.add(visitKey);
+
+        const results = [];
+
+        // Find all recipes that USE this product as INPUT
+        const consumingRecipes = this.recipes.filter(recipe =>
+            recipe.inputs.some(input => input.productId === currentProductId)
+        );
+
+        for (const recipe of consumingRecipes) {
+            if (chainSoFar.some(c => c.recipeId === recipe.id)) {
+                continue;
+            }
+
+            const ourInput = recipe.inputs.find(i => i.productId === currentProductId);
+            if (!ourInput) continue;
+
+            const inputQuantity = ourInput.quantity;
+
+            // Check all outputs of this recipe
+            for (const output of recipe.outputs) {
+                const outputProductId = output.productId;
+                const outputQuantity = output.quantity;
+
+                // Check if output is edible food
+                const isEdibleFood = this.foods.some(f => f.productId === outputProductId);
+
+                if (!isEdibleFood && depth > 0) {
+                    // Not food yet - check if this intermediate can lead to food
+                    const canLeadToFood = this.canProductLeadToFood(outputProductId);
+
+                    if (!canLeadToFood) {
+                        // This intermediate doesn't lead to any edible food, skip it
+                        continue;
+                    }
+
+                    // Max depth 2: Crop → Intermediate → Food (no deeper)
+                    if (depth >= 2) {
+                        continue;
+                    }
+                }
+
+                const stepRatio = inputQuantity / outputQuantity;
+                const totalRatio = currentRatio * stepRatio;
+
+                const newChain = [
+                    ...chainSoFar,
+                    {
+                        recipeId: recipe.id,
+                        recipeName: recipe.name,
+                        inputProductId: currentProductId,
+                        outputProductId: outputProductId,
+                        inputQuantity: inputQuantity,
+                        outputQuantity: outputQuantity,
+                        recipeInputCount: recipe.inputs.length,
+                        allInputs: recipe.inputs.map(i => ({
+                            productId: i.productId,
+                            productName: this.products?.find(p => p.id === i.productId)?.name,
+                            quantity: i.quantity
+                        }))
+                    }
+                ];
+
+                if (isEdibleFood) {
+                    // Found edible food!
+                    let contributionNote = '';
+                    if (recipe.inputs.length > 1) {
+                        const otherInputs = recipe.inputs.filter(i => i.productId !== currentProductId);
+                        contributionNote = `Also needs: ${otherInputs.map(i => {
+                            const p = this.products?.find(prod => prod.id === i.productId);
+                            return `${p?.name || i.productId}`;
+                        }).join(', ')}`;
+                    }
+
+                    results.push({
+                        finalFoodProductId: outputProductId,
+                        processingChain: newChain,
+                        conversionRatio: totalRatio,
+                        recipeChain: newChain.map(c => c.recipeId),
+                        isMultiInput: recipe.inputs.length > 1,
+                        contributionNote,
+                        requiresOtherInputs: recipe.inputs.length > 1
+                    });
+                } else {
+                    // Continue searching
+                    const deeperPaths = this.traceForwardToFood(
+                        outputProductId,
+                        totalRatio,
+                        newChain,
+                        depth + 1,
+                        maxDepth,
+                        new Set(visited),
+                        originalCropId
+                    );
+                    results.push(...deeperPaths);
+                }
+            }
+        }
+
+        return results;
+    }
+
+    /**
+ * Check if a product can be used in any recipe that produces edible food
+ * Uses actual game data to determine valid food intermediates
+ */
+    static canProductLeadToFood(productId) {
+        // Find all recipes that use this product as input
+        const recipesUsingProduct = this.recipes.filter(recipe =>
+            recipe.inputs.some(input => input.productId === productId)
+        );
+
+        // Check if any of these recipes directly produce edible food
+        for (const recipe of recipesUsingProduct) {
+            for (const output of recipe.outputs) {
+                const isEdibleFood = this.foods.some(f => f.productId === output.productId);
+                if (isEdibleFood) {
+                    return true; // This product is used to make food!
+                }
+            }
+        }
+
+        return false; // This product is NOT used in any food recipes
+    }
+
+    /**
+     * Get the "food value" of a crop (how many people it can feed per unit produced)
+     * Accounts for processing chains
+     */
+    static getCropFoodValue(crop, foodConsumptionMult = 1.0) {
+        const cropOutputProductId = crop.output.productId;
+
+        // Check if crop output is directly a food
+        const directFood = this.foods.find(f => f.productId === cropOutputProductId);
+        if (directFood) {
+            return this.calculateFoodValue(directFood, 1.0, foodConsumptionMult);
+        }
+
+        // Find all foods this crop can produce (via processing)
+        let bestValue = 0;
+
+        for (const food of this.foods) {
+            const paths = this.getCropsForFood(food.productId);
+            const relevantPath = paths.find(p => p.cropId === crop.id);
+
+            if (relevantPath) {
+                // Calculate: crop units → final food units → people fed
+                const foodUnitsPerCropUnit = 1 / relevantPath.conversionRatio;
+                const value = this.calculateFoodValue(food, foodUnitsPerCropUnit, foodConsumptionMult);
+
+                if (value > bestValue) {
+                    bestValue = value;
+                }
+            }
+        }
+
+        return bestValue;
+    }
+
+    /**
+ * Get all food-related recipes (recipes that eventually produce food)
+ * @returns {Array} Array of recipe objects that lead to food production
+ */
+    static getAllFoodRecipes() {
+        const foodRecipes = new Set();
+
+        // Get all recipes
+        const allRecipes = ProductionCalculator.recipes || [];
+
+        // Check each recipe's outputs
+        allRecipes.forEach(recipe => {
+            // Check if any output leads to food
+            const leadsToFood = recipe.outputs.some(output => {
+                // Direct food check
+                if (ProductionCalculator.foods?.some(f => f.productId === output.productId)) {
+                    return true;
+                }
+
+                // Check if it's used in food chains
+                const paths = this.getFoodsFromCrop(output.productId);
+                return paths.length > 0;
+            });
+
+            if (leadsToFood) {
+                foodRecipes.add(recipe.id);
+            }
+        });
+
+        return Array.from(foodRecipes).map(id => ProductionCalculator.getRecipe(id)).filter(r => r !== null);
+    }
+
+    /**
+     * Group food recipes by their output product
+     * Useful for filtering UI
+     * @returns {Object} Map of productId to array of recipes
+     */
+    static getFoodRecipesByOutput() {
+        const foodRecipes = this.getAllFoodRecipes();
+        const grouped = {};
+
+        foodRecipes.forEach(recipe => {
+            recipe.outputs.forEach(output => {
+                if (!grouped[output.productId]) {
+                    grouped[output.productId] = [];
+                }
+                grouped[output.productId].push(recipe);
+            });
+        });
+
+        return grouped;
+    }
+
+    /**
+     * Calculate people fed from food units
+     */
+    static calculateFoodValue(food, unitsAvailable, foodConsumptionMult) {
+        const consumptionPer100 = food.consumedPerHundredPopsPerMonth * foodConsumptionMult;
+        if (consumptionPer100 <= 0) return 0;
+
+        return (unitsAvailable / consumptionPer100) * 100;
     }
 }
