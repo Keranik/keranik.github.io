@@ -1,15 +1,18 @@
-// src/pages/FarmOptimizer.jsx - COMPLETE FIXED VERSION
-
-import { useEffect, useState, useCallback } from 'react';
+// src/pages/FarmOptimizer.jsx - CLEAN ORCHESTRATOR VERSION
+import { useEffect, useState, useRef } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
-import { FarmOptimizer } from '../utils/FarmOptimizer';
 import { FoodChainResolver } from '../utils/FoodChainResolver';
 import { FertilizerCalculator } from '../utils/FertilizerCalculator';
-import { RainwaterEstimator } from '../utils/RainwaterEstimator';
 import { getGeneralIcon } from '../utils/AssetHelper';
+import LoadingOverlay from '../components/LoadingOverlay';
 
+// Import calculation engines
+import { FarmCalculationEngine } from '../utils/FarmCalculationEngine';
+import { FarmStateManager } from '../utils/FarmStateManager';
+
+// Import UI components
 import {
     OptimizationModeSelector,
     ConstraintsPanel,
@@ -23,26 +26,24 @@ import {
 
 const FarmOptimizerPage = () => {
     const { settings, getResearchValue } = useSettings();
-    const [dataLoaded, setDataLoaded] = useState(false);
 
+    // ===== Core State =====
+    const [dataLoaded, setDataLoaded] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [isCalculating, setIsCalculating] = useState(false);
+    const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
+    const [results, setResults] = useState(null);
+
+    // ===== Configuration State =====
     const [research, setResearch] = useState({
         cropYield: 0,
         waterReduction: 0,
         rainYield: 0
     });
 
-    const [farms, setFarms] = useState([
-        {
-            id: 1,
-            farmId: 'FarmT1',
-            rotation: [null, null, null, null],
-            selectedFertilizerId: null,
-            customFertility: null
-        }
-    ]);
-
     const [optimizationMode, setOptimizationMode] = useState('manual');
     const [optimizationGoal, setOptimizationGoal] = useState('minWater');
+    const [targetPopulationEnabled, setTargetPopulationEnabled] = useState(true);
 
     const [constraints, setConstraints] = useState({
         targetPopulation: 1000,
@@ -57,15 +58,24 @@ const FarmOptimizerPage = () => {
         naturalFertilityOnly: false
     });
 
-    const [targetPopulationEnabled, setTargetPopulationEnabled] = useState(true);
-    const [selectedProcessingRecipes, setSelectedProcessingRecipes] = useState(new Map());
+    // ===== Farm State =====
+    const [farms, setFarms] = useState([
+        {
+            id: 1,
+            farmId: 'FarmT1',
+            rotation: [null, null, null, null],
+            selectedFertilizerId: null,
+            customFertility: null
+        }
+    ]);
 
+    // ===== UI State =====
+    const [selectedProcessingRecipes, setSelectedProcessingRecipes] = useState(new Map());
     const [cropModal, setCropModal] = useState({
         open: false,
         farmIndex: null,
         slotIndex: null
     });
-
     const [recipeSelectionModal, setRecipeSelectionModal] = useState({
         open: false,
         productId: null,
@@ -73,79 +83,92 @@ const FarmOptimizerPage = () => {
         availableRecipes: []
     });
 
-    const [results, setResults] = useState(null);
-    const [loading, setLoading] = useState(false);
+    // ===== Refs for State Management =====
+    const pendingRecalculation = useRef(false);
+    const userTriggeredCalculation = useRef(false);  // ✅ NEW: Track if user clicked Calculate
+    const loadingTimerRef = useRef(null);
 
+    // ===== Data Loading =====
     useEffect(() => {
         document.title = 'Farm Optimizer - Captain of Industry Tools';
-
-        const loadData = async () => {
-            try {
-                const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
-                const gameData = await DataLoader.loadGameData(enabledMods);
-
-                ProductionCalculator.initialize(gameData);
-                FoodChainResolver.initialize(
-                    ProductionCalculator.recipes || [],
-                    ProductionCalculator.foods || [],
-                    ProductionCalculator.crops || []
-                );
-
-                const foodCropIds = new Set();
-                ProductionCalculator.crops?.forEach(crop => {
-                    const isDirectFood = ProductionCalculator.foods?.some(f => f.productId === crop.output.productId);
-                    if (isDirectFood) {
-                        foodCropIds.add(crop.id);
-                    }
-                });
-
-                ProductionCalculator.crops?.forEach(crop => {
-                    const isUsedInRecipes = ProductionCalculator.recipes?.some(recipe =>
-                        recipe.inputs.some(input => input.productId === crop.output.productId)
-                    );
-                    if (isUsedInRecipes) {
-                        const outputProducts = new Set([crop.output.productId]);
-                        const visited = new Set();
-                        let foundFood = false;
-
-                        for (let depth = 0; depth < 3 && !foundFood; depth++) {
-                            const newProducts = new Set();
-                            outputProducts.forEach(productId => {
-                                if (visited.has(productId)) return;
-                                visited.add(productId);
-
-                                if (ProductionCalculator.foods?.some(f => f.productId === productId)) {
-                                    foundFood = true;
-                                    return;
-                                }
-
-                                ProductionCalculator.recipes?.forEach(recipe => {
-                                    if (recipe.inputs.some(input => input.productId === productId)) {
-                                        recipe.outputs.forEach(output => newProducts.add(output.productId));
-                                    }
-                                });
-                            });
-
-                            newProducts.forEach(p => outputProducts.add(p));
-                        }
-
-                        if (foundFood) {
-                            foodCropIds.add(crop.id);
-                        }
-                    }
-                });
-
-                ProductionCalculator.foodCropIds = foodCropIds;
-                setDataLoaded(true);
-            } catch (error) {
-                console.error('Error loading farm data:', error);
-                alert('Failed to load farm data: ' + error.message);
-            }
-        };
-
-        loadData();
+        loadGameData();
     }, [settings.enableModdedContent, settings.enabledMods]);
 
+    const loadGameData = async () => {
+        try {
+            const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
+            const gameData = await DataLoader.loadGameData(enabledMods);
+
+            ProductionCalculator.initialize(gameData);
+            FoodChainResolver.initialize(
+                ProductionCalculator.recipes || [],
+                ProductionCalculator.foods || [],
+                ProductionCalculator.crops || []
+            );
+
+            // Initialize food crop identification
+            initializeFoodCrops();
+
+            setDataLoaded(true);
+        } catch (error) {
+            console.error('Error loading farm data:', error);
+            alert('Failed to load farm data: ' + error.message);
+        }
+    };
+
+    const initializeFoodCrops = () => {
+        const foodCropIds = new Set();
+
+        // Direct food crops
+        ProductionCalculator.crops?.forEach(crop => {
+            const isDirectFood = ProductionCalculator.foods?.some(f => f.productId === crop.output.productId);
+            if (isDirectFood) {
+                foodCropIds.add(crop.id);
+            }
+        });
+
+        // Crops that can be processed into food
+        ProductionCalculator.crops?.forEach(crop => {
+            const isUsedInRecipes = ProductionCalculator.recipes?.some(recipe =>
+                recipe.inputs.some(input => input.productId === crop.output.productId)
+            );
+
+            if (isUsedInRecipes) {
+                const outputProducts = new Set([crop.output.productId]);
+                const visited = new Set();
+                let foundFood = false;
+
+                for (let depth = 0; depth < 3 && !foundFood; depth++) {
+                    const newProducts = new Set();
+                    outputProducts.forEach(productId => {
+                        if (visited.has(productId)) return;
+                        visited.add(productId);
+
+                        if (ProductionCalculator.foods?.some(f => f.productId === productId)) {
+                            foundFood = true;
+                            return;
+                        }
+
+                        ProductionCalculator.recipes?.forEach(recipe => {
+                            if (recipe.inputs.some(input => input.productId === productId)) {
+                                recipe.outputs.forEach(output => newProducts.add(output.productId));
+                            }
+                        });
+                    });
+
+                    newProducts.forEach(p => outputProducts.add(p));
+                }
+
+                if (foundFood) {
+                    foodCropIds.add(crop.id);
+                }
+            }
+        });
+
+        ProductionCalculator.foodCropIds = foodCropIds;
+    };
+
+    // ===== Research Updates =====
     useEffect(() => {
         setResearch({
             cropYield: getResearchValue('FarmYieldMultiplier') || 0,
@@ -155,35 +178,286 @@ const FarmOptimizerPage = () => {
     }, [settings.research, getResearchValue]);
 
     useEffect(() => {
+        if (pendingRecalculation.current && !loading && dataLoaded && results) {
+            console.log('🔄 Pending recalculation detected, executing now...');
+            pendingRecalculation.current = false;
+            performCalculation(false);  // ✅ Auto-triggered (fertilizer apply)
+        }
+    }, [farms, loading, dataLoaded, results]);
+
+    // Around line 161, update naturalFertilityOnly useEffect
+    useEffect(() => {
         if (results && !loading && dataLoaded) {
             console.log('naturalFertilityOnly changed, triggering recalculation');
-            const timer = setTimeout(() => {
-                performCalculation();
-            }, 300);
+            const timer = setTimeout(() => performCalculation(false), 300);  // ✅ Auto-triggered
             return () => clearTimeout(timer);
         }
-    }, [constraints.naturalFertilityOnly, loading, dataLoaded]);
+    }, [constraints.naturalFertilityOnly]);
 
-    useEffect(() => {
-        if (results && farms.length > 0 && !loading && dataLoaded) {
-            console.log('Farms state changed, triggering recalculation');
-            const timer = setTimeout(() => {
-                performCalculation();
-            }, 100);
-            return () => clearTimeout(timer);
-        }
-    }, [farms, loading, dataLoaded]);
-
+    // Around line 170, update allowedFertilizers useEffect
     useEffect(() => {
         if (results && !loading && dataLoaded) {
             console.log('allowedFertilizers changed, triggering recalculation');
-            const timer = setTimeout(() => {
-                performCalculation();
-            }, 300);
+            const timer = setTimeout(() => performCalculation(false), 300);  // ✅ Auto-triggered
             return () => clearTimeout(timer);
         }
-    }, [constraints.allowedFertilizers, loading, dataLoaded]);
+    }, [constraints.allowedFertilizers]);
 
+    // ===== Calculation =====
+    // ===== Calculation =====
+    const performCalculation = (userTriggered = false) => {
+        console.log('=== FarmOptimizerPage: Starting calculation ===', { userTriggered });
+        setLoading(true);
+        setIsCalculating(true);
+
+        // ✅ Only show loading overlay if calculation takes > 200ms
+        loadingTimerRef.current = setTimeout(() => {
+            if (isCalculating) {
+                setShowLoadingOverlay(true);
+            }
+        }, 350);
+
+        // Wrap in setTimeout like Calculator.jsx does
+        setTimeout(() => {
+            try {
+                // ✅ Determine which farms to calculate
+                let farmsToCalculate;
+
+                if (optimizationMode === 'manual') {
+                    // Manual mode: Always use existing farms
+                    farmsToCalculate = farms;
+                } else {
+                    // Auto mode logic
+                    if (userTriggered) {
+                        // User clicked Calculate button - regenerate optimized farms
+                        farmsToCalculate = generateOptimizedFarms();
+                        console.log('Auto mode: User-triggered - Generating new optimized farms');
+                    } else {
+                        // Auto-triggered (fertilizer apply) - use existing farms
+                        farmsToCalculate = farms;
+                        console.log('Auto mode: Auto-triggered - Using existing farms with user changes');
+                    }
+                }
+
+                // Use the calculation engine
+                const calculationResults = FarmCalculationEngine.calculate({
+                    farms: farmsToCalculate,
+                    optimizationMode,
+                    constraints,
+                    research,
+                    selectedProcessingRecipes,
+                    foodConsumptionMultiplier: settings.foodConsumptionMultiplier || 1.0
+                });
+
+                // Update farm state with any auto-applied fertilizer
+                if (optimizationMode === 'manual') {
+                    const updatedFarms = FarmStateManager.updateFarmsWithCalculationResults(
+                        farmsToCalculate,
+                        calculationResults.farms
+                    );
+
+                    if (FarmStateManager.hasChanges(farms, updatedFarms)) {
+                        console.log('✅ Manual mode: Updating farms state with calculation results');
+                        setFarms(updatedFarms);
+                    }
+                } else {
+                    // In auto mode, also update farms state with calculation results
+                    const updatedFarms = FarmStateManager.updateFarmsWithCalculationResults(
+                        farmsToCalculate,
+                        calculationResults.farms
+                    );
+
+                    if (FarmStateManager.hasChanges(farms, updatedFarms)) {
+                        console.log('✅ Auto mode: Updating farms state with calculation results');
+                        setFarms(updatedFarms);
+                    }
+                }
+
+                setResults(calculationResults);
+                console.log('=== FarmOptimizerPage: Calculation complete ===');
+            } catch (error) {
+                console.error('Optimization error:', error);
+                alert('Error during optimization: ' + error.message);
+            } finally {
+                // ✅ Clear the timer if calculation finished before 200ms
+                if (loadingTimerRef.current) {
+                    clearTimeout(loadingTimerRef.current);
+                    loadingTimerRef.current = null;
+                }
+
+                setLoading(false);
+                setIsCalculating(false);
+                setShowLoadingOverlay(false);  // ✅ Hide overlay immediately when done
+            }
+        }, 10);
+    };
+
+    const generateOptimizedFarms = () => {
+        const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
+        const availableFoodCrops = (ProductionCalculator.crops || []).filter(crop =>
+            ProductionCalculator.foodCropIds?.has(crop.id) ?? false
+        );
+
+        const targetPop = constraints.targetPopulation;
+        const avgPeoplePerFarm = 400;
+        const estimatedFarms = Math.ceil(targetPop / avgPeoplePerFarm);
+        const farmCount = constraints.maxFarms
+            ? Math.min(estimatedFarms, constraints.maxFarms)
+            : estimatedFarms;
+
+        const optimizedFarms = [];
+        for (let i = 0; i < farmCount; i++) {
+            const farmType = constraints.allowedFarmTypes.length > 0
+                ? constraints.allowedFarmTypes[0]
+                : availableFarms[0]?.id || 'FarmT1';
+
+            const efficientCrops = availableFoodCrops.slice(0, 2).map(c => c.id);
+            const rotation = [...efficientCrops, null, null];
+
+            optimizedFarms.push({
+                id: Date.now() + i,
+                farmId: farmType,
+                rotation,
+                selectedFertilizerId: null,
+                customFertility: null
+            });
+        }
+
+        return optimizedFarms;
+    };
+
+    // ===== User Actions - Calculation =====
+    const handleCalculate = () => {
+        performCalculation(true);  // ✅ User-triggered (Calculate button)
+    };
+
+    // ===== User Actions - Farm Management =====
+    const addFarm = () => {
+        const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
+        const lastFarmType = farms.length > 0
+            ? farms[farms.length - 1].farmId
+            : (availableFarms[0]?.id || 'FarmT1');
+
+        setFarms([...farms, {
+            id: Date.now(),
+            farmId: lastFarmType,
+            rotation: [null, null, null, null],
+            selectedFertilizerId: null,
+            customFertility: null
+        }]);
+    };
+
+    const removeFarm = (id) => {
+        setFarms(farms.filter(f => f.id !== id));
+    };
+
+    const updateFarmType = (id, farmId) => {
+        setFarms(farms.map(f => f.id === id ? { ...f, farmId } : f));
+    };
+
+    // ===== User Actions - Crop Selection =====
+    const openCropModal = (farmIndex, slotIndex) => {
+        setCropModal({ open: true, farmIndex, slotIndex });
+    };
+
+    const selectCrop = (cropId) => {
+        const { farmIndex, slotIndex } = cropModal;
+        setFarms(farms.map((farm, idx) => {
+            if (idx === farmIndex) {
+                const newRotation = [...farm.rotation];
+                newRotation[slotIndex] = cropId;
+                return { ...farm, rotation: newRotation };
+            }
+            return farm;
+        }));
+        setCropModal({ open: false, farmIndex: null, slotIndex: null });
+    };
+
+    // ===== User Actions - Recipe Selection =====
+    const openRecipeSelectionModal = (productId) => {
+        const product = ProductionCalculator.getProduct(productId);
+        const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
+
+        if (foodPaths.length === 0) {
+            alert(`No food recipes found for ${product?.name}. This crop cannot be processed into food.`);
+            return;
+        }
+
+        const uniqueRecipeChains = new Map();
+        foodPaths.forEach(path => {
+            if (path.processingChain.length === 0) return;
+
+            const chainKey = path.recipeChain.join('->');
+            if (!uniqueRecipeChains.has(chainKey)) {
+                const recipe = ProductionCalculator.getRecipe(path.processingChain[0].recipeId);
+                if (recipe) {
+                    uniqueRecipeChains.set(chainKey, {
+                        ...recipe,
+                        finalFoodProductId: path.finalFoodProductId,
+                        fullChain: path.processingChain,
+                        conversionRatio: path.conversionRatio
+                    });
+                }
+            }
+        });
+
+        const recipes = Array.from(uniqueRecipeChains.values());
+
+        if (recipes.length === 0) {
+            alert(`${product?.name} is directly edible, no processing needed!`);
+            return;
+        }
+
+        setRecipeSelectionModal({
+            open: true,
+            productId,
+            productName: product?.name,
+            availableRecipes: recipes
+        });
+    };
+
+    const selectProcessingRecipe = (productId, recipeId) => {
+        setSelectedProcessingRecipes(prev => {
+            const newMap = new Map(prev);
+            newMap.set(productId, recipeId);
+            return newMap;
+        });
+        setRecipeSelectionModal({
+            open: false,
+            productId: null,
+            productName: null,
+            availableRecipes: []
+        });
+    };
+
+    // ===== User Actions - Fertilizer Management =====
+    const handleFertilizerSelect = (farmIndex, fertilizerId) => {
+        console.log('FarmOptimizerPage: handleFertilizerSelect', { farmIndex, fertilizerId });
+        pendingRecalculation.current = true;
+
+        setFarms(prevFarms => {
+            const newFarms = prevFarms.map((farm, idx) =>
+                idx === farmIndex ? { ...farm, selectedFertilizerId: fertilizerId } : farm
+            );
+            console.log('Updated farms after fertilizer select:', newFarms);
+            return newFarms;
+        });
+    };
+
+    const handleCustomFertilityChange = (farmId, newFertility) => {
+        console.log('FarmOptimizerPage: handleCustomFertilityChange', { farmId, newFertility });
+        pendingRecalculation.current = true;
+
+        setFarms(prevFarms => {
+            const newFarms = prevFarms.map(farm =>
+                farm.id === farmId ? { ...farm, customFertility: newFertility } : farm
+            );
+            console.log('Updated farms after fertility change:', newFarms);
+            return newFarms;
+        });
+    };
+
+    // ===== Loading State =====
     if (!dataLoaded) {
         return (
             <div style={{
@@ -220,590 +494,24 @@ const FarmOptimizerPage = () => {
         );
     }
 
+    // ===== Prepare data for UI =====
     const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
     const availableCrops = ProductionCalculator.crops || [];
-    const availableFoodCrops = availableCrops.filter(crop =>
-        ProductionCalculator.foodCropIds?.has(crop.id) ?? false
-    );
-
-    const runOptimization = () => {
-        const targetPop = constraints.targetPopulation;
-        const avgPeoplePerFarm = 400;
-        const estimatedFarms = Math.ceil(targetPop / avgPeoplePerFarm);
-        const farmCount = constraints.maxFarms ? Math.min(estimatedFarms, constraints.maxFarms) : estimatedFarms;
-
-        const optimizedFarms = [];
-        for (let i = 0; i < farmCount; i++) {
-            const farmType = constraints.allowedFarmTypes.length > 0
-                ? constraints.allowedFarmTypes[0]
-                : availableFarms[0]?.id || 'FarmT1';
-
-            const rotation = optimizeRotationForGoal(optimizationGoal);
-
-            optimizedFarms.push({
-                id: Date.now() + i,
-                farmId: farmType,
-                rotation,
-                selectedFertilizerId: null,
-                customFertility: null
-            });
-        }
-
-        return optimizedFarms;
-    };
-
-    const optimizeRotationForGoal = (goal) => {
-        const efficientCrops = availableFoodCrops.slice(0, 2).map(c => c.id);
-        return [...efficientCrops, null, null];
-    };
-
-    const performCalculation = () => {
-        console.log('=== STARTING CALCULATION ===');
-        setLoading(true);
-
-        try {
-            let farmsToCalculate = [];
-
-            if (optimizationMode === 'manual') {
-                farmsToCalculate = farms;
-            } else {
-                farmsToCalculate = runOptimization();
-            }
-
-            const detailedResults = farmsToCalculate.map((farm, farmIdx) => {
-                const farmProto = availableFarms.find(f => f.id === farm.farmId);
-                if (!farmProto) {
-                    throw new Error(`Farm ${farm.farmId} not found`);
-                }
-
-                const effectiveFarm = FarmOptimizer.calculateEffectiveFarmStats(
-                    farm,
-                    [],
-                    research
-                );
-
-                const rotation = farm.rotation || [null, null, null, null];
-
-                const fertilityInfo = FarmOptimizer.calculateFertilityEquilibrium(
-                    rotation,
-                    effectiveFarm
-                );
-
-                let actualFertility;
-                if (constraints.naturalFertilityOnly) {
-                    actualFertility = fertilityInfo.naturalEquilibrium;
-                } else if (farm.customFertility !== null && farm.customFertility !== undefined) {
-                    actualFertility = farm.customFertility;
-                } else {
-                    actualFertility = fertilityInfo.naturalEquilibrium;
-                }
-
-                const slotDetails = rotation.map(cropId => {
-                    if (!cropId) return null;
-
-                    const crop = availableCrops.find(c => c.id === cropId);
-                    if (!crop) return null;
-
-                    const productionPerMonth = FarmOptimizer.calculateCropYield(crop, effectiveFarm, actualFertility);
-                    const waterPerDay = FarmOptimizer.calculateWaterPerDay(crop, effectiveFarm);
-
-                    return {
-                        cropId,
-                        cropName: crop.name,
-                        productionPerMonth,
-                        waterPerDay,
-                        productId: crop.output.productId,
-                        growthDays: crop.growthDays
-                    };
-                }).filter(s => s !== null);
-
-                const totalRotationDays = slotDetails.reduce((sum, s) => sum + s.growthDays, 0);
-                const production = {};
-                let totalFarmWaterPerDay = 0;
-
-                slotDetails.forEach(slot => {
-                    const weight = totalRotationDays > 0 ? slot.growthDays / totalRotationDays : 0;
-                    const avgProductionPerMonth = slot.productionPerMonth * weight;
-                    production[slot.productId] = (production[slot.productId] || 0) + avgProductionPerMonth;
-                    totalFarmWaterPerDay += slot.waterPerDay * weight;
-                });
-
-                const totalRotationMonths = totalRotationDays / 30;
-
-                const allowedIntermediatesForCalc = constraints.allowedIntermediates;
-                const allowedRecipesForCalc = constraints.allowedRecipes;
-
-                let foodResult;
-                if (optimizationMode === 'manual') {
-                    foodResult = FarmOptimizer.calculatePeopleFedManual(
-                        production,
-                        Object.fromEntries(selectedProcessingRecipes),
-                        totalFarmWaterPerDay,
-                        settings.foodConsumptionMultiplier || 1.0,
-                        allowedRecipesForCalc
-                    );
-                } else {
-                    foodResult = FarmOptimizer.calculatePeopleFedWithChains(
-                        production,
-                        totalFarmWaterPerDay,
-                        settings.foodConsumptionMultiplier || 1.0,
-                        allowedIntermediatesForCalc,
-                        allowedRecipesForCalc
-                    );
-                }
-
-                const slotsWithPeopleFed = slotDetails.map(slot => {
-                    const weight = totalRotationDays > 0 ? slot.growthDays / totalRotationDays : 0;
-                    const weightedProduction = slot.productionPerMonth * weight;
-                    const slotProduction = { [slot.productId]: weightedProduction };
-
-                    let slotFoodResult;
-                    if (optimizationMode === 'manual') {
-                        slotFoodResult = FarmOptimizer.calculatePeopleFedManual(
-                            slotProduction,
-                            Object.fromEntries(selectedProcessingRecipes),
-                            0,
-                            settings.foodConsumptionMultiplier || 1.0,
-                            allowedRecipesForCalc
-                        );
-                    } else {
-                        slotFoodResult = FarmOptimizer.calculatePeopleFedWithChains(
-                            slotProduction,
-                            0,
-                            settings.foodConsumptionMultiplier || 1.0,
-                            allowedIntermediatesForCalc,
-                            allowedRecipesForCalc
-                        );
-                    }
-
-                    return {
-                        ...slot,
-                        peopleFed: slotFoodResult.peopleFed,
-                        processingChain: slotFoodResult.processingChains[0] || null,
-                        weight: weight,
-                        weightedProduction: weightedProduction
-                    };
-                });
-
-                let bestFertilizerOption = null;
-                let autoAppliedFertilizer = false;
-
-                if (!constraints.naturalFertilityOnly && constraints.allowedFertilizers.length > 0) {
-                    const baseYieldAtNatural = foodResult.peopleFed / (actualFertility / fertilityInfo.naturalEquilibrium);
-
-                    // ✅ ALWAYS calculate best option (for recommendation in UI)
-                    bestFertilizerOption = FertilizerCalculator.findOptimalFertilizer(
-                        fertilityInfo.naturalEquilibrium,
-                        baseYieldAtNatural,
-                        constraints.allowedFertilizers
-                    );
-
-                    // ✅ FIXED: Only auto-apply on FIRST calculation OR if explicitly requested
-                    // Check if this is the first time we're calculating (no fertilizer set at all)
-                    const isFirstCalculation = farm.selectedFertilizerId === null && farm.customFertility === null;
-
-                    // ✅ In manual mode: Only auto-apply on first calculation
-                    // ✅ In auto mode: Always apply best (optimization mode should optimize!)
-                    const shouldAutoApply = optimizationMode === 'manual'
-                        ? isFirstCalculation
-                        : true; // In auto mode, always optimize
-
-                    if (bestFertilizerOption &&
-                        bestFertilizerOption.netPeopleFed > 0 &&
-                        shouldAutoApply) {
-
-                        console.log(`✅ Auto-applying best fertilizer to farm ${farmIdx + 1}:`, {
-                            fertilizer: bestFertilizerOption.fertilizerId,
-                            targetFertility: bestFertilizerOption.targetFertility,
-                            netBenefit: bestFertilizerOption.netPeopleFed,
-                            mode: optimizationMode
-                        });
-
-                        farm.selectedFertilizerId = bestFertilizerOption.fertilizerId;
-                        farm.customFertility = bestFertilizerOption.targetFertility;
-                        actualFertility = bestFertilizerOption.targetFertility;
-                        autoAppliedFertilizer = true;
-
-                        const updatedSlotDetails = rotation.map(cropId => {
-                            if (!cropId) return null;
-                            const crop = availableCrops.find(c => c.id === cropId);
-                            if (!crop) return null;
-                            const productionPerMonth = FarmOptimizer.calculateCropYield(crop, effectiveFarm, actualFertility);
-                            const waterPerDay = FarmOptimizer.calculateWaterPerDay(crop, effectiveFarm);
-                            return {
-                                cropId,
-                                cropName: crop.name,
-                                productionPerMonth,
-                                waterPerDay,
-                                productId: crop.output.productId,
-                                growthDays: crop.growthDays
-                            };
-                        }).filter(s => s !== null);
-
-                        const updatedProduction = {};
-                        let updatedFarmWaterPerDay = 0;
-                        updatedSlotDetails.forEach(slot => {
-                            const weight = totalRotationDays > 0 ? slot.growthDays / totalRotationDays : 0;
-                            const avgProductionPerMonth = slot.productionPerMonth * weight;
-                            updatedProduction[slot.productId] = (updatedProduction[slot.productId] || 0) + avgProductionPerMonth;
-                            updatedFarmWaterPerDay += slot.waterPerDay * weight;
-                        });
-
-                        Object.assign(production, updatedProduction);
-                        totalFarmWaterPerDay = updatedFarmWaterPerDay;
-
-                        if (optimizationMode === 'manual') {
-                            foodResult = FarmOptimizer.calculatePeopleFedManual(
-                                production,
-                                Object.fromEntries(selectedProcessingRecipes),
-                                totalFarmWaterPerDay,
-                                settings.foodConsumptionMultiplier || 1.0,
-                                allowedRecipesForCalc
-                            );
-                        } else {
-                            foodResult = FarmOptimizer.calculatePeopleFedWithChains(
-                                production,
-                                totalFarmWaterPerDay,
-                                settings.foodConsumptionMultiplier || 1.0,
-                                allowedIntermediatesForCalc,
-                                allowedRecipesForCalc
-                            );
-                        }
-
-                        slotDetails.length = 0;
-                        slotDetails.push(...updatedSlotDetails);
-
-                        slotsWithPeopleFed.length = 0;
-                        slotsWithPeopleFed.push(...updatedSlotDetails.map(slot => {
-                            const weight = totalRotationDays > 0 ? slot.growthDays / totalRotationDays : 0;
-                            const weightedProduction = slot.productionPerMonth * weight;
-                            const slotProduction = { [slot.productId]: weightedProduction };
-                            let slotFoodResult;
-                            if (optimizationMode === 'manual') {
-                                slotFoodResult = FarmOptimizer.calculatePeopleFedManual(
-                                    slotProduction,
-                                    Object.fromEntries(selectedProcessingRecipes),
-                                    0,
-                                    settings.foodConsumptionMultiplier || 1.0,
-                                    allowedRecipesForCalc
-                                );
-                            } else {
-                                slotFoodResult = FarmOptimizer.calculatePeopleFedWithChains(
-                                    slotProduction,
-                                    0,
-                                    settings.foodConsumptionMultiplier || 1.0,
-                                    allowedIntermediatesForCalc,
-                                    allowedRecipesForCalc
-                                );
-                            }
-                            return {
-                                ...slot,
-                                peopleFed: slotFoodResult.peopleFed,
-                                processingChain: slotFoodResult.processingChains[0] || null,
-                                weight: weight,
-                                weightedProduction: weightedProduction
-                            };
-                        }));
-                    } else if (!shouldAutoApply) {
-                        console.log(`ℹ️ Farm ${farmIdx + 1} has manual fertilizer settings in manual mode, preserving user choice`);
-                        autoAppliedFertilizer = false;
-                    }
-                }
-
-                const usingFertilizer = !constraints.naturalFertilityOnly &&
-                    actualFertility > fertilityInfo.naturalEquilibrium &&
-                    farm.selectedFertilizerId !== null;
-
-                return {
-                    farm,
-                    effectiveFarm,
-                    rotation,
-                    production,
-                    fertilityInfo,
-                    actualFertility,
-                    usingFertilizer,
-                    peopleFed: foodResult.peopleFed,
-                    totalWaterPerDay: foodResult.totalWaterPerDay,
-                    farmWaterPerDay: totalFarmWaterPerDay,
-                    processingWaterPerDay: foodResult.totalProcessingWater,
-                    totalRotationMonths,
-                    processingChains: foodResult.processingChains,
-                    foodCategories: foodResult.foodCategories,
-                    slotDetails: slotsWithPeopleFed,
-                    bestFertilizerOption, // ✅ Always pass this for "Use Best" button
-                    autoAppliedFertilizer
-                };
-            });
-
-            if (optimizationMode === 'manual') {
-                const updatedFarms = farmsToCalculate.map((farm, idx) => ({
-                    ...farm,
-                    selectedFertilizerId: detailedResults[idx].farm.selectedFertilizerId,
-                    customFertility: detailedResults[idx].farm.customFertility
-                }));
-
-                const hasChanges = updatedFarms.some((farm, idx) =>
-                    farm.selectedFertilizerId !== farms[idx]?.selectedFertilizerId ||
-                    farm.customFertility !== farms[idx]?.customFertility
-                );
-
-                if (hasChanges) {
-                    console.log('✅ Updating farms state with fertilizer changes');
-                    setFarms(updatedFarms);
-                }
-            }
-
-            // Rest of the aggregation code stays the same...
-            const totalPeopleFed = detailedResults.reduce((sum, r) => sum + r.peopleFed, 0);
-            const totalWaterPerDay = detailedResults.reduce((sum, r) => sum + r.totalWaterPerDay, 0);
-            const totalFarmWater = detailedResults.reduce((sum, r) => sum + r.farmWaterPerDay, 0);
-            const totalProcessingWater = detailedResults.reduce((sum, r) => sum + r.processingWaterPerDay, 0);
-
-            const allProduction = {};
-            detailedResults.forEach(result => {
-                Object.entries(result.production).forEach(([productId, quantity]) => {
-                    allProduction[productId] = (allProduction[productId] || 0) + quantity;
-                });
-            });
-
-            const allFoodCategories = new Set();
-            const categoryDetails = new Map();
-            const uniqueFoods = new Set();
-            const foodUnityDetails = [];
-            let totalUnity = 0;
-            let totalHealthBonuses = 0;
-
-            detailedResults.forEach(result => {
-                if (result.foodCategories) {
-                    result.foodCategories.categories.forEach(cat => {
-                        if (!allFoodCategories.has(cat.id)) {
-                            allFoodCategories.add(cat.id);
-
-                            const category = ProductionCalculator.foodCategories?.find(c => c.id === cat.id);
-                            if (category && category.hasHealthBenefit) {
-                                totalHealthBonuses += 1;
-                            }
-                        }
-
-                        const current = categoryDetails.get(cat.id) || {
-                            name: cat.name,
-                            hasHealthBenefit: cat.hasHealthBenefit,
-                            peopleFed: 0
-                        };
-                        current.peopleFed += cat.peopleFed;
-                        categoryDetails.set(cat.id, current);
-                    });
-
-                    result.processingChains?.forEach(chain => {
-                        const food = ProductionCalculator.foods?.find(f => f.productId === chain.finalFoodProductId);
-                        if (food && food.unityProvided > 0 && !uniqueFoods.has(food.productId)) {
-                            uniqueFoods.add(food.productId);
-
-                            const unityPerMonth = food.unityProvided;
-                            totalUnity += unityPerMonth;
-
-                            foodUnityDetails.push({
-                                foodId: food.id,
-                                productId: food.productId,
-                                productName: ProductionCalculator.getProduct(food.productId)?.name,
-                                categoryId: food.categoryId,
-                                categoryName: ProductionCalculator.foodCategories?.find(c => c.id === food.categoryId)?.name,
-                                unityProvided: food.unityProvided
-                            });
-                        }
-                    });
-                }
-            });
-
-            const allProcessingMachines = new Map();
-            let totalProcessingElectricity = 0;
-            let totalProcessingWorkers = 0;
-
-            detailedResults.forEach(result => {
-                result.processingChains?.forEach(chain => {
-                    chain.machines?.forEach(machine => {
-                        const current = allProcessingMachines.get(machine.machineId) || {
-                            name: machine.machineName,
-                            count: 0,
-                            electricityKw: machine.electricityKw || 0,
-                            workers: machine.workers || 0
-                        };
-                        current.count += machine.count;
-                        allProcessingMachines.set(machine.machineId, current);
-
-                        totalProcessingElectricity += (machine.electricityKw || 0) * machine.count;
-                        totalProcessingWorkers += (machine.workers || 0) * machine.count;
-                    });
-                });
-            });
-
-            const fertilizerSummary = FertilizerCalculator.calculateGlobalUsage(
-                detailedResults,
-                constraints.allowedFertilizers
-            );
-
-            setResults({
-                farms: detailedResults,
-                totals: {
-                    peopleFed: totalPeopleFed,
-                    waterPerDay: totalWaterPerDay,
-                    farmWaterPerDay: totalFarmWater,
-                    processingWaterPerDay: totalProcessingWater,
-                    waterPerMonth: totalWaterPerDay * 30,
-                    production: allProduction,
-                    foodCategories: {
-                        count: allFoodCategories.size,
-                        categories: Array.from(categoryDetails.entries()).map(([id, data]) => ({
-                            id,
-                            ...data
-                        })),
-                        healthBonuses: totalHealthBonuses,
-                        totalUnity: totalUnity,
-                        unityBreakdown: foodUnityDetails
-                    },
-                    processingMachines: Array.from(allProcessingMachines.entries()).map(([id, data]) => ({
-                        id,
-                        ...data
-                    })),
-                    processingElectricity: totalProcessingElectricity,
-                    processingWorkers: totalProcessingWorkers,
-                    fertilizer: fertilizerSummary
-                }
-            });
-
-            console.log('=== CALCULATION COMPLETE ===');
-        } catch (error) {
-            console.error('Optimization error:', error);
-            alert('Error during optimization: ' + error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleCalculate = () => {
-        performCalculation();
-    };
-
-    const addFarm = () => {
-        const lastFarmType = farms.length > 0 ? farms[farms.length - 1].farmId : (availableFarms[0]?.id || 'FarmT1');
-        setFarms([...farms, {
-            id: Date.now(),
-            farmId: lastFarmType,
-            rotation: [null, null, null, null],
-            selectedFertilizerId: null,
-            customFertility: null
-        }]);
-    };
-
-    const removeFarm = (id) => {
-        setFarms(farms.filter(f => f.id !== id));
-    };
-
-    const updateFarmType = (id, farmId) => {
-        setFarms(farms.map(f => f.id === id ? { ...f, farmId } : f));
-    };
-
-    const openCropModal = (farmIndex, slotIndex) => {
-        setCropModal({ open: true, farmIndex, slotIndex });
-    };
-
-    const selectCrop = (cropId) => {
-        const { farmIndex, slotIndex } = cropModal;
-        setFarms(farms.map((farm, idx) => {
-            if (idx === farmIndex) {
-                const newRotation = [...farm.rotation];
-                newRotation[slotIndex] = cropId;
-                return { ...farm, rotation: newRotation };
-            }
-            return farm;
-        }));
-        setCropModal({ open: false, farmIndex: null, slotIndex: null });
-    };
-
-    const openRecipeSelectionModal = (productId) => {
-        const product = ProductionCalculator.getProduct(productId);
-        const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
-
-        if (foodPaths.length === 0) {
-            alert(`No food recipes found for ${product?.name}. This crop cannot be processed into food.`);
-            return;
-        }
-
-        const uniqueRecipeChains = new Map();
-
-        foodPaths.forEach(path => {
-            if (path.processingChain.length === 0) {
-                return;
-            }
-
-            const firstRecipe = path.processingChain[0];
-            const chainKey = path.recipeChain.join('->');
-
-            if (!uniqueRecipeChains.has(chainKey)) {
-                const recipe = ProductionCalculator.getRecipe(firstRecipe.recipeId);
-                if (recipe) {
-                    uniqueRecipeChains.set(chainKey, {
-                        ...recipe,
-                        finalFoodProductId: path.finalFoodProductId,
-                        fullChain: path.processingChain,
-                        conversionRatio: path.conversionRatio
-                    });
-                }
-            }
-        });
-
-        const recipes = Array.from(uniqueRecipeChains.values());
-
-        if (recipes.length === 0) {
-            alert(`${product?.name} is directly edible, no processing needed!`);
-            return;
-        }
-
-        setRecipeSelectionModal({
-            open: true,
-            productId,
-            productName: product?.name,
-            availableRecipes: recipes
-        });
-    };
-
-    const selectProcessingRecipe = (productId, recipeId) => {
-        setSelectedProcessingRecipes(prev => {
-            const newMap = new Map(prev);
-            newMap.set(productId, recipeId);
-            return newMap;
-        });
-        setRecipeSelectionModal({ open: false, productId: null, productName: null, availableRecipes: [] });
-    };
-
-    const handleFertilizerSelect = (farmIndex, fertilizerId) => {
-        console.log('handleFertilizerSelect called:', { farmIndex, fertilizerId });
-        setFarms(prevFarms => {
-            const newFarms = prevFarms.map((farm, idx) =>
-                idx === farmIndex ? { ...farm, selectedFertilizerId: fertilizerId } : farm
-            );
-            console.log('Updated farms after fertilizer select:', newFarms);
-            return newFarms;
-        });
-    };
-
-    const handleCustomFertilityChange = (farmId, newFertility) => {
-        console.log('handleCustomFertilityChange called:', { farmId, newFertility });
-        setFarms(prevFarms => {
-            const newFarms = prevFarms.map(farm =>
-                farm.id === farmId ? { ...farm, customFertility: newFertility } : farm
-            );
-            console.log('Updated farms after fertility change:', newFarms);
-            return newFarms;
-        });
-    };
-
     const statsIcon = getGeneralIcon('Stats');
     const researchIcon = getGeneralIcon('Research');
     const infoIcon = getGeneralIcon('Info');
 
+    // ===== Render =====
     return (
         <>
+<LoadingOverlay
+                isVisible={showLoadingOverlay}  // ✅ CHANGED from isCalculating
+                title="Calculating Farm Production..."
+                message="Processing crop rotations, fertility calculations, and food production chains..."
+                showOptimizationTip={false}
+                icon="🚜"
+            />
+            {/* Header */}
             <div style={{ maxWidth: '1920px', margin: '0 auto' }}>
                 <div style={{
                     padding: '1.5rem 2rem',
@@ -829,7 +537,10 @@ const FarmOptimizerPage = () => {
                 </div>
             </div>
 
+            {/* Main Content */}
             <div style={{ maxWidth: '1920px', margin: '0 auto', padding: '0 2rem 2rem', minHeight: 'calc(100vh - 300px)' }}>
+
+                {/* Settings Panel */}
                 <div style={{
                     backgroundColor: '#2a2a2a',
                     padding: '2rem',
@@ -866,10 +577,13 @@ const FarmOptimizerPage = () => {
                     <ConstraintsPanel
                         constraints={constraints}
                         availableFarms={availableFarms}
-                        availableFoodCrops={availableFoodCrops}
+                        availableFoodCrops={availableCrops.filter(crop =>
+                            ProductionCalculator.foodCropIds?.has(crop.id) ?? false
+                        )}
                         onConstraintsChange={setConstraints}
                     />
 
+                    {/* Research Display */}
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -933,6 +647,7 @@ const FarmOptimizerPage = () => {
                         </div>
                     </div>
 
+                    {/* Manual Mode - Farm Configuration */}
                     {optimizationMode === 'manual' && (
                         <div style={{ marginBottom: '1.5rem' }}>
                             <div style={{
@@ -984,6 +699,7 @@ const FarmOptimizerPage = () => {
                         </div>
                     )}
 
+                    {/* Calculate Button */}
                     <button
                         onClick={handleCalculate}
                         disabled={loading || (optimizationMode === 'manual' && farms.length === 0)}
@@ -1017,6 +733,7 @@ const FarmOptimizerPage = () => {
                     </button>
                 </div>
 
+                {/* Results */}
                 {results && (
                     <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '2rem', alignItems: 'start' }}>
                         <ResultsSummary
@@ -1051,6 +768,7 @@ const FarmOptimizerPage = () => {
                 )}
             </div>
 
+            {/* Modals */}
             <CropSelectionModal
                 isOpen={cropModal.open}
                 crops={availableCrops}
