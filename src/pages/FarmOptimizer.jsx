@@ -209,36 +209,38 @@ const FarmOptimizerPage = () => {
         setLoading(true);
         setIsCalculating(true);
 
-        // ✅ Only show loading overlay if calculation takes > 200ms
-        loadingTimerRef.current = setTimeout(() => {
-            if (isCalculating) {
-                setShowLoadingOverlay(true);
-            }
-        }, 300);
-
-        // Wrap in setTimeout like Calculator.jsx does
+        // Wrap in setTimeout to allow UI to update
         setTimeout(() => {
+            let calculationComplete = false;
+
+            // ✅ Start loading timer INSIDE the setTimeout
+            loadingTimerRef.current = setTimeout(() => {
+                if (!calculationComplete) {
+                    console.log('⏱️ Calculation taking longer than 300ms, showing overlay');
+                    setShowLoadingOverlay(true);
+                }
+            }, 300);
+
+            // Add artificial delay to ensure calculations actually take time
+            const startTime = performance.now();
+
             try {
-                // ✅ Determine which farms to calculate
+                // ... all your calculation logic stays the same ...
+
                 let farmsToCalculate;
 
                 if (optimizationMode === 'manual') {
-                    // Manual mode: Always use existing farms
                     farmsToCalculate = farms;
                 } else {
-                    // Auto mode logic
                     if (userTriggered) {
-                        // User clicked Calculate button - regenerate optimized farms
                         farmsToCalculate = generateOptimizedFarms();
                         console.log('Auto mode: User-triggered - Generating new optimized farms');
                     } else {
-                        // Auto-triggered (fertilizer apply) - use existing farms
                         farmsToCalculate = farms;
                         console.log('Auto mode: Auto-triggered - Using existing farms with user changes');
                     }
                 }
 
-                // Use the calculation engine
                 const calculationResults = FarmCalculationEngine.calculate({
                     farms: farmsToCalculate,
                     optimizationMode,
@@ -248,7 +250,6 @@ const FarmOptimizerPage = () => {
                     foodConsumptionMultiplier: settings.foodConsumptionMultiplier || 1.0
                 });
 
-                // Update farm state with any auto-applied fertilizer
                 if (optimizationMode === 'manual') {
                     const updatedFarms = FarmStateManager.updateFarmsWithCalculationResults(
                         farmsToCalculate,
@@ -260,7 +261,6 @@ const FarmOptimizerPage = () => {
                         setFarms(updatedFarms);
                     }
                 } else {
-                    // In auto mode, also update farms state with calculation results
                     const updatedFarms = FarmStateManager.updateFarmsWithCalculationResults(
                         farmsToCalculate,
                         calculationResults.farms
@@ -273,12 +273,15 @@ const FarmOptimizerPage = () => {
                 }
 
                 setResults(calculationResults);
-                console.log('=== FarmOptimizerPage: Calculation complete ===');
+
+                const elapsed = performance.now() - startTime;
+                console.log(`=== Calculation complete in ${elapsed.toFixed(2)}ms ===`);
             } catch (error) {
                 console.error('Optimization error:', error);
                 alert('Error during optimization: ' + error.message);
             } finally {
-                // ✅ Clear the timer if calculation finished before 200ms
+                calculationComplete = true;
+
                 if (loadingTimerRef.current) {
                     clearTimeout(loadingTimerRef.current);
                     loadingTimerRef.current = null;
@@ -286,7 +289,7 @@ const FarmOptimizerPage = () => {
 
                 setLoading(false);
                 setIsCalculating(false);
-                setShowLoadingOverlay(false);  // ✅ Hide overlay immediately when done
+                setShowLoadingOverlay(false);
             }
         }, 10);
     };
