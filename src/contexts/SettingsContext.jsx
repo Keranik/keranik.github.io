@@ -1,10 +1,10 @@
-﻿import { createContext, useContext, useState, useEffect } from 'react';
+﻿// src/contexts/SettingsContext.jsx - COMPLETE UPDATED VERSION
+import { createContext, useContext, useState, useEffect } from 'react';
 import { DataLoader } from '../utils/DataLoader';
 import ProductionCalculator from '../utils/ProductionCalculator';
 
 const SettingsContext = createContext();
 
-// Build default research settings from game data
 // Build default research settings from game data
 const buildDefaultResearchSettings = () => {
     if (!ProductionCalculator._gameData || !ProductionCalculator.research) {
@@ -15,7 +15,6 @@ const buildDefaultResearchSettings = () => {
     console.log(`📊 Processing ${ProductionCalculator.research.length} research nodes...`);
     const researchSettings = {};
 
-    // Map of bonus IDs to their display configuration
     // Map of bonus IDs to their display configuration
     const bonusConfig = {
         // Farming
@@ -209,6 +208,18 @@ export const SettingsProvider = ({ children }) => {
     const [availableMods, setAvailableMods] = useState([]);
     const [researchDefinitions, setResearchDefinitions] = useState({});
     const [isLoadingData, setIsLoadingData] = useState(true);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);  // ✅ NEW: Modal state
+
+    // ✅ NEW: Functions to control settings modal
+    const openSettings = () => {
+        console.log('📖 Opening settings modal');
+        setIsSettingsOpen(true);
+    };
+
+    const closeSettings = () => {
+        console.log('📕 Closing settings modal');
+        setIsSettingsOpen(false);
+    };
 
     // ✅ Initial load - runs once on app start
     useEffect(() => {
@@ -378,7 +389,10 @@ export const SettingsProvider = ({ children }) => {
                 settings,
                 availableMods,
                 researchDefinitions,
-                isLoadingData,  // ✅ Expose this so UI can show loading state
+                isLoadingData,
+                isSettingsOpen,          // ✅ NEW: Expose modal state
+                openSettings,             // ✅ NEW: Function to open modal
+                closeSettings,            // ✅ NEW: Function to close modal
                 updateSetting,
                 updateNestedSetting,
                 updateResearchValue,

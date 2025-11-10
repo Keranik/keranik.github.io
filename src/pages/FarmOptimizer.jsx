@@ -1,5 +1,6 @@
 // src/pages/FarmOptimizer.jsx - CLEAN ORCHESTRATOR VERSION
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
@@ -25,8 +26,8 @@ import {
 } from '../components/farm-optimizer';
 
 const FarmOptimizerPage = () => {
-    const { settings, getResearchValue } = useSettings();
-
+    const { settings, getResearchValue, openSettings } = useSettings();
+    const navigate = useNavigate();
     // ===== Core State =====
     const [dataLoaded, setDataLoaded] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -87,6 +88,7 @@ const FarmOptimizerPage = () => {
     const pendingRecalculation = useRef(false);
     const userTriggeredCalculation = useRef(false);  // ✅ NEW: Track if user clicked Calculate
     const loadingTimerRef = useRef(null);
+    const settingsIcon = getGeneralIcon('Settings'); 
 
     // ===== Data Loading =====
     useEffect(() => {
@@ -185,7 +187,6 @@ const FarmOptimizerPage = () => {
         }
     }, [farms, loading, dataLoaded, results]);
 
-    // Around line 161, update naturalFertilityOnly useEffect
     useEffect(() => {
         if (results && !loading && dataLoaded) {
             console.log('naturalFertilityOnly changed, triggering recalculation');
@@ -194,7 +195,6 @@ const FarmOptimizerPage = () => {
         }
     }, [constraints.naturalFertilityOnly]);
 
-    // Around line 170, update allowedFertilizers useEffect
     useEffect(() => {
         if (results && !loading && dataLoaded) {
             console.log('allowedFertilizers changed, triggering recalculation');
@@ -203,7 +203,6 @@ const FarmOptimizerPage = () => {
         }
     }, [constraints.allowedFertilizers]);
 
-    // ===== Calculation =====
     // ===== Calculation =====
     const performCalculation = (userTriggered = false) => {
         console.log('=== FarmOptimizerPage: Starting calculation ===', { userTriggered });
@@ -215,7 +214,7 @@ const FarmOptimizerPage = () => {
             if (isCalculating) {
                 setShowLoadingOverlay(true);
             }
-        }, 350);
+        }, 300);
 
         // Wrap in setTimeout like Calculator.jsx does
         setTimeout(() => {
@@ -543,14 +542,14 @@ const FarmOptimizerPage = () => {
                 {/* Settings Panel */}
                 <div style={{
                     backgroundColor: '#2a2a2a',
-                    padding: '2rem',
+                    padding: '1.5rem',  // ✅ Reduced from 2rem
                     borderRadius: '10px',
-                    marginBottom: '2rem',
+                    marginBottom: '1.5rem',  // ✅ Reduced from 2rem
                     border: '1px solid #444',
                     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
                 }}>
                     <h3 style={{
-                        marginBottom: '1.5rem',
+                        marginBottom: '1rem',  // ✅ Reduced from 1.5rem
                         fontSize: '1.5rem',
                         fontWeight: '700',
                         color: '#50C878',
@@ -563,111 +562,169 @@ const FarmOptimizerPage = () => {
                         Optimization Settings
                     </h3>
 
-                    <OptimizationModeSelector
-                        optimizationMode={optimizationMode}
-                        optimizationGoal={optimizationGoal}
-                        targetPopulation={constraints.targetPopulation}
-                        targetPopulationEnabled={targetPopulationEnabled}
-                        onModeChange={setOptimizationMode}
-                        onGoalChange={setOptimizationGoal}
-                        onTargetPopulationChange={(pop) => setConstraints({ ...constraints, targetPopulation: pop })}
-                        onTargetPopulationToggle={setTargetPopulationEnabled}
-                    />
-
-                    <ConstraintsPanel
-                        constraints={constraints}
-                        availableFarms={availableFarms}
-                        availableFoodCrops={availableCrops.filter(crop =>
-                            ProductionCalculator.foodCropIds?.has(crop.id) ?? false
-                        )}
-                        onConstraintsChange={setConstraints}
-                    />
-
-                    {/* Research Display */}
+                    {/* ✅ COMPACT: Mode + Constraints in 2-column grid */}
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                        gridTemplateColumns: '1fr 1fr',
                         gap: '1rem',
-                        marginBottom: '1.5rem'
+                        marginBottom: '1rem'  // ✅ Reduced spacing
+                    }}>
+                        <div>
+                            <OptimizationModeSelector
+                                optimizationMode={optimizationMode}
+                                optimizationGoal={optimizationGoal}
+                                targetPopulation={constraints.targetPopulation}
+                                targetPopulationEnabled={targetPopulationEnabled}
+                                onModeChange={setOptimizationMode}
+                                onGoalChange={setOptimizationGoal}
+                                onTargetPopulationChange={(pop) => setConstraints({ ...constraints, targetPopulation: pop })}
+                                onTargetPopulationToggle={setTargetPopulationEnabled}
+                            />
+                        </div>
+
+                        <div>
+                            <ConstraintsPanel
+                                constraints={constraints}
+                                availableFarms={availableFarms}
+                                availableFoodCrops={availableCrops.filter(crop =>
+                                    ProductionCalculator.foodCropIds?.has(crop.id) ?? false
+                                )}
+                                onConstraintsChange={setConstraints}
+                            />
+                        </div>
+                    </div>
+
+                    {/* ✅ COMPACT: Research Display - smaller, inline */}
+                    <div style={{
+                        backgroundColor: '#1a1a1a',
+                        padding: '0.75rem 1rem',  // ✅ Tighter padding
+                        borderRadius: '6px',
+                        border: '1px solid #444',
+                        marginBottom: '1rem'  // ✅ Reduced from 1.5rem
                     }}>
                         <div style={{
-                            backgroundColor: '#1a1a1a',
-                            padding: '1rem',
-                            borderRadius: '6px',
-                            border: '1px solid #444'
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',  // ✅ Spread out horizontally
+                            flexWrap: 'wrap',
+                            gap: '1rem'
                         }}>
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '8px',
-                                marginBottom: '0.75rem'
+                                gap: '8px'
                             }}>
                                 {researchIcon && (
-                                    <img src={researchIcon} alt="Research" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                                    <img src={researchIcon} alt="Research" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
                                 )}
-                                <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#aaa' }}>
-                                    Active Research Bonuses
+                                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#aaa' }}>
+                                    Research Bonuses:
                                 </span>
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+
+                            {/* ✅ COMPACT: Inline research stats */}
+                            <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <span style={{ color: '#888' }}>Crop Yield:</span>
                                     <span style={{ color: research.cropYield > 0 ? '#50C878' : '#666', fontWeight: '600' }}>
                                         {research.cropYield > 0 ? '+' : ''}{research.cropYield}%
                                     </span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                                    <span style={{ color: '#888' }}>Water Reduction:</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ color: '#888' }}>Water:</span>
                                     <span style={{ color: research.waterReduction > 0 ? '#50C878' : '#666', fontWeight: '600' }}>
                                         {research.waterReduction > 0 ? '-' : ''}{research.waterReduction}%
                                     </span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                                    <span style={{ color: '#888' }}>Rain Yield:</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ color: '#888' }}>Rain:</span>
                                     <span style={{ color: research.rainYield > 0 ? '#50C878' : '#666', fontWeight: '600' }}>
                                         {research.rainYield > 0 ? '+' : ''}{research.rainYield}%
                                     </span>
                                 </div>
                             </div>
-                            <div style={{
-                                marginTop: '0.75rem',
-                                paddingTop: '0.75rem',
-                                borderTop: '1px solid #333',
-                                fontSize: '0.7rem',
-                                color: '#666',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px'
-                            }}>
+
+                            <button
+                                onClick={openSettings}  // ✅ Use context function
+                                style={{
+                                    fontSize: '0.7rem',
+                                    color: '#666',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px',
+                                    transition: 'all 0.2s',
+                                    textDecoration: 'none',
+                                    position: 'relative'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'rgba(74, 144, 226, 0.15)';
+                                    e.currentTarget.style.color = '#4a90e2';
+                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                    e.currentTarget.style.color = '#666';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                }}
+                                title="Click to open Global Settings"
+                            >
                                 {infoIcon && (
-                                    <img src={infoIcon} alt="Info" style={{ width: '12px', height: '12px', objectFit: 'contain' }} />
+                                    <img
+                                        src={infoIcon}
+                                        alt="Info"
+                                        style={{
+                                            width: '12px',
+                                            height: '12px',
+                                            objectFit: 'contain'
+                                        }}
+                                    />
                                 )}
-                                From Global Settings
-                            </div>
+                                <span style={{
+                                    textDecoration: 'underline',
+                                    textDecorationStyle: 'dotted',
+                                    textDecorationColor: 'currentColor'
+                                }}>
+                                    From <strong>Global Settings</strong>
+                                </span>
+                                <span style={{ fontSize: '0.65rem', opacity: 0.8 }}><img
+                                    src={settingsIcon}
+                                    alt="Settings"
+                                    style={{
+                                        width: '12px',
+                                        height: '12px',
+                                        objectFit: 'contain'
+                                    }}
+                                /></span>
+                            </button>
                         </div>
                     </div>
 
                     {/* Manual Mode - Farm Configuration */}
                     {optimizationMode === 'manual' && (
-                        <div style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ marginBottom: '1rem' }}>  {/* ✅ Reduced from 1.5rem */}
                             <div style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
-                                marginBottom: '0.75rem'
+                                marginBottom: '0.5rem'  // ✅ Reduced from 0.75rem
                             }}>
-                                <label style={{ fontSize: '0.95rem', fontWeight: '600', color: '#ddd' }}>
+                                <label style={{ fontSize: '0.9rem', fontWeight: '600', color: '#ddd' }}>  {/* ✅ Smaller font */}
                                     Farms ({farms.length})
                                 </label>
                                 <button
                                     onClick={addFarm}
                                     style={{
-                                        padding: '0.5rem 1rem',
+                                        padding: '0.4rem 0.8rem',  // ✅ Tighter padding
                                         backgroundColor: '#4a90e2',
                                         color: '#fff',
                                         border: 'none',
                                         borderRadius: '4px',
-                                        fontSize: '0.85rem',
+                                        fontSize: '0.8rem',  // ✅ Smaller font
                                         cursor: 'pointer',
                                         fontWeight: '600',
                                         transition: 'all 0.15s'
@@ -679,7 +736,7 @@ const FarmOptimizerPage = () => {
                                 </button>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>  {/* ✅ Reduced from 1rem */}
                                 {farms.map((farm, farmIndex) => (
                                     <FarmConfigCard
                                         key={farm.id}
@@ -705,12 +762,12 @@ const FarmOptimizerPage = () => {
                         disabled={loading || (optimizationMode === 'manual' && farms.length === 0)}
                         style={{
                             width: '100%',
-                            padding: '1rem',
+                            padding: '0.85rem',  // ✅ Reduced from 1rem
                             backgroundColor: loading ? '#555' : '#4a90e2',
                             color: '#fff',
                             border: 'none',
                             borderRadius: '6px',
-                            fontSize: '1.1rem',
+                            fontSize: '1rem',  // ✅ Slightly smaller
                             cursor: loading ? 'not-allowed' : 'pointer',
                             fontWeight: '700',
                             transition: 'all 0.2s',
@@ -735,7 +792,7 @@ const FarmOptimizerPage = () => {
 
                 {/* Results */}
                 {results && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '2rem', alignItems: 'start' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '1.5rem', alignItems: 'start' }}>  {/* ✅ Narrower sidebar, tighter gap */}
                         <ResultsSummary
                             results={results}
                             research={research}
@@ -743,12 +800,12 @@ const FarmOptimizerPage = () => {
 
                         <div style={{
                             backgroundColor: '#2a2a2a',
-                            padding: '1.5rem',
+                            padding: '1.25rem',  // ✅ Reduced from 1.5rem
                             borderRadius: '10px',
                             border: '1px solid #444',
                             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
                         }}>
-                            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
+                            <h3 style={{ marginBottom: '1rem', fontSize: '1.4rem', fontWeight: '700' }}>  {/* ✅ Tighter */}
                                 Farm Details
                             </h3>
 
