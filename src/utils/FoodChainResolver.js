@@ -17,27 +17,13 @@ export class FoodChainResolver {
     static isInitialized = false;
 
     static initialize(recipes, foods, crops) {
-        // ✅ CHECK IF ALREADY INITIALIZED
-        if (this.isInitialized && this.chainEfficiencyCache.size > 0) {
-            console.log('⏭️ FoodChainResolver already initialized, skipping cache rebuild...');
-            return;
-        }
-
+        // ✅ Just store the data, don't build the cache yet
         this.recipes = recipes;
         this.foods = foods;
         this.crops = crops;
-
-        console.log('🔗 FoodChainResolver: Building comprehensive chain cost cache...');
-
-        // Calculate baseline: "What can the best direct crop produce per worker?"
-        this.baselineFarmWorkerProductivity = this.calculateBaselineFarmProductivity();
-        console.log(`📊 Baseline farm worker productivity: ${this.baselineFarmWorkerProductivity.toFixed(1)} people/worker/month`);
-
-        // Build the cache
-        this.buildChainEfficiencyCache();
-
         this.isInitialized = true;
-        console.log(`✅ Cached ${this.chainEfficiencyCache.size} crop → food chain combinations`);
+
+        console.log('✅ FoodChainResolver initialized (lazy cache mode)');
     }
 
     /**
@@ -309,7 +295,32 @@ export class FoodChainResolver {
      */
     static getChainMetrics(cropId, foodProductId) {
         const cacheKey = `${cropId}_${foodProductId}`;
-        return this.chainEfficiencyCache.get(cacheKey);
+
+        // ✅ Check if already cached
+        if (this.chainEfficiencyCache.has(cacheKey)) {
+            return this.chainEfficiencyCache.get(cacheKey);
+        }
+
+        // ✅ Not cached yet - build it now
+        const crop = this.crops.find(c => c.id === cropId);
+        if (!crop) return null;
+
+        const paths = this.getFoodsFromCrop(crop.output.productId);
+        const path = paths.find(p => p.finalFoodProductId === foodProductId);
+        if (!path) return null;
+
+        // Calculate baseline if needed
+        if (this.baselineFarmWorkerProductivity === 0) {
+            this.baselineFarmWorkerProductivity = this.calculateBaselineFarmProductivity();
+        }
+
+        // Calculate and cache this specific chain
+        const chainMetrics = this.calculateComprehensiveChainMetrics(crop, path, 100);
+        if (chainMetrics) {
+            this.chainEfficiencyCache.set(cacheKey, chainMetrics);
+        }
+
+        return chainMetrics;
     }
 
     /**
@@ -317,11 +328,31 @@ export class FoodChainResolver {
      * Returns all possible food outputs with their metrics
      */
     static getAllChainsForCrop(cropId) {
-        const chains = [];
+        const crop = this.crops.find(c => c.id === cropId);
+        if (!crop) return [];
 
-        this.chainEfficiencyCache.forEach((metrics, key) => {
-            if (key.startsWith(`${cropId}_`)) {
-                chains.push(metrics);
+        const paths = this.getFoodsFromCrop(crop.output.productId);
+
+        // Calculate baseline if needed
+        if (this.baselineFarmWorkerProductivity === 0) {
+            this.baselineFarmWorkerProductivity = this.calculateBaselineFarmProductivity();
+        }
+
+        // Build cache for all paths of this crop
+        const chains = [];
+        paths.forEach(path => {
+            const cacheKey = `${cropId}_${path.finalFoodProductId}`;
+
+            // Check cache first
+            if (this.chainEfficiencyCache.has(cacheKey)) {
+                chains.push(this.chainEfficiencyCache.get(cacheKey));
+            } else {
+                // Calculate and cache
+                const chainMetrics = this.calculateComprehensiveChainMetrics(crop, path, 100);
+                if (chainMetrics) {
+                    this.chainEfficiencyCache.set(cacheKey, chainMetrics);
+                    chains.push(chainMetrics);
+                }
             }
         });
 

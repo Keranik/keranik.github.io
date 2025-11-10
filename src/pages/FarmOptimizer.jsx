@@ -1,6 +1,7 @@
-// src/pages/FarmOptimizer.jsx - USING CACHED CHAIN METRICS
+// src/pages/FarmOptimizer.jsx
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useData } from '../contexts/DataContext';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import { useSettings } from '../contexts/SettingsContext';
 import { FoodChainResolver } from '../utils/FoodChainResolver';
@@ -28,6 +29,15 @@ import {
 const FarmOptimizerPage = () => {
     const { settings, getResearchValue, openSettings } = useSettings();
     const navigate = useNavigate();
+
+    // ✅ Get pre-computed data from DataContext
+    const {
+        dataLoaded,
+        isLoading,
+        availableFarms,
+        availableCrops,
+        availableFoodCrops
+    } = useData();
 
     // ===== Core State =====
     const [loading, setLoading] = useState(false);
@@ -167,7 +177,7 @@ const FarmOptimizerPage = () => {
             pendingRecalculation.current = false;
             performCalculation(false);
         }
-    }, [farms, loading, results]);
+    }, [farms, loading]);
 
     useEffect(() => {
         if (results && !loading) {
@@ -256,7 +266,6 @@ const FarmOptimizerPage = () => {
         console.log('🎯 Generating optimized farms with goal:', optimizationGoal);
 
         try {
-            // ✅ Use the optimization engine with cached chain metrics
             const optimizedFarms = FarmOptimizationEngine.optimize({
                 optimizationGoal,
                 constraints,
@@ -276,11 +285,6 @@ const FarmOptimizerPage = () => {
 
     const generateFallbackFarms = () => {
         console.log('⚠️ Using fallback farm generation');
-
-        const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
-        const availableFoodCrops = (ProductionCalculator.crops || []).filter(crop =>
-            ProductionCalculator.foodCropIds?.has(crop.id) ?? false
-        );
 
         const filteredCrops = constraints.allowedCrops && constraints.allowedCrops.length > 0
             ? availableFoodCrops.filter(c => constraints.allowedCrops.includes(c.id))
@@ -324,7 +328,6 @@ const FarmOptimizerPage = () => {
 
     // ===== User Actions - Farm Management =====
     const addFarm = () => {
-        const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
         const lastFarmType = farms.length > 0
             ? farms[farms.length - 1].farmId
             : (availableFarms[0]?.id || 'FarmT1');
@@ -368,7 +371,6 @@ const FarmOptimizerPage = () => {
     const openRecipeSelectionModal = (productId) => {
         const product = ProductionCalculator.getProduct(productId);
 
-        // ✅ Use FoodChainResolver to get cached food paths
         const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
 
         if (foodPaths.length === 0) {
@@ -450,14 +452,8 @@ const FarmOptimizerPage = () => {
         });
     };
 
-    // ===== Check if data is loaded =====
-    const dataLoaded = ProductionCalculator.products &&
-        ProductionCalculator.products.length > 0 &&
-        ProductionCalculator.crops &&
-        ProductionCalculator.crops.length > 0;
-
     // ===== Loading State =====
-    if (!dataLoaded) {
+    if (isLoading || !dataLoaded) {
         return (
             <div style={{
                 padding: '2rem',
@@ -493,9 +489,6 @@ const FarmOptimizerPage = () => {
         );
     }
 
-    // ===== Prepare data for UI =====
-    const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
-    const availableCrops = ProductionCalculator.crops || [];
     const statsIcon = getGeneralIcon('Stats');
     const researchIcon = getGeneralIcon('Research');
     const infoIcon = getGeneralIcon('Info');
@@ -586,9 +579,7 @@ const FarmOptimizerPage = () => {
                             <ConstraintsPanel
                                 constraints={constraints}
                                 availableFarms={availableFarms}
-                                availableFoodCrops={availableCrops.filter(crop =>
-                                    ProductionCalculator.foodCropIds?.has(crop.id) ?? false
-                                )}
+                                availableFoodCrops={availableFoodCrops}
                                 onConstraintsChange={setConstraints}
                             />
                         </div>
