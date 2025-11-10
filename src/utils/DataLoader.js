@@ -4,13 +4,18 @@
 
 import { FertilizerCalculator } from './FertilizerCalculator';
 import ProductionCalculator from './ProductionCalculator';
-import { FoodChainResolver } from './FoodChainResolver';  // ✅ Add this import
+import { FoodChainResolver } from './FoodChainResolver';
 
 export class DataLoader {
     static baseGameData = null;
     static loadedMods = new Map();
     static manifestCache = null;
     static isInitialized = false;
+
+    // ✅ Cache for complete game data with mods
+    static gameDataCache = null;
+    static cachedModsKey = null;
+    static loadingPromise = null;
 
     /**
      * Load base game data
@@ -89,6 +94,44 @@ export class DataLoader {
      * @param {string[]} enabledModIds - Array of mod IDs to load
      */
     static async loadGameData(enabledModIds = []) {
+        // ✅ Create a cache key based on enabled mods
+        const modsKey = JSON.stringify([...(enabledModIds || [])].sort());
+
+        // ✅ Return cached data if available and mods haven't changed
+        if (this.gameDataCache && this.cachedModsKey === modsKey) {
+            console.log('📦 DataLoader: Using cached game data (mods unchanged)');
+            return this.gameDataCache;
+        }
+
+        // ✅ If already loading, wait for that promise instead of starting a new load
+        if (this.loadingPromise) {
+            console.log('⏳ DataLoader: Waiting for existing game data load operation...');
+            return this.loadingPromise;
+        }
+
+        // ✅ Start loading and cache the promise
+        console.log('🔄 DataLoader: Loading game data...', { enabledMods: enabledModIds });
+        this.loadingPromise = this._performLoad(enabledModIds);
+
+        try {
+            const data = await this.loadingPromise;
+
+            // ✅ Cache the result
+            this.gameDataCache = data;
+            this.cachedModsKey = modsKey;
+
+            return data;
+        } finally {
+            // ✅ Clear the loading promise
+            this.loadingPromise = null;
+        }
+    }
+
+    /**
+     * ✅ Internal method that performs the actual loading
+     * @param {string[]} enabledModIds - Array of mod IDs to load
+     */
+    static async _performLoad(enabledModIds = []) {
         const baseData = await this.loadBaseGame();
 
         if (!enabledModIds || enabledModIds.length === 0) {
@@ -138,11 +181,11 @@ export class DataLoader {
      */
     static initializeCalculators(gameData) {
         if (this.isInitialized) {
-            console.log('⏭️ Calculators already initialized, skipping...');
+            console.log('⏭️ DataLoader: Calculators already initialized, skipping...');
             return;
         }
 
-        console.log('🔧 Initializing calculators...');
+        console.log('🔧 DataLoader: Initializing calculators (ONE TIME ONLY)...');
 
         try {
             // Initialize ProductionCalculator first
@@ -214,9 +257,14 @@ export class DataLoader {
         this.manifestCache = null;
         this.isInitialized = false;
 
+        // ✅ Clear game data cache
+        this.gameDataCache = null;
+        this.cachedModsKey = null;
+        this.loadingPromise = null;
+
         // ✅ Clear FoodChainResolver cache
-        if (FoodChainResolver.chainEfficiencyCache) {
-            FoodChainResolver.chainEfficiencyCache.clear();
+        if (FoodChainResolver.clearCache) {
+            FoodChainResolver.clearCache();
         }
 
         // ✅ Reset ProductionCalculator

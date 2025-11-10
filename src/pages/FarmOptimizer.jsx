@@ -2,7 +2,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductionCalculator from '../utils/ProductionCalculator';
-import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
 import { FoodChainResolver } from '../utils/FoodChainResolver';
 import { FertilizerCalculator } from '../utils/FertilizerCalculator';
@@ -31,7 +30,6 @@ const FarmOptimizerPage = () => {
     const navigate = useNavigate();
 
     // ===== Core State =====
-    const [dataLoaded, setDataLoaded] = useState(false);
     const [loading, setLoading] = useState(false);
     const [isCalculating, setIsCalculating] = useState(false);
     const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
@@ -92,36 +90,15 @@ const FarmOptimizerPage = () => {
     const loadingTimerRef = useRef(null);
     const settingsIcon = getGeneralIcon('Settings');
 
-    // ===== Data Loading =====
+    // ===== Page Title and Food Crop Initialization =====
     useEffect(() => {
         document.title = 'Farm Optimizer - Captain of Industry Tools';
-        loadGameData();
-    }, [settings.enableModdedContent, settings.enabledMods]);
 
-    const loadGameData = async () => {
-        try {
-            const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
-            const gameData = await DataLoader.loadGameData(enabledMods);
-
-            ProductionCalculator.initialize(gameData);
-
-            // ✅ Initialize FoodChainResolver with chain cache building
-            // This builds the comprehensive chain cost cache synchronously
-            FoodChainResolver.initialize(
-                ProductionCalculator.recipes || [],
-                ProductionCalculator.foods || [],
-                ProductionCalculator.crops || []
-            );
-
-            // Initialize food crop identification
+        // Initialize food crop identification once data is available
+        if (ProductionCalculator.crops && !ProductionCalculator.foodCropIds) {
             initializeFoodCrops();
-
-            setDataLoaded(true);
-        } catch (error) {
-            console.error('Error loading farm data:', error);
-            alert('Failed to load farm data: ' + error.message);
         }
-    };
+    }, []);
 
     const initializeFoodCrops = () => {
         const foodCropIds = new Set();
@@ -185,15 +162,15 @@ const FarmOptimizerPage = () => {
     }, [settings.research, getResearchValue]);
 
     useEffect(() => {
-        if (pendingRecalculation.current && !loading && dataLoaded && results) {
+        if (pendingRecalculation.current && !loading && results) {
             console.log('🔄 Pending recalculation detected, executing now...');
             pendingRecalculation.current = false;
             performCalculation(false);
         }
-    }, [farms, loading, dataLoaded, results]);
+    }, [farms, loading, results]);
 
     useEffect(() => {
-        if (results && !loading && dataLoaded) {
+        if (results && !loading) {
             console.log('naturalFertilityOnly changed, triggering recalculation');
             const timer = setTimeout(() => performCalculation(false), 300);
             return () => clearTimeout(timer);
@@ -201,7 +178,7 @@ const FarmOptimizerPage = () => {
     }, [constraints.naturalFertilityOnly]);
 
     useEffect(() => {
-        if (results && !loading && dataLoaded) {
+        if (results && !loading) {
             console.log('allowedFertilizers changed, triggering recalculation');
             const timer = setTimeout(() => performCalculation(false), 300);
             return () => clearTimeout(timer);
@@ -472,6 +449,12 @@ const FarmOptimizerPage = () => {
             return newFarms;
         });
     };
+
+    // ===== Check if data is loaded =====
+    const dataLoaded = ProductionCalculator.products &&
+        ProductionCalculator.products.length > 0 &&
+        ProductionCalculator.crops &&
+        ProductionCalculator.crops.length > 0;
 
     // ===== Loading State =====
     if (!dataLoaded) {

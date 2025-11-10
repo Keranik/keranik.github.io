@@ -73,7 +73,7 @@ const RecipeConstraintModal = ({
 
         console.log('📊 Recipe tech tiers mapped:', map.size, 'recipes');
         return map;
-    }, [allRecipes, allResearch]);
+    }, []);
 
     // Tech tiers configuration
     const techTiers = [

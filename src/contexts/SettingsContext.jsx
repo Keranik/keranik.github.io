@@ -208,7 +208,8 @@ export const SettingsProvider = ({ children }) => {
     const [availableMods, setAvailableMods] = useState([]);
     const [researchDefinitions, setResearchDefinitions] = useState({});
     const [isLoadingData, setIsLoadingData] = useState(true);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);  // ✅ NEW: Modal state
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false); 
+    const [researchBuilt, setResearchBuilt] = useState(false);
 
     // ✅ NEW: Functions to control settings modal
     const openSettings = () => {
@@ -221,42 +222,41 @@ export const SettingsProvider = ({ children }) => {
         setIsSettingsOpen(false);
     };
 
-    // ✅ Initial load - runs once on app start
     useEffect(() => {
         const initializeData = async () => {
             try {
-                console.log('🔄 Loading game data...');
+                console.log('🔄 SettingsContext: Loading mod manifest and research definitions...');
 
                 // Load mods manifest
                 const manifest = await DataLoader.loadModManifest();
                 setAvailableMods(manifest.mods || []);
 
-                // Load game data with current mod settings
+                // Load game data (DataLoader handles caching and initialization)
                 const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
-                const gameData = await DataLoader.loadGameData(enabledMods);
+                await DataLoader.loadGameData(enabledMods);
 
-                // Initialize ProductionCalculator
-                ProductionCalculator.initialize(gameData);
+                // ✅ Only build research if not already built
+                if (!researchBuilt) {
+                    console.log('✅ Game data loaded, building research definitions...');
+                    const researchDefs = buildDefaultResearchSettings();
+                    setResearchDefinitions(researchDefs);
 
-                console.log('✅ Game data loaded, building research definitions...');
+                    console.log(`✅ Found ${Object.keys(researchDefs).length} research bonuses`);
 
-                // Build research definitions
-                const researchDefs = buildDefaultResearchSettings();
-                setResearchDefinitions(researchDefs);
+                    // Merge with existing settings
+                    setSettings(prev => ({
+                        ...prev,
+                        research: {
+                            ...Object.keys(researchDefs).reduce((acc, key) => {
+                                acc[key] = researchDefs[key].currentValue;
+                                return acc;
+                            }, {}),
+                            ...prev.research
+                        }
+                    }));
 
-                console.log(`✅ Found ${Object.keys(researchDefs).length} research bonuses`);
-
-                // Merge with existing settings
-                setSettings(prev => ({
-                    ...prev,
-                    research: {
-                        ...Object.keys(researchDefs).reduce((acc, key) => {
-                            acc[key] = researchDefs[key].currentValue;
-                            return acc;
-                        }, {}),
-                        ...prev.research // Keep any saved values
-                    }
-                }));
+                    setResearchBuilt(true); // ✅ Mark as built
+                }
 
                 setIsLoadingData(false);
             } catch (error) {
@@ -280,7 +280,6 @@ export const SettingsProvider = ({ children }) => {
 
                 const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
                 const gameData = await DataLoader.loadGameData(enabledMods);
-                ProductionCalculator.initialize(gameData);
 
                 // Rebuild research definitions
                 const researchDefs = buildDefaultResearchSettings();

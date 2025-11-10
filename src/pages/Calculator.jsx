@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
-import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
 import { getProductIcon, getMachineImage, getGeneralIcon, getProductTypeIcon, getEntityIcon } from '../utils/AssetHelper';
 import RecipeModal from '../components/RecipeModal';
@@ -20,7 +19,6 @@ import ToggleSwitch from '../components/common/ToggleSwitch';
 
 const Calculator = () => {
     const { settings } = useSettings();
-    const [dataLoaded, setDataLoaded] = useState(false);
 
     // Core calculator state
     const [selectedProduct, setSelectedProduct] = useState('');
@@ -162,21 +160,10 @@ const Calculator = () => {
         solver
     ]);
 
-    // Load game data on mount
+    // Set page title
     useEffect(() => {
         document.title = 'Production Calculator - Captain of Industry Tools';
-
-        const loadData = async () => {
-            const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
-            const gameData = await DataLoader.loadGameData(enabledMods);
-            ProductionCalculator.initialize(gameData);
-            setDataLoaded(true);
-        };
-
-        loadData();
-    }, [settings.enableModdedContent, settings.enabledMods]);
-
-    
+    }, []);
 
     // When product changes, update available recipes
     useEffect(() => {
@@ -197,6 +184,8 @@ const Calculator = () => {
     }, [selectedProduct]);
 
     useEffect(() => {
+        const dataLoaded = ProductionCalculator.products && ProductionCalculator.products.length > 0;
+
         if (dataLoaded && !selectedProduct) {
             // Recreate producibleProducts logic here to avoid scope error
             const allProducts = ProductionCalculator.products || [];
@@ -212,15 +201,18 @@ const Calculator = () => {
                 setSelectedProduct(defaultProductId);  // Triggers the recipe useEffect above
             }
         }
-    }, [dataLoaded, selectedProduct]);
+    }, [selectedProduct]);
 
-    // ✅ NEW: Recalculate when consolidation toggle changes
+    // ✅ Recalculate when consolidation toggle changes
     useEffect(() => {
         // Only trigger when consolidation changes AND we have an existing chain
         if (productionChain && !productionChain.error && selectedProduct && targetRate) {
             handleCalculate();
         }
-    }, [useConsolidation]); 
+    }, [useConsolidation]);
+
+    // ✅ Check if data is loaded
+    const dataLoaded = ProductionCalculator.products && ProductionCalculator.products.length > 0;
 
     if (!dataLoaded) {
         return (
@@ -360,7 +352,7 @@ const Calculator = () => {
                 optimizationGoal: optimizationGoal,
                 constraints: {},
                 resourceConstraints: new Map(),
-                disabledRecipes: disabledRecipes // ✅ ADD THIS LINE
+                disabledRecipes: disabledRecipes
             });
 
             if (!result.error) {
@@ -621,15 +613,15 @@ const Calculator = () => {
             margin: '0 auto',
             minHeight: '100vh'
         }}>
-        <LoadingOverlay
-            isVisible={isCalculating}
-            title={optimizationMode ? 'Optimizing Production Chains...' : 'Calculating Production Chains...'}
-            message={optimizationMode
+            <LoadingOverlay
+                isVisible={isCalculating}
+                title={optimizationMode ? 'Optimizing Production Chains...' : 'Calculating Production Chains...'}
+                message={optimizationMode
                     ? 'Finding optimal machine combinations and recipe selections...'
                     : 'Processing production requirements and resource dependencies...'}
-            showOptimizationTip={optimizationMode}
-            icon={optimizationMode ? '🔍' : '⚙️'}
-        />
+                showOptimizationTip={optimizationMode}
+                icon={optimizationMode ? '🔍' : '⚙️'}
+            />
             <div style={{
                 padding: '1.5rem 2rem',
                 backgroundColor: '#2a2a2a',
@@ -920,9 +912,9 @@ const Calculator = () => {
                     onChangeResourceInput={setResourceInput}
                     onAddResourceConstraint={addResourceConstraint}
                     onRemoveResourceConstraint={removeResourceConstraint}
-                    onSelectAlternative={handleSelectAlternative}  
+                    onSelectAlternative={handleSelectAlternative}
                     onApplyRecipeConstraints={handleApplyRecipeConstraints}
-                    currentAlternative={selectedAlternative}      
+                    currentAlternative={selectedAlternative}
                 />
 
                 {/* Input Section */}
@@ -1373,7 +1365,7 @@ const Calculator = () => {
                                                 collapsedNodes={collapsedNodes}
                                                 onToggleCollapse={toggleNodeCollapse}
                                                 onSelectNode={handleNodeClick}
-                                                        selectedNodeKey={selectedNode?.nodeKey}
+                                                selectedNodeKey={selectedNode?.nodeKey}
                                                 selectedNode={selectedNode}
                                                 onOpenResourceSourceModal={openResourceSourceModal}
                                                 onOpenRecipeModal={openRecipeModal}

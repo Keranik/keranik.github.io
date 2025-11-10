@@ -11,11 +11,18 @@ export class FoodChainResolver {
     static crops = [];
     static machines = [];
 
-    // ✅ NEW: Pre-calculated efficiency cache
+    // ✅ Pre-calculated efficiency cache
     static chainEfficiencyCache = new Map();
-    static baselineFarmWorkerProductivity = 0; // Calculated on init
+    static baselineFarmWorkerProductivity = 0;
+    static isInitialized = false;
 
     static initialize(recipes, foods, crops) {
+        // ✅ CHECK IF ALREADY INITIALIZED
+        if (this.isInitialized && this.chainEfficiencyCache.size > 0) {
+            console.log('⏭️ FoodChainResolver already initialized, skipping cache rebuild...');
+            return;
+        }
+
         this.recipes = recipes;
         this.foods = foods;
         this.crops = crops;
@@ -29,72 +36,12 @@ export class FoodChainResolver {
         // Build the cache
         this.buildChainEfficiencyCache();
 
+        this.isInitialized = true;
         console.log(`✅ Cached ${this.chainEfficiencyCache.size} crop → food chain combinations`);
     }
 
     /**
- * ✅ NEW: Async initialization that yields to browser between crops
- * Allows UI to remain responsive during cache build
- */
-    static async initializeAsync(recipes, foods, crops) {
-        this.recipes = recipes;
-        this.foods = foods;
-        this.crops = crops;
-
-        console.log('🔗 FoodChainResolver: Building comprehensive chain cost cache (async)...');
-
-        // Calculate baseline (fast)
-        this.baselineFarmWorkerProductivity = this.calculateBaselineFarmProductivity();
-        console.log(`📊 Baseline farm worker productivity: ${this.baselineFarmWorkerProductivity.toFixed(1)} people/worker/month`);
-
-        // Build cache with progress updates
-        await this.buildChainEfficiencyCacheAsync();
-
-        console.log(`✅ Cached ${this.chainEfficiencyCache.size} crop → food chain combinations`);
-    }
-
-    /**
-     * ✅ NEW: Build cache asynchronously with yield points
-     */
-    static async buildChainEfficiencyCacheAsync() {
-        this.chainEfficiencyCache.clear();
-
-        const totalCrops = this.crops.length;
-        let processedCrops = 0;
-
-        for (const crop of this.crops) {
-            const paths = this.getFoodsFromCrop(crop.output.productId);
-
-            for (const path of paths) {
-                const cacheKey = `${crop.id}_${path.finalFoodProductId}`;
-
-                // Calculate comprehensive metrics for this chain
-                const chainMetrics = this.calculateComprehensiveChainMetrics(
-                    crop,
-                    path,
-                    100
-                );
-
-                if (chainMetrics) {
-                    this.chainEfficiencyCache.set(cacheKey, chainMetrics);
-                }
-            }
-
-            processedCrops++;
-
-            // Yield to browser every 5 crops to keep UI responsive
-            if (processedCrops % 5 === 0) {
-                await new Promise(resolve => setTimeout(resolve, 0));
-
-                // Log progress
-                const progress = ((processedCrops / totalCrops) * 100).toFixed(0);
-                console.log(`⏳ Chain cache progress: ${progress}% (${processedCrops}/${totalCrops} crops)`);
-            }
-        }
-    }
-
-    /**
-     * ✅ NEW: Calculate baseline farm worker productivity
+     * ✅ Calculate baseline farm worker productivity
      * Uses the BEST direct-consumption crop as baseline
      * This represents opportunity cost: "What could this worker produce if farming instead?"
      */
@@ -133,7 +80,7 @@ export class FoodChainResolver {
     }
 
     /**
-     * ✅ NEW: Build comprehensive chain cost cache
+     * ✅ Build comprehensive chain cost cache
      * For EVERY crop → food combination, calculate ALL metrics
      */
     static buildChainEfficiencyCache() {
@@ -152,13 +99,15 @@ export class FoodChainResolver {
                     100 // Calculate per 100 units of crop for consistency
                 );
 
-                this.chainEfficiencyCache.set(cacheKey, chainMetrics);
+                if (chainMetrics) {
+                    this.chainEfficiencyCache.set(cacheKey, chainMetrics);
+                }
             });
         });
     }
 
     /**
-     * ✅ NEW: Calculate ALL metrics for a processing chain
+     * ✅ Calculate ALL metrics for a processing chain
      * This is the ONE SOURCE OF TRUTH for chain costs
      */
     static calculateComprehensiveChainMetrics(crop, path, inputQuantityPerMonth) {
@@ -236,7 +185,7 @@ export class FoodChainResolver {
     }
 
     /**
-     * ✅ NEW: Calculate processing chain costs
+     * ✅ Calculate processing chain costs
      * Returns absolute costs for the given input quantity
      */
     static calculateProcessingChainCosts(processingChain, inputQuantityPerMonth) {
@@ -355,7 +304,7 @@ export class FoodChainResolver {
     }
 
     /**
-     * ✅ NEW: Get cached chain metrics
+     * ✅ Get cached chain metrics
      * Used by optimization engine instead of calculating on-the-fly
      */
     static getChainMetrics(cropId, foodProductId) {
@@ -364,7 +313,7 @@ export class FoodChainResolver {
     }
 
     /**
-     * ✅ NEW: Get all cached chains for a crop
+     * ✅ Get all cached chains for a crop
      * Returns all possible food outputs with their metrics
      */
     static getAllChainsForCrop(cropId) {
@@ -380,7 +329,7 @@ export class FoodChainResolver {
     }
 
     /**
-     * ✅ NEW: Get best chain for a crop based on optimization mode
+     * ✅ Get best chain for a crop based on optimization mode
      * This is what the optimizer will use
      */
     static getBestChainForCrop(cropId, optimizationMode) {
@@ -548,5 +497,14 @@ export class FoodChainResolver {
         });
 
         return results;
+    }
+
+    /**
+     * ✅ Clear cache (for when data changes)
+     */
+    static clearCache() {
+        this.chainEfficiencyCache.clear();
+        this.isInitialized = false;
+        console.log('🗑️ FoodChainResolver cache cleared');
     }
 }

@@ -7,8 +7,10 @@
  */
 class ProductionCalculator {
     constructor() {
+
         // Initialize with empty data - will be populated by initialize()
         this._gameData = null;
+        this._isInitialized = false;
         this.machines = [];
         this.recipes = [];
         this.products = [];
@@ -44,6 +46,11 @@ class ProductionCalculator {
      * Initialize calculator with game data
      */
     initialize(gameData) {
+        if (this._isInitialized) {
+            console.log('⏭️ ProductionCalculator already initialized, skipping...');
+            return;
+        }
+
         this._gameData = gameData;
 
         // Populate arrays
@@ -91,6 +98,7 @@ class ProductionCalculator {
         // NEW: Detect A↔B tautological loops
         this._detectTautologicalLoops();
 
+        this._isInitialized = true;
         // Log loaded data for debugging
         console.log('ProductionCalculator initialized:', {
             machines: this.machines.length,
@@ -766,6 +774,32 @@ class ProductionCalculator {
             count: this.tautologicalProducts.size,
             products: pairs
         };
+    }
+
+    /**
+     * Reset the calculator (for testing or mod changes)
+     */
+    reset() {
+        this._isInitialized = false;
+        this._gameData = null;
+        this.machines = [];
+        this.recipes = [];
+        this.products = [];
+        this.farms = [];
+        this.crops = [];
+        this.foods = [];
+        this.foodCategories = [];
+        this.farmResearch = [];
+        this.productMap.clear();
+        this.recipeMap.clear();
+        this.machineMap.clear();
+        this.farmMap.clear();
+        this.cropMap.clear();
+        this.foodMap.clear();
+        this.productToRecipes.clear();
+        this.fertilizers = [];
+        this.tautologicalProducts.clear();
+        console.log('🔄 ProductionCalculator reset');
     }
 }
 
