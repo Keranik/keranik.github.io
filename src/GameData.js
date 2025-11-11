@@ -1,7 +1,7 @@
 const GameData = {
   "metadataJs": {
     "version": "Update 3",
-    "lastUpdated": "11/08/2025",
+    "lastUpdated": "11/11/2025",
     "updateNotes": "Base game export"
   },
   "machines": [
@@ -1562,11 +1562,7 @@ const GameData = {
         "CrewSuppliesAssemblyT3",
         "ProbePartsAssembly",
         "CompactReactorAssembly",
-        "AsteroidBoosterPartsAssembly",
-        "EmptyCanProductionT5Iron",
-        "EmptyCanProductionT5Steel",
-        "EmptyCanProductionT5Aluminum",
-        "FoodCanPackT3"
+        "AsteroidBoosterPartsAssembly"
       ],
       "electricityKw": 400,
       "computingTFlops": 6,
@@ -1695,10 +1691,7 @@ const GameData = {
         "CompositePanelAssemblyT2",
         "CompositeCoreBasicAssemblyT2",
         "StationPartsBasicAssemblyT2",
-        "CrewSuppliesAssemblyT2",
-        "EmptyCanProductionT4Iron",
-        "EmptyCanProductionT4Steel",
-        "FoodCanPackT2"
+        "CrewSuppliesAssemblyT2"
       ],
       "electricityKw": 250,
       "computingTFlops": 3,
@@ -1823,10 +1816,7 @@ const GameData = {
         "CompositePanelAssemblyT1",
         "CompositeCoreBasicAssemblyT1",
         "StationPartsBasicAssemblyT1",
-        "CrewSuppliesAssemblyT1",
-        "EmptyCanProductionT3Iron",
-        "EmptyCanProductionT3Steel",
-        "FoodCanPackT1"
+        "CrewSuppliesAssemblyT1"
       ],
       "electricityKw": 150,
       "computingTFlops": 0,
@@ -1925,8 +1915,7 @@ const GameData = {
         "VehicleParts1AssemblyT2",
         "LabEquipment1AssemblyT1",
         "HouseholdGoodsAssemblyT1",
-        "ElectronicsAssemblyT2",
-        "EmptyCanProductionT2Iron"
+        "ElectronicsAssemblyT2"
       ],
       "electricityKw": 80,
       "computingTFlops": 0,
@@ -2022,8 +2011,7 @@ const GameData = {
         "Cp2AssemblyT1",
         "MechPartsAssemblyT1",
         "VehicleParts1AssemblyT1",
-        "ElectronicsAssemblyT1",
-        "EmptyCanProductionT1Iron"
+        "ElectronicsAssemblyT1"
       ],
       "electricityKw": 40,
       "computingTFlops": 0,
@@ -5943,9 +5931,7 @@ const GameData = {
         "AnimalFeedFromSoybeanT2",
         "AnimalFeedCompostT2",
         "BiomassCompostT2",
-        "MeatTrimmingsCompostT2",
-        "FertilizerFromFishScalesT2",
-        "FertilizerFromDirtScalesT2"
+        "MeatTrimmingsCompostT2"
       ],
       "electricityKw": 200,
       "computingTFlops": 0,
@@ -6074,9 +6060,7 @@ const GameData = {
         "AnimalFeedFromSoybean",
         "AnimalFeedCompost",
         "BiomassCompost",
-        "MeatTrimmingsCompost",
-        "FertilizerFromFishScales",
-        "FertilizerFromDirtScales"
+        "MeatTrimmingsCompost"
       ],
       "electricityKw": 100,
       "computingTFlops": 0,
@@ -6210,8 +6194,7 @@ const GameData = {
         "CoreFuelFromEnriched",
         "CoreFuelFromPu",
         "DiamondPasteFromCookingOil",
-        "DiamondPasteFromHeavyOil",
-        "AntibioticsFromFishOil"
+        "DiamondPasteFromHeavyOil"
       ],
       "electricityKw": 400,
       "computingTFlops": 0,
@@ -6590,7 +6573,7 @@ const GameData = {
       },
       "upgrades": {
         "tierNumber": 0,
-        "nextTierId": "DistillationTowerS1T2",
+        "nextTierId": "",
         "previousTierId": "",
         "canDowngrade": true,
         "canSkipUpgrade": true,
@@ -6682,7 +6665,7 @@ const GameData = {
       },
       "upgrades": {
         "tierNumber": 0,
-        "nextTierId": "DistillationTowerS2T2",
+        "nextTierId": "",
         "previousTierId": "",
         "canDowngrade": true,
         "canSkipUpgrade": true,
@@ -6775,7 +6758,7 @@ const GameData = {
       },
       "upgrades": {
         "tierNumber": 0,
-        "nextTierId": "DistillationTowerS3T2",
+        "nextTierId": "",
         "previousTierId": "",
         "canDowngrade": true,
         "canSkipUpgrade": true,
@@ -6899,9 +6882,7 @@ const GameData = {
         "NaphthaReforming",
         "DieselReforming",
         "NaphthaReformingToGas",
-        "FuelGasReforming",
-        "HeavyOilToMediumCracking",
-        "MediumOilToLightCracking"
+        "FuelGasReforming"
       ],
       "electricityKw": 160,
       "computingTFlops": 0,
@@ -6970,7 +6951,7 @@ const GameData = {
       },
       "upgrades": {
         "tierNumber": 0,
-        "nextTierId": "HydroCrackerT2",
+        "nextTierId": "",
         "previousTierId": "",
         "canDowngrade": true,
         "canSkipUpgrade": true,
@@ -7096,9 +7077,7 @@ const GameData = {
       "description": "Makes sour water useful by extracting ammonia and sulfur. Sulfur can be turned into acid and used for instance in the production of copper.",
       "image": "Assets/Base/Machines/Oil/SourWaterStripper.prefab",
       "recipes": [
-        "SourWaterStripping",
-        "SourWaterStrippingT2",
-        "SourWaterStrippingT2Sp"
+        "SourWaterStripping"
       ],
       "electricityKw": 160,
       "computingTFlops": 0,
@@ -7525,8 +7504,7 @@ const GameData = {
         "FertilizerOrganicDumping",
         "FertilizerChem1Dumping",
         "FertilizerChem2Dumping",
-        "RedMudDumping",
-        "WasteDisposalFishOil"
+        "RedMudDumping"
       ],
       "electricityKw": 0,
       "computingTFlops": 0,
@@ -7931,8 +7909,7 @@ const GameData = {
         "MeatTrimmingsBurning",
         "ChickenCarcassBurning",
         "SulfurBurning",
-        "SludgeBurning",
-        "SolidBurnerFishScales"
+        "SludgeBurning"
       ],
       "electricityKw": 0,
       "computingTFlops": 0,
@@ -8007,9 +7984,7 @@ const GameData = {
         "IncinerationOfWaste",
         "IncinerationOfWastePressed",
         "IncinerationOfWasteHydrogen",
-        "IncinerationOfWastePressedHydrogen",
-        "IncineratingWasteSyngas",
-        "IncineratingWastePressedSyngas"
+        "IncinerationOfWastePressedHydrogen"
       ],
       "electricityKw": 500,
       "computingTFlops": 0,
@@ -14437,7 +14412,7 @@ const GameData = {
       "source": null,
       "graphics": {
         "prefabPath": "",
-        "customIconPath": "Assets/Agriculture/Icons/CookingOil.svg",
+        "customIconPath": "Assets/Base/Products/Icons/CookingOil.svg",
         "color": {
           "r": 217,
           "g": 205,
@@ -104099,11 +104074,11 @@ const GameData = {
       "powerMultiplier": 100,
       "destroyReason": "DumpedOnTerrain",
       "minUtilizationPercent": 1,
-      "quantitiesGcd": 6,
+      "quantitiesGcd": 2,
       "inputs": [
         {
           "productId": "Product_Water",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104125,7 +104100,7 @@ const GameData = {
       "visibleInputs": [
         {
           "productId": "Product_Water",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104153,11 +104128,11 @@ const GameData = {
       "powerMultiplier": 100,
       "destroyReason": "DumpedOnTerrain",
       "minUtilizationPercent": 1,
-      "quantitiesGcd": 6,
+      "quantitiesGcd": 2,
       "inputs": [
         {
           "productId": "Product_Brine",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104179,7 +104154,7 @@ const GameData = {
       "visibleInputs": [
         {
           "productId": "Product_Brine",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104207,11 +104182,11 @@ const GameData = {
       "powerMultiplier": 100,
       "destroyReason": "DumpedOnTerrain",
       "minUtilizationPercent": 1,
-      "quantitiesGcd": 6,
+      "quantitiesGcd": 2,
       "inputs": [
         {
           "productId": "Product_WasteWater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104232,7 +104207,7 @@ const GameData = {
       "outputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104242,7 +104217,7 @@ const GameData = {
       "visibleInputs": [
         {
           "productId": "Product_WasteWater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104263,7 +104238,7 @@ const GameData = {
       "visibleOutputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104279,11 +104254,11 @@ const GameData = {
       "powerMultiplier": 100,
       "destroyReason": "DumpedOnTerrain",
       "minUtilizationPercent": 1,
-      "quantitiesGcd": 6,
+      "quantitiesGcd": 2,
       "inputs": [
         {
           "productId": "Product_SourWater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104304,7 +104279,7 @@ const GameData = {
       "outputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 12,
+          "quantity": 4,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104314,7 +104289,7 @@ const GameData = {
       "visibleInputs": [
         {
           "productId": "Product_SourWater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104335,7 +104310,7 @@ const GameData = {
       "visibleOutputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 12,
+          "quantity": 4,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104351,11 +104326,11 @@ const GameData = {
       "powerMultiplier": 100,
       "destroyReason": "DumpedOnTerrain",
       "minUtilizationPercent": 1,
-      "quantitiesGcd": 6,
+      "quantitiesGcd": 2,
       "inputs": [
         {
           "productId": "Product_Acid",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104376,7 +104351,7 @@ const GameData = {
       "outputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 12,
+          "quantity": 4,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104386,7 +104361,7 @@ const GameData = {
       "visibleInputs": [
         {
           "productId": "Product_Acid",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104407,7 +104382,7 @@ const GameData = {
       "visibleOutputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 12,
+          "quantity": 4,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104423,11 +104398,11 @@ const GameData = {
       "powerMultiplier": 100,
       "destroyReason": "DumpedOnTerrain",
       "minUtilizationPercent": 1,
-      "quantitiesGcd": 3,
+      "quantitiesGcd": 1,
       "inputs": [
         {
           "productId": "Product_ToxicSlurry",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104448,7 +104423,7 @@ const GameData = {
       "outputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 15,
+          "quantity": 5,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104458,7 +104433,7 @@ const GameData = {
       "visibleInputs": [
         {
           "productId": "Product_ToxicSlurry",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104479,7 +104454,7 @@ const GameData = {
       "visibleOutputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 15,
+          "quantity": 5,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104495,11 +104470,11 @@ const GameData = {
       "powerMultiplier": 100,
       "destroyReason": "DumpedOnTerrain",
       "minUtilizationPercent": 1,
-      "quantitiesGcd": 6,
+      "quantitiesGcd": 2,
       "inputs": [
         {
           "productId": "Product_Seawater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104521,7 +104496,7 @@ const GameData = {
       "visibleInputs": [
         {
           "productId": "Product_Seawater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104549,11 +104524,11 @@ const GameData = {
       "powerMultiplier": 100,
       "destroyReason": "DumpedOnTerrain",
       "minUtilizationPercent": 1,
-      "quantitiesGcd": 3,
+      "quantitiesGcd": 1,
       "inputs": [
         {
           "productId": "Product_FertilizerOrganic",
-          "quantity": 12,
+          "quantity": 4,
           "ports": [
             {
               "id": "A",
@@ -104574,7 +104549,7 @@ const GameData = {
       "outputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 3,
+          "quantity": 1,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104584,7 +104559,7 @@ const GameData = {
       "visibleInputs": [
         {
           "productId": "Product_FertilizerOrganic",
-          "quantity": 12,
+          "quantity": 4,
           "ports": [
             {
               "id": "A",
@@ -104605,7 +104580,7 @@ const GameData = {
       "visibleOutputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 3,
+          "quantity": 1,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104621,11 +104596,11 @@ const GameData = {
       "powerMultiplier": 100,
       "destroyReason": "DumpedOnTerrain",
       "minUtilizationPercent": 1,
-      "quantitiesGcd": 3,
+      "quantitiesGcd": 1,
       "inputs": [
         {
           "productId": "Product_Fertilizer",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104646,7 +104621,7 @@ const GameData = {
       "outputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 3,
+          "quantity": 1,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104656,7 +104631,7 @@ const GameData = {
       "visibleInputs": [
         {
           "productId": "Product_Fertilizer",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104677,7 +104652,7 @@ const GameData = {
       "visibleOutputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 3,
+          "quantity": 1,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104693,11 +104668,11 @@ const GameData = {
       "powerMultiplier": 100,
       "destroyReason": "DumpedOnTerrain",
       "minUtilizationPercent": 1,
-      "quantitiesGcd": 6,
+      "quantitiesGcd": 2,
       "inputs": [
         {
           "productId": "Product_Fertilizer2",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104718,7 +104693,7 @@ const GameData = {
       "outputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104728,7 +104703,7 @@ const GameData = {
       "visibleInputs": [
         {
           "productId": "Product_Fertilizer2",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104749,7 +104724,7 @@ const GameData = {
       "visibleOutputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104765,11 +104740,11 @@ const GameData = {
       "powerMultiplier": 100,
       "destroyReason": "DumpedOnTerrain",
       "minUtilizationPercent": 1,
-      "quantitiesGcd": 6,
+      "quantitiesGcd": 2,
       "inputs": [
         {
           "productId": "Product_RedMud",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104790,7 +104765,7 @@ const GameData = {
       "outputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -104800,7 +104775,7 @@ const GameData = {
       "visibleInputs": [
         {
           "productId": "Product_RedMud",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [
             {
               "id": "A",
@@ -104821,7 +104796,7 @@ const GameData = {
       "visibleOutputs": [
         {
           "productId": "Product_Virtual_PollutedWater",
-          "quantity": 6,
+          "quantity": 2,
           "ports": [],
           "hideInUi": false,
           "triggerAtStart": false,
@@ -120702,6 +120677,136 @@ const GameData = {
       "buildTimePerProductSeconds": 0.200195313
     },
     {
+      "id": "RetainingWallStraight1",
+      "name": "Retaining wall (short)",
+      "description": "Prevents terrain from collapsing. Walls can be placed below the surface to prevent terrain collapse during mining, or above terrain to aid with dumping operations. The placement elevation is adjustable. Walls will collapse if they hold more than 5 units of height or if they are overfilled.",
+      "image": "Assets/Base/Buildings/RetainingWalls/RetainingWall2m.prefab",
+      "layout": {
+        "width": 1,
+        "height": 2,
+        "thickness": 1,
+        "layoutString": "(W)\n(W)",
+        "ports": []
+      },
+      "workers": 0,
+      "price": [
+        {
+          "productId": "Product_Iron",
+          "quantity": 2
+        },
+        {
+          "productId": "Product_ConcreteSlab",
+          "quantity": 6
+        }
+      ],
+      "tags": [],
+      "buildTimePerProductSeconds": 0.200195313
+    },
+    {
+      "id": "RetainingWallStraight4",
+      "name": "Retaining wall (long)",
+      "description": "Prevents terrain from collapsing. Walls can be placed below the surface to prevent terrain collapse during mining, or above terrain to aid with dumping operations. The placement elevation is adjustable. Walls will collapse if they hold more than 5 units of height or if they are overfilled.",
+      "image": "Assets/Base/Buildings/RetainingWalls/RetainingWall8m.prefab",
+      "layout": {
+        "width": 4,
+        "height": 2,
+        "thickness": 1,
+        "layoutString": "(W)(W)(W)(W)\n(W)(W)(W)(W)",
+        "ports": []
+      },
+      "workers": 0,
+      "price": [
+        {
+          "productId": "Product_Iron",
+          "quantity": 6
+        },
+        {
+          "productId": "Product_ConcreteSlab",
+          "quantity": 24
+        }
+      ],
+      "tags": [],
+      "buildTimePerProductSeconds": 0.200195313
+    },
+    {
+      "id": "RetainingWallCorner",
+      "name": "Retaining wall (corner)",
+      "description": "Prevents terrain from collapsing. Walls can be placed below the surface to prevent terrain collapse during mining, or above terrain to aid with dumping operations. The placement elevation is adjustable. Walls will collapse if they hold more than 5 units of height or if they are overfilled.",
+      "image": "Assets/Base/Buildings/RetainingWalls/RetainingWallCorner.prefab",
+      "layout": {
+        "width": 2,
+        "height": 2,
+        "thickness": 1,
+        "layoutString": "(W)(W)\n(W)(W)",
+        "ports": []
+      },
+      "workers": 0,
+      "price": [
+        {
+          "productId": "Product_Iron",
+          "quantity": 3
+        },
+        {
+          "productId": "Product_ConcreteSlab",
+          "quantity": 12
+        }
+      ],
+      "tags": [],
+      "buildTimePerProductSeconds": 0.200195313
+    },
+    {
+      "id": "RetainingWallCross",
+      "name": "Retaining wall (cross)",
+      "description": "Prevents terrain from collapsing. Walls can be placed below the surface to prevent terrain collapse during mining, or above terrain to aid with dumping operations. The placement elevation is adjustable. Walls will collapse if they hold more than 5 units of height or if they are overfilled.",
+      "image": "Assets/Base/Buildings/RetainingWalls/RetainingWallXing.prefab",
+      "layout": {
+        "width": 2,
+        "height": 2,
+        "thickness": 1,
+        "layoutString": "(W)(W)\n(W)(W)",
+        "ports": []
+      },
+      "workers": 0,
+      "price": [
+        {
+          "productId": "Product_Iron",
+          "quantity": 3
+        },
+        {
+          "productId": "Product_ConcreteSlab",
+          "quantity": 12
+        }
+      ],
+      "tags": [],
+      "buildTimePerProductSeconds": 0.200195313
+    },
+    {
+      "id": "RetainingWallTee",
+      "name": "Retaining wall (tee)",
+      "description": "Prevents terrain from collapsing. Walls can be placed below the surface to prevent terrain collapse during mining, or above terrain to aid with dumping operations. The placement elevation is adjustable. Walls will collapse if they hold more than 5 units of height or if they are overfilled.",
+      "image": "Assets/Base/Buildings/RetainingWalls/RetainingWallTee.prefab",
+      "layout": {
+        "width": 2,
+        "height": 2,
+        "thickness": 1,
+        "layoutString": "(W)(W)\n(W)(W)",
+        "ports": []
+      },
+      "workers": 0,
+      "price": [
+        {
+          "productId": "Product_Iron",
+          "quantity": 3
+        },
+        {
+          "productId": "Product_ConcreteSlab",
+          "quantity": 12
+        }
+      ],
+      "tags": [],
+      "buildTimePerProductSeconds": 0.200195313
+    },
+    {
       "id": "BarrierStraight1",
       "name": "Barrier (straight)",
       "description": "Barrier that blocks vehicle access.",
@@ -121110,6 +121215,43 @@ const GameData = {
         {
           "productId": "Product_Gold",
           "quantity": 2000
+        }
+      ],
+      "tags": [],
+      "buildTimePerProductSeconds": 0.200195313
+    },
+    {
+      "id": "Stacker",
+      "name": "Stacker",
+      "description": "Dumps material from connected conveyor belts directly on the terrain.",
+      "image": "Assets/Base/Transports/Stacker/Stacker.prefab",
+      "layout": {
+        "width": 24,
+        "height": 5,
+        "thickness": 12,
+        "layoutString": "                        (1G(1G                                             \n   [2][2][2]      (3A(2G(2X(3X(4B(5A                                       \nA~\u003E[2][2][2](3A(3A(4B(4G(5X(5X(6D(6B(7A(7A(8A(8A(9B(9A10B10A11B11A12B12A12A\n   [2][2][2]      (3A(2G(2X(3X(4B(5A                                       \n                        (1G(1G                                             ",
+        "ports": [
+          {
+            "id": "A",
+            "type": "input",
+            "pos": {
+              "x": 0,
+              "y": 2,
+              "z": 0
+            },
+            "dir": "-X"
+          }
+        ]
+      },
+      "workers": 0,
+      "price": [
+        {
+          "productId": "Product_ConstructionParts2",
+          "quantity": 10
+        },
+        {
+          "productId": "Product_Rubber",
+          "quantity": 10
         }
       ],
       "tags": [],
@@ -126454,6 +126596,58 @@ const GameData = {
       "anyParentCanUnlock": false
     },
     {
+      "id": "ResearchRetainingWalls",
+      "name": "Retaining walls",
+      "description": "Prevents terrain from collapsing. Walls can be placed below the surface to prevent terrain collapse during mining, or above terrain to aid with dumping operations. The placement elevation is adjustable. Walls will collapse if they hold more than 5 units of height or if they are overfilled.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/RetainingWallStraight1.png",
+      "gridPosition": {
+        "x": 28,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "RetainingWallStraight1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallStraight4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallCorner",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallTee",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "RetainingWallCross",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchConcreteAdvanced"
+      ],
+      "researchDurationMonths": 16,
+      "anyParentCanUnlock": false
+    },
+    {
       "id": "ResearchCp2Packing",
       "name": "Construction II",
       "description": "Production of advanced construction parts.",
@@ -128816,7 +129010,7 @@ const GameData = {
       "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/MicrochipMachineT2.png",
       "gridPosition": {
         "x": 148,
-        "y": 22
+        "y": 8
       },
       "unlocks": [
         {
@@ -135063,6 +135257,58 @@ const GameData = {
       "anyParentCanUnlock": false
     },
     {
+      "id": "ResearchVehicleCapIncrease2",
+      "name": "Vehicles management I",
+      "description": "Increases vehicle limit by 30.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Base/Icons/VehicleLimitIncrease.svg",
+      "gridPosition": {
+        "x": 44,
+        "y": 23
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "BarrierStraight1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierCorner",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierCross",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierEnd",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "BarrierTee",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 36,
+      "anyParentCanUnlock": false
+    },
+    {
       "id": "ResearchTradeDock",
       "name": "Trading dock",
       "description": "Allows trading of various goods with villages on the world map. All the products you trade are delivered into a trading dock. Also, trading can be a lifesaver if you run into a shortage of critical products, so it is advised to always have a trading dock available.",
@@ -135315,6 +135561,110 @@ const GameData = {
       "anyParentCanUnlock": false
     },
     {
+      "id": "ResearchPipeTransports",
+      "name": "Pipes",
+      "description": "Pipes are great. Imagine hauling all of that with trucks?",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/PipeT1.png",
+      "gridPosition": {
+        "x": 0,
+        "y": 35
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "PipeT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "MiniZip_IoPortShape_Pipe",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchPipeTransportsT2",
+      "name": "Pipes II",
+      "description": "It turns out that if we increase the pipe diameter, it has a higher throughput.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/PipeT2.png",
+      "gridPosition": {
+        "x": 40,
+        "y": 26
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "PipeT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "SmokeStackLarge",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "SmokeStackLargeDepletedSteam",
+            "SmokeStackLargeLpSteam",
+            "SmokeStackLargeHpSteam",
+            "SmokeStackLargeSpSteam",
+            "SmokeStackLargeOxygen",
+            "SmokeStackLargeNitrogen",
+            "SmokeStackLargeExhaust",
+            "SmokeStackLargeCarbonDioxide"
+          ]
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab2"
+      ],
+      "researchDurationMonths": 36,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchPipeTransportsT3",
+      "name": "Pipes III",
+      "description": "Another increase in the throughput.",
+      "baseCost": 0,
+      "tier": 3,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/PipeT3.png",
+      "gridPosition": {
+        "x": 76,
+        "y": 26
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "PipeT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab3",
+        "ResearchPipeTransportsT2"
+      ],
+      "researchDurationMonths": 84,
+      "anyParentCanUnlock": false
+    },
+    {
       "id": "ResearchStoragesT1",
       "name": "Storage",
       "description": "",
@@ -135466,7 +135816,7 @@ const GameData = {
       "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/CargoDepotT2.png",
       "gridPosition": {
         "x": 56,
-        "y": 25
+        "y": 1
       },
       "unlocks": [
         {
@@ -135639,6 +135989,126 @@ const GameData = {
       "anyParentCanUnlock": false
     },
     {
+      "id": "ResearchConveyorBelts",
+      "name": "Conveyor belts",
+      "description": "Connects machines directly to provide smooth and continuous operation.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/FlatConveyorT1.png",
+      "gridPosition": {
+        "x": 24,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "FlatConveyorT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "MiniZip_IoPortShape_FlatConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "LooseMaterialConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "MiniZip_IoPortShape_LooseMaterialConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp2Packing"
+      ],
+      "researchDurationMonths": 24,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchConveyorBeltsT2",
+      "name": "Conveyor belts II",
+      "description": "Conveyor belts with an increased throughput.",
+      "baseCost": 0,
+      "tier": 2,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/FlatConveyorT2.png",
+      "gridPosition": {
+        "x": 56,
+        "y": 15
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "FlatConveyorT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "LooseMaterialConveyorT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchCp3Packing"
+      ],
+      "researchDurationMonths": 60,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchConveyorBeltsT3",
+      "name": "Conveyor belts III",
+      "description": "Conveyor belts with an increased throughput.",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Transport/FlatConveyorT3.png",
+      "gridPosition": {
+        "x": 116,
+        "y": 10
+      },
+      "unlocks": [
+        {
+          "type": "other",
+          "id": "FlatConveyorT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "LooseMaterialConveyorT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "PipeT4",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 120,
+      "anyParentCanUnlock": false
+    },
+    {
       "id": "ResearchVehicleRamps",
       "name": "Ramp for vehicles",
       "description": "",
@@ -135676,6 +136146,80 @@ const GameData = {
         "ResearchBasicDiesel"
       ],
       "researchDurationMonths": 4,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchStacker",
+      "name": "Stacker",
+      "description": "Dumps material from connected conveyor belts directly on the terrain.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Stacker.png",
+      "gridPosition": {
+        "x": 32,
+        "y": 7
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "Stacker",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchRetainingWalls"
+      ],
+      "researchDurationMonths": 20,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchTransportsBalancing",
+      "name": "Transports balancing",
+      "description": "You can already split / merge transports. But this gives you the ability to set input / output priorities and ratios.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/Zipper_IoPortShape_FlatConveyor.png",
+      "gridPosition": {
+        "x": 28,
+        "y": 11
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_FlatConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_LooseMaterialConveyor",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_Pipe",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "Zipper_IoPortShape_MoltenMetalChannel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchConveyorBelts"
+      ],
+      "researchDurationMonths": 30,
       "anyParentCanUnlock": false
     },
     {
@@ -135846,7 +136390,7 @@ const GameData = {
     },
     {
       "id": "ResearchVehicleAssembly2",
-      "name": "Bigger Vehicles",
+      "name": "Large vehicles",
       "description": "Large vehicles to scale your mining and logistics operations. Their production requires glass which has to be acquired via quick trade from other world settlements until you research how to produce it yourself.",
       "baseCost": 0,
       "tier": 2,
@@ -136079,6 +136623,170 @@ const GameData = {
         "ResearchHydrogenReforming"
       ],
       "researchDurationMonths": 96,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleAssembly3",
+      "name": "Mega vehicles",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/VehiclesDepotT3.png",
+      "gridPosition": {
+        "x": 116,
+        "y": 4
+      },
+      "unlocks": [
+        {
+          "type": "building",
+          "id": "VehiclesDepotT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TruckT3Loose",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TruckT3Fluid",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "ExcavatorT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "FuelStationT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts3AssemblyT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts3AssemblyT2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Electronics2",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_VehicleParts3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "VehicleParts3AssemblyT3",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchResearchLab4"
+      ],
+      "researchDurationMonths": 144,
+      "anyParentCanUnlock": false
+    },
+    {
+      "id": "ResearchVehicleAssembly3H",
+      "name": "Hydrogen mega vehicles",
+      "description": "",
+      "baseCost": 0,
+      "tier": 4,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/Vehicle/TruckT3LooseH.png",
+      "gridPosition": {
+        "x": 120,
+        "y": 4
+      },
+      "unlocks": [
+        {
+          "type": "vehicle",
+          "id": "TruckT3LooseH",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "TruckT3FluidH",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "vehicle",
+          "id": "ExcavatorT3H",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [
+        "ResearchVehicleAssembly3"
+      ],
+      "researchDurationMonths": 168,
       "anyParentCanUnlock": false
     },
     {
@@ -136454,6 +137162,167 @@ const GameData = {
       "anyParentCanUnlock": false
     },
     {
+      "id": "ResearchIronSmeltingScrap",
+      "name": "Iron smelting (from scrap)",
+      "description": "Production of iron from metal scraps.",
+      "baseCost": 0,
+      "tier": 0,
+      "maxLevels": 1,
+      "perLevelBonuses": {},
+      "spacePointsRequiredFrom": 2147483647,
+      "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/SmeltingFurnaceT1.png",
+      "gridPosition": {
+        "x": 0,
+        "y": 10
+      },
+      "unlocks": [
+        {
+          "type": "machine",
+          "id": "SmeltingFurnaceT1",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_IronScrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronSmeltingT1Scrap",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "Caster",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "IronCasting",
+            "CopperCasting",
+            "AluminumCasting"
+          ]
+        },
+        {
+          "type": "product",
+          "id": "Product_Wood",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Coal",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "CharcoalBurning",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "CharcoalMaker",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "CharcoalBurning"
+          ]
+        },
+        {
+          "type": "product",
+          "id": "Product_MoltenIron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Iron",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "IronCasting",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "other",
+          "id": "MoltenMetalChannel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "building",
+          "id": "MiniZip_IoPortShape_MoltenMetalChannel",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "machine",
+          "id": "SmokeStack",
+          "allRecipesUnlocked": true,
+          "recipeIds": [
+            "SmokeStackDepletedSteam",
+            "SmokeStackLpSteam",
+            "SmokeStackHpSteam",
+            "SmokeStackSpSteam",
+            "SmokeStackOxygen",
+            "SmokeStackNitrogen",
+            "SmokeStackExhaust",
+            "SmokeStackCarbonDioxide"
+          ]
+        },
+        {
+          "type": "product",
+          "id": "Product_Exhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "product",
+          "id": "Product_Virtual_PollutedAir",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        },
+        {
+          "type": "recipe",
+          "id": "SmokeStackExhaust",
+          "allRecipesUnlocked": false,
+          "recipeIds": []
+        }
+      ],
+      "parentIds": [],
+      "researchDurationMonths": 0,
+      "anyParentCanUnlock": false
+    },
+    {
       "id": "ResearchSettlementWaste",
       "name": "Settlement waste",
       "description": "Basic collection and disposal of waste from settlements.",
@@ -136717,7 +137586,9 @@ const GameData = {
           "recipeIds": []
         }
       ],
-      "parentIds": [],
+      "parentIds": [
+        "ResearchIronSmeltingScrap"
+      ],
       "researchDurationMonths": 6,
       "anyParentCanUnlock": false
     },
@@ -142342,12 +143213,6 @@ const GameData = {
           "id": "Edict_SolarPowerIncreaseT2",
           "allRecipesUnlocked": false,
           "recipeIds": []
-        },
-        {
-          "type": "building",
-          "id": "SolarPanelQuarter",
-          "allRecipesUnlocked": false,
-          "recipeIds": []
         }
       ],
       "parentIds": [
@@ -142428,12 +143293,6 @@ const GameData = {
         {
           "type": "other",
           "id": "Edict_SolarPowerIncreaseT3",
-          "allRecipesUnlocked": false,
-          "recipeIds": []
-        },
-        {
-          "type": "building",
-          "id": "SolarPanelMonoQuarter",
           "allRecipesUnlocked": false,
           "recipeIds": []
         }
@@ -143171,7 +144030,7 @@ const GameData = {
       "iconPath": "Assets/Unity/Generated/Icons/LayoutEntity/AnaerobicDigester.png",
       "gridPosition": {
         "x": 44,
-        "y": 19
+        "y": 15
       },
       "unlocks": [
         {
@@ -144562,7 +145421,7 @@ const GameData = {
       "iconPath": "Assets/Base/Ships/BattleShip/Icons/Gun2.png",
       "gridPosition": {
         "x": 44,
-        "y": 54
+        "y": 4
       },
       "unlocks": [
         {
@@ -144596,7 +145455,7 @@ const GameData = {
       "iconPath": "Assets/Base/Ships/BattleShip/Icons/Armor1.png",
       "gridPosition": {
         "x": 48,
-        "y": 54
+        "y": 4
       },
       "unlocks": [
         {
@@ -144617,14 +145476,14 @@ const GameData = {
       "name": "Ship bridge II",
       "description": "Advanced ship bridge. Also contains a better radar for area explorations.",
       "baseCost": 0,
-      "tier": 2,
+      "tier": 3,
       "maxLevels": 1,
       "perLevelBonuses": {},
       "spacePointsRequiredFrom": 2147483647,
       "iconPath": "Assets/Base/Ships/BattleShip/Icons/Ship2.png",
       "gridPosition": {
-        "x": 52,
-        "y": 54
+        "x": 76,
+        "y": -3
       },
       "unlocks": [
         {
@@ -144635,6 +145494,7 @@ const GameData = {
         }
       ],
       "parentIds": [
+        "ResearchResearchLab3",
         "ResearchSteelSmelting"
       ],
       "researchDurationMonths": 60,
@@ -144651,8 +145511,8 @@ const GameData = {
       "spacePointsRequiredFrom": 2147483647,
       "iconPath": "Assets/Base/Ships/BattleShip/Icons/Engine2.png",
       "gridPosition": {
-        "x": 76,
-        "y": 54
+        "x": 92,
+        "y": -3
       },
       "unlocks": [
         {
@@ -144663,8 +145523,7 @@ const GameData = {
         }
       ],
       "parentIds": [
-        "ResearchResearchLab3",
-        "ResearchShipFuelTankUpgrade"
+        "ResearchShipRadar"
       ],
       "researchDurationMonths": 84,
       "anyParentCanUnlock": false
@@ -144680,8 +145539,8 @@ const GameData = {
       "spacePointsRequiredFrom": 2147483647,
       "iconPath": "Assets/Base/Ships/BattleShip/Icons/Gun3.png",
       "gridPosition": {
-        "x": 88,
-        "y": 54
+        "x": 96,
+        "y": -3
       },
       "unlocks": [
         {
@@ -144708,14 +145567,14 @@ const GameData = {
       "name": "Fuel tank upgrade",
       "description": "",
       "baseCost": 0,
-      "tier": 2,
+      "tier": 3,
       "maxLevels": 1,
       "perLevelBonuses": {},
       "spacePointsRequiredFrom": 2147483647,
       "iconPath": "Assets/Base/Ships/BattleShip/Icons/Engine1.png",
       "gridPosition": {
-        "x": 56,
-        "y": 54
+        "x": 104,
+        "y": 1
       },
       "unlocks": [
         {
@@ -144726,7 +145585,7 @@ const GameData = {
         }
       ],
       "parentIds": [
-        "ResearchCp3Packing"
+        "ResearchShipRadar2"
       ],
       "researchDurationMonths": 120,
       "anyParentCanUnlock": false
@@ -144736,14 +145595,14 @@ const GameData = {
       "name": "Ship armor II",
       "description": "",
       "baseCost": 0,
-      "tier": 3,
+      "tier": 4,
       "maxLevels": 1,
       "perLevelBonuses": {},
       "spacePointsRequiredFrom": 2147483647,
       "iconPath": "Assets/Base/Ships/BattleShip/Icons/Armor2.png",
       "gridPosition": {
-        "x": 96,
-        "y": 54
+        "x": 132,
+        "y": -3
       },
       "unlocks": [
         {
@@ -144754,6 +145613,7 @@ const GameData = {
         }
       ],
       "parentIds": [
+        "ResearchResearchLab4",
         "ResearchShipWeapons2"
       ],
       "researchDurationMonths": 120,
@@ -144770,8 +145630,8 @@ const GameData = {
       "spacePointsRequiredFrom": 2147483647,
       "iconPath": "Assets/Base/Ships/BattleShip/Icons/Ship3.png",
       "gridPosition": {
-        "x": 104,
-        "y": 54
+        "x": 100,
+        "y": 1
       },
       "unlocks": [
         {
@@ -144782,7 +145642,7 @@ const GameData = {
         }
       ],
       "parentIds": [
-        "ResearchShipArmor2"
+        "ResearchShipWeapons2"
       ],
       "researchDurationMonths": 120,
       "anyParentCanUnlock": false
@@ -144792,14 +145652,14 @@ const GameData = {
       "name": "Ship engine III",
       "description": "Once fitted, the ship will be able to travel farther.",
       "baseCost": 0,
-      "tier": 3,
+      "tier": 5,
       "maxLevels": 1,
       "perLevelBonuses": {},
       "spacePointsRequiredFrom": 2147483647,
       "iconPath": "Assets/Base/Ships/BattleShip/Icons/Engine3.png",
       "gridPosition": {
-        "x": 112,
-        "y": 54
+        "x": 148,
+        "y": -3
       },
       "unlocks": [
         {
@@ -144810,9 +145670,10 @@ const GameData = {
         }
       ],
       "parentIds": [
-        "ResearchShipRadar2"
+        "ResearchResearchLab5",
+        "ResearchShipArmor2"
       ],
-      "researchDurationMonths": 128,
+      "researchDurationMonths": 300,
       "anyParentCanUnlock": false
     },
     {
@@ -144820,14 +145681,14 @@ const GameData = {
       "name": "Ship weapons III",
       "description": "Ship guns that provide increased range and damage.",
       "baseCost": 0,
-      "tier": 4,
+      "tier": 5,
       "maxLevels": 1,
       "perLevelBonuses": {},
       "spacePointsRequiredFrom": 2147483647,
       "iconPath": "Assets/Base/Ships/BattleShip/Icons/Gun4.png",
       "gridPosition": {
-        "x": 116,
-        "y": 54
+        "x": 156,
+        "y": -3
       },
       "unlocks": [
         {
@@ -144844,10 +145705,9 @@ const GameData = {
         }
       ],
       "parentIds": [
-        "ResearchShipRadar2",
-        "ResearchResearchLab4"
+        "ResearchEngine3"
       ],
-      "researchDurationMonths": 84,
+      "researchDurationMonths": 360,
       "anyParentCanUnlock": false
     },
     {
@@ -145569,7 +146429,248 @@ const GameData = {
       "anyParentCanUnlock": false
     }
   ],
-  "mods": null
+  "mods": null,
+  "cropFoodChains": {
+    "Crop_NoCrop": {
+      "isFoodCrop": false,
+      "directlyEdible": false,
+      "directFoodId": null,
+      "directFoodCategoryId": null,
+      "processingChains": []
+    },
+    "Crop_GreenManure": {
+      "isFoodCrop": false,
+      "directlyEdible": false,
+      "directFoodId": null,
+      "directFoodCategoryId": null,
+      "processingChains": []
+    },
+    "Crop_Potato": {
+      "isFoodCrop": true,
+      "directlyEdible": true,
+      "directFoodId": "Food_Potato",
+      "directFoodCategoryId": "FoodCategory_Carbs",
+      "processingChains": [
+        {
+          "finalFoodId": "Food_Potato",
+          "finalFoodProductId": "Product_Potato",
+          "foodCategoryId": "FoodCategory_Carbs",
+          "recipeChain": [],
+          "conversionRatio": 1,
+          "processingSteps": 0
+        }
+      ]
+    },
+    "Crop_Corn": {
+      "isFoodCrop": true,
+      "directlyEdible": true,
+      "directFoodId": "Food_Corn",
+      "directFoodCategoryId": "FoodCategory_Carbs",
+      "processingChains": [
+        {
+          "finalFoodId": "Food_Corn",
+          "finalFoodProductId": "Product_Corn",
+          "foodCategoryId": "FoodCategory_Carbs",
+          "recipeChain": [],
+          "conversionRatio": 1,
+          "processingSteps": 0
+        }
+      ]
+    },
+    "Crop_Wheat": {
+      "isFoodCrop": true,
+      "directlyEdible": false,
+      "directFoodId": null,
+      "directFoodCategoryId": null,
+      "processingChains": [
+        {
+          "finalFoodId": "Food_Sausage",
+          "finalFoodProductId": "Product_Sausage",
+          "foodCategoryId": "FoodCategory_Protein",
+          "recipeChain": [
+            "WheatMilling",
+            "SausageProduction"
+          ],
+          "conversionRatio": 0.615400016,
+          "processingSteps": 2
+        },
+        {
+          "finalFoodId": "Food_Bread",
+          "finalFoodProductId": "Product_Bread",
+          "foodCategoryId": "FoodCategory_Carbs",
+          "recipeChain": [
+            "WheatMilling",
+            "BreadProduction"
+          ],
+          "conversionRatio": 1,
+          "processingSteps": 2
+        },
+        {
+          "finalFoodId": "Food_Cake",
+          "finalFoodProductId": "Product_Cake",
+          "foodCategoryId": "FoodCategory_Treats",
+          "recipeChain": [
+            "WheatMilling",
+            "CakeProduction"
+          ],
+          "conversionRatio": 0.699999988,
+          "processingSteps": 2
+        }
+      ]
+    },
+    "Crop_TreeSapling": {
+      "isFoodCrop": false,
+      "directlyEdible": false,
+      "directFoodId": null,
+      "directFoodCategoryId": null,
+      "processingChains": []
+    },
+    "Crop_Soybeans": {
+      "isFoodCrop": true,
+      "directlyEdible": false,
+      "directFoodId": null,
+      "directFoodCategoryId": null,
+      "processingChains": [
+        {
+          "finalFoodId": "Food_Tofu",
+          "finalFoodProductId": "Product_Tofu",
+          "foodCategoryId": "FoodCategory_Protein",
+          "recipeChain": [
+            "TofuProduction"
+          ],
+          "conversionRatio": 0.666700006,
+          "processingSteps": 1
+        },
+        {
+          "finalFoodId": "Food_Snack",
+          "finalFoodProductId": "Product_Snack",
+          "foodCategoryId": "FoodCategory_Treats",
+          "recipeChain": [
+            "SoybeanMilling",
+            "SnackProductionPotato"
+          ],
+          "conversionRatio": 0.1875,
+          "processingSteps": 2
+        },
+        {
+          "finalFoodId": "Food_Cake",
+          "finalFoodProductId": "Product_Cake",
+          "foodCategoryId": "FoodCategory_Treats",
+          "recipeChain": [
+            "SoybeanMilling",
+            "CakeProduction"
+          ],
+          "conversionRatio": 0.262499988,
+          "processingSteps": 2
+        }
+      ]
+    },
+    "Crop_SugarCane": {
+      "isFoodCrop": true,
+      "directlyEdible": false,
+      "directFoodId": null,
+      "directFoodCategoryId": null,
+      "processingChains": [
+        {
+          "finalFoodId": "Food_Cake",
+          "finalFoodProductId": "Product_Cake",
+          "foodCategoryId": "FoodCategory_Treats",
+          "recipeChain": [
+            "SugarRefiningCane",
+            "CakeProduction"
+          ],
+          "conversionRatio": 0.466699988,
+          "processingSteps": 2
+        }
+      ]
+    },
+    "Crop_Vegetables": {
+      "isFoodCrop": true,
+      "directlyEdible": true,
+      "directFoodId": "Food_Vegetables",
+      "directFoodCategoryId": "FoodCategory_Vitamins",
+      "processingChains": [
+        {
+          "finalFoodId": "Food_Vegetables",
+          "finalFoodProductId": "Product_Vegetables",
+          "foodCategoryId": "FoodCategory_Vitamins",
+          "recipeChain": [],
+          "conversionRatio": 1,
+          "processingSteps": 0
+        }
+      ]
+    },
+    "Crop_Fruits": {
+      "isFoodCrop": true,
+      "directlyEdible": true,
+      "directFoodId": "Food_Fruits",
+      "directFoodCategoryId": "FoodCategory_Vitamins",
+      "processingChains": [
+        {
+          "finalFoodId": "Food_Fruits",
+          "finalFoodProductId": "Product_Fruit",
+          "foodCategoryId": "FoodCategory_Vitamins",
+          "recipeChain": [],
+          "conversionRatio": 1,
+          "processingSteps": 0
+        }
+      ]
+    },
+    "Crop_Canola": {
+      "isFoodCrop": true,
+      "directlyEdible": false,
+      "directFoodId": null,
+      "directFoodCategoryId": null,
+      "processingChains": [
+        {
+          "finalFoodId": "Food_Snack",
+          "finalFoodProductId": "Product_Snack",
+          "foodCategoryId": "FoodCategory_Treats",
+          "recipeChain": [
+            "CanolaMilling",
+            "SnackProductionPotato"
+          ],
+          "conversionRatio": 0.375,
+          "processingSteps": 2
+        },
+        {
+          "finalFoodId": "Food_Cake",
+          "finalFoodProductId": "Product_Cake",
+          "foodCategoryId": "FoodCategory_Treats",
+          "recipeChain": [
+            "CanolaMilling",
+            "CakeProduction"
+          ],
+          "conversionRatio": 0.524999976,
+          "processingSteps": 2
+        }
+      ]
+    },
+    "Crop_Poppy": {
+      "isFoodCrop": false,
+      "directlyEdible": false,
+      "directFoodId": null,
+      "directFoodCategoryId": null,
+      "processingChains": []
+    },
+    "Crop_Flowers": {
+      "isFoodCrop": false,
+      "directlyEdible": false,
+      "directFoodId": null,
+      "directFoodCategoryId": null,
+      "processingChains": []
+    }
+  },
+  "foodCropIds": [
+    "Crop_Potato",
+    "Crop_Corn",
+    "Crop_Wheat",
+    "Crop_Soybeans",
+    "Crop_SugarCane",
+    "Crop_Vegetables",
+    "Crop_Fruits",
+    "Crop_Canola"
+  ]
 };
 
 export default GameData;

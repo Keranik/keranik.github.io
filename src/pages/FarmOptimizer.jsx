@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductionCalculator from '../utils/ProductionCalculator';
-import { DataLoader } from '../utils/DataLoader';
+import { GameDataManager } from '../managers/GameDataManager';
 import { useSettings } from '../contexts/SettingsContext';
 import { FoodChainResolver } from '../utils/FoodChainResolver';
 import { FertilizerCalculator } from '../utils/FertilizerCalculator';
@@ -30,6 +30,8 @@ const FarmOptimizerPage = () => {
     const navigate = useNavigate();
     // ===== Core State =====
     const [dataLoaded, setDataLoaded] = useState(false);
+    const [foodCropIds, setFoodCropIds] = useState([]);  
+    const [cropFoodChains, setCropFoodChains] = useState({});  
     const [loading, setLoading] = useState(false);
     const [isCalculating, setIsCalculating] = useState(false);
     const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
@@ -96,78 +98,40 @@ const FarmOptimizerPage = () => {
         loadGameData();
     }, [settings.enableModdedContent, settings.enabledMods]);
 
+    // src/pages/FarmOptimizer.jsx
+
     const loadGameData = async () => {
         try {
             const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
-            const gameData = await DataLoader.loadGameData(enabledMods);
 
-            ProductionCalculator.initialize(gameData);
+            // Load game data
+            await GameDataManager.getGameData(enabledMods);
+
+            // Initialize ProductionCalculator
+            await ProductionCalculator.initialize();
+
+            // ✅ Get crop food chains (pre-computed)
+            const { cropFoodChains: chains, foodCropIds: cropIds } = await GameDataManager.getCropFoodChains();
+
+            // ✅ Store in component state
+            setFoodCropIds(cropIds);
+            setCropFoodChains(chains);
+
+            // Set food crop IDs on ProductionCalculator (for backwards compatibility)
+            ProductionCalculator.foodCropIds = new Set(cropIds);
+
+            // Initialize FoodChainResolver (still needed for some legacy logic)
             FoodChainResolver.initialize(
                 ProductionCalculator.recipes || [],
                 ProductionCalculator.foods || [],
                 ProductionCalculator.crops || []
             );
 
-            // Initialize food crop identification
-            initializeFoodCrops();
-
             setDataLoaded(true);
         } catch (error) {
             console.error('Error loading farm data:', error);
             alert('Failed to load farm data: ' + error.message);
         }
-    };
-
-    const initializeFoodCrops = () => {
-        const foodCropIds = new Set();
-
-        // Direct food crops
-        ProductionCalculator.crops?.forEach(crop => {
-            const isDirectFood = ProductionCalculator.foods?.some(f => f.productId === crop.output.productId);
-            if (isDirectFood) {
-                foodCropIds.add(crop.id);
-            }
-        });
-
-        // Crops that can be processed into food
-        ProductionCalculator.crops?.forEach(crop => {
-            const isUsedInRecipes = ProductionCalculator.recipes?.some(recipe =>
-                recipe.inputs.some(input => input.productId === crop.output.productId)
-            );
-
-            if (isUsedInRecipes) {
-                const outputProducts = new Set([crop.output.productId]);
-                const visited = new Set();
-                let foundFood = false;
-
-                for (let depth = 0; depth < 3 && !foundFood; depth++) {
-                    const newProducts = new Set();
-                    outputProducts.forEach(productId => {
-                        if (visited.has(productId)) return;
-                        visited.add(productId);
-
-                        if (ProductionCalculator.foods?.some(f => f.productId === productId)) {
-                            foundFood = true;
-                            return;
-                        }
-
-                        ProductionCalculator.recipes?.forEach(recipe => {
-                            if (recipe.inputs.some(input => input.productId === productId)) {
-                                recipe.outputs.forEach(output => newProducts.add(output.productId));
-                            }
-                        });
-                    });
-
-                    newProducts.forEach(p => outputProducts.add(p));
-                }
-
-                if (foundFood) {
-                    foodCropIds.add(crop.id);
-                }
-            }
-        });
-
-        ProductionCalculator.foodCropIds = foodCropIds;
     };
 
     // ===== Research Updates =====
@@ -281,8 +245,10 @@ const FarmOptimizerPage = () => {
 
     const generateOptimizedFarms = () => {
         const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
+
+        // ✅ Use pre-computed foodCropIds instead of runtime filter
         const availableFoodCrops = (ProductionCalculator.crops || []).filter(crop =>
-            ProductionCalculator.foodCropIds?.has(crop.id) ?? false
+            foodCropIds.includes(crop.id)
         );
 
         const targetPop = constraints.targetPopulation;
@@ -363,32 +329,45 @@ const FarmOptimizerPage = () => {
     // ===== User Actions - Recipe Selection =====
     const openRecipeSelectionModal = (productId) => {
         const product = ProductionCalculator.getProduct(productId);
-        const foodPaths = FoodChainResolver.getFoodsFromCrop(productId);
 
-        if (foodPaths.length === 0) {
-            alert(`No food recipes found for ${product?.name}. This crop cannot be processed into food.`);
+        // ✅ Get crop ID from product (reverse lookup)
+        const crop = ProductionCalculator.crops.find(c => c.output.productId === productId);
+        if (!crop) {
+            alert(`Cannot find crop for ${product?.name}`);
             return;
         }
 
-        const uniqueRecipeChains = new Map();
-        foodPaths.forEach(path => {
-            if (path.processingChain.length === 0) return;
+        // ✅ Get pre-computed food chains
+        const chainData = cropFoodChains[crop.id];
 
-            const chainKey = path.recipeChain.join('->');
-            if (!uniqueRecipeChains.has(chainKey)) {
-                const recipe = ProductionCalculator.getRecipe(path.processingChain[0].recipeId);
-                if (recipe) {
-                    uniqueRecipeChains.set(chainKey, {
-                        ...recipe,
-                        finalFoodProductId: path.finalFoodProductId,
-                        fullChain: path.processingChain,
-                        conversionRatio: path.conversionRatio
-                    });
-                }
-            }
-        });
+        if (!chainData || !chainData.isFoodCrop) {
+            alert(`${product?.name} cannot be processed into food.`);
+            return;
+        }
 
-        const recipes = Array.from(uniqueRecipeChains.values());
+        // ✅ If directly edible and no processing chains, show message
+        if (chainData.directlyEdible && chainData.processingChains.length === 0) {
+            alert(`${product?.name} is directly edible, no processing needed!`);
+            return;
+        }
+
+        // ✅ Convert pre-computed chains to recipe options
+        const recipes = chainData.processingChains
+            .filter(chain => chain.recipeChain.length > 0)  // Exclude direct food entries
+            .map(chain => {
+                const firstRecipeId = chain.recipeChain[0];
+                const recipe = ProductionCalculator.getRecipe(firstRecipeId);
+
+                return {
+                    ...recipe,
+                    finalFoodProductId: chain.finalFoodProductId,
+                    finalFoodId: chain.finalFoodId,
+                    foodCategoryId: chain.foodCategoryId,
+                    fullChain: chain.recipeChain,
+                    conversionRatio: chain.conversionRatio,
+                    processingSteps: chain.processingSteps
+                };
+            });
 
         if (recipes.length === 0) {
             alert(`${product?.name} is directly edible, no processing needed!`);
@@ -575,7 +554,7 @@ const FarmOptimizerPage = () => {
                                 constraints={constraints}
                                 availableFarms={availableFarms}
                                 availableFoodCrops={availableCrops.filter(crop =>
-                                    ProductionCalculator.foodCropIds?.has(crop.id) ?? false
+                                    foodCropIds.includes(crop.id)  // ✅ Use state instead
                                 )}
                                 onConstraintsChange={setConstraints}
                             />

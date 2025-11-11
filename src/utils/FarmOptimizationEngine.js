@@ -2,8 +2,8 @@
 import ProductionCalculator from './ProductionCalculator';
 import { FarmOptimizer } from './FarmOptimizer';
 import { FoodChainResolver } from './FoodChainResolver';
-import { DataLoader } from './DataLoader';
 import { FertilizerCalculator } from './FertilizerCalculator';
+import { GameDataManager } from '../managers/GameDataManager';
 
 /**
  * Dedicated engine for automatic farm optimization
@@ -153,7 +153,7 @@ export class FarmOptimizationEngine {
         const byCategory = new Map();
 
         // Initialize category maps
-        DataLoader.getAllFoodCategories().forEach(category => {
+        ProductionCalculator.foodCategories.forEach(category => {
             byCategory.set(category.id, {
                 category,
                 crops: []
@@ -350,7 +350,10 @@ export class FarmOptimizationEngine {
         let categoryId = null;
         if (foodResult.processingChains && foodResult.processingChains.length > 0) {
             const finalFoodProductId = foodResult.processingChains[0].finalFoodProductId;
-            categoryId = DataLoader.getFoodCategory(finalFoodProductId);
+
+            // Find category by looking up the food product
+            const food = ProductionCalculator.foods?.find(f => f.productId === finalFoodProductId);
+            categoryId = food?.categoryId || null;
         }
 
         const growthDays = crop.growthDays;

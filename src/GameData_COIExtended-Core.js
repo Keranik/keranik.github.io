@@ -1,7 +1,7 @@
 const GameData = {
   "metadataJs": {
     "version": "Update 3",
-    "lastUpdated": "11/08/2025",
+    "lastUpdated": "11/11/2025",
     "updateNotes": "Mod export: COIExtended-Core"
   },
   "machines": [
@@ -19788,7 +19788,9 @@ const GameData = {
       "anyParentCanUnlock": false
     }
   ],
-  "mods": null
+  "mods": null,
+  "cropFoodChains": {},
+  "foodCropIds": []
 };
 
 export default GameData;

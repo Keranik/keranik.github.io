@@ -1,182 +1,9 @@
-﻿// src/contexts/SettingsContext.jsx - COMPLETE UPDATED VERSION
+﻿// src/contexts/SettingsContext.jsx - SIMPLIFIED VERSION
+
 import { createContext, useContext, useState, useEffect } from 'react';
-import { DataLoader } from '../utils/DataLoader';
-import ProductionCalculator from '../utils/ProductionCalculator';
+import { GameDataManager } from '../managers/GameDataManager';
 
 const SettingsContext = createContext();
-
-// Build default research settings from game data
-const buildDefaultResearchSettings = () => {
-    if (!ProductionCalculator._gameData || !ProductionCalculator.research) {
-        console.log('⚠️ No game data or research available');
-        return {};
-    }
-
-    console.log(`📊 Processing ${ProductionCalculator.research.length} research nodes...`);
-    const researchSettings = {};
-
-    // Map of bonus IDs to their display configuration
-    const bonusConfig = {
-        // Farming
-        'FarmYieldMultiplier': {
-            name: 'Crop Yield Increase',
-            icon: 'Farm',
-            description: 'Increases crop yield from farms',
-            category: 'farming',
-            unit: '%',
-            isNegative: false
-        },
-        'FarmWaterConsumptionMultiplier': {
-            name: 'Crop Water Consumption',
-            icon: 'Water',
-            description: 'Water consumed by crops (increases with yield research)',
-            category: 'farming',
-            unit: '%',
-            isNegative: false
-        },
-        'RainYieldMultiplier': {
-            name: 'Rainwater Yield',
-            icon: 'Water',
-            description: 'Increases rainwater collection',
-            category: 'farming',
-            unit: '%',
-            isNegative: false
-        },
-        'SettlementWaterConsumptionMultiplier': {
-            name: 'Settlement Water Use',
-            icon: 'Water',
-            description: 'Reduces water consumption of settlements',
-            category: 'farming',
-            unit: '%',
-            isNegative: true
-        },
-
-        // Vehicles (NEW CATEGORY)
-        'VehiclesFuelConsumptionMultiplier': {
-            name: 'Vehicle Fuel Use',
-            icon: 'Diesel',
-            description: 'Reduces vehicle fuel consumption',
-            category: 'vehicles',
-            unit: '%',
-            isNegative: true
-        },
-        'ShipsFuelConsumptionMultiplier': {
-            name: 'Ship Fuel Use',
-            icon: 'Diesel',
-            description: 'Reduces ship fuel consumption',
-            category: 'vehicles',
-            unit: '%',
-            isNegative: true
-        },
-        'VehicleLimitBonus': {
-            name: 'Vehicle Limit',
-            icon: 'Excavator',
-            description: 'Increases vehicle limit',
-            category: 'vehicles',
-            unit: '',
-            isNegative: false
-        },
-
-        // Production
-        'MaintenanceProductionMultiplier': {
-            name: 'Maintenance Production',
-            icon: 'MaintenanceT1',
-            description: 'Increases maintenance production bonus',
-            category: 'production',
-            unit: '%',
-            isNegative: false
-        },
-
-        // Efficiency
-        'SolarPowerMultiplier': {
-            name: 'Solar Power',
-            icon: 'PowerGenerator',
-            description: 'Increases solar power production',
-            category: 'efficiency',
-            unit: '%',
-            isNegative: false
-        },
-
-        // General
-        'HousingCapacityMultiplier': {
-            name: 'Housing Capacity',
-            icon: 'Settlement',
-            description: 'Increases housing capacity',
-            category: 'general',
-            unit: '%',
-            isNegative: false
-        },
-        'UnityCapacityMultiplier': {
-            name: 'Unity Capacity',
-            icon: 'Unity',
-            description: 'Increases Unity capacity',
-            category: 'general',
-            unit: '%',
-            isNegative: false
-        }
-    };
-
-    // Process all research nodes to find repeatable research with bonuses
-    ProductionCalculator.research.forEach(node => {
-        // Only process nodes with multiple levels and bonuses
-        if (node.maxLevels > 1 && node.perLevelBonuses) {
-            Object.entries(node.perLevelBonuses).forEach(([bonusId, perLevelAmount]) => {
-                // Skip if already added
-                if (researchSettings[bonusId]) return;
-
-                // Get config or create default
-                const config = bonusConfig[bonusId] || {
-                    name: bonusId.replace(/([A-Z])/g, ' $1').trim(),
-                    icon: 'Research',
-                    description: `Research bonus: ${bonusId}`,
-                    category: 'general',
-                    unit: '%',
-                    isNegative: false
-                };
-
-                // Calculate total possible bonus (maxLevels * perLevelAmount)
-                // Convert from 0-1 scale to percentage (multiply by 100)
-                const maxTotalBonus = Math.abs(node.maxLevels * perLevelAmount * 100);
-
-                // Determine step size (5% increments for most, or based on per-level amount)
-                const perLevelPercent = Math.abs(perLevelAmount * 100);
-                let step = 5;
-                if (perLevelPercent < 1) {
-                    step = 1; // For small bonuses
-                } else if (perLevelPercent >= 5) {
-                    step = Math.round(perLevelPercent); // Match per-level for large bonuses
-                }
-
-                researchSettings[bonusId] = {
-                    id: bonusId,
-                    name: config.name,
-                    icon: config.icon,
-                    description: config.description,
-                    bonusType: 'percentage',
-                    minValue: 0,
-                    maxValue: Math.ceil(maxTotalBonus / step) * step, // Round up to nearest step
-                    step: step,
-                    currentValue: 0,
-                    unit: config.unit,
-                    category: config.category,
-                    isNegative: config.isNegative, // For display (show as -X% or +X%)
-                    perLevelAmount: perLevelAmount, // Store for future calculations
-                    maxLevels: node.maxLevels,
-                    researchNodeId: node.id // Track which node this came from
-                };
-            });
-        }
-    });
-
-    console.log(`✅ Found ${Object.keys(researchSettings).length} research bonuses:`, Object.keys(researchSettings));
-
-    // Debug log each bonus
-    Object.entries(researchSettings).forEach(([id, bonus]) => {
-        console.log(`  ${id}: ${bonus.minValue}-${bonus.maxValue}${bonus.unit} (${bonus.maxLevels} levels max)`);
-    });
-
-    return researchSettings;
-};
 
 const DEFAULT_SETTINGS = {
     foodConsumptionMultiplier: 1.0,
@@ -192,6 +19,10 @@ const DEFAULT_SETTINGS = {
 };
 
 export const SettingsProvider = ({ children }) => {
+    // ==========================================
+    // STATE - Settings Only
+    // ==========================================
+
     const [settings, setSettings] = useState(() => {
         const saved = localStorage.getItem('coi-tools-settings');
         if (saved) {
@@ -208,45 +39,54 @@ export const SettingsProvider = ({ children }) => {
     const [availableMods, setAvailableMods] = useState([]);
     const [researchDefinitions, setResearchDefinitions] = useState({});
     const [isLoadingData, setIsLoadingData] = useState(true);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);  // ✅ NEW: Modal state
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-    // ✅ NEW: Functions to control settings modal
+    // ==========================================
+    // MODAL CONTROLS
+    // ==========================================
+
     const openSettings = () => {
-        console.log('📖 Opening settings modal');
+        console.log('📖 SettingsContext: Opening settings modal');
         setIsSettingsOpen(true);
     };
 
     const closeSettings = () => {
-        console.log('📕 Closing settings modal');
+        console.log('📕 SettingsContext: Closing settings modal');
         setIsSettingsOpen(false);
     };
 
-    // ✅ Initial load - runs once on app start
+    // ==========================================
+    // INITIAL LOAD - Runs once on app start
+    // ==========================================
+
     useEffect(() => {
         const initializeData = async () => {
             try {
-                console.log('🔄 Loading game data...');
+                console.log('🔄 SettingsContext: Initial data load...');
+                setIsLoadingData(true);
 
-                // Load mods manifest
-                const manifest = await DataLoader.loadModManifest();
-                setAvailableMods(manifest.mods || []);
+                // Load mod manifest (just metadata)
+                try {
+                    const manifestModule = await import('../manifest.json');
+                    const manifest = manifestModule.default;
+                    setAvailableMods(manifest.mods || []);
+                    console.log(`✅ SettingsContext: Found ${manifest.mods?.length || 0} available mods`);
+                } catch (error) {
+                    console.warn('⚠️ SettingsContext: Could not load mod manifest:', error);
+                    setAvailableMods([]);
+                }
 
-                // Load game data with current mod settings
+                // ✅ Load game data via GameDataManager
                 const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
-                const gameData = await DataLoader.loadGameData(enabledMods);
+                await GameDataManager.getGameData(enabledMods);
 
-                // Initialize ProductionCalculator
-                ProductionCalculator.initialize(gameData);
-
-                console.log('✅ Game data loaded, building research definitions...');
-
-                // Build research definitions
-                const researchDefs = buildDefaultResearchSettings();
+                // ✅ Get research definitions (lazy-initialized by GameDataManager)
+                const researchDefs = await GameDataManager.getResearchDefinitions();
                 setResearchDefinitions(researchDefs);
 
-                console.log(`✅ Found ${Object.keys(researchDefs).length} research bonuses`);
+                console.log(`✅ SettingsContext: Loaded ${Object.keys(researchDefs).length} research bonuses`);
 
-                // Merge with existing settings
+                // Merge research definitions with saved settings
                 setSettings(prev => ({
                     ...prev,
                     research: {
@@ -254,39 +94,44 @@ export const SettingsProvider = ({ children }) => {
                             acc[key] = researchDefs[key].currentValue;
                             return acc;
                         }, {}),
-                        ...prev.research // Keep any saved values
+                        ...prev.research
                     }
                 }));
 
                 setIsLoadingData(false);
             } catch (error) {
-                console.error('❌ Failed to initialize game data:', error);
+                console.error('❌ SettingsContext: Failed to initialize:', error);
                 setIsLoadingData(false);
             }
         };
 
         initializeData();
-    }, []); // Only run once on mount
+    }, []);
 
-    // ✅ Reload when mod settings change
+    // ==========================================
+    // RELOAD WHEN MODS CHANGE
+    // ==========================================
+
     useEffect(() => {
-        // Skip if initial load hasn't finished
-        if (isLoadingData) return;
+        if (isLoadingData) {
+            console.log('⏭️ SettingsContext: Skipping mod reload (initial load in progress)');
+            return;
+        }
 
         const reloadGameData = async () => {
             try {
-                console.log('🔄 Reloading game data due to mod changes...');
+                console.log('🔄 SettingsContext: Mod configuration changed, reloading...');
                 setIsLoadingData(true);
 
+                // ✅ Ask GameDataManager to reload
                 const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
-                const gameData = await DataLoader.loadGameData(enabledMods);
-                ProductionCalculator.initialize(gameData);
+                await GameDataManager.getGameData(enabledMods);
 
-                // Rebuild research definitions
-                const researchDefs = buildDefaultResearchSettings();
+                // ✅ Get fresh research definitions
+                const researchDefs = await GameDataManager.getResearchDefinitions();
                 setResearchDefinitions(researchDefs);
 
-                console.log(`✅ Reloaded with ${Object.keys(researchDefs).length} research bonuses`);
+                console.log(`✅ SettingsContext: Reloaded with ${Object.keys(researchDefs).length} research bonuses`);
 
                 // Update research settings
                 setSettings(prev => ({
@@ -302,7 +147,7 @@ export const SettingsProvider = ({ children }) => {
 
                 setIsLoadingData(false);
             } catch (error) {
-                console.error('❌ Failed to reload game data:', error);
+                console.error('❌ SettingsContext: Failed to reload:', error);
                 setIsLoadingData(false);
             }
         };
@@ -310,9 +155,17 @@ export const SettingsProvider = ({ children }) => {
         reloadGameData();
     }, [settings.enableModdedContent, settings.enabledMods]);
 
+    // ==========================================
+    // PERSIST SETTINGS TO LOCALSTORAGE
+    // ==========================================
+
     useEffect(() => {
         localStorage.setItem('coi-tools-settings', JSON.stringify(settings));
     }, [settings]);
+
+    // ==========================================
+    // SETTINGS UPDATERS
+    // ==========================================
 
     const updateSetting = (key, value) => {
         setSettings(prev => ({ ...prev, [key]: value }));
@@ -390,9 +243,9 @@ export const SettingsProvider = ({ children }) => {
                 availableMods,
                 researchDefinitions,
                 isLoadingData,
-                isSettingsOpen,          // ✅ NEW: Expose modal state
-                openSettings,             // ✅ NEW: Function to open modal
-                closeSettings,            // ✅ NEW: Function to close modal
+                isSettingsOpen,
+                openSettings,
+                closeSettings,
                 updateSetting,
                 updateNestedSetting,
                 updateResearchValue,

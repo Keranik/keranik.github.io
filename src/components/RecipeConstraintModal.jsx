@@ -2,6 +2,7 @@
 import ProductionCalculator from '../utils/ProductionCalculator';
 import MiniRecipeCard from './MiniRecipeCard';
 import { getGeneralIcon } from '../utils/AssetHelper';
+import { GameDataManager } from '../managers/GameDataManager';
 
 const RecipeConstraintModal = ({
     isOpen,
@@ -17,6 +18,7 @@ const RecipeConstraintModal = ({
     const [filterTechLevel, setFilterTechLevel] = useState('all');
     const [showOnlyDisabled, setShowOnlyDisabled] = useState(false);
     const [enabledTiers, setEnabledTiers] = useState(new Set([0, 1, 2, 3, 4, 5]));
+    const [recipeToTechTier, setRecipeToTechTier] = useState(new Map());
     const searchInputRef = useRef(null);
 
     // Load icons
@@ -47,33 +49,22 @@ const RecipeConstraintModal = ({
         return Array.from(machines).map(id => ProductionCalculator.getMachine(id)).filter(Boolean);
     }, []);
 
-    // Build recipe -> tech tier map
-    const recipeToTechTier = useMemo(() => {
-        const map = new Map();
+    useEffect(() => {
+        if (isOpen) {
+            setLocalDisabledRecipes(new Set(disabledRecipes));
 
-        allRecipes.forEach(recipe => {
-            const researchNode = ProductionCalculator.getResearchForRecipe(recipe.id);
+            // Load tech tier mapping from GameDataManager
+            GameDataManager.getRecipeTechTiers().then(tierMap => {
+                setRecipeToTechTier(tierMap);
+                console.log('✅ Loaded recipe tech tiers:', tierMap.size, 'recipes');
+            }).catch(err => {
+                console.error('❌ Failed to load recipe tech tiers:', err);
+                setRecipeToTechTier(new Map());
+            });
 
-            if (researchNode) {
-                map.set(recipe.id, researchNode.tier);
-            } else {
-                const machines = ProductionCalculator.getMachinesForRecipe(recipe.id);
-                if (machines.length > 0) {
-                    const machineResearch = ProductionCalculator.getResearchForMachine(machines[0].id);
-                    if (machineResearch) {
-                        map.set(recipe.id, machineResearch.tier);
-                    } else {
-                        map.set(recipe.id, 0);
-                    }
-                } else {
-                    map.set(recipe.id, 0);
-                }
-            }
-        });
-
-        console.log('📊 Recipe tech tiers mapped:', map.size, 'recipes');
-        return map;
-    }, [allRecipes, allResearch]);
+            setTimeout(() => searchInputRef.current?.focus(), 100);
+        }
+    }, [isOpen, disabledRecipes]);
 
     // Tech tiers configuration
     const techTiers = [

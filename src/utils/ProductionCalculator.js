@@ -1,268 +1,210 @@
-﻿/**
+﻿import { GameDataManager } from '../managers/GameDataManager';
+/**
  * Production Calculator Engine - REWRITTEN FOR EXCELLENCE
  * Handles all production chain calculations, recipe optimization, and resource requirements
  * Now with per-minute normalization, resource source management, storage calculations, and SMART RAW MATERIAL DETECTION
- * 
+ *
  * NEW: Simple A↔B loop detection - if Product A only makes Product B and Product B only makes Product A, treat both as raw
  */
 class ProductionCalculator {
     constructor() {
-        // Initialize with empty data - will be populated by initialize()
-        this._gameData = null;
-        this.machines = [];
-        this.recipes = [];
-        this.products = [];
-        this.farms = [];
-        this.crops = [];
-        this.foods = [];
-        this.foodCategories = [];
-        this.farmResearch = [];
-
-        // Lookup maps
-        this.productMap = new Map();
-        this.recipeMap = new Map();
-        this.machineMap = new Map();
-        this.farmMap = new Map();
-        this.cropMap = new Map();
-        this.foodMap = new Map();
-        this.productToRecipes = new Map();
-        this.fertilizers = [];
-
-        // Storage throughput limits (per minute)
-        this.STORAGE_THROUGHPUT = {
-            1: 400,
-            2: 900,
-            3: 1800,
-            4: 3000
-        };
-
-        // NEW: Simple tautology detection cache
-        this.tautologicalProducts = new Set(); // Products that are in A↔B loops
+        // 10-10-25 note
+        // All data is now stored in GameDataManager
+        // These getters will fetch from the manager
     }
 
     /**
-     * Initialize calculator with game data
+     * Initialize calculator (now just fetches from GameDataManager)
+     * Safe to call multiple times - will use cached data after first call
      */
-    initialize(gameData) {
-        this._gameData = gameData;
+    async initialize(gameData = null) {
+        console.log('🔧 ProductionCalculator: Requesting initialization from GameDataManager...');
 
-        // Populate arrays
-        this.machines = gameData.machines || [];
-        this.recipes = gameData.recipes || [];
-        this.products = gameData.products || [];
-        this.farms = gameData.farms || [];
-        this.crops = gameData.crops || [];
-        this.foods = gameData.foods || [];
-        this.foodCategories = gameData.foodCategories || [];
-        this.farmResearch = gameData.farmResearch || [];
-        this.research = gameData.research || [];
-        
-
-        // Build lookup maps for fast access
-        this.productMap = new Map(this.products.map(p => [p.id, p]));
-        this.recipeMap = new Map(this.recipes.map(r => [r.id, r]));
-        this.machineMap = new Map(this.machines.map(m => [m.id, m]));
-        this.farmMap = new Map(this.farms.map(f => [f.id, f]));
-        this.cropMap = new Map(this.crops.map(c => [c.id, c]));
-        this.foodMap = new Map(this.foods.map(f => [f.id, f]));
-        this.researchMap = new Map(this.research.map(r => [r.id, r]));
-
-        // Build reverse lookup: product -> recipes that produce it
-        this.productToRecipes = new Map();
-        this.recipes.forEach(recipe => {
-            recipe.outputs.forEach(output => {
-                if (!this.productToRecipes.has(output.productId)) {
-                    this.productToRecipes.set(output.productId, []);
-                }
-                this.productToRecipes.get(output.productId).push(recipe.id);
-            });
-        });
-
-        // Extract fertilizers from products
-        this.fertilizers = this.products
-            .filter(p => p.fertilizer != null)
-            .map(p => ({
-                id: p.id,
-                name: p.name,
-                fertilityPerQuantity: p.fertilizer.fertilityPerQuantityPercent,
-                maxFertility: p.fertilizer.maxFertilityPercent
-            }));
-
-        // NEW: Detect A↔B tautological loops
-        this._detectTautologicalLoops();
-
-        // Log loaded data for debugging
-        console.log('ProductionCalculator initialized:', {
-            machines: this.machines.length,
-            recipes: this.recipes.length,
-            products: this.products.length,
-            farms: this.farms.length,
-            crops: this.crops.length,
-            foods: this.foods.length,
-            fertilizers: this.fertilizers.length,
-            tautologicalProducts: this.tautologicalProducts.size,
-            research: this.research.length
-        });
-    }
-
-    /**
- * NEW: Detect A↔B tautological loops
- * Simple rule: If Product A has ONLY ONE recipe that produces it from Product B,
- * AND Product B has ONLY ONE recipe that produces it from Product A,
- * then both are tautological and should be treated as raw materials.
- */
-    _detectTautologicalLoops() {
-        console.log('🔍 Detecting A↔B tautological loops...');
-
-        const tautologicalPairs = [];
-
-        // Build a map of product -> [what it's made from (if only one recipe)]
-        const productToSingleSource = new Map();
-
-        this.products.forEach(product => {
-            const recipes = this.getRecipesForProduct(product.id);
-
-            // Only consider if there's exactly ONE recipe that produces this product
-            if (recipes.length === 1) {
-                const recipe = recipes[0];
-
-                // Only consider if the recipe has exactly ONE input
-                if (recipe.inputs.length === 1) {
-                    const inputProductId = recipe.inputs[0].productId;
-                    productToSingleSource.set(product.id, inputProductId);
-                }
-            }
-        });
-
-        // Now check for mutual loops: A→B (only path) and B→A (only path)
-        const processedPairs = new Set();
-
-        productToSingleSource.forEach((sourceProductId, targetProductId) => {
-            // Check if the source product also has only one recipe, and it comes from target
-            const reverseSource = productToSingleSource.get(sourceProductId);
-
-            if (reverseSource === targetProductId) {
-                // Found a tautological loop! A→B (only way) and B→A (only way)
-
-                // Avoid processing the same pair twice
-                const pairKey = [targetProductId, sourceProductId].sort().join('↔');
-                if (processedPairs.has(pairKey)) return;
-                processedPairs.add(pairKey);
-
-                this.tautologicalProducts.add(targetProductId);
-                this.tautologicalProducts.add(sourceProductId);
-
-                const productA = this.getProduct(targetProductId);
-                const productB = this.getProduct(sourceProductId);
-
-                tautologicalPairs.push(`${productA?.name || targetProductId} ↔ ${productB?.name || sourceProductId}`);
-            }
-        });
-
-        console.log(`✅ Found ${tautologicalPairs.length / 2} tautological pairs (${this.tautologicalProducts.size} products)`);
-
-        if (tautologicalPairs.length > 0) {
-            console.log('🚫 Tautological loops (will be treated as raw):', tautologicalPairs.join(', '));
+        // If gameData is provided, ensure GameDataManager has it loaded
+        if (gameData) {
+            // This is a legacy path - ideally pages should load via GameDataManager first
+            console.warn('⚠️ ProductionCalculator: Received gameData directly (legacy usage). Consider using GameDataManager.getGameData() instead.');
+            // We can't force GameDataManager to use this data, so just log a warning
         }
+
+        // Request initialized data from GameDataManager
+        const data = await GameDataManager.getProductionCalculatorData();
+
+        console.log('✅ ProductionCalculator: Initialization complete');
+        return data;
     }
 
-    /**
-     * Get product details by ID
-     */
+    // ==========================================
+    // HELPER: Get data from GameDataManager
+    // ==========================================
+
+    _getData() {
+        const data = GameDataManager._cache.productionCalculatorMaps;
+        if (!data) {
+            throw new Error('ProductionCalculator: Data not initialized. Call initialize() first or ensure GameDataManager has loaded game data.');
+        }
+        return data;
+    }
+
+    // ==========================================
+    // PUBLIC GETTERS - Arrays
+    // ==========================================
+
+    get machines() {
+        return this._getData().machines;
+    }
+
+    get recipes() {
+        return this._getData().recipes;
+    }
+
+    get products() {
+        return this._getData().products;
+    }
+
+    get farms() {
+        return this._getData().farms;
+    }
+
+    get crops() {
+        return this._getData().crops;
+    }
+
+    get foods() {
+        return this._getData().foods;
+    }
+
+    get foodCategories() {
+        return this._getData().foodCategories;
+    }
+
+    get farmResearch() {
+        return this._getData().farmResearch;
+    }
+
+    get research() {
+        return this._getData().research;
+    }
+
+    get fertilizers() {
+        return this._getData().fertilizers;
+    }
+
+    // ==========================================
+    // PUBLIC GETTERS - Maps
+    // ==========================================
+
+    get productMap() {
+        return this._getData().productMap;
+    }
+
+    get recipeMap() {
+        return this._getData().recipeMap;
+    }
+
+    get machineMap() {
+        return this._getData().machineMap;
+    }
+
+    get farmMap() {
+        return this._getData().farmMap;
+    }
+
+    get cropMap() {
+        return this._getData().cropMap;
+    }
+
+    get foodMap() {
+        return this._getData().foodMap;
+    }
+
+    get researchMap() {
+        return this._getData().researchMap;
+    }
+
+    get productToRecipes() {
+        return this._getData().productToRecipes;
+    }
+
+    get tautologicalProducts() {
+        return this._getData().tautologicalProducts;
+    }
+
+    get STORAGE_THROUGHPUT() {
+        return this._getData().STORAGE_THROUGHPUT;
+    }
+
+    get _gameData() {
+        return this._getData()._gameData;
+    }
+
+    // For compatibility with code that sets this (like FarmOptimizer)
+    set foodCropIds(value) {
+        this._getData().foodCropIds = value;
+    }
+
+    get foodCropIds() {
+        return this._getData().foodCropIds;
+    }
+
+    // ==========================================
+    // PUBLIC METHODS - Queries (unchanged)
+    // ==========================================
+
     getProduct(productId) {
         return this.productMap.get(productId);
     }
 
-    /**
-     * Get recipe details by ID
-     */
     getRecipe(recipeId) {
         return this.recipeMap.get(recipeId);
     }
 
-    /**
-     * Get machine details by ID
-     */
     getMachine(machineId) {
         return this.machineMap.get(machineId);
     }
 
-    /**
-     * Get farm details by ID
-     */
     getFarm(farmId) {
         return this.farmMap.get(farmId);
     }
 
-    /**
-     * Get crop details by ID
-     */
     getCrop(cropId) {
         return this.cropMap.get(cropId);
     }
 
-    /**
-     * Get food details by ID
-     */
     getFood(foodId) {
         return this.foodMap.get(foodId);
     }
 
+    getResearch(researchId) {
+        return this.researchMap.get(researchId);
+    }
+
     /**
-     * Find all recipes that produce a given product
+     * Get all recipes that produce a given product
      */
     getRecipesForProduct(productId) {
-        const recipeIds = this.productToRecipes.get(productId) || [];
-        return recipeIds.map(id => this.getRecipe(id)).filter(r => r);
+        const recipeIds = this.productToRecipes.get(productId);
+        if (!recipeIds) return [];
+        return recipeIds.map(id => this.getRecipe(id)).filter(Boolean);
     }
 
     /**
-     * Find all machines that can run a given recipe
+     * Check if a product is a raw material (no recipes produce it, or it's tautological)
      */
-    getMachinesForRecipe(recipeId) {
-        return this.machines.filter(m => m.recipes.includes(recipeId));
-    }
-
-    /**
-  * Check if a product is a raw/mineable resource
-  * 
-  * A product is considered RAW if:
-  * 1. It can be mined (marked as CanBeMined from terrain materials export)
-  * 2. It has NO recipes that produce it
-  * 3. NEW: It's part of a tautological A↔B loop
-  * 
-  * @param {string} productId - Product ID to check
-  * @returns {boolean} - True if this product should default to raw material
-  */
     isRawMaterial(productId) {
-        const product = this.getProduct(productId);
-        if (!product) return false;
-
-        // Check 1: Products that can be mined from terrain
-        // Examples: Coal, Sand, Iron Ore, Copper Ore, Rock, Dirt, etc.
-        if (product.canBeMined === true) {
-            return true;
-        }
-
-        // Check 2: Products with no recipes = raw materials
-        // Examples: Wood (from trees), naturally collected items
-        const recipes = this.getRecipesForProduct(productId);
-        if (recipes.length === 0) {
-            return true;
-        }
-
-        // Check 3: NEW - Products in tautological A↔B loops
-        // Examples: Iron Scrap ↔ Iron Scrap Pressed, Aluminum Scrap ↔ Aluminum Pressed
+        // Check if it's in a tautological loop
         if (this.tautologicalProducts.has(productId)) {
             return true;
         }
 
-        return false;
+        // Check if no recipes produce it
+        const recipes = this.getRecipesForProduct(productId);
+        return recipes.length === 0;
     }
 
     /**
- * Get research node by ID
- */
+     * Get research node by ID
+     */
     getResearchNode(researchId) {
         return this.researchMap.get(researchId);
     }
@@ -300,6 +242,21 @@ class ProductionCalculator {
             node.unlocks.some(unlock =>
                 unlock.type === 'machine' && unlock.id === machineId
             )
+        );
+    }
+
+    /**
+ * Get all machines that can run a specific recipe
+ * @param {string} recipeId - Recipe ID
+ * @returns {Array} - Array of machine objects
+ */
+    getMachinesForRecipe(recipeId) {
+        const recipe = this.getRecipe(recipeId);
+        if (!recipe) return [];
+
+        // Find machines that have this recipe in their recipes array
+        return this.machines.filter(machine =>
+            machine.recipes && machine.recipes.includes(recipeId)
         );
     }
 

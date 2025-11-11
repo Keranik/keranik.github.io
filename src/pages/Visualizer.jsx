@@ -10,7 +10,7 @@ import {
 import '@xyflow/react/dist/style.css';
 
 import ProductionCalculator from '../utils/ProductionCalculator';
-import { DataLoader } from '../utils/DataLoader';
+import { GameDataManager } from '../managers/GameDataManager';
 import { useSettings } from '../contexts/SettingsContext';
 import { getMachineImage, getEntityIconTop } from '../utils/AssetHelper';
 
@@ -182,8 +182,13 @@ const Visualizer = () => {
         document.title = 'Factory Visualizer - Captain of Industry Tools';
         const load = async () => {
             const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
-            const gameData = await DataLoader.loadGameData(enabledMods);
-            ProductionCalculator.initialize(gameData);
+
+            // ✅ Use GameDataManager
+            await GameDataManager.getGameData(enabledMods);
+
+            // ✅ Initialize ProductionCalculator
+            await ProductionCalculator.initialize();
+
             setDataLoaded(true);
         };
         load();

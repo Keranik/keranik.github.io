@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
-import { DataLoader } from '../utils/DataLoader';
+import { GameDataManager } from '../managers/GameDataManager';
 import { FertilizerProductionAnalyzer } from '../utils/FertilizerProductionAnalyzer';
 import { useSettings } from '../contexts/SettingsContext';
 import { getProductIcon } from '../utils/AssetHelper';
@@ -26,7 +26,12 @@ const FertilizerAnalysisTest = () => {
             try {
                 console.log('Loading game data...');
                 const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
-                const gameData = await DataLoader.loadGameData(enabledMods);
+
+                // ✅ Use GameDataManager
+                await GameDataManager.getGameData(enabledMods);
+
+                // ✅ Initialize ProductionCalculator
+                await ProductionCalculator.initialize();
 
                 const allFertilizers = ProductionCalculator.products?.filter(p =>
                     p.fertilizer &&

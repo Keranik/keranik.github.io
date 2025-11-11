@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import ProductionCalculator from '../utils/ProductionCalculator';
-import { DataLoader } from '../utils/DataLoader';
 import { useSettings } from '../contexts/SettingsContext';
 import { getProductIcon, getMachineImage, getGeneralIcon, getProductTypeIcon, getEntityIcon } from '../utils/AssetHelper';
 import RecipeModal from '../components/RecipeModal';
@@ -12,11 +11,9 @@ import DetailsPanel from '../components/DetailsPanel';
 import ProductionNode from '../components/ProductionNode';
 import CompactNode from '../components/CompactNode';
 import ProductionSolver from '../utils/ProductionSolver';
+import { GameDataManager } from '../managers/GameDataManager';
 import ConsolidatedResourcesPanel from '../components/ConsolidatedResourcesPanel';
-import OptimizationAlternativesPanel from '../components/OptimizationAlternativesPanel';
-import ResourceConsolidator from '../utils/ResourceConsolidator';
 import LoadingOverlay from '../components/LoadingOverlay';
-import ToggleSwitch from '../components/common/ToggleSwitch';
 
 const Calculator = () => {
     const { settings } = useSettings();
@@ -168,8 +165,8 @@ const Calculator = () => {
 
         const loadData = async () => {
             const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
-            const gameData = await DataLoader.loadGameData(enabledMods);
-            ProductionCalculator.initialize(gameData);
+            await GameDataManager.getGameData(enabledMods);
+            await ProductionCalculator.initialize(); 
             setDataLoaded(true);
         };
 
