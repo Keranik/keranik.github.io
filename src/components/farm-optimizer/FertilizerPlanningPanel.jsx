@@ -38,7 +38,7 @@ const FertilizerPlanningPanel = ({
 
     // Get current farm
     const currentFarm = farmResults[selectedFarmIndex];
-    const naturalEquilibrium = currentFarm?.fertilityInfo?.naturalEquilibrium || 100;
+    const naturalEquilibrium = currentFarm?.fertilityInfo?.naturalEquilibrium || 250;
 
     // State for selected fertilizer and target
     const [selectedFertilizerId, setSelectedFertilizerId] = useState(

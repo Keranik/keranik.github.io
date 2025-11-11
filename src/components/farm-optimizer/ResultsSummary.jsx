@@ -6,7 +6,7 @@ import { RainwaterEstimator } from '../../utils/RainwaterEstimator';
 import RainwaterEstimatorModal from './RainwaterEstimatorModal';
 import ToggleSwitch from '../common/ToggleSwitch';
 
-const ResultsSummary = ({ results, research }) => {
+const ResultsSummary = ({ results, research, simulationData }) => {
     // Rainwater collection state
     const [rainwaterEnabled, setRainwaterEnabled] = useState(false);
     const [rainwaterSettings, setRainwaterSettings] = useState({
@@ -62,6 +62,7 @@ const ResultsSummary = ({ results, research }) => {
     const settingsIcon = getGeneralIcon('Settings');
     const fertilizerIcon = getGeneralIcon('Fertilizer');
     const healthIcon = getGeneralIcon('Health');
+    const infoIcon = getGeneralIcon('Info');
 
     // Check if fertilizer is being used
     const fertilizerData = results.totals.fertilizer;
@@ -87,7 +88,7 @@ const ResultsSummary = ({ results, research }) => {
                     Results Summary
                 </h3>
 
-                {/* People Fed */}
+                {/* People Fed - with comprehensive breakdown */}
                 <div style={{
                     backgroundColor: '#1a1a1a',
                     padding: '1rem',
@@ -106,9 +107,468 @@ const ResultsSummary = ({ results, research }) => {
                         )}
                         <span style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: '600' }}>People Fed</span>
                     </div>
-                    <div style={{ fontSize: '2rem', fontWeight: '700', color: '#50C878' }}>
-                        {results.totals.peopleFed.toFixed(0)}
+
+                    {/* ✅ Display target met OR actual capacity if under target */}
+                    <div style={{ fontSize: '2rem', fontWeight: '700', color: '#50C878', marginBottom: '0.25rem' }}>
+                        {simulationData && simulationData.maxCapacity
+                            ? (simulationData.targetSimulation.wasFullyFed
+                                ? simulationData.targetPopulation.toFixed(0)  // Show target if met
+                                : simulationData.targetSimulation.totalPeopleFed.toFixed(0)) // Show actual if under
+                            : results.totals.peopleFed.toFixed(0)
+                        }
                     </div>
+
+                    {/* ✅ Show max capacity if there's excess */}
+                    {simulationData && simulationData.hasExcessCapacity && (
+                        <div style={{
+                            fontSize: '0.75rem',
+                            color: '#50C878',
+                            fontWeight: '600',
+                            marginBottom: '0.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                        }}>
+                            <span>✓ Max Capacity:</span>
+                            <span style={{ fontSize: '0.9rem' }}>{simulationData.maxCapacity.toFixed(0)}</span>
+                            <span style={{
+                                fontSize: '0.65rem',
+                                color: '#888',
+                                backgroundColor: 'rgba(80, 200, 120, 0.15)',
+                                padding: '2px 4px',
+                                borderRadius: '3px'
+                            }}>
+                                +{simulationData.excessCapacity.toFixed(0)} extra
+                            </span>
+                        </div>
+                    )}
+
+                    {/* ✅ Expandable Capacity Analysis */}
+                    {simulationData && simulationData.targetSimulation && (
+                        <details style={{ marginTop: '0.75rem' }}>
+                            <summary style={{
+                                fontSize: '0.75rem',
+                                color: '#4a90e2',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '0.5rem',
+                                backgroundColor: '#0f0f0f',
+                                borderRadius: '4px',
+                                border: '1px solid rgba(74, 144, 226, 0.3)',
+                                userSelect: 'none',
+                                listStyle: 'none'
+                            }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(74, 144, 226, 0.1)'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0f0f0f'}
+                            >
+                                <span style={{ fontSize: '1rem' }}>▼</span>
+                                <span style={{ fontWeight: '600' }}>Feeding Simulation Details</span>
+                                <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: '#666', fontStyle: 'italic' }}>
+                                    (Advanced)
+                                </span>
+                            </summary>
+
+                            <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#ccc' }}>
+                                {/* ✅ Explanation Header */}
+                                <div style={{
+                                    padding: '0.75rem',
+                                    backgroundColor: '#0f0f0f',
+                                    borderRadius: '6px',
+                                    marginBottom: '1rem',
+                                    border: '1px solid rgba(74, 144, 226, 0.3)'
+                                }}>
+                                    <div style={{ fontWeight: '600', color: '#4a90e2', marginBottom: '0.5rem' }}>
+                                        How Settlement Feeding Works:
+                                    </div>
+                                    <div style={{ color: '#888', lineHeight: '1.6' }}>
+                                        The game splits your population evenly across all food categories with available food.
+                                        If a category runs out, remaining population redistributes to other categories.
+                                        This continues in rounds until everyone is fed or all food is exhausted.
+                                    </div>
+                                </div>
+
+                                {/* ✅ Target vs Actual Summary */}
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '1fr 1fr',
+                                    gap: '0.5rem',
+                                    marginBottom: '1rem'
+                                }}>
+                                    <div style={{
+                                        padding: '0.75rem',
+                                        backgroundColor: '#0f0f0f',
+                                        borderRadius: '6px',
+                                        border: '1px solid #555'
+                                    }}>
+                                        <div style={{ color: '#888', marginBottom: '0.25rem', fontSize: '0.7rem' }}>
+                                            Target Population:
+                                        </div>
+                                        <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#4a90e2' }}>
+                                            {simulationData.targetPopulation.toLocaleString()}
+                                        </div>
+                                    </div>
+                                    <div style={{
+                                        padding: '0.75rem',
+                                        backgroundColor: '#0f0f0f',
+                                        borderRadius: '6px',
+                                        border: simulationData.targetSimulation.wasFullyFed
+                                            ? '1px solid #50C878'
+                                            : '1px solid #ff6b6b'
+                                    }}>
+                                        <div style={{ color: '#888', marginBottom: '0.25rem', fontSize: '0.7rem' }}>
+                                            Actually Fed:
+                                        </div>
+                                        <div style={{
+                                            fontSize: '1.2rem',
+                                            fontWeight: '700',
+                                            color: simulationData.targetSimulation.wasFullyFed ? '#50C878' : '#ff6b6b',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px'
+                                        }}>
+                                            {peopleIcon && (
+                                                <img src={peopleIcon} alt="People" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                                            )}
+                                            {simulationData.targetSimulation.totalPeopleFed.toFixed(0)}
+                                            {simulationData.targetSimulation.wasFullyFed && (
+                                                <span style={{ fontSize: '0.6em' }}>✓</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ✅ Show surplus if overproducing */}
+                                {simulationData.hasExcessCapacity && (
+                                    <div style={{
+                                        padding: '0.75rem',
+                                        backgroundColor: 'rgba(80, 200, 120, 0.1)',
+                                        borderRadius: '6px',
+                                        border: '1px solid rgba(80, 200, 120, 0.3)',
+                                        marginBottom: '1rem'
+                                    }}>
+                                        <div style={{ fontWeight: '600', color: '#50C878', marginBottom: '0.5rem' }}>
+                                            ✓ Surplus Capacity Detected
+                                        </div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#50C878', marginBottom: '0.5rem' }}>
+                                            {simulationData.maxCapacity.toLocaleString()} people
+                                        </div>
+                                        <div style={{ color: '#888', fontSize: '0.7rem' }}>
+                                            Your farms can feed <span style={{ color: '#50C878', fontWeight: '600' }}>
+                                                {simulationData.excessCapacity.toFixed(0)} more people
+                                            </span> beyond your target. This provides a safety buffer for population growth.
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* ✅ Health Categories */}
+                                <div style={{
+                                    padding: '0.75rem',
+                                    backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                                    borderRadius: '6px',
+                                    border: '1px solid rgba(243, 156, 18, 0.3)',
+                                    marginBottom: '1rem'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: '#f39c12', fontWeight: '600' }}>Health Categories Satisfied:</span>
+                                        <span style={{ fontSize: '1.1rem', fontWeight: '700', color: '#f39c12' }}>
+                                            {simulationData.targetSimulation.healthCategoriesSatisfaction.toFixed(2)}
+                                        </span>
+                                    </div>
+                                    <div style={{ fontSize: '0.65rem', color: '#888', marginTop: '0.25rem' }}>
+                                        Based on first-round balanced feeding (higher = better health bonuses)
+                                    </div>
+                                </div>
+
+                                {/* ✅ NESTED: Round-by-Round Feeding Details */}
+                                <details style={{ marginBottom: '1rem' }}>
+                                    <summary style={{
+                                        fontSize: '0.75rem',
+                                        color: '#ddd',
+                                        cursor: 'pointer',
+                                        padding: '0.5rem',
+                                        backgroundColor: '#0f0f0f',
+                                        borderRadius: '4px',
+                                        border: '1px solid #333',
+                                        fontWeight: '600',
+                                        listStyle: 'none',
+                                        userSelect: 'none'
+                                    }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1a1a1a'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0f0f0f'}
+                                    >
+                                        <span style={{ fontSize: '0.9rem', marginRight: '6px' }}>▶</span>
+                                        Round-by-Round Feeding Breakdown ({simulationData.targetSimulation.rounds.length} rounds)
+                                    </summary>
+
+                                    <div style={{ marginTop: '0.75rem' }}>
+                                        {simulationData.targetSimulation.rounds.map((round, idx) => (
+                                            <div
+                                                key={idx}
+                                                style={{
+                                                    padding: '0.75rem',
+                                                    backgroundColor: '#0f0f0f',
+                                                    borderRadius: '6px',
+                                                    border: '1px solid #333',
+                                                    marginBottom: '0.5rem'
+                                                }}
+                                            >
+                                                <div style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    marginBottom: '0.5rem',
+                                                    paddingBottom: '0.5rem',
+                                                    borderBottom: '1px solid #222'
+                                                }}>
+                                                    <span style={{ fontWeight: '600', color: '#4a90e2' }}>
+                                                        Round {round.roundNumber}
+                                                        {round.roundNumber === 1 && (
+                                                            <span style={{
+                                                                marginLeft: '6px',
+                                                                fontSize: '0.65rem',
+                                                                color: '#f39c12',
+                                                                backgroundColor: 'rgba(243, 156, 18, 0.15)',
+                                                                padding: '2px 4px',
+                                                                borderRadius: '3px'
+                                                            }}>
+                                                                Health Counted
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                    <span style={{ color: '#888' }}>
+                                                        {round.categoriesWithFood} categor{round.categoriesWithFood !== 1 ? 'ies' : 'y'} active
+                                                    </span>
+                                                </div>
+
+                                                <div style={{ fontSize: '0.7rem', color: '#666', marginBottom: '0.5rem' }}>
+                                                    Trying to feed <span style={{ color: '#ddd', fontWeight: '600' }}>
+                                                        {round.popsToFeedAtStart.toFixed(0)}
+                                                    </span> people →
+                                                    <span style={{ color: '#ddd', fontWeight: '600' }}> {round.targetPerCategory.toFixed(0)}</span> per category
+                                                </div>
+
+                                                {/* Category feedings in this round */}
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                                    {round.categoryFeedings.map((feeding, catIdx) => {
+                                                        const category = ProductionCalculator.foodCategories?.find(c => c.id === feeding.categoryId);
+                                                        const categoryName = category?.name || feeding.categoryId;
+
+                                                        return (
+                                                            <div
+                                                                key={catIdx}
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    justifyContent: 'space-between',
+                                                                    alignItems: 'center',
+                                                                    padding: '0.35rem 0.5rem',
+                                                                    backgroundColor: feeding.ranOut ? 'rgba(255, 107, 107, 0.1)' : '#1a1a1a',
+                                                                    borderRadius: '4px',
+                                                                    border: feeding.ranOut ? '1px solid rgba(255, 107, 107, 0.3)' : '1px solid #222'
+                                                                }}
+                                                            >
+                                                                <span style={{ color: '#aaa' }}>
+                                                                    {categoryName}
+                                                                    {feeding.ranOut && (
+                                                                        <span style={{
+                                                                            marginLeft: '6px',
+                                                                            fontSize: '0.65rem',
+                                                                            color: '#ff6b6b',
+                                                                            fontWeight: '600'
+                                                                        }}>
+                                                                            EXHAUSTED
+                                                                        </span>
+                                                                    )}
+                                                                </span>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                    <span style={{ color: '#50C878', fontWeight: '600' }}>
+                                                                        +{feeding.actuallyFed.toFixed(0)}
+                                                                    </span>
+                                                                    <span style={{ color: '#555', fontSize: '0.65rem' }}>
+                                                                        ({feeding.remaining.toFixed(0)} left)
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                <div style={{
+                                                    marginTop: '0.5rem',
+                                                    paddingTop: '0.5rem',
+                                                    borderTop: '1px solid #222',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    fontSize: '0.7rem'
+                                                }}>
+                                                    <span style={{ color: '#888' }}>Fed this round:</span>
+                                                    <span style={{ color: '#50C878', fontWeight: '700' }}>
+                                                        {round.totalFedThisRound.toFixed(0)} people
+                                                    </span>
+                                                </div>
+                                                {round.remainingAfterRound > 0 && (
+                                                    <div style={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        fontSize: '0.7rem',
+                                                        marginTop: '0.25rem'
+                                                    }}>
+                                                        <span style={{ color: '#888' }}>Still need feeding:</span>
+                                                        <span style={{ color: '#ff8c42', fontWeight: '600' }}>
+                                                            {round.remainingAfterRound.toFixed(0)} people
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </details>
+
+                                {/* ✅ Final Category Totals */}
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <div style={{ fontWeight: '600', color: '#ddd', marginBottom: '0.5rem' }}>
+                                        Final Category Contributions:
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                        {Object.entries(simulationData.targetSimulation.finalCategoryTotals).map(([catId, fed]) => {
+                                            const category = ProductionCalculator.foodCategories?.find(c => c.id === catId);
+                                            const categoryName = category?.name || catId;
+                                            const isExhausted = simulationData.targetSimulation.categoriesExhausted.includes(catId);
+
+                                            return (
+                                                <div
+                                                    key={catId}
+                                                    style={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        padding: '0.5rem',
+                                                        backgroundColor: '#0f0f0f',
+                                                        borderRadius: '4px',
+                                                        border: isExhausted ? '1px solid rgba(255, 107, 107, 0.3)' : '1px solid #333'
+                                                    }}
+                                                >
+                                                    <span style={{ color: '#aaa' }}>
+                                                        {categoryName}
+                                                        {isExhausted && (
+                                                            <span style={{
+                                                                marginLeft: '6px',
+                                                                fontSize: '0.65rem',
+                                                                color: '#ff6b6b',
+                                                                fontWeight: '600'
+                                                            }}>
+                                                                (All Used)
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                    <span style={{ color: '#50C878', fontWeight: '700', fontSize: '0.9rem' }}>
+                                                        {fed.toFixed(0)} people
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* ✅ NESTED: Maximum Capacity Test Details (only if surplus exists) */}
+                                {simulationData.hasExcessCapacity && (
+                                    <details>
+                                        <summary style={{
+                                            fontSize: '0.75rem',
+                                            color: '#50C878',
+                                            cursor: 'pointer',
+                                            padding: '0.5rem',
+                                            backgroundColor: 'rgba(80, 200, 120, 0.1)',
+                                            borderRadius: '4px',
+                                            border: '1px solid rgba(80, 200, 120, 0.3)',
+                                            fontWeight: '600',
+                                            listStyle: 'none',
+                                            userSelect: 'none'
+                                        }}
+                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(80, 200, 120, 0.15)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(80, 200, 120, 0.1)'}
+                                        >
+                                            <span style={{ fontSize: '0.9rem', marginRight: '6px' }}>▶</span>
+                                            Maximum Capacity Analysis (True Limit: {simulationData.maxCapacity} people)
+                                        </summary>
+
+                                        <div style={{ marginTop: '0.75rem' }}>
+                                            {/* Remaining Food Per Category at Max Capacity */}
+                                            <div style={{ marginBottom: '1rem' }}>
+                                                <div style={{ fontWeight: '600', color: '#ddd', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
+                                                    Remaining Food After Feeding {simulationData.maxCapacity} People:
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                                    {Object.entries(simulationData.maxSimulation.remainingCapacity).map(([catId, remaining]) => {
+                                                        const category = ProductionCalculator.foodCategories?.find(c => c.id === catId);
+                                                        const categoryName = category?.name || catId;
+                                                        const isExhausted = remaining === 0;
+
+                                                        return (
+                                                            <div
+                                                                key={catId}
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    justifyContent: 'space-between',
+                                                                    alignItems: 'center',
+                                                                    padding: '0.5rem',
+                                                                    backgroundColor: '#0f0f0f',
+                                                                    borderRadius: '4px',
+                                                                    border: isExhausted ? '1px solid rgba(255, 107, 107, 0.3)' : '1px solid #333'
+                                                                }}
+                                                            >
+                                                                <span style={{ color: '#aaa', fontSize: '0.75rem' }}>
+                                                                    {categoryName}
+                                                                    {isExhausted && (
+                                                                        <span style={{
+                                                                            marginLeft: '6px',
+                                                                            fontSize: '0.65rem',
+                                                                            color: '#ff6b6b',
+                                                                            fontWeight: '600'
+                                                                        }}>
+                                                                            (Fully Used)
+                                                                        </span>
+                                                                    )}
+                                                                </span>
+                                                                <span style={{
+                                                                    color: isExhausted ? '#ff6b6b' : '#888',
+                                                                    fontWeight: '600',
+                                                                    fontSize: '0.8rem'
+                                                                }}>
+                                                                    {remaining.toFixed(0)} people worth
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+
+                                            {/* How We Found Maximum */}
+                                            <div style={{
+                                                padding: '0.75rem',
+                                                backgroundColor: '#0f0f0f',
+                                                borderRadius: '6px',
+                                                border: '1px solid #333',
+                                                fontSize: '0.7rem',
+                                                color: '#888'
+                                            }}>
+                                                <div style={{ fontWeight: '600', color: '#ddd', marginBottom: '0.5rem' }}>
+                                                    How We Found This:
+                                                </div>
+                                                <div style={{ lineHeight: '1.6' }}>
+                                                    After meeting your target of {simulationData.targetPopulation.toLocaleString()} people,
+                                                    we incrementally tested higher populations using the exact game feeding algorithm
+                                                    until food ran out. Maximum capacity: <span style={{ color: '#50C878', fontWeight: '600' }}>
+                                                        {simulationData.maxCapacity.toLocaleString()} people
+                                                    </span>.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </details>
+                                )}
+                            </div>
+                        </details>
+                    )}
                 </div>
 
                 {/* Water Usage Section */}

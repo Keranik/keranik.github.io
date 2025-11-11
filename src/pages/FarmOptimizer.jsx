@@ -12,6 +12,7 @@ import LoadingOverlay from '../components/LoadingOverlay';
 // Import calculation engines
 import { FarmCalculationEngine } from '../utils/FarmCalculationEngine';
 import { FarmStateManager } from '../utils/FarmStateManager';
+import { FarmOptimizationEngine } from '../utils/FarmOptimizationEngine';
 
 // Import UI components
 import {
@@ -30,12 +31,13 @@ const FarmOptimizerPage = () => {
     const navigate = useNavigate();
     // ===== Core State =====
     const [dataLoaded, setDataLoaded] = useState(false);
-    const [foodCropIds, setFoodCropIds] = useState([]);  
-    const [cropFoodChains, setCropFoodChains] = useState({});  
+    const [foodCropIds, setFoodCropIds] = useState([]);
+    const [cropFoodChains, setCropFoodChains] = useState({});
     const [loading, setLoading] = useState(false);
     const [isCalculating, setIsCalculating] = useState(false);
     const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
     const [results, setResults] = useState(null);
+    const [simulationData, setSimulationData] = useState(null);
 
     // ===== Configuration State =====
     const [research, setResearch] = useState({
@@ -90,7 +92,7 @@ const FarmOptimizerPage = () => {
     const pendingRecalculation = useRef(false);
     const userTriggeredCalculation = useRef(false);  // ✅ NEW: Track if user clicked Calculate
     const loadingTimerRef = useRef(null);
-    const settingsIcon = getGeneralIcon('Settings'); 
+    const settingsIcon = getGeneralIcon('Settings');
 
     // ===== Data Loading =====
     useEffect(() => {
@@ -244,39 +246,52 @@ const FarmOptimizerPage = () => {
     };
 
     const generateOptimizedFarms = () => {
-        const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
+        console.log('🎯 Generating optimized farms using FarmOptimizationEngine...');
 
-        // ✅ Use pre-computed foodCropIds instead of runtime filter
-        const availableFoodCrops = (ProductionCalculator.crops || []).filter(crop =>
-            foodCropIds.includes(crop.id)
-        );
+        try {
+            const result = FarmOptimizationEngine.optimize({
+                optimizationGoal,
+                constraints,
+                research,
+                selectedProcessingRecipes,
+                foodConsumptionMultiplier: settings.foodConsumptionMultiplier || 1.0
+            });
 
-        const targetPop = constraints.targetPopulation;
-        const avgPeoplePerFarm = 400;
-        const estimatedFarms = Math.ceil(targetPop / avgPeoplePerFarm);
-        const farmCount = constraints.maxFarms
-            ? Math.min(estimatedFarms, constraints.maxFarms)
-            : estimatedFarms;
+            // ✅ Check if result has simulation data
+            if (result.simulationData) {
+                console.log('📊 Received simulation data:', result.simulationData);
+                setSimulationData(result.simulationData);
+            } else {
+                console.warn('⚠️ No simulation data returned from optimizer');
+                setSimulationData(null);
+            }
 
-        const optimizedFarms = [];
-        for (let i = 0; i < farmCount; i++) {
-            const farmType = constraints.allowedFarmTypes.length > 0
-                ? constraints.allowedFarmTypes[0]
-                : availableFarms[0]?.id || 'FarmT1';
+            // ✅ Return just the farms array (result.farms or result if it's already an array)
+            const farms = Array.isArray(result) ? result : result.farms;
+            console.log(`✅ Generated ${farms.length} optimized farms`);
 
-            const efficientCrops = availableFoodCrops.slice(0, 2).map(c => c.id);
-            const rotation = [...efficientCrops, null, null];
+            return farms;
+        } catch (error) {
+            console.error('❌ Optimization failed:', error);
+            alert('Optimization failed: ' + error.message);
 
-            optimizedFarms.push({
+            // Fallback: generate simple farms
+            setSimulationData(null);
+
+            const avgPeoplePerFarm = 400;
+            const estimatedFarms = Math.ceil(constraints.targetPopulation / avgPeoplePerFarm);
+            const farmCount = constraints.maxFarms
+                ? Math.min(estimatedFarms, constraints.maxFarms)
+                : estimatedFarms;
+
+            return Array.from({ length: farmCount }, (_, i) => ({
                 id: Date.now() + i,
-                farmId: farmType,
-                rotation,
+                farmId: 'FarmT1',
+                rotation: [null, null, null, null],
                 selectedFertilizerId: null,
                 customFertility: null
-            });
+            }));
         }
-
-        return optimizedFarms;
     };
 
     // ===== User Actions - Calculation =====
@@ -463,6 +478,7 @@ const FarmOptimizerPage = () => {
     // ===== Prepare data for UI =====
     const availableFarms = ProductionCalculator.farms?.filter(f => f.type === 'crop') || [];
     const availableCrops = ProductionCalculator.crops || [];
+    const availableFoodCrops = availableCrops.filter(crop => foodCropIds.includes(crop.id));
     const statsIcon = getGeneralIcon('Stats');
     const researchIcon = getGeneralIcon('Research');
     const infoIcon = getGeneralIcon('Info');
@@ -470,8 +486,9 @@ const FarmOptimizerPage = () => {
     // ===== Render =====
     return (
         <>
-<LoadingOverlay
-                isVisible={showLoadingOverlay}  // ✅ CHANGED from isCalculating
+            <LoadingOverlay
+                isVisible={showLoadingOverlay}  // ✅ CHANGED from isCalculating
+
                 title="Calculating Farm Production..."
                 message="Processing crop rotations, fertility calculations, and food production chains..."
                 showOptimizationTip={false}
@@ -553,9 +570,7 @@ const FarmOptimizerPage = () => {
                             <ConstraintsPanel
                                 constraints={constraints}
                                 availableFarms={availableFarms}
-                                availableFoodCrops={availableCrops.filter(crop =>
-                                    foodCropIds.includes(crop.id)  // ✅ Use state instead
-                                )}
+                                availableFoodCrops={availableFoodCrops}
                                 onConstraintsChange={setConstraints}
                             />
                         </div>
@@ -763,6 +778,7 @@ const FarmOptimizerPage = () => {
                         <ResultsSummary
                             results={results}
                             research={research}
+                            simulationData={simulationData}
                         />
 
                         <div style={{

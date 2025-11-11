@@ -378,8 +378,8 @@ export class FarmOptimizer {
     }
 
     /**
-     * Calculate effective farm stats with all multipliers (additive stacking)
-     */
+ * Calculate effective farm stats with all multipliers (additive stacking)
+ */
     static calculateEffectiveFarmStats(farm, edictIds, research) {
         const farmProto = ProductionCalculator.farms.find(f => f.id === farm.farmId);
         if (!farmProto) return null;
@@ -408,7 +408,8 @@ export class FarmOptimizer {
             originalWater: farmProto.demandsMultiplierPercent,
             effectiveYieldMult: yieldMult / 100, // Convert to decimal
             effectiveWaterMult: waterMult / 100,
-            effectiveFertilityReplenish: farmProto.fertilityReplenishPercent
+            effectiveFertilityMult: waterMult / 100, // ✅ Same as water - affects fertility consumption
+            effectiveFertilityReplenish: farmProto.fertilityReplenishPercent // ✅ Already correct (1 = 1% per day)
         };
     }
 
@@ -559,15 +560,6 @@ export class FarmOptimizer {
         return Array.from(machineMap.values());
     }
 
-    /**
-     * ✅ CORRECT: Calculate fertility equilibrium for a rotation
-     * Matches Farm.cs recomputeRotationStats() exactly
-     * Accounts for monoculture penalty (50% extra consumption for same crop)
-     * 
-     * @param {Array} rotation - Array of crop IDs (can include nulls)
-     * @param {Object} farm - Farm with effective stats
-     * @returns {Object} Fertility equilibrium data
-     */
     static calculateFertilityEquilibrium(rotation, farm) {
         // Filter out empty slots
         const nonEmptyCrops = rotation
@@ -583,7 +575,7 @@ export class FarmOptimizer {
             };
         }
 
-        let totalFertilityConsumed = 0; // Accumulated fertility consumption
+        let totalFertilityConsumed = 0;
         let totalDays = 0;
 
         // For steady-state: the "previous crop" before slot 0 is the LAST crop in rotation
@@ -596,16 +588,13 @@ export class FarmOptimizer {
         }
 
         nonEmptyCrops.forEach((crop) => {
-            // Get base consumption (already positive for consuming crops)
-            let consumedFertilityPerDay = crop.fertilityPerDayPercent;
+            // ✅ Get base consumption and apply farm's demands multiplier
+            // This replicates: crop.GetConsumedFertilityPerDay(farmPrototype)
+            let consumedFertilityPerDay = crop.fertilityPerDayPercent * (farm.demandsMultiplierPercent / 100);
 
             // ✅ Apply 50% monoculture penalty for CONSUMING crops
-            // From Farm.cs line 771: if (consumedFertilityPerDay.IsPositive && flag)
             const isSameCropAsPrevious = prevCrop && prevCrop.id === crop.id;
             if (consumedFertilityPerDay > 0 && isSameCropAsPrevious) {
-                // From Farm.cs line 773:
-                // consumedFertilityPerDay += consumedFertilityPerDay * FERTILITY_PENALTY_FOR_SAME_CROP
-                // Which is: consumedFertilityPerDay *= (1 + 0.5) = 1.5
                 consumedFertilityPerDay *= 1.5;
             }
 
@@ -613,24 +602,23 @@ export class FarmOptimizer {
             totalFertilityConsumed += consumedFertilityPerDay * crop.growthDays;
             totalDays += crop.growthDays;
 
-            // Update previous crop (skip "empty" crops like green manure for tracking)
+            // Update previous crop
             if (!crop.isEmptyCrop) {
                 prevCrop = crop;
             }
         });
 
         const avgFertilityPerDay = totalFertilityConsumed / totalDays;
-        const replenishRate = farm.effectiveFertilityReplenish; // 1.0%
+        const replenishRate = farm.fertilityReplenishPercent; // Use direct value (1.0 = 1%)
 
-        // ✅ From Farm.cs line 777:
-        // NaturalFertilityEquilibrium = (Percent.Hundred - m_avgFertilityUsedPerDay / Prototype.FertilityReplenish PerDay).Max(Percent.Zero)
+        // ✅ From Farm.cs line 777
         const naturalEquilibrium = Math.max(0, Math.min(200,
             100 - ((avgFertilityPerDay / replenishRate) * 100)
         ));
 
         return {
             naturalEquilibrium,
-            avgFertilityPerDay, // This is the CONSUMPTION rate (positive)
+            avgFertilityPerDay,
             totalRotationDays: totalDays,
             fertilityDeficit: Math.max(0, avgFertilityPerDay - replenishRate)
         };
