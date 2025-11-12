@@ -1,7 +1,7 @@
 const GameData = {
   "metadataJs": {
     "version": "Update 3",
-    "lastUpdated": "11/11/2025",
+    "lastUpdated": "11/12/2025",
     "updateNotes": "Base game export"
   },
   "machines": [
@@ -125738,6 +125738,12 @@ const GameData = {
       },
       "waterPerDay": 0,
       "fertilityPerDayPercent": 0,
+      "fertilityPerFarm": {
+        "FarmT4": 0,
+        "FarmT3": 0,
+        "FarmT2": 0,
+        "FarmT1": 0
+      },
       "minFertilityPercent": 0,
       "growthDays": 90,
       "droughtDays": 90,
@@ -125754,7 +125760,13 @@ const GameData = {
         "quantity": 0
       },
       "waterPerDay": 0.900390625,
-      "fertilityPerDayPercent": -0.119999997,
+      "fertilityPerDayPercent": -120,
+      "fertilityPerFarm": {
+        "FarmT4": -180,
+        "FarmT3": -150,
+        "FarmT2": -120,
+        "FarmT1": -120
+      },
       "minFertilityPercent": 0,
       "growthDays": 60,
       "droughtDays": null,
@@ -125771,7 +125783,13 @@ const GameData = {
         "quantity": 58
       },
       "waterPerDay": 1.20019531,
-      "fertilityPerDayPercent": 0.349999994,
+      "fertilityPerDayPercent": 350,
+      "fertilityPerFarm": {
+        "FarmT4": 437,
+        "FarmT3": 393,
+        "FarmT2": 350,
+        "FarmT1": 350
+      },
       "minFertilityPercent": 0,
       "growthDays": 90,
       "droughtDays": 90,
@@ -125788,7 +125806,13 @@ const GameData = {
         "quantity": 66
       },
       "waterPerDay": 1.33007813,
-      "fertilityPerDayPercent": 0.400000006,
+      "fertilityPerDayPercent": 400,
+      "fertilityPerFarm": {
+        "FarmT4": 500,
+        "FarmT3": 450,
+        "FarmT2": 400,
+        "FarmT1": 400
+      },
       "minFertilityPercent": 0,
       "growthDays": 120,
       "droughtDays": 30,
@@ -125805,7 +125829,13 @@ const GameData = {
         "quantity": 58
       },
       "waterPerDay": 1.05957031,
-      "fertilityPerDayPercent": 0.349999994,
+      "fertilityPerDayPercent": 350,
+      "fertilityPerFarm": {
+        "FarmT4": 437,
+        "FarmT3": 393,
+        "FarmT2": 350,
+        "FarmT1": 350
+      },
       "minFertilityPercent": 0,
       "growthDays": 180,
       "droughtDays": 60,
@@ -125822,7 +125852,13 @@ const GameData = {
         "quantity": 60
       },
       "waterPerDay": 0.900390625,
-      "fertilityPerDayPercent": 0.200000003,
+      "fertilityPerDayPercent": 200,
+      "fertilityPerFarm": {
+        "FarmT4": 250,
+        "FarmT3": 225,
+        "FarmT2": 200,
+        "FarmT1": 200
+      },
       "minFertilityPercent": 0,
       "growthDays": 360,
       "droughtDays": 300,
@@ -125839,7 +125875,13 @@ const GameData = {
         "quantity": 22
       },
       "waterPerDay": 1.20019531,
-      "fertilityPerDayPercent": 0.5,
+      "fertilityPerDayPercent": 500,
+      "fertilityPerFarm": {
+        "FarmT4": 625,
+        "FarmT3": 562,
+        "FarmT2": 500,
+        "FarmT1": 500
+      },
       "minFertilityPercent": 0,
       "growthDays": 120,
       "droughtDays": 30,
@@ -125856,7 +125898,13 @@ const GameData = {
         "quantity": 198
       },
       "waterPerDay": 1.59960938,
-      "fertilityPerDayPercent": 0.5,
+      "fertilityPerDayPercent": 500,
+      "fertilityPerFarm": {
+        "FarmT4": 625,
+        "FarmT3": 562,
+        "FarmT2": 500,
+        "FarmT1": 500
+      },
       "minFertilityPercent": 0,
       "growthDays": 270,
       "droughtDays": 90,
@@ -125873,7 +125921,13 @@ const GameData = {
         "quantity": 60
       },
       "waterPerDay": 1.0703125,
-      "fertilityPerDayPercent": 0.349999994,
+      "fertilityPerDayPercent": 350,
+      "fertilityPerFarm": {
+        "FarmT4": 437,
+        "FarmT3": 393,
+        "FarmT2": 350,
+        "FarmT1": 350
+      },
       "minFertilityPercent": 0,
       "growthDays": 120,
       "droughtDays": 90,
@@ -125890,7 +125944,13 @@ const GameData = {
         "quantity": 80
       },
       "waterPerDay": 1.33007813,
-      "fertilityPerDayPercent": 0.300000012,
+      "fertilityPerDayPercent": 300,
+      "fertilityPerFarm": {
+        "FarmT4": 375,
+        "FarmT3": 337,
+        "FarmT2": 300,
+        "FarmT1": 300
+      },
       "minFertilityPercent": 0,
       "growthDays": 240,
       "droughtDays": 90,
@@ -125907,7 +125967,13 @@ const GameData = {
         "quantity": 36
       },
       "waterPerDay": 0.9296875,
-      "fertilityPerDayPercent": 0.300000012,
+      "fertilityPerDayPercent": 300,
+      "fertilityPerFarm": {
+        "FarmT4": 375,
+        "FarmT3": 337,
+        "FarmT2": 300,
+        "FarmT1": 300
+      },
       "minFertilityPercent": 0,
       "growthDays": 90,
       "droughtDays": 30,
@@ -125924,7 +125990,13 @@ const GameData = {
         "quantity": 25
       },
       "waterPerDay": 0.900390625,
-      "fertilityPerDayPercent": 0.300000012,
+      "fertilityPerDayPercent": 300,
+      "fertilityPerFarm": {
+        "FarmT4": 375,
+        "FarmT3": 337,
+        "FarmT2": 300,
+        "FarmT1": 300
+      },
       "minFertilityPercent": 0,
       "growthDays": 120,
       "droughtDays": 30,
@@ -125941,7 +126013,13 @@ const GameData = {
         "quantity": 24
       },
       "waterPerDay": 1.5,
-      "fertilityPerDayPercent": 0.5,
+      "fertilityPerDayPercent": 500,
+      "fertilityPerFarm": {
+        "FarmT4": 625,
+        "FarmT3": 562,
+        "FarmT2": 500,
+        "FarmT1": 500
+      },
       "minFertilityPercent": 0,
       "growthDays": 120,
       "droughtDays": 30,

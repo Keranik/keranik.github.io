@@ -575,7 +575,7 @@ export class FarmOptimizer {
             };
         }
 
-        let totalFertilityConsumed = 0;
+        let totalFertilityConsumedRaw = 0;
         let totalDays = 0;
 
         // For steady-state: the "previous crop" before slot 0 is the LAST crop in rotation
@@ -587,40 +587,56 @@ export class FarmOptimizer {
             }
         }
 
-        nonEmptyCrops.forEach((crop) => {
-            // ✅ Get base consumption and apply farm's demands multiplier
-            // This replicates: crop.GetConsumedFertilityPerDay(farmPrototype)
-            let consumedFertilityPerDay = crop.fertilityPerDayPercent * (farm.demandsMultiplierPercent / 100);
+        console.log(`🌾 Calculating equilibrium for farm: ${farm.id}`);
 
-            // ✅ Apply 50% monoculture penalty for CONSUMING crops
+        nonEmptyCrops.forEach((crop) => {
+            // Get pre-calculated fertility consumption for this farm
+            let consumedFertilityPerDayRaw = crop.fertilityPerFarm[farm.id] || crop.fertilityPerDayPercent;
+
+            console.log(`  Crop: ${crop.name}`);
+            console.log(`    Base raw: ${consumedFertilityPerDayRaw}`);
+            console.log(`    Base %: ${(consumedFertilityPerDayRaw / 100000).toFixed(5)}%`);
+
+            // Apply 50% monoculture penalty
             const isSameCropAsPrevious = prevCrop && prevCrop.id === crop.id;
-            if (consumedFertilityPerDay > 0 && isSameCropAsPrevious) {
-                consumedFertilityPerDay *= 1.5;
+            if (consumedFertilityPerDayRaw > 0 && isSameCropAsPrevious) {
+                const beforePenalty = consumedFertilityPerDayRaw;
+                consumedFertilityPerDayRaw = Math.round((consumedFertilityPerDayRaw * 150000) / 100000);
+                console.log(`    Monoculture penalty: ${beforePenalty} → ${consumedFertilityPerDayRaw}`);
             }
 
-            // Accumulate total consumption
-            totalFertilityConsumed += consumedFertilityPerDay * crop.growthDays;
+            const totalForCrop = consumedFertilityPerDayRaw * crop.growthDays;
+            console.log(`    Growth days: ${crop.growthDays}`);
+            console.log(`    Total consumed: ${totalForCrop} raw`);
+
+            totalFertilityConsumedRaw += totalForCrop;
             totalDays += crop.growthDays;
 
-            // Update previous crop
             if (!crop.isEmptyCrop) {
                 prevCrop = crop;
             }
         });
 
-        const avgFertilityPerDay = totalFertilityConsumed / totalDays;
-        const replenishRate = farm.fertilityReplenishPercent; // Use direct value (1.0 = 1%)
+        console.log(`  Total fertility consumed (raw): ${totalFertilityConsumedRaw}`);
+        console.log(`  Total days: ${totalDays}`);
 
-        // ✅ From Farm.cs line 777
-        const naturalEquilibrium = Math.max(0, Math.min(200,
-            100 - ((avgFertilityPerDay / replenishRate) * 100)
-        ));
+        const avgFertilityPerDayRaw = Math.floor(totalFertilityConsumedRaw / totalDays);
+        console.log(`  Avg fertility/day (raw): ${avgFertilityPerDayRaw}`);
+        console.log(`  Avg fertility/day (%): ${(avgFertilityPerDayRaw / 100000).toFixed(5)}%`);
+
+        const replenishRaw = 1000; // 1.0%
+        const equilibriumRaw = 100000 - Math.round((avgFertilityPerDayRaw * 100000) / replenishRaw);
+        console.log(`  Equilibrium (raw): ${equilibriumRaw}`);
+
+        const naturalEquilibrium = Math.max(0, Math.min(200, equilibriumRaw / 1000));
+        console.log(`  🎯 FINAL Equilibrium: ${naturalEquilibrium}%`);
+        console.log(`  🎯 FINAL Equilibrium (raw display): ${equilibriumRaw / 1000}`);
 
         return {
             naturalEquilibrium,
-            avgFertilityPerDay,
+            avgFertilityPerDay: avgFertilityPerDayRaw / 100000,
             totalRotationDays: totalDays,
-            fertilityDeficit: Math.max(0, avgFertilityPerDay - replenishRate)
+            fertilityDeficit: Math.max(0, (avgFertilityPerDayRaw - replenishRaw) / 100000)
         };
     }
 
@@ -660,6 +676,7 @@ export class FarmOptimizer {
         // Calculate quantity needed per day per farm
         const quantityPerDayPerFarm = extraFertilityNeeded / fertilizer.fertilizer.fertilityPerQuantityPercent;
         const totalQuantityPerDay = quantityPerDayPerFarm * farmCount;
+
 
         return {
             needed: true,

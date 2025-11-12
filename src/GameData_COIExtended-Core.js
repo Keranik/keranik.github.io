@@ -1,7 +1,7 @@
 const GameData = {
   "metadataJs": {
     "version": "Update 3",
-    "lastUpdated": "11/11/2025",
+    "lastUpdated": "11/12/2025",
     "updateNotes": "Mod export: COIExtended-Core"
   },
   "machines": [
