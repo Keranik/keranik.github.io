@@ -250,6 +250,7 @@ const Calculator = () => {
     }
 
     const trashIcon = getGeneralIcon('Trash');
+    const tipIcon = getGeneralIcon('Tip');
     const optimizationOn = getGeneralIcon('LogisticsAuto');
     const optimizationOff = getGeneralIcon('LogisticsOff');
 
@@ -1542,15 +1543,26 @@ const Calculator = () => {
                                         <>
                                             <div style={{
                                                 marginBottom: '1rem',
-                                                padding: '10px',
+                                                padding: '4px',
                                                 backgroundColor: '#1a1a1a',
                                                 borderRadius: '6px',
                                                 fontSize: '0.85rem',
                                                 color: '#888',
                                                 border: '1px solid #333'
                                             }}>
-                                                💡 <strong style={{ color: '#4a90e2' }}>Compact Mode:</strong> Click ▶/▼ to expand/collapse. Click a node to view details.
-                                                Raw materials show a "+" button to change their source.
+                                                {tipIcon && (
+                                                            <img
+                                                                src={tipIcon}
+                                                                alt="Tip"
+                                                                style={{
+                                                                    width: '16px',
+                                                                    height: '16px', paddingRight: '2px',
+                                                                    opacity: 0.8,
+                                                                    filter: 'brightness(0) saturate(100%) invert(79%) sepia(85%) saturate(494%) hue-rotate(359deg) brightness(104%) contrast(101%)'
+                                                                }}
+                                                            />
+                                                        )} <strong style={{ color: '#4a90e2' }}>TIP:</strong> Click ▶/▼ to expand/collapse.  Click a node to view details. 
+                                                Click "+" to change source.
                                             </div>
                                             <CompactNode
                                                 node={productionChain}
