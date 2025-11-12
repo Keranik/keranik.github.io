@@ -1269,9 +1269,48 @@ const Calculator = () => {
                                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
                             }}>
                                 {viewMode === 'compact' && selectedNode && (
-                                    <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
-                                        Node Details
-                                    </h3>
+                                    <>
+                                        {/* Full-Width Embossed "Node Details" Badge - Edge to Edge */}
+                                        <div style={{
+                                            margin: '-1.5rem -1.5rem 0 -1.5rem',
+                                            padding: '12px 0',
+                                            background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+                                            borderBottom: '2px solid #333',
+                                            boxShadow:
+                                                'inset 0 3px 8px rgba(0, 0, 0, 0.7), ' +
+                                                'inset 0 -3px 8px rgba(255, 255, 255, 0.03), ' +
+                                                '0 4px 10px rgba(0, 0, 0, 0.5)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '8px',
+                                            borderRadius: '10px 10px 0 0',
+                                            marginBottom: '1.5rem'
+                                        }}>
+                                            <span style={{
+                                                fontSize: '0.9rem',
+                                                fontWeight: '700',
+                                                color: '#4a90e2',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '1.5px',
+                                                textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
+                                            }}>
+                                                Node Details
+                                            </span>
+                                            {getGeneralIcon('Info') && (
+                                                <img
+                                                    src={getGeneralIcon('Info')}
+                                                    alt="Info"
+                                                    style={{
+                                                        width: '16px',
+                                                        height: '16px',
+                                                        opacity: 0.7,
+                                                        filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8))'
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
+                                    </>
                                 )}
 
                                 <DetailsPanel

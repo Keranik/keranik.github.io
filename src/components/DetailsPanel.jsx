@@ -47,31 +47,98 @@ const DetailsPanel = ({
 
         return (
             <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '2px solid #444' }}>
-                    {productIcon && (
-                        <img src={productIcon} alt={product?.name} style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
-                    )}
-                    <div style={{ flex: 1 }}>
-                        <h4 style={{ fontSize: '1.3rem', fontWeight: '700', color: '#fff', marginBottom: '4px' }}>
+                {/* Compact Product Header */}
+                <div style={{
+                    marginBottom: '1.5rem',
+                    paddingBottom: '1rem',
+                    borderBottom: '2px solid #444',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: '10px'
+                    }}>
+                        {productIcon && (
+                            <img
+                                src={productIcon}
+                                alt={product?.name}
+                                style={{
+                                    width: '42px',
+                                    height: '42px',
+                                    objectFit: 'contain',
+                                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
+                                }}
+                            />
+                        )}
+                        <h4 style={{
+                            fontSize: '1.2rem',
+                            fontWeight: '700',
+                            color: '#fff',
+                            margin: 0,
+                            lineHeight: 1.2
+                        }}>
                             {product?.name || selectedNode.productId}
                         </h4>
-                        <div style={{ color: '#4a90e2', fontSize: '1rem', fontWeight: '600' }}>
-                            {selectedNode.targetRate?.toFixed(2)} /min
-                        </div>
+                        {selectedNode.isRawMaterial && (
+                            <span style={{
+                                padding: '4px 10px',
+                                backgroundColor: 'rgba(255, 215, 0, 0.15)',
+                                color: '#FFD700',
+                                borderRadius: '4px',
+                                fontSize: '0.7rem',
+                                fontWeight: '700',
+                                border: '1px solid rgba(255, 215, 0, 0.3)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                            }}>
+                                RAW
+                            </span>
+                        )}
                     </div>
-                    {selectedNode.isRawMaterial && (
+
+                    {/* Production Rate Badge */}
+                    <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '6px 12px',
+                        backgroundColor: '#1a1a1a',
+                        borderRadius: '6px',
+                        border: '1px solid #333'
+                    }}>
                         <span style={{
-                            padding: '6px 12px',
-                            backgroundColor: 'rgba(255, 215, 0, 0.15)',
-                            color: '#FFD700',
-                            borderRadius: '6px',
-                            fontSize: '0.85rem',
-                            fontWeight: '700',
-                            border: '1px solid rgba(255, 215, 0, 0.3)'
+                            fontSize: '0.75rem',
+                            color: '#888',
+                            textTransform: 'uppercase',
+                            fontWeight: '600',
+                            letterSpacing: '0.5px'
                         }}>
-                            RAW MATERIAL
+                            Production Rate
                         </span>
-                    )}
+                        <div style={{
+                            width: '1px',
+                            height: '16px',
+                            backgroundColor: '#444'
+                        }} />
+                        <span style={{
+                            color: '#4a90e2',
+                            fontSize: '1.1rem',
+                            fontWeight: '700'
+                        }}>
+                            {selectedNode.targetRate?.toFixed(2)}
+                        </span>
+                        <span style={{
+                            fontSize: '0.85rem',
+                            color: '#888',
+                            fontWeight: '600'
+                        }}>
+                            /min
+                        </span>
+                    </div>
                 </div>
 
                 {/* RAW MATERIAL - Show Resource Source */}
