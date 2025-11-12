@@ -50,16 +50,14 @@ const ConstraintsPanel = ({
             const newList = currentList.filter(id => id !== fertilizerId);
             onConstraintsChange({
                 ...constraints,
-                allowedFertilizers: newList,
-                naturalFertilityOnly: newList.length === 0 // Auto-enable natural only if no fertilizers
+                allowedFertilizers: newList
             });
         } else {
             // Add to list
             const newList = [...currentList, fertilizerId];
             onConstraintsChange({
                 ...constraints,
-                allowedFertilizers: newList,
-                naturalFertilityOnly: false // Disable natural only when fertilizers are selected
+                allowedFertilizers: newList
             });
         }
     };
@@ -68,8 +66,7 @@ const ConstraintsPanel = ({
     const clearAllFertilizers = () => {
         onConstraintsChange({
             ...constraints,
-            allowedFertilizers: [],
-            naturalFertilityOnly: true
+            allowedFertilizers: []
         });
     };
 
@@ -78,8 +75,7 @@ const ConstraintsPanel = ({
         const allIds = availableFertilizers.map(f => f.id);
         onConstraintsChange({
             ...constraints,
-            allowedFertilizers: allIds,
-            naturalFertilityOnly: false
+            allowedFertilizers: allIds
         });
     };
 

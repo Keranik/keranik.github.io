@@ -127,7 +127,7 @@ export class FarmCalculationEngine {
             };
         }
 
-        const usingFertilizer = !constraints.naturalFertilityOnly &&
+        const usingFertilizer = constraints.allowedFertilizers.length > 0 &&
             actualFertility > fertilityInfo.naturalEquilibrium &&
             farm.selectedFertilizerId !== null;
 
@@ -153,7 +153,7 @@ export class FarmCalculationEngine {
     }
 
     static determineActualFertility(farm, fertilityInfo, constraints) {
-        if (constraints.naturalFertilityOnly) {
+        if (constraints.allowedFertilizers.length === 0) {
             return fertilityInfo.naturalEquilibrium;
         }
         if (farm.customFertility !== null && farm.customFertility !== undefined) {
@@ -254,7 +254,7 @@ export class FarmCalculationEngine {
     }
 
     static calculateFertilizerOptions({ farm, farmIdx, fertilityInfo, foodResult, actualFertility, constraints }) {
-        if (constraints.naturalFertilityOnly || constraints.allowedFertilizers.length === 0) {
+        if (constraints.allowedFertilizers.length === 0) {
             return { bestOption: null, autoApplied: false, updatedFarm: farm };
         }
 
@@ -267,18 +267,18 @@ export class FarmCalculationEngine {
             constraints.allowedFertilizers
         );
 
-        console.log(`Farm ${farmIdx + 1}: Best fertilizer calculated:`, {
-            fertilizer: bestOption?.fertilizerId,
-            targetFertility: bestOption?.targetFertility,
-            netBenefit: bestOption?.netPeopleFed,
-            currentlyApplied: farm.selectedFertilizerId
-        });
-
         // Only auto-apply on FIRST calculation
         const isFirstCalculation = farm.selectedFertilizerId === null && farm.customFertility === null;
 
+        console.log(`🔍 Farm ${farmIdx + 1} - Auto-apply check:`, {
+            isFirstCalculation,
+            selectedFertilizerId: farm.selectedFertilizerId,
+            customFertility: farm.customFertility,
+            hasBestOption: !!bestOption,
+            netPeopleFed: bestOption?.netPeopleFed
+        });
+
         if (bestOption && bestOption.netPeopleFed > 0 && isFirstCalculation) {
-            console.log(`✅ FIRST-TIME auto-applying best fertilizer to farm ${farmIdx + 1}`);
 
             const updatedFarm = {
                 ...farm,
@@ -318,7 +318,7 @@ export class FarmCalculationEngine {
             constraints
         });
 
-        const usingFertilizer = !constraints.naturalFertilityOnly &&
+        const usingFertilizer = constraints.allowedFertilizers.length > 0 &&
             actualFertility > fertilityInfo.naturalEquilibrium &&
             farm.selectedFertilizerId !== null;
 

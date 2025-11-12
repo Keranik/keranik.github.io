@@ -80,21 +80,28 @@ const Layout = () => {
                 </header>
                 */}
 
-                {/* Navigation */}
+                {/* Navigation - Modern Glass-Morphism Design */}
                 <nav style={{
-                    backgroundColor: '#1a1a1a',
-                    borderBottom: '1px solid #333',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                    backgroundColor: 'rgba(26, 26, 26, 0.85)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    borderBottom: '1px solid rgba(74, 144, 226, 0.2)',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+                    margin: '1rem 2rem 0 2rem', marginBottom: '2rem',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    background: 'linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(42, 42, 42, 0.85) 100%)',
+                    border: '1px solid rgba(74, 144, 226, 0.15)'
                 }}>
                     <div style={{
-                        padding: '0 2rem',
+                        padding: '0.5rem 1rem',
                         display: 'flex',
                         justifyContent: 'center'
                     }}>
                         <ul style={{
                             listStyle: 'none',
                             display: 'flex',
-                            gap: '0.5rem',
+                            gap: '0.25rem',
                             margin: 0,
                             padding: 0
                         }}>
@@ -113,38 +120,65 @@ const Layout = () => {
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '8px',
-                                            padding: '0.875rem 1.5rem',
-                                            color: 'white',
+                                            padding: '0.75rem 1.25rem',
+                                            color: isActive(path) ? '#fff' : '#aaa',
                                             textDecoration: 'none',
-                                            fontWeight: '600',
-                                            fontSize: '0.95rem',
-                                            borderBottom: isActive(path) ? '3px solid #4a90e2' : '3px solid transparent',
-                                            backgroundColor: isActive(path) ? 'rgba(74, 144, 226, 0.1)' : 'transparent',
-                                            transition: 'all 0.2s',
-                                            borderRadius: '4px 4px 0 0'
+                                            fontWeight: isActive(path) ? '700' : '600',
+                                            fontSize: '0.9rem',
+                                            backgroundColor: isActive(path)
+                                                ? 'rgba(74, 144, 226, 0.2)'
+                                                : 'transparent',
+                                            transition: 'all 0.3s ease',
+                                            borderRadius: '8px',
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            border: isActive(path)
+                                                ? '1px solid rgba(74, 144, 226, 0.4)'
+                                                : '1px solid transparent'
                                         }}
                                         onMouseEnter={(e) => {
                                             if (!isActive(path)) {
-                                                e.currentTarget.style.backgroundColor = '#2a2a2a';
-                                                e.currentTarget.style.borderBottomColor = '#5aa0f2';
+                                                e.currentTarget.style.backgroundColor = 'rgba(74, 144, 226, 0.1)';
+                                                e.currentTarget.style.color = '#fff';
+                                                e.currentTarget.style.borderColor = 'rgba(74, 144, 226, 0.3)';
+                                                e.currentTarget.style.transform = 'translateY(-2px)';
                                             }
                                         }}
                                         onMouseLeave={(e) => {
                                             if (!isActive(path)) {
                                                 e.currentTarget.style.backgroundColor = 'transparent';
-                                                e.currentTarget.style.borderBottomColor = 'transparent';
+                                                e.currentTarget.style.color = '#aaa';
+                                                e.currentTarget.style.borderColor = 'transparent';
+                                                e.currentTarget.style.transform = 'translateY(0)';
                                             }
                                         }}
                                     >
+                                        {/* Active indicator */}
+                                        {isActive(path) && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                bottom: 0,
+                                                left: '50%',
+                                                transform: 'translateX(-50%)',
+                                                width: '60%',
+                                                height: '3px',
+                                                background: 'linear-gradient(90deg, transparent, #4a90e2, transparent)',
+                                                borderRadius: '3px 3px 0 0'
+                                            }} />
+                                        )}
+
                                         {icon && (
                                             <img
                                                 src={icon}
                                                 alt={label}
                                                 style={{
-                                                    width: '24px',
-                                                    height: '24px',
+                                                    width: '22px',
+                                                    height: '22px',
                                                     objectFit: 'contain',
-                                                    filter: 'brightness(1.2)'
+                                                    filter: isActive(path)
+                                                        ? 'brightness(1.3) drop-shadow(0 0 4px rgba(74, 144, 226, 0.6))'
+                                                        : 'brightness(1)',
+                                                    transition: 'all 0.3s ease'
                                                 }}
                                             />
                                         )}

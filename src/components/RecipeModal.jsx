@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import RecipeCard from './RecipeCard';
 
 const RecipeModal = ({
@@ -12,6 +12,13 @@ const RecipeModal = ({
     onToggleTime = null // Optional: callback for toggling recipe time
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const searchInputRef = useRef(null);
+
+    useEffect(() => {
+        if (isOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [isOpen]);
 
     if (!isOpen || !recipes || recipes.length === 0) return null;
 
@@ -114,6 +121,7 @@ const RecipeModal = ({
                 {/* Search Box */}
                 <div style={{ marginBottom: '1.5rem' }}>
                     <input
+                        ref={searchInputRef}
                         type="text"
                         placeholder="Search recipes by name, description, inputs, or outputs..."
                         value={searchTerm}

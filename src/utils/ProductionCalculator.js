@@ -578,6 +578,7 @@ class ProductionCalculator {
             machines: new Map(),
             power: 0,
             workers: 0,
+            computing: 0,
             maintenance: new Map(),
             rawMaterials: new Map()
         };
@@ -602,6 +603,10 @@ class ProductionCalculator {
 
             // Add worker requirements
             requirements.workers += node.machine.workers * node.machineCount;
+
+            if (node.machine.computingTFlops) {
+                requirements.computing += node.machine.computingTFlops * node.machineCount;
+            }
 
             // Add maintenance requirements
             const maintenanceId = node.machine.maintenance.productId;

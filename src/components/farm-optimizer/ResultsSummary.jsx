@@ -51,11 +51,11 @@ const ResultsSummary = ({ results, research, simulationData }) => {
     };
 
     // Icons
-    const peopleIcon = getGeneralIcon('People');
+    const peopleIcon = getGeneralIcon('Population');
     const waterIcon = getGeneralIcon('Water');
     const foodIcon = getGeneralIcon('Food');
     const unityIcon = getGeneralIcon('Unity');
-    const machineIcon = getGeneralIcon('Machine');
+    const machineIcon = getGeneralIcon('Machines');
     const electricityIcon = getGeneralIcon('Electricity');
     const workersIcon = getGeneralIcon('Workers');
     const rainIcon = getGeneralIcon('Rain');
@@ -571,6 +571,113 @@ const ResultsSummary = ({ results, research, simulationData }) => {
                     )}
                 </div>
 
+                {/* Food Diversity (with Health & Unity nested inside) */}
+                <div style={{
+                    backgroundColor: '#1a1a1a',
+                    padding: '1rem',
+                    borderRadius: '8px',
+                    marginBottom: '1rem',
+                    border: '1px solid #333'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '0.5rem'
+                    }}>
+                        {foodIcon && (
+                            <img src={foodIcon} alt="Food" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                        )}
+                        <span style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: '600' }}>Food Diversity</span>
+                    </div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f39c12', marginBottom: '0.75rem' }}>
+                        {results.totals.foodCategories.count} Categories
+                    </div>
+
+                    {/* Health & Unity Grid (nested inside Food Diversity) */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '0.5rem',
+                        marginBottom: '0.75rem',
+                        padding: '0.75rem',
+                        backgroundColor: '#0f0f0f',
+                        borderRadius: '6px'
+                    }}>
+                        {/* Health Bonuses */}
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                                marginBottom: '0.35rem'
+                            }}>
+                                {healthIcon && (
+                                    <img src={healthIcon} alt="Health" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                )}
+                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: '600' }}>Health</span>
+                            </div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#f39c12' }}>
+                                {results.totals.foodCategories.healthBonuses}
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#666' }}>
+                                Bonus{results.totals.foodCategories.healthBonuses !== 1 ? 'es' : ''}
+                            </div>
+                        </div>
+
+                        {/* Unity Production */}
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                                marginBottom: '0.35rem'
+                            }}>
+                                {unityIcon && (
+                                    <img src={unityIcon} alt="Unity" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                )}
+                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: '600' }}>Unity</span>
+                            </div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#e74c3c' }}>
+                                {results.totals.foodCategories.totalUnity.toFixed(1)}
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#666' }}>
+                                per month
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Food Categories Breakdown */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                        {results.totals.foodCategories.categories.map(cat => (
+                            <div
+                                key={cat.id}
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    fontSize: '0.7rem',
+                                    padding: '0.35rem 0.5rem',
+                                    backgroundColor: '#0f0f0f',
+                                    borderRadius: '4px'
+                                }}
+                            >
+                                <span style={{ color: '#aaa' }}>
+                                    {cat.name}
+                                    {cat.hasHealthBenefit && (
+                                        <span style={{ color: '#50C878', marginLeft: '4px' }}>★</span>
+                                    )}
+                                </span>
+                                <span style={{ color: '#888', fontWeight: '600' }}>
+                                    {cat.peopleFed.toFixed(0)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Water Usage Section */}
                 <div style={{
                     backgroundColor: '#1a1a1a',
@@ -814,112 +921,7 @@ const ResultsSummary = ({ results, research, simulationData }) => {
                     )}
                 </div>
 
-                {/* Food Diversity (with Health & Unity nested inside) */}
-                <div style={{
-                    backgroundColor: '#1a1a1a',
-                    padding: '1rem',
-                    borderRadius: '8px',
-                    marginBottom: '1rem',
-                    border: '1px solid #333'
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        marginBottom: '0.5rem'
-                    }}>
-                        {foodIcon && (
-                            <img src={foodIcon} alt="Food" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
-                        )}
-                        <span style={{ fontSize: '0.85rem', color: '#aaa', fontWeight: '600' }}>Food Diversity</span>
-                    </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f39c12', marginBottom: '0.75rem' }}>
-                        {results.totals.foodCategories.count} Categories
-                    </div>
-
-                    {/* Health & Unity Grid (nested inside Food Diversity) */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr 1fr',
-                        gap: '0.5rem',
-                        marginBottom: '0.75rem',
-                        padding: '0.75rem',
-                        backgroundColor: '#0f0f0f',
-                        borderRadius: '6px'
-                    }}>
-                        {/* Health Bonuses */}
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '4px',
-                                marginBottom: '0.35rem'
-                            }}>
-                                {healthIcon && (
-                                    <img src={healthIcon} alt="Health" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
-                                )}
-                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: '600' }}>Health</span>
-                            </div>
-                            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#f39c12' }}>
-                                {results.totals.foodCategories.healthBonuses}
-                            </div>
-                            <div style={{ fontSize: '0.65rem', color: '#666' }}>
-                                Bonus{results.totals.foodCategories.healthBonuses !== 1 ? 'es' : ''}
-                            </div>
-                        </div>
-
-                        {/* Unity Production */}
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '4px',
-                                marginBottom: '0.35rem'
-                            }}>
-                                {unityIcon && (
-                                    <img src={unityIcon} alt="Unity" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
-                                )}
-                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: '600' }}>Unity</span>
-                            </div>
-                            <div style={{ fontSize: '1.2rem', fontWeight: '700', color: '#e74c3c' }}>
-                                {results.totals.foodCategories.totalUnity.toFixed(1)}
-                            </div>
-                            <div style={{ fontSize: '0.65rem', color: '#666' }}>
-                                per month
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Food Categories Breakdown */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                        {results.totals.foodCategories.categories.map(cat => (
-                            <div
-                                key={cat.id}
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    fontSize: '0.7rem',
-                                    padding: '0.35rem 0.5rem',
-                                    backgroundColor: '#0f0f0f',
-                                    borderRadius: '4px'
-                                }}
-                            >
-                                <span style={{ color: '#aaa' }}>
-                                    {cat.name}
-                                    {cat.hasHealthBenefit && (
-                                        <span style={{ color: '#50C878', marginLeft: '4px' }}>★</span>
-                                    )}
-                                </span>
-                                <span style={{ color: '#888', fontWeight: '600' }}>
-                                    {cat.peopleFed.toFixed(0)}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+               
 
                 {/* Processing Requirements */}
                 {results.totals.processingMachines.length > 0 && (

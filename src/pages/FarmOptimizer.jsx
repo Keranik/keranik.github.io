@@ -59,8 +59,7 @@ const FarmOptimizerPage = () => {
         allowedFarmTypes: [],
         allowedFertilizers: ['Product_FertilizerOrganic', 'Product_Fertilizer', 'Product_Fertilizer2'],
         maxWaterPerDay: null,
-        maxFertilityPerDay: null,
-        naturalFertilityOnly: false
+        maxFertilityPerDay: null
     });
 
     // ===== Farm State =====
@@ -152,14 +151,6 @@ const FarmOptimizerPage = () => {
             performCalculation(false);  // ✅ Auto-triggered (fertilizer apply)
         }
     }, [farms, loading, dataLoaded, results]);
-
-    useEffect(() => {
-        if (results && !loading && dataLoaded) {
-            console.log('naturalFertilityOnly changed, triggering recalculation');
-            const timer = setTimeout(() => performCalculation(false), 300);  // ✅ Auto-triggered
-            return () => clearTimeout(timer);
-        }
-    }, [constraints.naturalFertilityOnly]);
 
     useEffect(() => {
         if (results && !loading && dataLoaded) {

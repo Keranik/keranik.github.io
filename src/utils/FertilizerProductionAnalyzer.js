@@ -1,21 +1,41 @@
-﻿// src/utils/FertilizerProductionAnalyzer.js - FIXED to use conversion factors in core metrics
+﻿// src/utils/FertilizerProductionAnalyzer.js
+// Analyzes the true economic cost of fertilizer production in worker-months
 
 import ProductionCalculator from './ProductionCalculator';
 
 /**
- * Analyzes fertilizer production costs to replace hardcoded values in FertilizerCalculator
- * Averages all available recipes for each fertilizer to get representative production cost
+ * ECONOMIC MODEL:
+ * ===============
+ * Game Time: 10 ticks/sec, 2 sec/day, 30 days/month, 60 seconds/month
+ * 
+ * We calculate the TOTAL worker-months required to produce 1 unit of fertilizer,
+ * including all upstream production chains (inputs, electricity, water, etc.)
+ * 
+ * This lets us determine if fertilizer is "worth it":
+ * - Fertilizer increases farm yield
+ * - But requires workers to produce
+ * - Net benefit = yield increase - worker food consumption
+ * 
+ * CONVERSION FACTORS represent the worker-months needed to produce 1 unit/month
+ * of each resource type. These are TUNABLE to match your economic model.
  */
 export class FertilizerProductionAnalyzer {
 
-    // Conversion factors to normalize different resource types to "worker-equivalent hours"
+    /**
+     * Conversion Factors: Worker-months required per unit/month of resource
+     * 
+     * Example: maintenancePerMonth = 0.025 means:
+     *   "If a machine requires 1 maintenance/month, that costs 0.025 worker-months"
+     * 
+     * These values are TUNABLE based on your game's economy.
+     * Use the test page to calibrate them until fertilizer rankings match your intuition.
+     */
     static CONVERSION_FACTORS = {
-        workerHours: 1.0,
-        maintenancePerMonth: 2.667,
-        electricityKwPerMonth: 0.032,
-        computingPerMonth: 90,
-        waterPerMonth: 2.5,
-        ammoniaPerMonth: 46
+        maintenancePerMonth: 0.0005,      // Nearly free for testing
+        electricityKwPerMonth: 0.0010,    // Nearly free for testing
+        computingPerMonth: 0.01,        // Nearly free for testing
+        waterPerMonth: 0.01,            // Nearly free for testing
+        ammoniaPerMonth: 0.005           // Nearly free for testing
     };
 
     /**
@@ -50,6 +70,28 @@ export class FertilizerProductionAnalyzer {
     }
 
     /**
+     * Check if a product is water
+     */
+    static isWater(productId) {
+        const product = ProductionCalculator.getProduct(productId);
+        if (!product) return false;
+        const name = product.name?.toLowerCase() || '';
+        const id = productId.toLowerCase();
+        return name.includes('water') || id.includes('water');
+    }
+
+    /**
+     * Check if a product is ammonia
+     */
+    static isAmmonia(productId) {
+        const product = ProductionCalculator.getProduct(productId);
+        if (!product) return false;
+        const name = product.name?.toLowerCase() || '';
+        const id = productId.toLowerCase();
+        return name.includes('ammonia') || id.includes('ammonia');
+    }
+
+    /**
      * Extract maintenance cost from machine
      */
     static getMaintenanceCost(machine) {
@@ -61,14 +103,30 @@ export class FertilizerProductionAnalyzer {
     }
 
     /**
-     * Calculate production cost for ONE unit through a specific recipe
-     * Returns cost in worker-months per unit
+     * Get empty cost structure
      */
-    // src/utils/FertilizerProductionAnalyzer.js - FIX for calculateRecipeCost
+    static getEmptyCost() {
+        return {
+            workerMonths: 0,           // Direct worker time on machines
+            maintenanceMonths: 0,      // Maintenance units consumed per month
+            electricityKwMonths: 0,    // Electricity kW consumed per month
+            computingMonths: 0,        // Computing units consumed per month
+            waterMonths: 0,            // Water units consumed per month
+            ammoniaMonths: 0           // Ammonia units consumed per month
+        };
+    }
 
     /**
-     * Calculate production cost for ONE unit through a specific recipe
-     * Returns cost in worker-months per unit
+     * Calculate production cost for ONE unit of product through a specific recipe
+     * 
+     * Returns cost structure showing resource consumption per unit produced.
+     * All values are in "per month" units (e.g., workerMonths = worker-months per unit)
+     * 
+     * @param {Object} recipe - The recipe to analyze
+     * @param {number} maxDepth - Maximum recursion depth for input chains
+     * @param {Set} visited - Set of visited recipe IDs (prevents infinite loops)
+     * @param {string} targetProductId - Which output to optimize for (if recipe has multiple outputs)
+     * @returns {Object} Cost structure with all resource requirements
      */
     static calculateRecipeCost(recipe, maxDepth = 5, visited = new Set(), targetProductId = null) {
         if (maxDepth <= 0 || visited.has(recipe.id)) {
@@ -84,10 +142,10 @@ export class FertilizerProductionAnalyzer {
             return this.getEmptyCost();
         }
 
-        const machine = machines[0];
+        const machine = machines[0]; // Use first available machine
         const maintenanceCost = this.getMaintenanceCost(machine);
 
-        // Find the target output (either fertilizer or specified product)
+        // Find the target output product
         let targetOutput;
         if (targetProductId) {
             targetOutput = recipe.outputs.find(o => o.productId === targetProductId);
@@ -97,10 +155,9 @@ export class FertilizerProductionAnalyzer {
         }
 
         if (!targetOutput) {
-            // If no fertilizer and no target specified, try the first output
+            // If no fertilizer and no target specified, use first output
             if (recipe.outputs.length > 0) {
                 targetOutput = recipe.outputs[0];
-                console.log(`Using first output ${targetOutput.productId} for recipe ${recipe.id}`);
             } else {
                 console.warn(`No suitable output in recipe ${recipe.id}`);
                 return this.getEmptyCost();
@@ -110,9 +167,11 @@ export class FertilizerProductionAnalyzer {
         const unitsPerCycle = targetOutput.quantity;
         const cycleSeconds = recipe.durationSeconds;
         const secondsPerMonth = 60;
+
+        // How many months does it take to produce 1 unit?
         const monthsPerUnit = (cycleSeconds / unitsPerCycle) / secondsPerMonth;
 
-        // Direct machine costs per unit
+        // Direct costs for THIS machine to produce 1 unit
         const cost = {
             workerMonths: (machine.workers || 0) * monthsPerUnit,
             maintenanceMonths: maintenanceCost * monthsPerUnit,
@@ -122,46 +181,58 @@ export class FertilizerProductionAnalyzer {
             ammoniaMonths: 0
         };
 
-        // Process inputs
+        // Add costs for inputs (recursive production chains)
         recipe.inputs.forEach(input => {
             const inputProduct = ProductionCalculator.getProduct(input.productId);
             if (!inputProduct) return;
 
             const quantityPerUnit = input.quantity / unitsPerCycle;
+
+            // ✅ CRITICAL: Check if THIS input is water or ammonia FIRST
+            // This ensures we track water/ammonia consumption at EVERY level of the chain
+            const isWaterInput = this.isWater(input.productId);
+            const isAmmoniaInput = this.isAmmonia(input.productId);
+
+            if (isWaterInput) {
+                cost.waterMonths += quantityPerUnit;
+                console.log(`  💧 Water consumed: ${quantityPerUnit.toFixed(6)} per unit`);
+            }
+
+            if (isAmmoniaInput) {
+                cost.ammoniaMonths += quantityPerUnit;
+                console.log(`  🧪 Ammonia consumed: ${quantityPerUnit.toFixed(6)} per unit`);
+            }
+
+            // Now check if this input has its own production chain
             const inputRecipes = this.findRecipesProducing(input.productId);
 
             if (inputRecipes.length === 0) {
-                // Raw material
-                const name = inputProduct.name?.toLowerCase() || '';
-                const id = input.productId.toLowerCase();
-
-                if (name.includes('water') || id.includes('water')) {
-                    cost.waterMonths += quantityPerUnit;
-                    console.log(`  -> Raw water: ${quantityPerUnit.toFixed(6)} per unit`);
-                } else if (name.includes('ammonia') || id.includes('ammonia')) {
-                    cost.ammoniaMonths += quantityPerUnit;
-                    console.log(`  -> Raw ammonia: ${quantityPerUnit.toFixed(6)} per unit`);
-                } else {
-                    console.log(`  -> Raw material ${inputProduct.name}: ${quantityPerUnit.toFixed(6)} per unit (no cost)`);
+                // Raw material (no production chain)
+                // Water and ammonia already counted above
+                if (!isWaterInput && !isAmmoniaInput) {
+                    console.log(`  ⛏️ Raw material ${inputProduct.name}: ${quantityPerUnit.toFixed(6)} per unit (no worker cost)`);
                 }
             } else {
-                // Has production chain - recursively calculate (use first recipe, specify target product)
+                // Has production chain - recursively calculate cost
                 const inputCost = this.calculateRecipeCost(
                     inputRecipes[0],
                     maxDepth - 1,
                     visited,
-                    input.productId // ✅ SPECIFY TARGET PRODUCT
+                    input.productId
                 );
 
+                // Add the input's production cost (scaled by quantity needed)
                 cost.workerMonths += inputCost.workerMonths * quantityPerUnit;
                 cost.maintenanceMonths += inputCost.maintenanceMonths * quantityPerUnit;
                 cost.electricityKwMonths += inputCost.electricityKwMonths * quantityPerUnit;
                 cost.computingMonths += inputCost.computingMonths * quantityPerUnit;
+
+                // ✅ CRITICAL: Add water/ammonia from the input's production chain
                 cost.waterMonths += inputCost.waterMonths * quantityPerUnit;
                 cost.ammoniaMonths += inputCost.ammoniaMonths * quantityPerUnit;
 
                 if (inputCost.waterMonths > 0 || inputCost.ammoniaMonths > 0) {
-                    console.log(`  -> ${inputProduct.name} contributes: water=${inputCost.waterMonths.toFixed(6)}, ammonia=${inputCost.ammoniaMonths.toFixed(6)}`);
+                    console.log(`  ⛓️ ${inputProduct.name} production chain uses: water=${(inputCost.waterMonths * quantityPerUnit).toFixed(6)}, ammonia=${(inputCost.ammoniaMonths * quantityPerUnit).toFixed(6)}`);
                 }
             }
         });
@@ -170,61 +241,85 @@ export class FertilizerProductionAnalyzer {
     }
 
     /**
-     * Get empty cost structure
-     */
-    static getEmptyCost() {
-        return {
-            workerMonths: 0,
-            maintenanceMonths: 0,
-            electricityKwMonths: 0,
-            computingMonths: 0,
-            waterMonths: 0,
-            ammoniaMonths: 0
-        };
-    }
-
-    /**
-     * Convert cost to total worker-equivalent MONTHS (not hours)
-     * This is used for the core metrics
+     * Convert resource costs to total worker-months
+     * 
+     * This is the KEY FUNCTION for economic comparison.
+     * It converts all resource types to a common unit: worker-months
+     * 
+     * Example: If a fertilizer unit requires:
+     *   - 0.1 worker-months (direct labor)
+     *   - 5 maintenance/month (= 5 * 0.025 = 0.125 worker-months)
+     *   - 10 water/month (= 10 * 0.025 = 0.25 worker-months)
+     *   Total: 0.475 worker-months per unit
+     * 
+     * Then: unitsPerWorkerMonth = 1 / 0.475 = 2.1 units/worker-month
      */
     static normalizeToWorkerEquivalentMonths(cost) {
-        // Convert everything to worker-equivalent months
-        const workerMonths = cost.workerMonths;
-        const maintenanceEq = cost.maintenanceMonths * (this.CONVERSION_FACTORS.maintenancePerMonth / 60); // Convert hours to months
-        const electricityEq = cost.electricityKwMonths * (this.CONVERSION_FACTORS.electricityKwPerMonth / 60);
-        const computingEq = cost.computingMonths * (this.CONVERSION_FACTORS.computingPerMonth / 60);
-        const waterEq = cost.waterMonths * (this.CONVERSION_FACTORS.waterPerMonth / 60);
-        const ammoniaEq = cost.ammoniaMonths * (this.CONVERSION_FACTORS.ammoniaPerMonth / 60);
-
-        return workerMonths + maintenanceEq + electricityEq + computingEq + waterEq + ammoniaEq;
+        return cost.workerMonths +
+            (cost.maintenanceMonths * this.CONVERSION_FACTORS.maintenancePerMonth) +
+            (cost.electricityKwMonths * this.CONVERSION_FACTORS.electricityKwPerMonth) +
+            (cost.computingMonths * this.CONVERSION_FACTORS.computingPerMonth) +
+            (cost.waterMonths * this.CONVERSION_FACTORS.waterPerMonth) +
+            (cost.ammoniaMonths * this.CONVERSION_FACTORS.ammoniaPerMonth);
     }
 
     /**
-     * Convert cost to total worker-equivalent hours (for display)
+     * Convert worker-months to worker-seconds (for display)
+     * Game time: 60 seconds per month
      */
-    static normalizeToWorkerEquivalentHours(cost) {
-        const workerHours = cost.workerMonths * 60;
-        const maintenanceEq = cost.maintenanceMonths * this.CONVERSION_FACTORS.maintenancePerMonth;
-        const electricityEq = cost.electricityKwMonths * this.CONVERSION_FACTORS.electricityKwPerMonth;
-        const computingEq = cost.computingMonths * this.CONVERSION_FACTORS.computingPerMonth;
-        const waterEq = cost.waterMonths * this.CONVERSION_FACTORS.waterPerMonth;
-        const ammoniaEq = cost.ammoniaMonths * this.CONVERSION_FACTORS.ammoniaPerMonth;
+    static workerMonthsToSeconds(workerMonths) {
+        return workerMonths * 60;
+    }
+
+    /**
+     * Convert worker-months to worker-days (for display)
+     * Game time: 30 days per month
+     */
+    static workerMonthsToDays(workerMonths) {
+        return workerMonths * 30;
+    }
+
+    /**
+     * Get detailed breakdown for display
+     * Shows both raw costs and worker-equivalent costs
+     */
+    static getDetailedBreakdown(cost) {
+        const rawCosts = {
+            workerMonths: cost.workerMonths,
+            maintenanceMonths: cost.maintenanceMonths,
+            electricityKwMonths: cost.electricityKwMonths,
+            computingMonths: cost.computingMonths,
+            waterMonths: cost.waterMonths,
+            ammoniaMonths: cost.ammoniaMonths
+        };
+
+        const workerEquivalents = {
+            workers: cost.workerMonths,
+            maintenance: cost.maintenanceMonths * this.CONVERSION_FACTORS.maintenancePerMonth,
+            electricity: cost.electricityKwMonths * this.CONVERSION_FACTORS.electricityKwPerMonth,
+            computing: cost.computingMonths * this.CONVERSION_FACTORS.computingPerMonth,
+            water: cost.waterMonths * this.CONVERSION_FACTORS.waterPerMonth,
+            ammonia: cost.ammoniaMonths * this.CONVERSION_FACTORS.ammoniaPerMonth
+        };
+
+        const totalWorkerMonths = this.normalizeToWorkerEquivalentMonths(cost);
 
         return {
-            total: workerHours + maintenanceEq + electricityEq + computingEq + waterEq + ammoniaEq,
-            breakdown: {
-                workerHours,
-                maintenanceEq,
-                electricityEq,
-                computingEq,
-                waterEq,
-                ammoniaEq
-            }
+            rawCosts,
+            workerEquivalents,
+            totalWorkerMonths,
+            totalWorkerSeconds: this.workerMonthsToSeconds(totalWorkerMonths),
+            totalWorkerDays: this.workerMonthsToDays(totalWorkerMonths)
         };
     }
 
     /**
-     * Analyze a single fertilizer - average all its recipes
+     * Analyze a single fertilizer - average across all recipes
+     * 
+     * Returns complete economic analysis including:
+     * - Production costs (raw resources and worker-equivalent)
+     * - Efficiency metrics (units per worker-month, fertility per worker-month)
+     * - Comparison data
      */
     static analyzeFertilizer(fertilizerId) {
         const product = ProductionCalculator.getProduct(fertilizerId);
@@ -238,7 +333,7 @@ export class FertilizerProductionAnalyzer {
             return null;
         }
 
-        console.log(`\nAnalyzing ${product.name} (${recipes.length} recipe${recipes.length > 1 ? 's' : ''})`);
+        console.log(`\n📊 Analyzing ${product.name} (${recipes.length} recipe${recipes.length > 1 ? 's' : ''})`);
 
         // Calculate cost for each recipe
         const recipeCosts = recipes.map(recipe => {
@@ -246,7 +341,7 @@ export class FertilizerProductionAnalyzer {
             return this.calculateRecipeCost(recipe);
         });
 
-        // Average the costs
+        // Average the costs across all recipes
         const avgCost = this.getEmptyCost();
         recipeCosts.forEach(cost => {
             avgCost.workerMonths += cost.workerMonths / recipeCosts.length;
@@ -257,26 +352,19 @@ export class FertilizerProductionAnalyzer {
             avgCost.ammoniaMonths += cost.ammoniaMonths / recipeCosts.length;
         });
 
-        // Get normalized costs for display
-        const normalizedHours = this.normalizeToWorkerEquivalentHours(avgCost);
+        const breakdown = this.getDetailedBreakdown(avgCost);
         const fertilityPerUnit = product.fertilizer.fertilityPerQuantityPercent;
 
-        // ✅ FIXED: Calculate the three values using NORMALIZED worker-equivalent months
-        const totalWorkerEquivalentMonths = this.normalizeToWorkerEquivalentMonths(avgCost);
-        const unitsPerWorkerMonth = 1 / totalWorkerEquivalentMonths;
-        const fertilityPerWorkerMonth = fertilityPerUnit / totalWorkerEquivalentMonths;
-        const workerMonthsPerUnit = totalWorkerEquivalentMonths;
+        // Core metrics for FertilizerCalculator
+        const workerMonthsPerUnit = breakdown.totalWorkerMonths;
+        const unitsPerWorkerMonth = 1 / workerMonthsPerUnit;
+        const fertilityPerWorkerMonth = fertilityPerUnit * unitsPerWorkerMonth;
 
-        console.log(`  Average cost per unit:`, {
-            workerMonths: avgCost.workerMonths.toFixed(6),
-            maintenance: avgCost.maintenanceMonths.toFixed(6),
-            electricity: avgCost.electricityKwMonths.toFixed(6),
-            computing: avgCost.computingMonths.toFixed(6),
-            water: avgCost.waterMonths.toFixed(6),
-            ammonia: avgCost.ammoniaMonths.toFixed(6)
-        });
-        console.log(`  Total worker-equivalent months: ${totalWorkerEquivalentMonths.toFixed(6)}`);
-        console.log(`  Total worker-equivalent hours: ${normalizedHours.total.toFixed(4)}`);
+        console.log(`  💧 Total water per unit: ${avgCost.waterMonths.toFixed(6)}`);
+        console.log(`  🧪 Total ammonia per unit: ${avgCost.ammoniaMonths.toFixed(6)}`);
+        console.log(`  ✅ Total worker-months per unit: ${workerMonthsPerUnit.toFixed(6)}`);
+        console.log(`  ✅ Units per worker-month: ${unitsPerWorkerMonth.toFixed(4)}`);
+        console.log(`  ✅ Fertility per worker-month: ${fertilityPerWorkerMonth.toFixed(4)}%`);
 
         return {
             fertilizerId,
@@ -284,28 +372,34 @@ export class FertilizerProductionAnalyzer {
             fertilityPerUnit,
             maxFertility: product.fertilizer.maxFertilityPercent,
 
-            // Core metrics for FertilizerCalculator (now uses normalized values!)
+            // Core metrics for FertilizerCalculator
             unitsPerWorkerMonth,
             fertilityPerWorkerMonth,
             workerMonthsPerUnit,
 
             // Detailed breakdown
             costPerUnit: avgCost,
-            normalizedCostPerUnit: normalizedHours.total,
-            costBreakdown: normalizedHours.breakdown,
-            recipeCount: recipes.length,
-            normalizationScale: 1
+            breakdown,
+            recipeCount: recipes.length
         };
     }
 
     /**
-     * Analyze all fertilizers and generate replacement data for FertilizerCalculator
+     * Analyze all fertilizers and generate replacement data
+     * 
+     * Returns:
+     * - results: Full analysis for each fertilizer (for display)
+     * - replacementData: Just the core metrics (for FertilizerCalculator)
      */
     static generateReplacementData(fertilizerIds) {
         console.log('\n' + '='.repeat(80));
-        console.log('FERTILIZER PRODUCTION COST ANALYSIS');
+        console.log('🧪 FERTILIZER ECONOMIC ANALYSIS');
         console.log('='.repeat(80));
-        console.log('Conversion Factors:', this.CONVERSION_FACTORS);
+        console.log('Game Time: 60 seconds/month, 30 days/month');
+        console.log('Conversion Factors (worker-months per unit/month):');
+        Object.entries(this.CONVERSION_FACTORS).forEach(([key, value]) => {
+            console.log(`  ${key}: ${value}`);
+        });
         console.log('');
 
         const results = [];
@@ -316,27 +410,27 @@ export class FertilizerProductionAnalyzer {
             if (analysis) {
                 results.push(analysis);
 
-                // Build replacement data in exact format for FertilizerCalculator
+                // Build replacement data for FertilizerCalculator
                 replacementData[id] = {
-                    unitsPerWorkerMonth: analysis.unitsPerWorkerMonth,
-                    fertilityPerWorkerMonth: analysis.fertilityPerWorkerMonth,
-                    workerMonthsPerUnit: analysis.workerMonthsPerUnit
+                    unitsPerWorkerMonth: analysis.unitsPerWorkerMonth*10,
+                    fertilityPerWorkerMonth: analysis.fertilityPerWorkerMonth*10,
+                    workerMonthsPerUnit: analysis.workerMonthsPerUnit/10
                 };
             }
         });
 
-        // Sort by cost efficiency (cost per fertility point)
+        // Sort by cost efficiency (worker-months per % fertility gained)
         results.sort((a, b) => {
-            const costPerFertA = a.normalizedCostPerUnit / a.fertilityPerUnit;
-            const costPerFertB = b.normalizedCostPerUnit / b.fertilityPerUnit;
+            const costPerFertA = a.workerMonthsPerUnit / a.fertilityPerUnit;
+            const costPerFertB = b.workerMonthsPerUnit / b.fertilityPerUnit;
             return costPerFertA - costPerFertB;
         });
 
         // Calculate relative efficiency
         if (results.length > 0) {
-            const bestCostPerFert = results[0].normalizedCostPerUnit / results[0].fertilityPerUnit;
+            const bestCostPerFert = results[0].workerMonthsPerUnit / results[0].fertilityPerUnit;
             results.forEach(r => {
-                const costPerFert = r.normalizedCostPerUnit / r.fertilityPerUnit;
+                const costPerFert = r.workerMonthsPerUnit / r.fertilityPerUnit;
                 r.costPerFertilityPoint = costPerFert;
                 r.relativeEfficiency = bestCostPerFert / costPerFert;
                 r.efficiencyRating = r.relativeEfficiency >= 0.9 ? 'Excellent' :
@@ -346,14 +440,18 @@ export class FertilizerProductionAnalyzer {
         }
 
         console.log('\n' + '='.repeat(80));
-        console.log('RANKING (by cost per fertility point)');
+        console.log('📊 EFFICIENCY RANKING (by worker-months per % fertility)');
         console.log('='.repeat(80));
         results.forEach((r, i) => {
-            console.log(`${i + 1}. ${r.name}: ${r.costPerFertilityPoint.toFixed(4)} worker-eq hours per % fertility (${r.efficiencyRating})`);
+            console.log(`${i + 1}. ${r.name}:`);
+            console.log(`   Cost: ${r.costPerFertilityPoint.toFixed(6)} worker-months per % fertility`);
+            console.log(`   Water: ${r.costPerUnit.waterMonths.toFixed(4)} units/fertilizer unit`);
+            console.log(`   Ammonia: ${r.costPerUnit.ammoniaMonths.toFixed(4)} units/fertilizer unit`);
+            console.log(`   Rating: ${r.efficiencyRating} (${(r.relativeEfficiency * 100).toFixed(1)}%)`);
         });
 
         console.log('\n' + '='.repeat(80));
-        console.log('REPLACEMENT DATA FOR FertilizerCalculator.FERTILIZER_PRODUCTION_COSTS');
+        console.log('📋 REPLACEMENT DATA FOR FertilizerCalculator.FERTILIZER_PRODUCTION_COSTS');
         console.log('='.repeat(80));
         console.log(JSON.stringify(replacementData, null, 2));
         console.log('='.repeat(80) + '\n');
@@ -365,11 +463,11 @@ export class FertilizerProductionAnalyzer {
     }
 
     /**
-     * Update conversion factors
+     * Update conversion factors (for tuning)
      */
     static updateConversionFactors(newFactors) {
         Object.assign(this.CONVERSION_FACTORS, newFactors);
-        console.log('Updated conversion factors:', this.CONVERSION_FACTORS);
+        console.log('✅ Updated conversion factors:', this.CONVERSION_FACTORS);
     }
 
     /**

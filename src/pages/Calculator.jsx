@@ -14,6 +14,7 @@ import ProductionSolver from '../utils/ProductionSolver';
 import { GameDataManager } from '../managers/GameDataManager';
 import ConsolidatedResourcesPanel from '../components/ConsolidatedResourcesPanel';
 import LoadingOverlay from '../components/LoadingOverlay';
+import RecipeCard from '../components/RecipeCard';
 
 const Calculator = () => {
     const { settings } = useSettings();
@@ -23,6 +24,7 @@ const Calculator = () => {
     const [selectedProduct, setSelectedProduct] = useState('');
     const [selectedRecipe, setSelectedRecipe] = useState('');
     const [targetRate, setTargetRate] = useState(60);
+    const [isEditingRate, setIsEditingRate] = useState(false);
     const [productionChain, setProductionChain] = useState(null);
     const [requirements, setRequirements] = useState(null);
     const [availableRecipes, setAvailableRecipes] = useState([]);
@@ -38,6 +40,7 @@ const Calculator = () => {
     const [selectedAlternative, setSelectedAlternative] = useState('best');
     const [disabledRecipes, setDisabledRecipes] = useState(new Set());
     const [isCalculating, setIsCalculating] = useState(false);
+    const [showAdvancedOptimization, setShowAdvancedOptimization] = useState(false);
 
     // Resource source management
     const [resourceSources, setResourceSources] = useState(new Map());
@@ -166,7 +169,7 @@ const Calculator = () => {
         const loadData = async () => {
             const enabledMods = settings.enableModdedContent ? settings.enabledMods : [];
             await GameDataManager.getGameData(enabledMods);
-            await ProductionCalculator.initialize(); 
+            await ProductionCalculator.initialize();
             setDataLoaded(true);
         };
 
@@ -175,7 +178,7 @@ const Calculator = () => {
 
     useEffect(() => {
         if (dataLoaded && !selectedProduct) {
-            const defaultProductId = 'Product_ConstructionParts'; 
+            const defaultProductId = 'Product_ConstructionParts';
             setSelectedProduct(defaultProductId);
         }
     }, [dataLoaded, selectedProduct]);
@@ -186,7 +189,6 @@ const Calculator = () => {
             const recipes = ProductionCalculator.getRecipesForProduct(selectedProduct);
             setAvailableRecipes(recipes);
 
-            // ✅ ALWAYS set the first recipe as default, even if multiple exist
             if (recipes.length > 0) {
                 setSelectedRecipe(recipes[0].id);
             } else {
@@ -198,13 +200,12 @@ const Calculator = () => {
         }
     }, [selectedProduct]);
 
-    // ✅ NEW: Recalculate when consolidation toggle changes
+    // Recalculate when consolidation toggle changes
     useEffect(() => {
-        // Only trigger when consolidation changes AND we have an existing chain
         if (productionChain && !productionChain.error && selectedProduct && targetRate) {
             handleCalculate();
         }
-    }, [useConsolidation]); 
+    }, [useConsolidation]);
 
     if (!dataLoaded) {
         return (
@@ -277,7 +278,6 @@ const Calculator = () => {
     };
 
     const handleNodeClick = (node) => {
-        // If clicking the same node, deselect it (go back to total requirements)
         if (selectedNode && selectedNode.nodeKey === node.nodeKey) {
             setSelectedNode(null);
         } else {
@@ -285,19 +285,48 @@ const Calculator = () => {
         }
     };
 
+    const handleClearAll = () => {
+        setSelectedProduct('');
+        setSelectedRecipe('');
+        setTargetRate(60);
+        setResourceConstraints(new Map());
+        setResourceInput({ productId: '', productName: '', quantity: 0 });
+        setProductionChain(null);
+        setRequirements(null);
+        setRecipeOverrides(new Map());
+        setResourceSources(new Map());
+        setRecipeTimeToggles(new Map());
+        setCollapsedNodes(new Set());
+        setOptimizationMode(false);
+        setOptimizationResult(null);
+        setUseConsolidation(false);
+        setShowResourcePoolDetail(false);
+        setDisabledRecipes(new Set());
+        setSelectedNode(null);
+        setSelectedAlternative('best');
+        setShowAdvancedOptimization(false);
+        setOptimizationConstraints({
+            maxPower: null,
+            maxWorkers: null,
+            maxMachines: null,
+            maxMaintenance: null,
+            maxComputing: null,
+            excludedRecipes: [],
+            tierRestrictions: null
+        });
+    };
+
     const handleSelectAlternative = (alternativeId, alternativeRecipeOverrides) => {
         console.log('Selecting alternative:', alternativeId, 'with overrides:', alternativeRecipeOverrides);
 
         setSelectedAlternative(alternativeId);
 
-        // Ensure recipeOverrides is always a Map, never undefined
         const overrides = alternativeRecipeOverrides instanceof Map
             ? alternativeRecipeOverrides
             : new Map(Object.entries(alternativeRecipeOverrides || {}));
 
         setRecipeOverrides(overrides);
 
-        // Recalculate immediately with the alternative's recipe overrides
         if (selectedProduct && targetRate) {
             const result = solver.solve({
                 targetProductId: selectedProduct,
@@ -314,9 +343,6 @@ const Calculator = () => {
             if (!result.error) {
                 setProductionChain(result.chain);
                 setRequirements(result.requirements);
-
-                // Keep the optimization result visible but mark which alternative is active
-                // DON'T clear optimizationResult here - it stays visible
             } else {
                 console.error('Error recalculating with alternative:', result.error);
             }
@@ -344,7 +370,7 @@ const Calculator = () => {
                 optimizationGoal: optimizationGoal,
                 constraints: {},
                 resourceConstraints: new Map(),
-                disabledRecipes: disabledRecipes // ✅ ADD THIS LINE
+                disabledRecipes: disabledRecipes
             });
 
             if (!result.error) {
@@ -368,9 +394,7 @@ const Calculator = () => {
 
     const selectRecipeFromModal = (recipeId) => {
         if (recipeModalProductId) {
-            // Check if this is for resource source selection (machine production)
             if (resourceSourceModal.open && recipeModalProductId === resourceSourceModal.productId) {
-                // User selected a recipe for machine production from resource source modal
                 const newSources = new Map(resourceSources);
                 newSources.set(resourceSourceModal.nodeKey, {
                     type: 'machine',
@@ -378,7 +402,6 @@ const Calculator = () => {
                 });
                 setResourceSources(newSources);
 
-                // Close both modals
                 setRecipeModalOpen(false);
                 setRecipeModalProductId(null);
                 setRecipeModalRecipes([]);
@@ -391,7 +414,6 @@ const Calculator = () => {
                     currentSource: null
                 });
 
-                // ✅ Recalculate chain with new source
                 if (selectedProduct && targetRate && targetRate > 0) {
                     const result = solver.solve({
                         targetProductId: selectedProduct,
@@ -409,25 +431,22 @@ const Calculator = () => {
                     }
                 }
             } else if (recipeModalProductId === selectedProduct) {
-                // Main product recipe selection
                 setSelectedRecipe(recipeId);
                 setRecipeModalOpen(false);
                 setRecipeModalProductId(null);
                 setRecipeModalRecipes([]);
 
-                // ✅ Update recipe overrides for main product
                 const newOverrides = new Map(recipeOverrides);
                 newOverrides.set(selectedProduct, recipeId);
                 setRecipeOverrides(newOverrides);
 
-                // ✅ Auto-recalculate if chain exists (user is changing recipe in existing chain)
                 if (targetRate && targetRate > 0 && selectedProduct && productionChain) {
                     const result = solver.solve({
                         targetProductId: selectedProduct,
                         targetRate: targetRate,
                         useConsolidation: useConsolidation,
                         resourceSources: resourceSources,
-                        recipeOverrides: newOverrides, // Use the NEW overrides
+                        recipeOverrides: newOverrides,
                         optimizationMode: false,
                         disabledRecipes: disabledRecipes
                     });
@@ -438,7 +457,6 @@ const Calculator = () => {
                     }
                 }
             } else {
-                // Recipe override for a node (intermediate product in chain)
                 handleRecipeOverride(recipeModalProductId, recipeId);
                 setRecipeModalOpen(false);
                 setRecipeModalProductId(null);
@@ -486,7 +504,6 @@ const Calculator = () => {
             setResourceSources(newSources);
             setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
 
-            // ✅ Recalculate with new source
             if (selectedProduct && targetRate && targetRate > 0) {
                 const result = solver.solve({
                     targetProductId: selectedProduct,
@@ -519,7 +536,6 @@ const Calculator = () => {
         setStorageTierModal({ open: false, product: null, requiredRate: 0, tiers: [], selectedTier: null });
         setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
 
-        // ✅ Recalculate with new storage source
         if (selectedProduct && targetRate && targetRate > 0) {
             const result = solver.solve({
                 targetProductId: selectedProduct,
@@ -566,7 +582,6 @@ const Calculator = () => {
         });
     };
 
-    // NEW: Handler for recipe constraints
     const handleApplyRecipeConstraints = (newDisabledRecipes) => {
         console.log('📝 Applying recipe constraints:', newDisabledRecipes.size, 'disabled');
         setDisabledRecipes(newDisabledRecipes);
@@ -598,62 +613,36 @@ const Calculator = () => {
         return search(chain);
     };
 
+    // Get selected product and recipe objects
+    const selectedProductObj = selectedProduct ? ProductionCalculator.getProduct(selectedProduct) : null;
+    const selectedRecipeObj = selectedRecipe ? ProductionCalculator.getRecipe(selectedRecipe) : null;
+
     return (
         <div style={{
             maxWidth: '1920px',
             margin: '0 auto',
             minHeight: '100vh'
         }}>
-        <LoadingOverlay
-            isVisible={isCalculating}
-            title={optimizationMode ? 'Optimizing Production Chains...' : 'Calculating Production Chains...'}
-            message={optimizationMode
+            <LoadingOverlay
+                isVisible={isCalculating}
+                title={optimizationMode ? 'Optimizing Production Chains...' : 'Calculating Production Chains...'}
+                message={optimizationMode
                     ? 'Finding optimal machine combinations and recipe selections...'
                     : 'Processing production requirements and resource dependencies...'}
-            showOptimizationTip={optimizationMode}
-            icon={optimizationMode ? '🔍' : '⚙️'}
-        />
-            <div style={{
-                padding: '1.5rem 2rem',
-                backgroundColor: '#2a2a2a',
-                borderBottom: '2px solid #4a90e2',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                marginBottom: '2rem'
-            }}>
-                <h2 style={{
-                    fontSize: '2rem',
-                    fontWeight: '700',
-                    margin: 0,
-                    marginBottom: '0.5rem',
-                    background: 'linear-gradient(135deg, #4a90e2 0%, #5aa0f2 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                }}>
-                    Production Calculator
-                </h2>
-                <p style={{
-                    color: '#aaa',
-                    fontSize: '1rem',
-                    margin: 0
-                }}>
-                    Calculate production chains, resource requirements, and optimize your factory planning • {ProductionCalculator.products.length} products available
-                </p>
-            </div>
+                showOptimizationTip={optimizationMode}
+                icon={optimizationMode ? '🔍' : '⚙️'}
+            />
 
             <div style={{ padding: '0 2rem 2rem' }}>
                 {/* MODALS */}
-
-                {/* Recipe Selection Modal (for node recipes AND resource source machine production) */}
                 <RecipeModal
                     isOpen={recipeModalOpen}
                     onClose={() => {
                         if (resourceSourceModal.open) {
-                            // If resource source modal is open, just close recipe modal
                             setRecipeModalOpen(false);
                             setRecipeModalProductId(null);
                             setRecipeModalRecipes([]);
                         } else {
-                            // Otherwise use the full close function
                             closeRecipeModal();
                         }
                     }}
@@ -664,7 +653,6 @@ const Calculator = () => {
                     onToggleTime={toggleRecipeTime}
                 />
 
-                {/* Main Product Recipe Selection Modal */}
                 <RecipeModal
                     isOpen={recipeSelectionModalOpen && availableRecipes.length > 1}
                     onClose={() => setRecipeSelectionModalOpen(false)}
@@ -674,19 +662,17 @@ const Calculator = () => {
                         setSelectedRecipe(recipeId);
                         setRecipeSelectionModalOpen(false);
 
-                        // Update recipe overrides for main product
                         const newOverrides = new Map(recipeOverrides);
                         newOverrides.set(selectedProduct, recipeId);
                         setRecipeOverrides(newOverrides);
 
-                        // Auto-recalculate if chain exists
                         if (targetRate && targetRate > 0 && selectedProduct && productionChain) {
                             const result = solver.solve({
                                 targetProductId: selectedProduct,
                                 targetRate: targetRate,
                                 useConsolidation: useConsolidation,
                                 resourceSources: resourceSources,
-                                recipeOverrides: newOverrides, // Use the NEW overrides
+                                recipeOverrides: newOverrides,
                                 optimizationMode: false,
                                 disabledRecipes: disabledRecipes
                             });
@@ -730,7 +716,6 @@ const Calculator = () => {
                     onSelectStorageTier={selectStorageTier}
                 />
 
-                {/* Consolidated Resources Detail Modal */}
                 {showResourcePoolDetail && productionChain && productionChain.consolidatedResources && (
                     <ConsolidatedResourcesPanel
                         consolidatedResources={productionChain.consolidatedResources}
@@ -738,297 +723,322 @@ const Calculator = () => {
                     />
                 )}
 
-                {/* Mode Toggle and Controls */}
-                <div style={{
-                    backgroundColor: '#2a2a2a',
-                    padding: '1.5rem',
-                    borderRadius: '10px',
-                    border: '1px solid #444',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
-                    marginBottom: '1.5rem',
-                    width: 'fit-content'
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        alignItems: 'center',
-                        flexWrap: 'wrap'
-                    }}>
-                        <button
-                            onClick={() => setOptimizationMode(!optimizationMode)}
-                            style={{
-                                padding: '10px 24px',
-                                backgroundColor: optimizationMode ? '#50C878' : '#555',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontSize: '1rem',
-                                cursor: 'pointer',
-                                fontWeight: '700',
-                                transition: 'all 0.2s',
-                                boxShadow: optimizationMode
-                                    ? '0 4px 10px rgba(80, 200, 120, 0.4)'
-                                    : '0 2px 6px rgba(0, 0, 0, 0.3)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                filter: 'drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.4))',
-                                flex: '0 0 auto'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-2px)';
-                                e.currentTarget.style.boxShadow = optimizationMode
-                                    ? '0 6px 14px rgba(80, 200, 120, 0.5)'
-                                    : '0 4px 10px rgba(0, 0, 0, 0.4)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = optimizationMode
-                                    ? '0 4px 10px rgba(80, 200, 120, 0.4)'
-                                    : '0 2px 6px rgba(0, 0, 0, 0.3)';
-                            }}
-                        >
-                            {optimizationMode ? (
-                                <>
-                                    <img
-                                        src={optimizationOff}
-                                        alt="Off"
-                                        style={{
-                                            width: '43px',
-                                            height: '24px',
-                                            filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4))'
-                                        }}
-                                    />
-                                    Disable Optimization
-                                </>
-                            ) : (
-                                <>
-                                    <img
-                                        src={optimizationOn}
-                                        alt="On"
-                                        style={{
-                                            width: '43px',
-                                            height: '24px',
-                                            filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4))'
-                                        }}
-                                    />
-                                    Enable Optimization
-                                </>
-                            )}
-                        </button>
-                        <button
-                            onClick={() => {
-                                setSelectedProduct('');
-                                setSelectedRecipe('');
-                                setTargetRate(60);
-                                setResourceConstraints(new Map());
-                                setResourceInput({ productId: '', productName: '', quantity: 0 });
-                                setProductionChain(null);
-                                setRequirements(null);
-                                setRecipeOverrides(new Map());
-                                setResourceSources(new Map());
-                                setRecipeTimeToggles(new Map());
-                                setCollapsedNodes(new Set());
-                                setOptimizationMode(false);
-                                setOptimizationResult(null);
-                                setUseConsolidation(false);
-                                setShowResourcePoolDetail(false);
-                                setDisabledRecipes(new Set());
-                                setSelectedNode(null);
-                                setSelectedAlternative('best');
-                                setOptimizationConstraints({
-                                    maxPower: null,
-                                    maxWorkers: null,
-                                    maxMachines: null,
-                                    maxMaintenance: null,
-                                    maxComputing: null,
-                                    excludedRecipes: [],
-                                    tierRestrictions: null
-                                });
-                            }}
-                            style={{
-                                padding: '10px 24px',
-                                backgroundColor: '#ff6b6b',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontSize: '1rem',
-                                cursor: 'pointer',
-                                fontWeight: '700',
-                                transition: 'all 0.2s',
-                                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                filter: 'drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.4))',
-                                flex: '0 0 auto'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#ff5252';
-                                e.currentTarget.style.transform = 'translateY(-2px)';
-                                e.currentTarget.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.4)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = '#ff6b6b';
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)';
-                            }}
-                        >
-                            <img
-                                src={trashIcon}
-                                alt="Trash"
-                                style={{
-                                    width: '24px',
-                                    height: '24px',
-                                    filter: 'drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.4))'
-                                }}
-                            />
-                            Clear All
-                        </button>
-                    </div>
-                </div>
-
-                {/* Optimization Controls Component */}
-                <OptimizationControls
-                    optimizationMode={optimizationMode}
-                    optimizationGoal={optimizationGoal}
-                    optimizationConstraints={optimizationConstraints}
-                    resourceConstraints={resourceConstraints}
-                    resourceInput={resourceInput}
-                    optimizationResult={optimizationResult}
-                    disabledRecipes={disabledRecipes}
-                    onToggleOptimization={() => setOptimizationMode(!optimizationMode)}
-                    onChangeGoal={setOptimizationGoal}
-                    onChangeConstraints={setOptimizationConstraints}
-                    onChangeResourceInput={setResourceInput}
-                    onAddResourceConstraint={addResourceConstraint}
-                    onRemoveResourceConstraint={removeResourceConstraint}
-                    onSelectAlternative={handleSelectAlternative}  
-                    onApplyRecipeConstraints={handleApplyRecipeConstraints}
-                    currentAlternative={selectedAlternative}      
-                />
-
-                {/* Input Section */}
+                {/* MODERN INPUT SECTION */}
                 <div style={{
                     backgroundColor: '#2a2a2a',
                     padding: '2rem',
                     borderRadius: '10px',
                     marginBottom: '2rem',
                     border: '1px solid #444',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+                    position: 'relative'
                 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 200px', gap: '1.5rem', alignItems: 'end', marginBottom: '1.5rem' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
-                                Target Product
-                            </label>
-                            <button
-                                onClick={() => setProductModalOpen(true)}
-                                disabled={!dataLoaded}
-                                style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    backgroundColor: '#333',
-                                    color: 'white',
-                                    border: '2px solid #555',
-                                    borderRadius: '6px',
-                                    fontSize: '1rem',
-                                    cursor: 'pointer',
-                                    textAlign: 'left',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#3a3a3a';
-                                    e.currentTarget.style.borderColor = '#4a90e2';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#333';
-                                    e.currentTarget.style.borderColor = '#555';
-                                }}
-                            >
-                                <span>
-                                    {selectedProduct ? ProductionCalculator.getProduct(selectedProduct)?.name : 'Select product...'}
-                                </span>
-                                <span style={{ color: '#4a90e2' }}>▼</span>
-                            </button>
-                        </div>
 
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
-                                Recipe {availableRecipes.length > 1 && <span style={{ color: '#4a90e2' }}>({availableRecipes.length} available)</span>}
-                            </label>
-                            <button
-                                onClick={() => {
-                                    if (availableRecipes.length > 1) {
-                                        setRecipeSelectionModalOpen(true);
-                                    }
-                                }}
-                                disabled={availableRecipes.length <= 1}
-                                style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    backgroundColor: availableRecipes.length > 1 ? '#333' : '#2a2a2a',
-                                    color: 'white',
-                                    border: '2px solid #555',
-                                    borderRadius: '6px',
-                                    fontSize: '1rem',
-                                    cursor: availableRecipes.length > 1 ? 'pointer' : 'not-allowed',
-                                    textAlign: 'left',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (availableRecipes.length > 1) {
-                                        e.currentTarget.style.backgroundColor = '#3a3a3a';
-                                        e.currentTarget.style.borderColor = '#4a90e2';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (availableRecipes.length > 1) {
-                                        e.currentTarget.style.backgroundColor = '#333';
-                                        e.currentTarget.style.borderColor = '#555';
-                                    }
-                                }}
-                            >
-                                <span>
-                                    {availableRecipes.length === 0 ? 'Select product first' :
-                                        availableRecipes.length === 1 ? availableRecipes[0].name :
-                                            selectedRecipe ? availableRecipes.find(r => r.id === selectedRecipe)?.name : 'Select recipe...'}
-                                </span>
-                                {availableRecipes.length > 1 && <span style={{ color: '#4a90e2' }}>▼</span>}
-                            </button>
-                        </div>
+                    {/* Integrated Header */}
+                    <div style={{
+                        marginBottom: '2rem',
+                        paddingBottom: '1.5rem',
+                        borderBottom: '2px solid #444'
+                    }}>
+                        <h2 style={{
+                            fontSize: '2rem',
+                            fontWeight: '700',
+                            margin: 0,
+                            marginBottom: '0.5rem',
+                            background: 'linear-gradient(135deg, #4a90e2 0%, #5aa0f2 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent'
+                        }}>
+                            Production Calculator
+                        </h2>
+                        <p style={{
+                            color: '#aaa',
+                            fontSize: '1rem',
+                            margin: 0
+                        }}>
+                            Calculate production chains, resource requirements, and optimize your factory planning • {ProductionCalculator.products.length} products available
+                        </p>
+                    </div>
 
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontWeight: '600', fontSize: '0.95rem' }}>
-                                Rate (/min)
-                            </label>
-                            <input
-                                type="number"
-                                value={targetRate}
-                                onChange={(e) => setTargetRate(parseFloat(e.target.value))}
-                                min="0.1"
-                                step="1"
+                    {/* Clear All Button - Top Right Corner with MORE padding */}
+                    <button
+                        onClick={handleClearAll}
+                        style={{
+                            position: 'absolute',
+                            top: '1.5rem',
+                            right: '1.5rem',
+                            padding: '8px 16px',
+                            backgroundColor: '#ff6b6b',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                            zIndex: 10
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#ff5252';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#ff6b6b';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+                        }}
+                    >
+                        {trashIcon && (
+                            <img
+                                src={trashIcon}
+                                alt="Clear"
                                 style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    backgroundColor: '#333',
-                                    color: 'white',
-                                    border: '2px solid #555',
-                                    borderRadius: '6px',
-                                    fontSize: '1rem'
+                                    width: '16px',
+                                    height: '16px',
+                                    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
                                 }}
                             />
+                        )}
+                        Clear All
+                    </button>
+
+                    {/* Top Row: Product Selection & Target Rate Cards - MORE padding */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '1.5rem',
+                        marginBottom: '1.5rem',
+                        paddingTop: '3rem'
+                    }}>
+                        {/* Product Selection Card */}
+                        <div
+                            onClick={() => setProductModalOpen(true)}
+                            style={{
+                                flex: '0 0 280px',
+                                backgroundColor: '#1a1a1a',
+                                border: '2px solid #444',
+                                borderRadius: '8px',
+                                padding: '1rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#252525';
+                                e.currentTarget.style.borderColor = '#4a90e2';
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#1a1a1a';
+                                e.currentTarget.style.borderColor = '#444';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '8px', fontWeight: '600' }}>
+                                Currently Selected
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}>
+                                {selectedProductObj && (
+                                    <>
+                                        <img
+                                            src={getProductIcon(selectedProductObj)}
+                                            alt={selectedProductObj.name}
+                                            style={{
+                                                width: '48px',
+                                                height: '48px',
+                                                objectFit: 'contain'
+                                            }}
+                                        />
+                                        <div style={{
+                                            fontSize: '1rem',
+                                            fontWeight: '700',
+                                            color: '#fff',
+                                            textAlign: 'center'
+                                        }}>
+                                            {selectedProductObj.name}
+                                        </div>
+                                    </>
+                                )}
+                                {!selectedProductObj && (
+                                    <div style={{
+                                        fontSize: '0.95rem',
+                                        color: '#888',
+                                        fontStyle: 'italic',
+                                        padding: '2rem 0',
+                                        textAlign: 'center'
+                                    }}>
+                                        Click to select a product...
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Target Rate Card */}
+                        <div
+                            style={{
+                                flex: '0 0 200px',
+                                backgroundColor: '#1a1a1a',
+                                border: '2px solid #444',
+                                borderRadius: '8px',
+                                padding: '1rem',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '8px', fontWeight: '600' }}>
+                                Target Rate
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '4px',
+                                paddingTop: '8px'
+                            }}>
+                                {isEditingRate ? (
+                                    <input
+                                        type="number"
+                                        value={targetRate}
+                                        onChange={(e) => setTargetRate(parseFloat(e.target.value) || 0)}
+                                        onBlur={() => setIsEditingRate(false)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                setIsEditingRate(false);
+                                            }
+                                        }}
+                                        autoFocus
+                                        min="0.1"
+                                        step="1"
+                                        style={{
+                                            fontSize: '2rem',
+                                            fontWeight: '700',
+                                            color: '#4a90e2',
+                                            backgroundColor: '#252525',
+                                            border: '2px solid #4a90e2',
+                                            borderRadius: '6px',
+                                            padding: '4px 12px',
+                                            textAlign: 'center',
+                                            width: '120px'
+                                        }}
+                                    />
+                                ) : (
+                                    <div
+                                        onClick={() => setIsEditingRate(true)}
+                                        style={{
+                                            fontSize: '2rem',
+                                            fontWeight: '700',
+                                            color: '#4a90e2',
+                                            cursor: 'pointer',
+                                            padding: '4px 12px',
+                                            borderRadius: '6px',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.backgroundColor = '#252525';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                        }}
+                                    >
+                                        {targetRate}
+                                    </div>
+                                )}
+                                <div style={{ fontSize: '0.9rem', color: '#888' }}>
+                                    /min
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recipe Card */}
+                        <div
+                            onClick={() => {
+                                if (availableRecipes.length > 1) {
+                                    setRecipeSelectionModalOpen(true);
+                                }
+                            }}
+                            style={{
+                                flex: 1,
+                                backgroundColor: '#1a1a1a',
+                                border: availableRecipes.length > 1 ? '2px solid #444' : '2px solid #333',
+                                borderRadius: '8px',
+                                padding: '1rem',
+                                cursor: availableRecipes.length > 1 ? 'pointer' : 'default',
+                                transition: 'all 0.2s',
+                                minWidth: 0
+                            }}
+                            onMouseEnter={(e) => {
+                                if (availableRecipes.length > 1) {
+                                    e.currentTarget.style.backgroundColor = '#252525';
+                                    e.currentTarget.style.borderColor = '#4a90e2';
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (availableRecipes.length > 1) {
+                                    e.currentTarget.style.backgroundColor = '#1a1a1a';
+                                    e.currentTarget.style.borderColor = '#444';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                }
+                            }}
+                        >
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginBottom: '8px'
+                            }}>
+                                <div style={{ fontSize: '0.8rem', color: '#888', fontWeight: '600' }}>
+                                    Current Recipe
+                                </div>
+                                {availableRecipes.length > 1 && (
+                                    <div style={{
+                                        fontSize: '0.75rem',
+                                        color: '#4a90e2',
+                                        fontWeight: '600'
+                                    }}>
+                                        {availableRecipes.length} available
+                                    </div>
+                                )}
+                            </div>
+                            {selectedRecipeObj ? (
+                                <RecipeCard
+                                    recipe={selectedRecipeObj}
+                                    size="normal"
+                                    isClickable={false}
+                                    showPerMinute={getRecipeTimeDisplay(selectedRecipeObj.id)}
+                                    onToggleTime={() => toggleRecipeTime(selectedRecipeObj.id)}
+                                />
+                            ) : (
+                                <div style={{
+                                    fontSize: '0.9rem',
+                                    color: '#888',
+                                    fontStyle: 'italic',
+                                    padding: '1rem',
+                                    textAlign: 'center'
+                                }}>
+                                    {availableRecipes.length === 0 ? 'Select a product first' : 'No recipe available'}
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        {/* Consolidation Toggle - Updated */}
+                    {/* Bottom Row: Controls */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '1rem',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '1.5rem'
+                    }}>
+                        {/* Left: Consolidate Checkbox */}
                         <label style={{
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -1062,14 +1072,26 @@ const Calculator = () => {
                                     accentColor: '#4a90e2'
                                 }}
                             />
+                            {getGeneralIcon('LogisticsAuto') && (
+                                <img
+                                    src={getGeneralIcon('LogisticsAuto')}
+                                    alt="Consolidate"
+                                    style={{
+                                        width: '31px',
+                                        height: '20px',
+                                        opacity: 0.8
+                                    }}
+                                />
+                            )}
                             <span style={{ fontWeight: '600' }}>
-                                🔗 Consolidate Resources
+                                Consolidate Resources
                             </span>
                             <span style={{ fontSize: '0.8rem', color: '#888' }}>
                                 {useConsolidation ? '(Sharing enabled)' : '(Independent chains)'}
                             </span>
                         </label>
 
+                        {/* Right: Calculate Button */}
                         <button
                             onClick={handleCalculate}
                             disabled={!selectedProduct || !targetRate}
@@ -1102,12 +1124,131 @@ const Calculator = () => {
                             Calculate
                         </button>
                     </div>
+
+                    {/* Collapsible Advanced Optimization Section - Toggle both dropdown AND optimization */}
+                    <div>
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const newOptimizationMode = !optimizationMode;
+                                setOptimizationMode(newOptimizationMode);
+                                // Always open when enabling, toggle when disabling
+                                if (newOptimizationMode) {
+                                    setShowAdvancedOptimization(true);
+                                } else {
+                                    setShowAdvancedOptimization(!showAdvancedOptimization);
+                                }
+                            }}
+                            type="button"
+                            style={{
+                                width: '100%',
+                                padding: '12px 16px',
+                                backgroundColor: '#333',
+                                border: '2px solid #444',
+                                borderRadius: '6px',
+                                color: '#fff',
+                                fontSize: '1rem',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#3a3a3a';
+                                e.currentTarget.style.borderColor = '#4a90e2';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#333';
+                                e.currentTarget.style.borderColor = '#444';
+                            }}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {getGeneralIcon('Filter') && (
+                                    <img
+                                        src={getGeneralIcon('Filter')}
+                                        alt="Advanced"
+                                        style={{
+                                            width: '20px',
+                                            height: '20px',
+                                            opacity: 0.8,
+                                            filter: 'brightness(0) saturate(100%) invert(79%) sepia(85%) saturate(494%) hue-rotate(359deg) brightness(104%) contrast(101%)'
+                                        }}
+                                    />
+                                )}
+                                <span>Advanced Constraints & Optimization</span>
+                                {optimizationMode && (
+                                    <span style={{
+                                        fontSize: '0.75rem',
+                                        color: '#50C878',
+                                        fontWeight: '600',
+                                        padding: '2px 8px',
+                                        backgroundColor: 'rgba(80, 200, 120, 0.15)',
+                                        borderRadius: '4px',
+                                        marginLeft: '8px'
+                                    }}>
+                                        ENABLED
+                                    </span>
+                                )}
+                                {!optimizationMode && (
+                                    <span style={{
+                                        fontSize: '0.75rem',
+                                        color: '#888',
+                                        fontWeight: '600',
+                                        padding: '2px 8px',
+                                        backgroundColor: 'rgba(136, 136, 136, 0.15)',
+                                        borderRadius: '4px',
+                                        marginLeft: '8px'
+                                    }}>
+                                        DISABLED
+                                    </span>
+                                )}
+                            </div>
+                            <span style={{
+                                transform: showAdvancedOptimization ? 'rotate(180deg)' : 'rotate(0deg)',
+                                transition: 'transform 0.2s',
+                                fontSize: '1.2rem'
+                            }}>
+                                ▼
+                            </span>
+                        </button>
+
+                        {showAdvancedOptimization && (
+                            <div style={{
+                                marginTop: '1rem',
+                                paddingTop: '1.5rem',
+                                borderTop: '1px solid #444'
+                            }}>
+                                <OptimizationControls
+                                    optimizationMode={optimizationMode}
+                                    optimizationGoal={optimizationGoal}
+                                    optimizationConstraints={optimizationConstraints}
+                                    resourceConstraints={resourceConstraints}
+                                    resourceInput={resourceInput}
+                                    optimizationResult={optimizationResult}
+                                    disabledRecipes={disabledRecipes}
+                                    onToggleOptimization={() => setOptimizationMode(!optimizationMode)}
+                                    onChangeGoal={setOptimizationGoal}
+                                    onChangeConstraints={setOptimizationConstraints}
+                                    onChangeResourceInput={setResourceInput}
+                                    onAddResourceConstraint={addResourceConstraint}
+                                    onRemoveResourceConstraint={removeResourceConstraint}
+                                    onSelectAlternative={handleSelectAlternative}
+                                    onApplyRecipeConstraints={handleApplyRecipeConstraints}
+                                    currentAlternative={selectedAlternative}
+                                />
+                            </div>
+                        )}
+                    </div>
+
                 </div>
 
                 {/* Results Section */}
                 {productionChain && requirements && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '2rem', alignItems: 'start', paddingBottom: '3rem' }}>
-                        {/* LEFT: Details Panel - STICKY with scroll */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '2rem', alignItems: 'start', paddingBottom: '3rem' }}>
+                        {/* LEFT: Details Panel */}
                         <div style={{
                             position: 'sticky',
                             top: '2rem',
@@ -1164,7 +1305,7 @@ const Calculator = () => {
                                 </h3>
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    {/* Expand/Collapse All - Subtle controls */}
+                                    {/* Expand/Collapse All */}
                                     <div style={{
                                         display: 'flex',
                                         alignItems: 'center',
@@ -1204,7 +1345,6 @@ const Calculator = () => {
 
                                         <button
                                             onClick={() => {
-                                                // Collapse all nodes by collecting all node IDs from the chain
                                                 const getAllNodeIds = (node, path = '', level = 0) => {
                                                     const ids = new Set();
                                                     const nodeId = `${path}-${node.productId}-${level}`;
@@ -1356,7 +1496,7 @@ const Calculator = () => {
                                                 collapsedNodes={collapsedNodes}
                                                 onToggleCollapse={toggleNodeCollapse}
                                                 onSelectNode={handleNodeClick}
-                                                        selectedNodeKey={selectedNode?.nodeKey}
+                                                selectedNodeKey={selectedNode?.nodeKey}
                                                 selectedNode={selectedNode}
                                                 onOpenResourceSourceModal={openResourceSourceModal}
                                                 onOpenRecipeModal={openRecipeModal}

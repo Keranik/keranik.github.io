@@ -153,7 +153,7 @@ const DetailsPanel = ({
                                     </span>
                                 </div>
                                 {selectedNode.machine.computingTFlops > 0 && (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4a90e2' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#b19cd9' }}>
                                         {getGeneralIcon('Computing') && <img src={getGeneralIcon('Computing')} style={{ width: '18px', height: '18px' }} />}
                                         <span style={{ fontWeight: '700' }}>
                                             {(selectedNode.machine.computingTFlops * selectedNode.machineCount).toFixed(1)} TF
@@ -222,113 +222,203 @@ const DetailsPanel = ({
         ? ResourceConsolidator.getConsolidationStats(productionChain)
         : null;
 
+    const totalMachines = Array.from(requirements.machines.values()).reduce((a, b) => a + b, 0);
+    const totalWorkers = requirements.workers;
+
     return (
         <>
-            {/* Header for compact mode */}
-            {viewMode === 'compact' && (
-                <div style={{
-                    marginBottom: '1.5rem',
-                    paddingBottom: '1rem',
-                    borderBottom: '2px solid #444'
-                }}>
-                    <h3 style={{
-                        fontSize: '1.3rem',
-                        fontWeight: '700',
-                        color: '#4a90e2',
-                        margin: 0
-                    }}>
-                        Total Requirements
-                    </h3>
-                    <div style={{
-                        fontSize: '0.85rem',
-                        color: '#888',
-                        marginTop: '4px'
-                    }}>
-                        Click a node to view details
-                    </div>
-                </div>
-            )}
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
-                    <div style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '4px' }}>Total Machines</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4a90e2' }}>
-                        {Array.from(requirements.machines.values()).reduce((a, b) => a + b, 0)}
+                {/* Combined Stats Grid - 2x2 */}
+                <div style={{
+                    backgroundColor: '#1a1a1a',
+                    borderRadius: '6px',
+                    border: '1px solid #333',
+                    overflow: 'hidden',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gridTemplateRows: '1fr 1fr'
+                }}>
+                    {/* Machines */}
+                    <div style={{
+                        padding: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRight: '2px solid #333',
+                        borderBottom: '2px solid #333'
+                    }}>
+                        {getGeneralIcon('Machines') && (
+                            <img
+                                src={getGeneralIcon('Machines')}
+                                alt="Machines"
+                                style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    marginBottom: '8px',
+                                    opacity: 0.8
+                                }}
+                            />
+                        )}
+                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4a90e2', lineHeight: 1 }}>
+                            {totalMachines}
+                        </div>
+                        <div style={{ color: '#aaa', fontSize: '0.85rem', marginTop: '4px' }}>
+                            Machines
+                        </div>
+                    </div>
+
+                    {/* Workers */}
+                    <div style={{
+                        padding: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderBottom: '2px solid #333'
+                    }}>
+                        {getGeneralIcon('Worker') && (
+                            <img
+                                src={getGeneralIcon('Worker')}
+                                alt="Workers"
+                                style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    marginBottom: '8px',
+                                    opacity: 0.8
+                                }}
+                            />
+                        )}
+                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#50C878', lineHeight: 1 }}>
+                            {totalWorkers}
+                        </div>
+                        <div style={{ color: '#aaa', fontSize: '0.85rem', marginTop: '4px' }}>
+                            Workers
+                        </div>
+                    </div>
+
+                    {/* Power */}
+                    <div style={{
+                        padding: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRight: '2px solid #333'
+                    }}>
+                        {getGeneralIcon('Electricity') && (
+                            <img
+                                src={getGeneralIcon('Electricity')}
+                                alt="Power"
+                                style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    marginBottom: '8px',
+                                    opacity: 0.8
+                                }}
+                            />
+                        )}
+                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#FFD700', lineHeight: 1 }}>
+                            {formatPower(requirements.power, powerUnit)}
+                        </div>
+                        <div style={{ color: '#aaa', fontSize: '0.85rem', marginTop: '4px' }}>
+                            Power ({powerUnit})
+                        </div>
+                    </div>
+
+                    {/* Computing */}
+                    <div style={{
+                        padding: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        {getGeneralIcon('Computing') && (
+                            <img
+                                src={getGeneralIcon('Computing')}
+                                alt="Computing"
+                                style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    marginBottom: '8px',
+                                    opacity: 0.8
+                                }}
+                            />
+                        )}
+                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#b19cd9', lineHeight: 1 }}>
+                            {requirements.computing ? requirements.computing.toFixed(1) : '0.0'}
+                        </div>
+                        <div style={{ color: '#aaa', fontSize: '0.85rem', marginTop: '4px' }}>
+                            Computing (TF)
+                        </div>
                     </div>
                 </div>
 
-                <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
+                {/* Power Unit Selector - Moved Below */}
+                <div style={{
+                    backgroundColor: '#1a1a1a',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    border: '1px solid #333',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginTop: '-0.5rem'
+                }}>
                     <div style={{
-                        color: '#aaa',
                         fontSize: '0.85rem',
-                        marginBottom: '4px',
+                        color: '#aaa',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between'
+                        gap: '6px'
                     }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            Total Power
-                            {getGeneralIcon('Electricity') && (
-                                <img src={getGeneralIcon('Electricity')} alt="Electricity" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
-                            )}
-                        </div>
-
-                        <div style={{
-                            display: 'flex',
-                            gap: '4px',
-                            backgroundColor: '#2a2a2a',
-                            padding: '2px',
-                            borderRadius: '4px',
-                            border: '1px solid #444'
-                        }}>
-                            {['kW', 'MW', 'GW'].map(unit => (
-                                <button
-                                    key={unit}
-                                    onClick={() => onSetPowerUnit(unit)}
-                                    style={{
-                                        padding: '2px 6px',
-                                        fontSize: '0.7rem',
-                                        fontWeight: '700',
-                                        backgroundColor: powerUnit === unit ? '#4a90e2' : 'transparent',
-                                        color: powerUnit === unit ? '#fff' : '#888',
-                                        border: 'none',
-                                        borderRadius: '3px',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.15s',
-                                        letterSpacing: '0.3px'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (powerUnit !== unit) {
-                                            e.currentTarget.style.backgroundColor = '#333';
-                                            e.currentTarget.style.color = '#aaa';
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (powerUnit !== unit) {
-                                            e.currentTarget.style.backgroundColor = 'transparent';
-                                            e.currentTarget.style.color = '#888';
-                                        }
-                                    }}
-                                >
-                                    {unit}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#FFD700' }}>
-                        {formatPower(requirements.power, powerUnit)} <span style={{ fontSize: '1rem', color: '#aaa' }}>{powerUnit}</span>
-                    </div>
-                </div>
-
-                <div style={{ backgroundColor: '#1a1a1a', padding: '1rem', borderRadius: '6px', border: '1px solid #333' }}>
-                    <div style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        Total Workers
-                        {getGeneralIcon('Worker') && (
-                            <img src={getGeneralIcon('Worker')} alt="Workers" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                        Power Unit:
+                        {getGeneralIcon('Electricity') && (
+                            <img src={getGeneralIcon('Electricity')} alt="Electricity" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
                         )}
                     </div>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#50C878' }}>
-                        {requirements.workers}
+
+                    <div style={{
+                        display: 'flex',
+                        gap: '4px',
+                        backgroundColor: '#2a2a2a',
+                        padding: '2px',
+                        borderRadius: '4px',
+                        border: '1px solid #444'
+                    }}>
+                        {['kW', 'MW', 'GW'].map(unit => (
+                            <button
+                                key={unit}
+                                onClick={() => onSetPowerUnit(unit)}
+                                style={{
+                                    padding: '4px 12px',
+                                    fontSize: '0.8rem',
+                                    fontWeight: '700',
+                                    backgroundColor: powerUnit === unit ? '#FFD700' : 'transparent',
+                                    color: powerUnit === unit ? '#1a1a1a' : '#888',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s',
+                                    letterSpacing: '0.3px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (powerUnit !== unit) {
+                                        e.currentTarget.style.backgroundColor = '#333';
+                                        e.currentTarget.style.color = '#aaa';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (powerUnit !== unit) {
+                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                        e.currentTarget.style.color = '#888';
+                                    }
+                                }}
+                            >
+                                {unit}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -402,12 +492,44 @@ const DetailsPanel = ({
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {Array.from(requirements.maintenance.entries())
-                            .reverse()
-                            .map(([productId, perMonth], index) => {
+                            .sort(([productIdA], [productIdB]) => {
+                                // Sort by tier: T1 (white), T2 (yellow), T3 (red)
+                                const productA = ProductionCalculator.getProduct(productIdA);
+                                const productB = ProductionCalculator.getProduct(productIdB);
+                                const nameA = productA?.name || productIdA;
+                                const nameB = productB?.name || productIdB;
+
+                                // Extract tier numbers (e.g., "Maintenance I" -> 1, "Maintenance II" -> 2, "Maintenance III" -> 3)
+                                const getTier = (name) => {
+                                    if (name.includes('III') || name.includes('3')) return 3;
+                                    if (name.includes('II') || name.includes('2')) return 2;
+                                    if (name.includes('I') || name.includes('1')) return 1;
+                                    return 0; // fallback
+                                };
+
+                                return getTier(nameA) - getTier(nameB);
+                            })
+                            .map(([productId, perMonth]) => {
                                 const product = ProductionCalculator.getProduct(productId);
                                 const maintenanceIcon = getProductIcon(product);
-                                const colors = ['#fff', '#FFD700', '#ff4444']; // white, yellow, red
-                                const amountColor = colors[index] || '#fff';
+                                const productName = product?.name || productId;
+
+                                // Determine color based on actual tier, not array index
+                                const getTier = (name) => {
+                                    if (name.includes('III') || name.includes('3')) return 3;
+                                    if (name.includes('II') || name.includes('2')) return 2;
+                                    if (name.includes('I') || name.includes('1')) return 1;
+                                    return 1; // fallback to T1
+                                };
+
+                                const tier = getTier(productName);
+                                const colorMap = {
+                                    1: '#fff',      // T1 = white
+                                    2: '#FFD700',   // T2 = yellow
+                                    3: '#ff4444'    // T3 = red
+                                };
+                                const amountColor = colorMap[tier] || '#fff';
+
                                 return (
                                     <div key={productId} style={{
                                         backgroundColor: '#1a1a1a',
@@ -434,7 +556,7 @@ const DetailsPanel = ({
                                                 color: '#ddd',
                                                 padding: '0 8px'
                                             }}>
-                                                {product?.name || productId}
+                                                {productName}
                                             </span>
                                             <span style={{ color: amountColor, fontWeight: 'bold' }}>
                                                 {perMonth.toFixed(2)}/mo
@@ -451,7 +573,7 @@ const DetailsPanel = ({
             {stats && stats.totalResources > 0 && (
                 <div>
                     <h4 style={{ marginBottom: '0.75rem', color: '#ccc', fontSize: '1.1rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        
+
                         Shared Resource Pool:
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>

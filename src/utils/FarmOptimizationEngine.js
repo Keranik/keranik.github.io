@@ -61,7 +61,6 @@ export class FarmOptimizationEngine {
 
         // ✅ Check if fertilizer is available based on selected farm
         const canUseFertilizer = farmForEvaluation.capabilities?.supportsFertilizer &&
-            !constraints.naturalFertilityOnly &&
             constraints.allowedFertilizers?.length > 0;
 
         console.log(`🌱 Fertilizer optimization: ${canUseFertilizer ? 'ENABLED' : 'DISABLED'}`);

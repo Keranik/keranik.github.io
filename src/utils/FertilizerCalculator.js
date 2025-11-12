@@ -8,6 +8,7 @@ export class FertilizerCalculator {
     static isInitialized = false;
     static maxFertilityCapByFertilizers = 200; // ✅ Will be set dynamically
 
+
     static initialize() {
         if (this.isInitialized) {
             return;
@@ -26,24 +27,30 @@ export class FertilizerCalculator {
             return;
         }
 
-        // ✅ Calculate the max fertility cap from available fertilizers
         this.maxFertilityCapByFertilizers = Math.max(
             ...allFertilizers.map(f => f.fertilizer.maxFertilityPercent || 140)
         );
 
-        console.log(`✅ Max fertility cap from fertilizers: ${this.maxFertilityCapByFertilizers}%`);
-
         const fertilizerIds = allFertilizers.map(f => f.id);
 
-        try {
+        /*try {*/
             const { replacementData } = FertilizerProductionAnalyzer.generateReplacementData(fertilizerIds);
-            this.FERTILIZER_PRODUCTION_COSTS = replacementData;
-            this.isInitialized = true;
-        } catch (error) {
-            console.error('Error initializing FertilizerCalculator:', error);
+
+            // ✅ COMPARE: Show both generated and fallback values
+            console.log('\n📊 COMPARISON: Generated vs Fallback Values');
+            console.log('='.repeat(80));
+
+            const fallback = this.getFallbackCosts();
+
+            console.log('='.repeat(80) + '\n');
+
+        //    this.FERTILIZER_PRODUCTION_COSTS = replacementData;
+        //    this.isInitialized = true;
+        //} catch (error) {
+        //    console.error('Error initializing FertilizerCalculator:', error);
             this.FERTILIZER_PRODUCTION_COSTS = this.getFallbackCosts();
             this.isInitialized = true;
-        }
+       /* }*/
     }
 
     static getFallbackCosts() {
@@ -184,6 +191,14 @@ export class FertilizerCalculator {
 
             const workersNeeded = workerMonthsPerYear / 12;
             const netPeopleFed = yieldIncrease - workersNeeded;
+
+            console.log(`      ${fertilizer.name} at ${targetFertility}%:`, {
+                yieldIncrease: yieldIncrease.toFixed(1),
+                workersNeeded: workersNeeded.toFixed(1),
+                netPeopleFed: netPeopleFed.toFixed(1),
+                quantityPerYear: quantityPerYear.toFixed(1),
+                productionCost: productionCost?.unitsPerWorkerMonth
+            });
 
             return {
                 fertilizerId: fertilizer.id,

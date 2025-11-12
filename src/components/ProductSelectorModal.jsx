@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { getProductIcon } from '../utils/AssetHelper';
 
 const ProductSelectorModal = ({
@@ -9,6 +9,13 @@ const ProductSelectorModal = ({
     currentProductId = null
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const searchInputRef = useRef(null);
+
+    useEffect(() => {
+        if (isOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [isOpen]);
 
     if (!isOpen || products.length === 0) return null;
 
@@ -90,6 +97,7 @@ const ProductSelectorModal = ({
                 {/* Search Box */}
                 <div style={{ marginBottom: '1.5rem' }}>
                     <input
+                        ref={searchInputRef}
                         type="text"
                         placeholder="Search products by name..."
                         value={searchTerm}

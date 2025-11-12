@@ -1,5 +1,4 @@
-﻿// src/components/farm-optimizer/RecipeSelectionModal.jsx - Add multi-select support
-import { useState } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import ProductionCalculator from '../../utils/ProductionCalculator';
 import { getProductIcon, getGeneralIcon } from '../../utils/AssetHelper';
 
@@ -11,6 +10,13 @@ const RecipeSelectionModal = ({
     multiSelect = false
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const searchInputRef = useRef(null);
+
+    useEffect(() => {
+        if (modal.open && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [modal.open]);
 
     if (!modal.open) return null;
 
@@ -70,6 +76,7 @@ const RecipeSelectionModal = ({
                 </div>
 
                 <input
+                    ref={searchInputRef}
                     type="text"
                     placeholder="Search recipes..."
                     value={searchTerm}

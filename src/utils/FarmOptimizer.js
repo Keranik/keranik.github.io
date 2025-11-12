@@ -587,50 +587,33 @@ export class FarmOptimizer {
             }
         }
 
-        console.log(`🌾 Calculating equilibrium for farm: ${farm.id}`);
-
         nonEmptyCrops.forEach((crop) => {
-            // Get pre-calculated fertility consumption for this farm
+            // Get pre-calculated fertility consumption for this farm (already includes demands multiplier)
             let consumedFertilityPerDayRaw = crop.fertilityPerFarm[farm.id] || crop.fertilityPerDayPercent;
 
-            console.log(`  Crop: ${crop.name}`);
-            console.log(`    Base raw: ${consumedFertilityPerDayRaw}`);
-            console.log(`    Base %: ${(consumedFertilityPerDayRaw / 100000).toFixed(5)}%`);
-
-            // Apply 50% monoculture penalty
+            // Apply 50% monoculture penalty for CONSUMING crops
             const isSameCropAsPrevious = prevCrop && prevCrop.id === crop.id;
             if (consumedFertilityPerDayRaw > 0 && isSameCropAsPrevious) {
-                const beforePenalty = consumedFertilityPerDayRaw;
                 consumedFertilityPerDayRaw = Math.round((consumedFertilityPerDayRaw * 150000) / 100000);
-                console.log(`    Monoculture penalty: ${beforePenalty} → ${consumedFertilityPerDayRaw}`);
             }
 
-            const totalForCrop = consumedFertilityPerDayRaw * crop.growthDays;
-            console.log(`    Growth days: ${crop.growthDays}`);
-            console.log(`    Total consumed: ${totalForCrop} raw`);
-
-            totalFertilityConsumedRaw += totalForCrop;
+            // Accumulate total consumption
+            totalFertilityConsumedRaw += consumedFertilityPerDayRaw * crop.growthDays;
             totalDays += crop.growthDays;
 
+            // Update previous crop
             if (!crop.isEmptyCrop) {
                 prevCrop = crop;
             }
         });
 
-        console.log(`  Total fertility consumed (raw): ${totalFertilityConsumedRaw}`);
-        console.log(`  Total days: ${totalDays}`);
-
+        // Replicate C# Percent division with floor
         const avgFertilityPerDayRaw = Math.floor(totalFertilityConsumedRaw / totalDays);
-        console.log(`  Avg fertility/day (raw): ${avgFertilityPerDayRaw}`);
-        console.log(`  Avg fertility/day (%): ${(avgFertilityPerDayRaw / 100000).toFixed(5)}%`);
 
+        // Calculate equilibrium: 100% - (avg / replenish)
         const replenishRaw = 1000; // 1.0%
         const equilibriumRaw = 100000 - Math.round((avgFertilityPerDayRaw * 100000) / replenishRaw);
-        console.log(`  Equilibrium (raw): ${equilibriumRaw}`);
-
         const naturalEquilibrium = Math.max(0, Math.min(200, equilibriumRaw / 1000));
-        console.log(`  🎯 FINAL Equilibrium: ${naturalEquilibrium}%`);
-        console.log(`  🎯 FINAL Equilibrium (raw display): ${equilibriumRaw / 1000}`);
 
         return {
             naturalEquilibrium,
