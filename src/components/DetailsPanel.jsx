@@ -56,10 +56,12 @@ const DetailsPanel = ({
                     flexDirection: 'column',
                     alignItems: 'center'
                 }}>
+                    {/* Icon and Name Stacked */}
                     <div style={{
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        gap: '12px',
+                        gap: '8px',
                         marginBottom: '10px'
                     }}>
                         {productIcon && (
@@ -74,30 +76,34 @@ const DetailsPanel = ({
                                 }}
                             />
                         )}
-                        <h4 style={{
-                            fontSize: '1.2rem',
-                            fontWeight: '700',
-                            color: '#fff',
-                            margin: 0,
-                            lineHeight: 1.2
-                        }}>
-                            {product?.name || selectedNode.productId}
-                        </h4>
-                        {selectedNode.isRawMaterial && (
-                            <span style={{
-                                padding: '4px 10px',
-                                backgroundColor: 'rgba(255, 215, 0, 0.15)',
-                                color: '#FFD700',
-                                borderRadius: '4px',
-                                fontSize: '0.7rem',
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <h4 style={{
+                                fontSize: '1.2rem',
                                 fontWeight: '700',
-                                border: '1px solid rgba(255, 215, 0, 0.3)',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
+                                color: '#fff',
+                                margin: 0,
+                                lineHeight: 1.2,
+                                textAlign: 'center'
                             }}>
-                                RAW
-                            </span>
-                        )}
+                                {product?.name || selectedNode.productId}
+                            </h4>
+                            {selectedNode.isRawMaterial && (
+                                <span style={{
+                                    padding: '4px 10px',
+                                    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+                                    color: '#FFD700',
+                                    borderRadius: '4px',
+                                    fontSize: '0.7rem',
+                                    fontWeight: '700',
+                                    border: '1px solid rgba(255, 215, 0, 0.3)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px'
+                                }}>
+                                    RAW
+                                </span>
+                            )}
+                        </div>
                     </div>
 
                     {/* Production Rate Badge */}
@@ -140,6 +146,7 @@ const DetailsPanel = ({
                         </span>
                     </div>
                 </div>
+
 
                 {/* RAW MATERIAL - Show Resource Source */}
                 {selectedNode.isRawMaterial && onOpenResourceSourceModal && (
@@ -383,6 +390,45 @@ const DetailsPanel = ({
 
     return (
         <>
+            {/* Embossed "Production Summary" Badge */}
+            <div style={{
+                margin: '-1.5rem -1.5rem 1.5rem -1.5rem',
+                padding: '12px 0',
+                background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+                borderBottom: '2px solid #333',
+                boxShadow:
+                    'inset 0 3px 8px rgba(0, 0, 0, 0.7), ' +
+                    'inset 0 -3px 8px rgba(255, 255, 255, 0.03), ' +
+                    '0 4px 10px rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                borderRadius: '10px 10px 0 0'
+            }}>
+                <span style={{
+                    fontSize: '0.9rem',
+                    fontWeight: '700',
+                    color: '#4a90e2',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1.5px',
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
+                }}>
+                    Production Summary
+                </span>
+                {getGeneralIcon('Machines') && (
+                    <img
+                        src={getGeneralIcon('Machines')}
+                        alt="Summary"
+                        style={{
+                            width: '16px',
+                            height: '16px',
+                            opacity: 0.7,
+                            filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8))'
+                        }}
+                    />
+                )}
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
                 {/* Combined Stats Grid - 2x2 */}
                 <div style={{
