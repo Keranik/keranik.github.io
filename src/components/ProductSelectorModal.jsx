@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
-import { getProductIcon } from '../utils/AssetHelper';
+import { getProductIcon, getProductTypeIcon } from '../utils/AssetHelper';
 
 const ProductSelectorModal = ({
     isOpen,
@@ -9,6 +9,7 @@ const ProductSelectorModal = ({
     currentProductId = null
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedType, setSelectedType] = useState('all');
     const searchInputRef = useRef(null);
 
     useEffect(() => {
@@ -19,9 +20,14 @@ const ProductSelectorModal = ({
 
     if (!isOpen || products.length === 0) return null;
 
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Get unique product types from products
+    const productTypes = ['all', ...new Set(products.map(p => p.type).filter(Boolean))];
+
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesType = selectedType === 'all' || product.type === selectedType;
+        return matchesSearch && matchesType;
+    });
 
     const handleSelect = (productId) => {
         onSelectProduct(productId);
@@ -94,6 +100,87 @@ const ProductSelectorModal = ({
                         ✕ Close
                     </button>
                 </div>
+
+                {/* Product Type Filter */}
+                <div style={{
+                    display: 'flex',
+                    gap: '0.75rem',
+                    marginBottom: '1.5rem',
+                    flexWrap: 'wrap',
+                    padding: '1rem',
+                    backgroundColor: '#1a1a1a',
+                    borderRadius: '8px',
+                    border: '1px solid #333'
+                }}>
+                    {productTypes
+                        .sort((a, b) => {
+                            // Sort: 'all' first, 'Virtual' last, rest alphabetically
+                            if (a === 'all') return -1;
+                            if (b === 'all') return 1;
+                            if (a === 'Virtual') return 1;
+                            if (b === 'Virtual') return -1;
+                            return a.localeCompare(b);
+                        })
+                        .map(type => {
+                            const isSelected = selectedType === type;
+                            const typeIcon = type !== 'all' ? getProductTypeIcon(type) : null;
+
+                            // Capitalize the display name
+                            const displayName = type === 'all'
+                                ? 'All Types'
+                                : type.charAt(0).toUpperCase() + type.slice(1);
+
+                            return (
+                                <button
+                                    key={type}
+                                    onClick={() => setSelectedType(type)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        padding: '8px 16px',
+                                        backgroundColor: isSelected ? 'rgba(74, 144, 226, 0.2)' : 'transparent',
+                                        color: isSelected ? '#4a90e2' : '#aaa',
+                                        border: isSelected ? '2px solid #4a90e2' : '2px solid #444',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9rem',
+                                        fontWeight: '600',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!isSelected) {
+                                            e.currentTarget.style.backgroundColor = 'rgba(74, 144, 226, 0.1)';
+                                            e.currentTarget.style.borderColor = '#4a90e2';
+                                            e.currentTarget.style.color = '#4a90e2';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!isSelected) {
+                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                            e.currentTarget.style.borderColor = '#444';
+                                            e.currentTarget.style.color = '#aaa';
+                                        }
+                                    }}
+                                >
+                                    {typeIcon && (
+                                        <img
+                                            src={typeIcon}
+                                            alt={type}
+                                            style={{
+                                                width: '18px',
+                                                height: '18px',
+                                                objectFit: 'contain',
+                                                filter: isSelected ? 'brightness(1.2)' : 'brightness(0.8)'
+                                            }}
+                                        />
+                                    )}
+                                    {displayName}
+                                </button>
+                            );
+                        })}
+                </div>
+
                 {/* Search Box */}
                 <div style={{ marginBottom: '1.5rem' }}>
                     <input
@@ -123,6 +210,7 @@ const ProductSelectorModal = ({
                         }}
                     />
                 </div>
+
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(95px, 1fr))',

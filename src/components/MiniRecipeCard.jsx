@@ -3,7 +3,8 @@ import ProductionCalculator from '../utils/ProductionCalculator';
 
 const MiniRecipeCard = ({
     recipe,
-    iconSize = 20
+    iconSize = 20,
+    showNumbers = false
 }) => {
     const machines = ProductionCalculator.getMachinesForRecipe(recipe.id);
     const machine = machines[0];
@@ -72,18 +73,30 @@ const MiniRecipeCard = ({
                         const icon = getProductIcon(input.product);
                         return (
                             <div key={idx} style={{ display: 'contents' }}>
-                                {icon && (
-                                    <img
-                                        src={icon}
-                                        alt={input.product?.name}
-                                        title={input.product?.name}
-                                        style={{
-                                            width: `${iconSize}px`,
-                                            height: `${iconSize}px`,
-                                            objectFit: 'contain'
-                                        }}
-                                    />
-                                )}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1px' }}>
+                                    {icon && (
+                                        <img
+                                            src={icon}
+                                            alt={input.product?.name}
+                                            title={input.product?.name}
+                                            style={{
+                                                width: `${iconSize}px`,
+                                                height: `${iconSize}px`,
+                                                objectFit: 'contain'
+                                            }}
+                                        />
+                                    )}
+                                    {showNumbers && (
+                                        <span style={{
+                                            fontSize: '0.6rem',
+                                            color: '#888',
+                                            fontWeight: '400',
+                                            lineHeight: 1
+                                        }}>
+                                            ({input.quantity})
+                                        </span>
+                                    )}
+                                </div>
                                 {idx < inputs.length - 1 && (
                                     <span style={{
                                         color: '#888',
@@ -129,18 +142,30 @@ const MiniRecipeCard = ({
                     const icon = getProductIcon(output.product);
                     return (
                         <div key={idx} style={{ display: 'contents' }}>
-                            {icon && (
-                                <img
-                                    src={icon}
-                                    alt={output.product?.name}
-                                    title={output.product?.name}
-                                    style={{
-                                        width: `${iconSize}px`,
-                                        height: `${iconSize}px`,
-                                        objectFit: 'contain'
-                                    }}
-                                />
-                            )}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1px' }}>
+                                {icon && (
+                                    <img
+                                        src={icon}
+                                        alt={output.product?.name}
+                                        title={output.product?.name}
+                                        style={{
+                                            width: `${iconSize}px`,
+                                            height: `${iconSize}px`,
+                                            objectFit: 'contain'
+                                        }}
+                                    />
+                                )}
+                                {showNumbers && (
+                                    <span style={{
+                                        fontSize: '0.6rem',
+                                        color: '#888',
+                                        fontWeight: '400',
+                                        lineHeight: 1
+                                    }}>
+                                        ({output.quantity})
+                                    </span>
+                                )}
+                            </div>
                             {idx < outputs.length - 1 && (
                                 <span style={{
                                     color: '#888',

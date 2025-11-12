@@ -183,6 +183,12 @@ const Calculator = () => {
         }
     }, [dataLoaded, selectedProduct]);
 
+    useEffect(() => {
+        if (productionChain && !productionChain.error && selectedProduct && targetRate > 0) {
+            handleCalculate();
+        }
+    }, [targetRate]);
+
     // When product changes, update available recipes
     useEffect(() => {
         if (selectedProduct) {
@@ -915,7 +921,7 @@ const Calculator = () => {
                                             }
                                         }}
                                         autoFocus
-                                        min="0.1"
+                                        min="1"
                                         step="1"
                                         style={{
                                             fontSize: '2rem',
@@ -1282,6 +1288,7 @@ const Calculator = () => {
                                     productionChain={productionChain}
                                     useConsolidation={useConsolidation}
                                     onViewResourcePoolDetails={() => setShowResourcePoolDetail(true)}
+                                    onOpenResourceSourceModal={openResourceSourceModal}
                                 />
                             </div>
                         </div>

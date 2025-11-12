@@ -1,5 +1,5 @@
 import { getProductIcon, getMachineImage, getGeneralIcon } from '../utils/AssetHelper';
-import RecipeCard from './RecipeCard';
+import MiniRecipeCard from './MiniRecipeCard';
 import ProductionCalculator from '../utils/ProductionCalculator';
 import ResourceConsolidator from '../utils/ResourceConsolidator';
 
@@ -16,7 +16,8 @@ const DetailsPanel = ({
     onToggleRecipeTime,
     productionChain,
     useConsolidation,
-    onViewResourcePoolDetails
+    onViewResourcePoolDetails,
+    onOpenResourceSourceModal  // ← Add this prop
 }) => {
     // In compact mode:
     // - If no node selected OR if requirements exist but no selectedNode, show total requirements
@@ -33,6 +34,16 @@ const DetailsPanel = ({
         const hasMultipleRecipes = selectedNode.availableRecipes && selectedNode.availableRecipes.length > 1;
         const currentRecipeId = recipeOverrides.get(selectedNode.productId) || selectedNode.recipe?.id;
         const currentRecipe = selectedNode.availableRecipes?.find(r => r.id === currentRecipeId) || selectedNode.recipe;
+
+        // Resource source info for raw materials
+        const currentSource = selectedNode.resourceSource || { type: 'mining' };
+        const sourceLabels = {
+            mining: 'Mining',
+            worldMine: 'World Mine',
+            trade: 'Trading Dock',
+            storage: 'Storage',
+            machine: 'Production Machine'
+        };
 
         return (
             <div>
@@ -63,6 +74,82 @@ const DetailsPanel = ({
                     )}
                 </div>
 
+                {/* RAW MATERIAL - Show Resource Source */}
+                {selectedNode.isRawMaterial && onOpenResourceSourceModal && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '8px', fontWeight: '600' }}>
+                            Resource Source:
+                        </div>
+                        <div style={{
+                            backgroundColor: '#1a1a1a',
+                            border: '2px solid #FFD700',
+                            borderRadius: '8px',
+                            padding: '12px',
+                            marginBottom: '8px'
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                color: '#FFD700',
+                                fontWeight: '600',
+                                fontSize: '1rem'
+                            }}>
+                                <span>{sourceLabels[currentSource.type] || currentSource.type}</span>
+                                {currentSource.type === 'storage' && currentSource.config && (
+                                    <span style={{ fontSize: '0.9rem', color: '#aaa' }}>
+                                        Tier {currentSource.config.tier}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => onOpenResourceSourceModal(selectedNode)}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                backgroundColor: '#FFD700',
+                                color: '#1a1a1a',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontSize: '0.9rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#FFC107';
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 4px 8px rgba(255, 215, 0, 0.3)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#FFD700';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
+                        >
+                            {getGeneralIcon('Plus') && (
+                                <img
+                                    src={getGeneralIcon('Plus')}
+                                    alt="Change"
+                                    style={{
+                                        width: '16px',
+                                        height: '16px',
+                                        filter: 'brightness(0) saturate(100%) invert(0%)'
+                                    }}
+                                />
+                            )}
+                            Change Resource Source
+                        </button>
+                    </div>
+                )}
+
+                {/* PRODUCED ITEM - Show Recipe */}
                 {currentRecipe && !selectedNode.isRawMaterial && (
                     <div style={{ marginBottom: '1.5rem' }}>
                         <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '8px', fontWeight: '600' }}>
@@ -75,10 +162,12 @@ const DetailsPanel = ({
                             padding: '8px',
                             marginBottom: '8px'
                         }}>
-                            <RecipeCard
+                            <MiniRecipeCard
                                 recipe={currentRecipe}
                                 size="normal"
                                 isClickable={false}
+                                iconSize={24}
+                                showNumbers={true}
                                 showPerMinute={getRecipeTimeDisplay(currentRecipe.id)}
                                 onToggleTime={onToggleRecipeTime}
                             />
