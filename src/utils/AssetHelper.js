@@ -2,79 +2,147 @@
  * Asset Helper
  * Converts game asset paths and IDs to web-accessible URLs
  * Assets are stored in src/assets/icons/
+ * Supports both PNG and SVG formats
  */
 
 /**
- * Import all product icons using Vite's glob import
+ * Import all product icons (both PNG and SVG) using Vite's glob import
  */
-const productIcons = import.meta.glob('../assets/icons/product/*.png', { eager: true, import: 'default' });
-const layoutEntityIcons = import.meta.glob('../assets/icons/layoutentity/*.png', { eager: true, import: 'default' });
-const generalIcons = import.meta.glob('../assets/icons/general/*.png', { eager: true, import: 'default' });
-const productTypeIcons = import.meta.glob('../assets/icons/producttypes/*.png', { eager: true, import: 'default' });
-const topdownIcons = import.meta.glob('../assets/icons/topdown/*.png', { eager: true, import: 'default' });
+const productIconsPng = import.meta.glob('../assets/icons/product/*.png', { eager: true, import: 'default' });
+const productIconsSvg = import.meta.glob('../assets/icons/product/*.svg', { eager: true, import: 'default' });
+const productIcons = { ...productIconsPng, ...productIconsSvg };
+
+const layoutEntityIconsPng = import.meta.glob('../assets/icons/layoutentity/*.png', { eager: true, import: 'default' });
+const layoutEntityIconsSvg = import.meta.glob('../assets/icons/layoutentity/*.svg', { eager: true, import: 'default' });
+const layoutEntityIcons = { ...layoutEntityIconsPng, ...layoutEntityIconsSvg };
+
+const generalIconsPng = import.meta.glob('../assets/icons/general/*.png', { eager: true, import: 'default' });
+const generalIconsSvg = import.meta.glob('../assets/icons/general/*.svg', { eager: true, import: 'default' });
+const generalIcons = { ...generalIconsPng, ...generalIconsSvg };
+
+const productTypeIconsPng = import.meta.glob('../assets/icons/producttypes/*.png', { eager: true, import: 'default' });
+const productTypeIconsSvg = import.meta.glob('../assets/icons/producttypes/*.svg', { eager: true, import: 'default' });
+const productTypeIcons = { ...productTypeIconsPng, ...productTypeIconsSvg };
+
+const topdownIconsPng = import.meta.glob('../assets/icons/topdown/*.png', { eager: true, import: 'default' });
+const topdownIconsSvg = import.meta.glob('../assets/icons/topdown/*.svg', { eager: true, import: 'default' });
+const topdownIcons = { ...topdownIconsPng, ...topdownIconsSvg };
 
 /**
- * Convert product ID to icon path key
- * Product IDs like "Product_Iron" -> "../assets/icons/product/Iron.png"
+ * Convert product ID to icon path key (tries PNG first, then SVG)
+ * Product IDs like "Product_Iron" -> "../assets/icons/product/Iron.png" or ".svg"
  */
 function getProductIconPath(productId) {
     if (!productId) return null;
     // Strip "Product_Virtual_" first, then fallback to "Product_"
     const filename = productId
         .replace(/^Product_Virtual_/, '')
-        .replace(/^Product_/, '')
-        + '.png';
-    return `../assets/icons/product/${filename}`;
+        .replace(/^Product_/, '');
+
+    // Try PNG first
+    const pngPath = `../assets/icons/product/${filename}.png`;
+    if (productIcons[pngPath]) return pngPath;
+
+    // Fallback to SVG
+    const svgPath = `../assets/icons/product/${filename}.svg`;
+    if (productIcons[svgPath]) return svgPath;
+
+    return null;
 }
 
 /**
- * Convert entity ID to icon path key
- * Entity IDs like "FoodMill" -> "../assets/icons/layoutentity/FoodMill.png"
+ * Convert entity ID to icon path key (tries PNG first, then SVG)
+ * Entity IDs like "FoodMill" -> "../assets/icons/layoutentity/FoodMill.png" or ".svg"
  */
 function getEntityIconPath(entityId) {
     if (!entityId) return null;
-    return `../assets/icons/layoutentity/${entityId}.png`;
+
+    // Try PNG first
+    const pngPath = `../assets/icons/layoutentity/${entityId}.png`;
+    if (layoutEntityIcons[pngPath]) return pngPath;
+
+    // Fallback to SVG
+    const svgPath = `../assets/icons/layoutentity/${entityId}.svg`;
+    if (layoutEntityIcons[svgPath]) return svgPath;
+
+    return null;
 }
 
 /**
- * Convert entity ID to topdown icon path key
- * Entity IDs like "FoodMill" -> "../assets/icons/topdown/FoodMill.png"
+ * Convert entity ID to topdown icon path key (tries PNG first, then SVG)
+ * Entity IDs like "FoodMill" -> "../assets/icons/topdown/FoodMill.png" or ".svg"
  */
 function getEntityIconTopPath(entityId) {
     if (!entityId) return null;
-    return `../assets/icons/topdown/${entityId}.png`;
+
+    // Try PNG first
+    const pngPath = `../assets/icons/topdown/${entityId}.png`;
+    if (topdownIcons[pngPath]) return pngPath;
+
+    // Fallback to SVG
+    const svgPath = `../assets/icons/topdown/${entityId}.svg`;
+    if (topdownIcons[svgPath]) return svgPath;
+
+    return null;
 }
 
 /**
- * Get general icon path
- * Icon names like "Worker" -> "../assets/icons/general/Worker.png"
+ * Get general icon path (tries PNG first, then SVG)
+ * Icon names like "Worker" -> "../assets/icons/general/Worker.png" or ".svg"
  */
 function getGeneralIconPath(iconName) {
     if (!iconName) return null;
-    return `../assets/icons/general/${iconName}.png`;
+
+    // Try PNG first
+    const pngPath = `../assets/icons/general/${iconName}.png`;
+    if (generalIcons[pngPath]) return pngPath;
+
+    // Fallback to SVG
+    const svgPath = `../assets/icons/general/${iconName}.svg`;
+    if (generalIcons[svgPath]) return svgPath;
+
+    return null;
 }
 
 /**
- * Get product type icon path
- * Type names like "Fluid" -> "../assets/icons/producttypes/Fluid.png"
+ * Get product type icon path (tries PNG first, then SVG)
+ * Type names like "Fluid" -> "../assets/icons/producttypes/Fluid.png" or ".svg"
  */
 function getProductTypeIconPath(typeName) {
     if (!typeName) return null;
-    return `../assets/icons/producttypes/${typeName}.png`;
+
+    // Try PNG first
+    const pngPath = `../assets/icons/producttypes/${typeName}.png`;
+    if (productTypeIcons[pngPath]) return pngPath;
+
+    // Fallback to SVG
+    const svgPath = `../assets/icons/producttypes/${typeName}.svg`;
+    if (productTypeIcons[svgPath]) return svgPath;
+
+    return null;
 }
 
 /**
- * Convert crop ID to icon path key (in product directory)
- * Crop IDs like "Crop_GreenManure" -> "../assets/icons/product/GreenManure.png"
+ * Convert crop ID to icon path key (in product directory, tries PNG first, then SVG)
+ * Crop IDs like "Crop_GreenManure" -> "../assets/icons/product/GreenManure.png" or ".svg"
  */
 function getCropIconPath(cropId) {
     if (!cropId) return null;
-    const filename = cropId.replace(/^Crop_/, '') + '.png';
-    return `../assets/icons/product/${filename}`;
+    const filename = cropId.replace(/^Crop_/, '');
+
+    // Try PNG first
+    const pngPath = `../assets/icons/product/${filename}.png`;
+    if (productIcons[pngPath]) return pngPath;
+
+    // Fallback to SVG
+    const svgPath = `../assets/icons/product/${filename}.svg`;
+    if (productIcons[svgPath]) return svgPath;
+
+    return null;
 }
 
 /**
- * NEW: Convert research icon path to web path
+ * Convert research icon path to web path (tries PNG first, then SVG)
  * Research iconPath like "Assets/Base/Products/Icons/ConstructionParts4.svg" 
  * -> Try product icon, then layout entity icon, then general icon
  */
@@ -86,22 +154,25 @@ function getResearchIconPath(iconPath) {
 
     // Try multiple icon directories in order of likelihood
     // 1. Product icons (for product-based research)
-    const productPath = `../assets/icons/product/${filename}.png`;
-    if (productIcons[productPath]) {
-        return productPath;
-    }
+    const productPngPath = `../assets/icons/product/${filename}.png`;
+    if (productIcons[productPngPath]) return productPngPath;
+
+    const productSvgPath = `../assets/icons/product/${filename}.svg`;
+    if (productIcons[productSvgPath]) return productSvgPath;
 
     // 2. Layout entity icons (for building/machine research)
-    const entityPath = `../assets/icons/layoutentity/${filename}.png`;
-    if (layoutEntityIcons[entityPath]) {
-        return entityPath;
-    }
+    const entityPngPath = `../assets/icons/layoutentity/${filename}.png`;
+    if (layoutEntityIcons[entityPngPath]) return entityPngPath;
+
+    const entitySvgPath = `../assets/icons/layoutentity/${filename}.svg`;
+    if (layoutEntityIcons[entitySvgPath]) return entitySvgPath;
 
     // 3. General icons (for general tech)
-    const generalPath = `../assets/icons/general/${filename}.png`;
-    if (generalIcons[generalPath]) {
-        return generalPath;
-    }
+    const generalPngPath = `../assets/icons/general/${filename}.png`;
+    if (generalIcons[generalPngPath]) return generalPngPath;
+
+    const generalSvgPath = `../assets/icons/general/${filename}.svg`;
+    if (generalIcons[generalSvgPath]) return generalSvgPath;
 
     return null;
 }
@@ -117,7 +188,7 @@ export function getProductIcon(product) {
     const path = getProductIconPath(product.id);
     if (!path) return null;
 
-    // Return the imported image URL
+    // Return the imported image URL (works for both PNG and SVG)
     return productIcons[path] || null;
 }
 
@@ -132,8 +203,10 @@ export function getCropIcon(crop) {
     // First try to get icon from the crop's output product
     if (crop.output && crop.output.productId && crop.output.productId !== '__PHANTOM__PRODUCT__') {
         const productPath = getProductIconPath(crop.output.productId);
-        const productIcon = productIcons[productPath];
-        if (productIcon) return productIcon;
+        if (productPath) {
+            const productIcon = productIcons[productPath];
+            if (productIcon) return productIcon;
+        }
     }
 
     // Fallback to crop-specific icon (also in product directory)
@@ -217,7 +290,7 @@ export function getProductTypeIcon(typeName) {
 }
 
 /**
- * NEW: Get research icon URL
+ * Get research icon URL
  * @param {Object} researchNode - Research node object from GameData
  * @returns {string|null} - Icon URL or null
  */
@@ -274,5 +347,5 @@ export default {
     getProductTypeIcon,
     getEntityIcon,
     getEntityIconTop,
-    getResearchIcon 
+    getResearchIcon
 };

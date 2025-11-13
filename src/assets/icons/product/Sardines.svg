@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="800px" height="800px" viewBox="-3.2 -3.2 38.4 38.4" id="icons" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .cls-1{fill:#80a090;} /* Light green-gray for sides */
+      .cls-2{fill:#90b0a0;} /* Lighter green-gray for body */
+      .cls-3{fill:#a0c0b0;} /* Even lighter for eye outer */
+      .cls-4{fill:#406050;} /* Dark green-gray for eye inner */
+      .cls-5{fill:#608070;} /* Medium green-gray for fins */
+    </style>
+  </defs>
+  <title>Sardines</title>
+  <path class="cls-1" d="M1,19.71S4,24,9,24V18.05C3.43,18.33,1,19.71,1,19.71Z"/>
+  <path class="cls-2" d="M11,18c-.71,0-1.37,0-2,.05V24c5,0,18-3,18-3V19S18,18,11,18Z"/>
+  <circle class="cls-3" cx="6" cy="20.5" r="1.5"/>
+  <circle class="cls-4" cx="6" cy="20.5" r="1"/>
+  <polygon class="cls-5" points="27 19 31 18 31 22 27 21 27 19"/>
+  <path class="cls-5" d="M14,24H11a1,1,0,0,1,0-2h3a1,1,0,0,1,0,2Z"/>
+  <path class="cls-1" d="M1,9.71S4,14,9,14V8.05C3.43,8.33,1,9.71,1,9.71Z"/>
+  <path class="cls-2" d="M11,8c-.71,0-1.37,0-2,.05V14c5,0,18-3,18-3V9S18,8,11,8Z"/>
+  <circle class="cls-3" cx="6" cy="10.5" r="1.5"/>
+  <circle class="cls-4" cx="6" cy="10.5" r="1"/>
+  <polygon class="cls-5" points="27 9 31 8 31 12 27 11 27 9"/>
+  <path class="cls-5" d="M14,14H11a1,1,0,0,1,0-2h3a1,1,0,0,1,0,2Z"/>
+</svg>
