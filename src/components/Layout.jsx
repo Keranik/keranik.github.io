@@ -90,7 +90,7 @@ const Layout = () => {
                     margin: '1rem 2rem 0 2rem', marginBottom: '2rem',
                     borderRadius: '12px',
                     overflow: 'hidden',
-                    background: 'linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(42, 42, 42, 0.85) 100%)',
+                    background: 'linear-gradient(135deg, rgba(26, 26, 26, 0.85) 0%, rgba(42, 42, 42, 0.85) 100%)',
                     border: '1px solid rgba(74, 144, 226, 0.15)'
                 }}>
                     <div style={{

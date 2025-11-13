@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "mods": [
     {
-      "id": "coiextended-core",
+      "id": "COIExtended-Core",
       "name": "COI Extended",
       "version": 1,
       "description": "Major overhaul mod adding extensive new content and rebalancing",
