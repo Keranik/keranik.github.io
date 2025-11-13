@@ -13,6 +13,10 @@
  * - Research definitions (for settings UI)
  * - More will be added as we migrate other files
  */
+
+// ✅ FIXED: Pre-import all mod files for production build compatibility
+const modDataFiles = import.meta.glob('../mods/GameData_*.js', { eager: true, import: 'default' });
+
 export class GameDataManager {
     // ==========================================
     // PRIVATE STATE
@@ -257,12 +261,14 @@ export class GameDataManager {
     }
 
     /**
-     * Load mod data files
+     * ✅ FIXED: Load mod data files using pre-imported glob
+     * Now production-safe with import.meta.glob
      */
     static async _loadMods(enabledModIds) {
         console.log('📦 GameDataManager: Loading mods...', enabledModIds);
+        console.log('📦 Available mod files:', Object.keys(modDataFiles));
 
-        // Load manifest to find mod file names
+        // Load manifest to get mod metadata
         let manifest;
         try {
             const manifestModule = await import('../manifest.json');
@@ -272,27 +278,36 @@ export class GameDataManager {
             return [];
         }
 
-        // Load each mod in parallel
-        const modPromises = enabledModIds.map(async (modId) => {
+        // Load each enabled mod using pre-imported files
+        const loadedMods = [];
+
+        for (const modId of enabledModIds) {
             const modInfo = manifest.mods?.find(m => m.id === modId);
 
             if (!modInfo) {
                 console.warn(`⚠️ GameDataManager: Mod "${modId}" not found in manifest`);
-                return null;
+                continue;
             }
 
-            try {
-                const module = await import(`../${modInfo.dataFile}`);
-                console.log(`✅ GameDataManager: Loaded mod "${modId}"`);
-                return module.default;
-            } catch (error) {
-                console.error(`❌ GameDataManager: Failed to load mod "${modId}":`, error);
-                return null;
-            }
-        });
+            // Build the path that matches import.meta.glob pattern
+            // Format: ../mods/GameData_{modId}.js
+            const modPath = `../mods/GameData_${modId}.js`;
 
-        const results = await Promise.all(modPromises);
-        return results.filter(Boolean); // Remove nulls
+            // Look up the pre-imported module
+            const modData = modDataFiles[modPath];
+
+            if (modData) {
+                console.log(`✅ GameDataManager: Loaded mod "${modId}" from ${modPath}`);
+                loadedMods.push(modData);
+            } else {
+                console.error(`❌ GameDataManager: Mod file not found: ${modPath}`, {
+                    expectedPath: modPath,
+                    availableFiles: Object.keys(modDataFiles)
+                });
+            }
+        }
+
+        return loadedMods;
     }
 
     /**
