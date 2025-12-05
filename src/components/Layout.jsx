@@ -38,7 +38,7 @@ const Layout = () => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundImage: `url(${backgroundImage})`,
+                    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), url(${backgroundImage})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',

@@ -15,6 +15,7 @@ import { GameDataManager } from '../managers/GameDataManager';
 import ConsolidatedResourcesPanel from '../components/ConsolidatedResourcesPanel';
 import LoadingOverlay from '../components/LoadingOverlay';
 import RecipeCard from '../components/RecipeCard';
+import { getProducibleProducts } from '../utils/ProductHelper';
 
 const Calculator = () => {
     const { settings } = useSettings();
@@ -57,7 +58,8 @@ const Calculator = () => {
         product: null,
         requiredRate: 0,
         tiers: [],
-        selectedTier: null
+        selectedTier: null,
+        applyToAll: false
     });
 
     // Recipe time display toggles
@@ -85,6 +87,44 @@ const Calculator = () => {
     const [solver] = useState(() => ProductionSolver);
 
     const [recipeSelectionModalOpen, setRecipeSelectionModalOpen] = useState(false);
+
+    // Helper: Find all nodes in chain with the same productId (for "apply to all" feature)
+    // Matches nodes that show the "+" button (raw materials OR single-recipe hybrids)
+    const findAllNodesWithProduct = useCallback((chain, productId, excludeNodeKey = null) => {
+        if (!chain || !productId) return [];
+
+        const matches = [];
+
+        const search = (node) => {
+            // Match the same condition as showSourceButton in CompactNode:
+            // raw materials OR single-recipe hybrids using machine
+            const showsSourceButton = node.isRawMaterial ||
+                (!node.isRawMaterial && node.availableRecipes && node.availableRecipes.length === 1);
+
+            if (node.productId === productId && showsSourceButton && node.nodeKey !== excludeNodeKey) {
+                matches.push(node);
+            }
+            if (node.inputChains && node.inputChains.length > 0) {
+                for (const child of node.inputChains) {
+                    search(child);
+                }
+            }
+        };
+
+        search(chain);
+        return matches;
+    }, []);
+
+    // Helper: Count matching nodes for the "apply to all" toggle
+    const getMatchingNodeCount = useCallback(() => {
+        if (!productionChain || !resourceSourceModal.productId) return 0;
+        const matches = findAllNodesWithProduct(
+            productionChain,
+            resourceSourceModal.productId,
+            resourceSourceModal.nodeKey
+        );
+        return matches.length;
+    }, [productionChain, resourceSourceModal.productId, resourceSourceModal.nodeKey, findAllNodesWithProduct]);
 
     const handleCalculate = useCallback(async () => {
         if (!selectedProduct || !targetRate) return;
@@ -251,15 +291,11 @@ const Calculator = () => {
 
     const trashIcon = getGeneralIcon('Trash');
     const tipIcon = getGeneralIcon('Tip');
-    const optimizationOn = getGeneralIcon('LogisticsAuto');
-    const optimizationOff = getGeneralIcon('LogisticsOff');
 
-    const producibleProducts = ProductionCalculator.products
-        .filter(product => {
-            const recipes = ProductionCalculator.getRecipesForProduct(product.id);
-            return recipes.length > 0;
-        })
-        .sort((a, b) => a.name.localeCompare(b.name));
+    const producibleProducts = getProducibleProducts(
+        ProductionCalculator.products,
+        (productId) => ProductionCalculator.getRecipesForProduct(productId)
+    );
 
     const formatPower = (kw, unit) => {
         switch (unit) {
@@ -483,7 +519,7 @@ const Calculator = () => {
         });
     };
 
-    const selectResourceSource = (sourceType) => {
+    const selectResourceSource = (sourceType, applyToAll = false) => {
         const { nodeKey, productId, requiredRate } = resourceSourceModal;
 
         if (sourceType === 'storage') {
@@ -496,7 +532,8 @@ const Calculator = () => {
                 product,
                 requiredRate,
                 tiers,
-                selectedTier: optimal
+                selectedTier: optimal,
+                applyToAll: applyToAll
             });
         } else if (sourceType === 'machine') {
             const recipes = ProductionCalculator.getRecipesForProduct(productId);
@@ -504,12 +541,34 @@ const Calculator = () => {
                 setRecipeModalProductId(productId);
                 setRecipeModalRecipes(recipes);
                 setRecipeModalOpen(true);
+                // Note: For machine source, applyToAll is not supported since each node
+                // might need different recipe selections based on available inputs
             }
         } else {
+            // For mining, worldMine, trade sources
             const newSources = new Map(resourceSources);
+
+            // Always apply to the current node
             newSources.set(nodeKey, { type: sourceType });
+
+            // If applyToAll is enabled, apply to all matching nodes
+            if (applyToAll && productionChain) {
+                const matchingNodes = findAllNodesWithProduct(productionChain, productId, nodeKey);
+                matchingNodes.forEach(node => {
+                    newSources.set(node.nodeKey, { type: sourceType });
+                });
+                console.log(`Applied "${sourceType}" source to ${matchingNodes.length + 1} nodes for ${productId}`);
+            }
+
             setResourceSources(newSources);
-            setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
+            setResourceSourceModal({
+                open: false,
+                nodeKey: null,
+                productId: null,
+                productName: null,
+                requiredRate: 0,
+                currentSource: null
+            });
 
             if (selectedProduct && targetRate && targetRate > 0) {
                 const result = solver.solve({
@@ -531,16 +590,38 @@ const Calculator = () => {
     };
 
     const selectStorageTier = (tier) => {
-        const { nodeKey } = resourceSourceModal;
+        const { nodeKey, productId } = resourceSourceModal;
+        const { applyToAll } = storageTierModal;
 
         const newSources = new Map(resourceSources);
+
+        // Always apply to the current node
         newSources.set(nodeKey, {
             type: 'storage',
             config: { tier: tier.tier, entityId: tier.entityId, count: tier.count }
         });
+
+        // If applyToAll is enabled, apply to all matching nodes
+        if (applyToAll && productionChain) {
+            const matchingNodes = findAllNodesWithProduct(productionChain, productId, nodeKey);
+            matchingNodes.forEach(node => {
+                // Recalculate tier for each node based on its required rate
+                const nodeTiers = ProductionCalculator.getStorageTierOptions(
+                    ProductionCalculator.getProduct(productId),
+                    node.targetRate
+                );
+                const nodeTier = nodeTiers.find(t => t.tier === tier.tier) || tier;
+                newSources.set(node.nodeKey, {
+                    type: 'storage',
+                    config: { tier: nodeTier.tier, entityId: nodeTier.entityId, count: nodeTier.count }
+                });
+            });
+            console.log(`Applied storage tier ${tier.tier} to ${matchingNodes.length + 1} nodes for ${productId}`);
+        }
+
         setResourceSources(newSources);
 
-        setStorageTierModal({ open: false, product: null, requiredRate: 0, tiers: [], selectedTier: null });
+        setStorageTierModal({ open: false, product: null, requiredRate: 0, tiers: [], selectedTier: null, applyToAll: false });
         setResourceSourceModal({ open: false, nodeKey: null, productId: null, productName: null, requiredRate: 0, currentSource: null });
 
         if (selectedProduct && targetRate && targetRate > 0) {
@@ -714,11 +795,12 @@ const Calculator = () => {
                     }}
                     resourceSourceModal={resourceSourceModal}
                     onSelectResourceSource={selectResourceSource}
+                    matchingNodeCount={getMatchingNodeCount()}
                 />
 
                 <StorageTierModal
                     isOpen={storageTierModal.open}
-                    onClose={() => setStorageTierModal({ open: false, product: null, requiredRate: 0, tiers: [], selectedTier: null })}
+                    onClose={() => setStorageTierModal({ open: false, product: null, requiredRate: 0, tiers: [], selectedTier: null, applyToAll: false })}
                     storageTierModal={storageTierModal}
                     onSelectStorageTier={selectStorageTier}
                 />
@@ -767,7 +849,7 @@ const Calculator = () => {
                         </p>
                     </div>
 
-                    {/* Clear All Button - Top Right Corner with MORE padding */}
+                    {/* Clear All Button - Top Right Corner */}
                     <button
                         onClick={handleClearAll}
                         style={{
@@ -814,7 +896,7 @@ const Calculator = () => {
                         Clear All
                     </button>
 
-                    {/* Top Row: Product Selection & Target Rate Cards - MORE padding */}
+                    {/* Top Row: Product Selection & Target Rate Cards */}
                     <div style={{
                         display: 'flex',
                         gap: '1.5rem',
@@ -1132,7 +1214,7 @@ const Calculator = () => {
                         </button>
                     </div>
 
-                    {/* Collapsible Advanced Optimization Section - Toggle both dropdown AND optimization */}
+                    {/* Collapsible Advanced Optimization Section */}
                     <div>
                         <button
                             onClick={(e) => {
@@ -1140,7 +1222,6 @@ const Calculator = () => {
                                 e.stopPropagation();
                                 const newOptimizationMode = !optimizationMode;
                                 setOptimizationMode(newOptimizationMode);
-                                // Always open when enabling, toggle when disabling
                                 if (newOptimizationMode) {
                                     setShowAdvancedOptimization(true);
                                 } else {
@@ -1271,7 +1352,6 @@ const Calculator = () => {
                             }}>
                                 {viewMode === 'compact' && selectedNode && (
                                     <>
-                                        {/* Full-Width Embossed "Node Details" Badge - Edge to Edge */}
                                         <div style={{
                                             margin: '-1.5rem -1.5rem 0 -1.5rem',
                                             padding: '12px 0',
@@ -1329,6 +1409,7 @@ const Calculator = () => {
                                     useConsolidation={useConsolidation}
                                     onViewResourcePoolDetails={() => setShowResourcePoolDetail(true)}
                                     onOpenResourceSourceModal={openResourceSourceModal}
+                                    targetProductId={selectedProduct}
                                 />
                             </div>
                         </div>
@@ -1339,9 +1420,13 @@ const Calculator = () => {
                             padding: '1.5rem',
                             borderRadius: '10px',
                             border: '1px solid #444',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+                            borderBottom: '2px solid #333',
+                            boxShadow:
+                                'inset 0 3px 8px rgba(0, 0, 0, 0.7), ' +
+                                'inset 0 -3px 8px rgba(255, 255, 255, 0.03), ' +
+                                '0 4px 10px rgba(0, 0, 0, 0.5)'
                         }}>
-                            {/* Embossed Control Banner - No Text, Just Controls */}
+                            {/* Control Banner */}
                             <div style={{
                                 margin: '-1.5rem -1.5rem 1.5rem -1.5rem',
                                 padding: '8px 16px',
@@ -1358,7 +1443,7 @@ const Calculator = () => {
                                 justifyContent: 'flex-end',
                                 gap: '10px'
                             }}>
-                                {/* Expand/Collapse All */}
+                                {/* Expand All */}
                                 <button
                                     onClick={() => setCollapsedNodes(new Set())}
                                     title="Expand all nodes"
@@ -1387,6 +1472,7 @@ const Calculator = () => {
                                     ⊞
                                 </button>
 
+                                {/* Collapse All */}
                                 <button
                                     onClick={() => {
                                         const getAllNodeIds = (node, path = '', level = 0) => {
@@ -1395,7 +1481,7 @@ const Calculator = () => {
                                             ids.add(nodeId);
 
                                             if (node.inputChains && node.inputChains.length > 0) {
-                                                node.inputChains.forEach((child, idx) => {
+                                                node.inputChains.forEach((child) => {
                                                     const childIds = getAllNodeIds(child, nodeId, level + 1);
                                                     childIds.forEach(id => ids.add(id));
                                                 });
@@ -1434,7 +1520,6 @@ const Calculator = () => {
                                     ⊟
                                 </button>
 
-                                {/* Separator */}
                                 <span style={{ color: '#444', fontSize: '1rem', fontWeight: '300' }}>|</span>
 
                                 {/* Compact Button */}
@@ -1551,17 +1636,17 @@ const Calculator = () => {
                                                 border: '1px solid #333'
                                             }}>
                                                 {tipIcon && (
-                                                            <img
-                                                                src={tipIcon}
-                                                                alt="Tip"
-                                                                style={{
-                                                                    width: '16px',
-                                                                    height: '16px', paddingRight: '2px',
-                                                                    opacity: 0.8,
-                                                                    filter: 'brightness(0) saturate(100%) invert(79%) sepia(85%) saturate(494%) hue-rotate(359deg) brightness(104%) contrast(101%)'
-                                                                }}
-                                                            />
-                                                        )} <strong style={{ color: '#4a90e2' }}>TIP:</strong> Click ▶/▼ to expand/collapse.  Click a node to view details. 
+                                                    <img
+                                                        src={tipIcon}
+                                                        alt="Tip"
+                                                        style={{
+                                                            width: '16px',
+                                                            height: '16px',
+                                                            opacity: 0.8,
+                                                            filter: 'brightness(0) saturate(100%) invert(79%) sepia(85%) saturate(494%) hue-rotate(359deg) brightness(104%) contrast(101%)'
+                                                        }}
+                                                    />
+                                                )} <strong style={{ color: '#4a90e2' }}>TIP:</strong> Click ▶/▼ to expand/collapse. Click a node to view details.
                                                 Click "+" to change source.
                                             </div>
                                             <CompactNode

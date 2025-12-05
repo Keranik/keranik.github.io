@@ -17,7 +17,8 @@ const DetailsPanel = ({
     productionChain,
     useConsolidation,
     onViewResourcePoolDetails,
-    onOpenResourceSourceModal  // ← Add this prop
+    onOpenResourceSourceModal,
+    targetProductId  // NEW: Need this to identify main product
 }) => {
     // In compact mode:
     // - If no node selected OR if requirements exist but no selectedNode, show total requirements
@@ -385,6 +386,11 @@ const DetailsPanel = ({
         ? ResourceConsolidator.getConsolidationStats(productionChain)
         : null;
 
+    // Calculate total outputs (byproducts, waste, etc.)
+    const outputAnalysis = productionChain && targetProductId
+        ? ProductionCalculator.calculateTotalOutputs(productionChain, targetProductId)
+        : null;
+
     const totalMachines = Array.from(requirements.machines.values()).reduce((a, b) => a + b, 0);
     const totalWorkers = requirements.workers;
 
@@ -413,6 +419,7 @@ const DetailsPanel = ({
                     textTransform: 'uppercase',
                     letterSpacing: '1.5px',
                     textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)'
+
                 }}>
                     Production Summary
                 </span>
@@ -625,6 +632,155 @@ const DetailsPanel = ({
                 </div>
             </div>
 
+            {/* NEW: Total Outputs Section */}
+            {outputAnalysis && (
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <h4 style={{ marginBottom: '0.75rem', color: '#50C878', fontSize: '1.1rem', fontWeight: '600' }}>
+                        Total Outputs:
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {/* Main Product */}
+                        {outputAnalysis.mainProduct && outputAnalysis.mainProduct.rate > 0 && (
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                backgroundColor: '#1a3a1a',
+                                padding: '10px 12px',
+                                borderRadius: '4px',
+                                fontSize: '0.9rem',
+                                border: '1px solid #50C878'
+                            }}>
+                                {getProductIcon(outputAnalysis.mainProduct.product) && (
+                                    <img
+                                        src={getProductIcon(outputAnalysis.mainProduct.product)}
+                                        alt={outputAnalysis.mainProduct.product?.name}
+                                        style={{ width: '24px', height: '24px', objectFit: 'contain' }}
+                                    />
+                                )}
+                                <span style={{ flex: 1, color: '#50C878', fontWeight: '700' }}>
+                                    {outputAnalysis.mainProduct.product?.name || outputAnalysis.mainProduct.productId}
+                                </span>
+                                <span style={{
+                                    padding: '2px 6px',
+                                    backgroundColor: 'rgba(80, 200, 120, 0.2)',
+                                    borderRadius: '3px',
+                                    fontSize: '0.75rem',
+                                    color: '#50C878',
+                                    fontWeight: '600'
+                                }}>
+                                    TARGET
+                                </span>
+                                <span style={{ color: '#50C878', fontWeight: 'bold' }}>
+                                    {outputAnalysis.mainProduct.rate.toFixed(2)}/min
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Byproducts (useful intermediates) */}
+                        {outputAnalysis.byproducts.length > 0 && (
+                            <>
+                                <div style={{
+                                    fontSize: '0.8rem',
+                                    color: '#888',
+                                    marginTop: '8px',
+                                    marginBottom: '4px',
+                                    fontWeight: '600',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px'
+                                }}>
+                                    Unused Byproducts
+                                </div>
+                                {outputAnalysis.byproducts.map((item, idx) => (
+                                    <div key={idx} style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        backgroundColor: '#1a1a1a',
+                                        padding: '8px 12px',
+                                        borderRadius: '4px',
+                                        fontSize: '0.9rem',
+                                        border: '1px solid #444'
+                                    }}>
+                                        {getProductIcon(item.product) && (
+                                            <img
+                                                src={getProductIcon(item.product)}
+                                                alt={item.product?.name}
+                                                style={{ width: '20px', height: '20px', objectFit: 'contain' }}
+                                            />
+                                        )}
+                                        <span style={{ flex: 1, color: '#ddd' }}>
+                                            {item.product?.name || item.productId}
+                                        </span>
+                                        <span style={{ color: '#4a90e2', fontWeight: 'bold' }}>
+                                            +{item.rate.toFixed(2)}/min
+                                        </span>
+                                    </div>
+                                ))}
+                            </>
+                        )}
+
+                        {/* Waste products */}
+                        {outputAnalysis.waste.length > 0 && (
+                            <>
+                                <div style={{
+                                    fontSize: '0.8rem',
+                                    color: '#ff6b6b',
+                                    marginTop: '8px',
+                                    marginBottom: '4px',
+                                    fontWeight: '600',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px'
+                                }}>
+                                    Waste / Pollution
+                                </div>
+                                {outputAnalysis.waste.map((item, idx) => (
+                                    <div key={idx} style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        backgroundColor: '#2a1a1a',
+                                        padding: '8px 12px',
+                                        borderRadius: '4px',
+                                        fontSize: '0.9rem',
+                                        border: '1px solid #ff6b6b'
+                                    }}>
+                                        {getProductIcon(item.product) && (
+                                            <img
+                                                src={getProductIcon(item.product)}
+                                                alt={item.product?.name}
+                                                style={{ width: '20px', height: '20px', objectFit: 'contain' }}
+                                            />
+                                        )}
+                                        <span style={{ flex: 1, color: '#ff6b6b' }}>
+                                            {item.product?.name || item.productId}
+                                        </span>
+                                        <span style={{ color: '#ff6b6b', fontWeight: 'bold' }}>
+                                            +{item.rate.toFixed(2)}/min
+                                        </span>
+                                    </div>
+                                ))}
+                            </>
+                        )}
+
+                        {/* No byproducts message */}
+                        {outputAnalysis.byproducts.length === 0 && outputAnalysis.waste.length === 0 && (
+                            <div style={{
+                                padding: '8px 12px',
+                                backgroundColor: '#1a1a1a',
+                                borderRadius: '4px',
+                                fontSize: '0.85rem',
+                                color: '#666',
+                                fontStyle: 'italic',
+                                textAlign: 'center'
+                            }}>
+                                No unused byproducts or waste
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {requirements.machines.size > 0 && (
                 <div style={{ marginBottom: '1.5rem' }}>
                     <h4 style={{ marginBottom: '0.75rem', color: '#ccc', fontSize: '1.1rem', fontWeight: '600' }}>
@@ -695,18 +851,16 @@ const DetailsPanel = ({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {Array.from(requirements.maintenance.entries())
                             .sort(([productIdA], [productIdB]) => {
-                                // Sort by tier: T1 (white), T2 (yellow), T3 (red)
                                 const productA = ProductionCalculator.getProduct(productIdA);
                                 const productB = ProductionCalculator.getProduct(productIdB);
                                 const nameA = productA?.name || productIdA;
                                 const nameB = productB?.name || productIdB;
 
-                                // Extract tier numbers (e.g., "Maintenance I" -> 1, "Maintenance II" -> 2, "Maintenance III" -> 3)
                                 const getTier = (name) => {
                                     if (name.includes('III') || name.includes('3')) return 3;
                                     if (name.includes('II') || name.includes('2')) return 2;
                                     if (name.includes('I') || name.includes('1')) return 1;
-                                    return 0; // fallback
+                                    return 0;
                                 };
 
                                 return getTier(nameA) - getTier(nameB);
@@ -716,19 +870,18 @@ const DetailsPanel = ({
                                 const maintenanceIcon = getProductIcon(product);
                                 const productName = product?.name || productId;
 
-                                // Determine color based on actual tier, not array index
                                 const getTier = (name) => {
                                     if (name.includes('III') || name.includes('3')) return 3;
                                     if (name.includes('II') || name.includes('2')) return 2;
                                     if (name.includes('I') || name.includes('1')) return 1;
-                                    return 1; // fallback to T1
+                                    return 1;
                                 };
 
                                 const tier = getTier(productName);
                                 const colorMap = {
-                                    1: '#fff',      // T1 = white
-                                    2: '#FFD700',   // T2 = yellow
-                                    3: '#ff4444'    // T3 = red
+                                    1: '#fff',
+                                    2: '#FFD700',
+                                    3: '#ff4444'
                                 };
                                 const amountColor = colorMap[tier] || '#fff';
 
@@ -771,11 +924,10 @@ const DetailsPanel = ({
                 </div>
             )}
 
-            {/* Resource Pool Summary - integrated seamlessly at the bottom */}
+            {/* Resource Pool Summary */}
             {stats && stats.totalResources > 0 && (
                 <div>
                     <h4 style={{ marginBottom: '0.75rem', color: '#ccc', fontSize: '1.1rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
-
                         Shared Resource Pool:
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>

@@ -1,4 +1,5 @@
 ﻿import { GameDataManager } from '../managers/GameDataManager';
+import { isWasteProduct, isPollutionOutput } from './ProductHelper';
 /**
  * Production Calculator Engine - REWRITTEN FOR EXCELLENCE
  * Handles all production chain calculations, recipe optimization, and resource requirements
@@ -727,6 +728,116 @@ class ProductionCalculator {
             tautologicalProducts: Array.from(this.tautologicalProducts),
             count: this.tautologicalProducts.size,
             products: pairs
+        };
+    }
+
+    /**
+       * Calculate total outputs from a production chain
+       * Includes main product, intermediates, byproducts, and waste
+       * Uses data-driven waste detection from ProductHelper
+       * @param {Object} chain - Production chain from calculateProductionChain
+       * @param {string} targetProductId - The main product being produced
+       * @returns {Object} - { totalOutputs: Map, totalInputs: Map, netOutputs: Map, mainProduct, byproducts, waste }
+       */
+    calculateTotalOutputs(chain, targetProductId) {
+        const totalOutputs = new Map(); // productId -> rate produced
+        const totalInputs = new Map();  // productId -> rate consumed
+        const pollutionOutputs = new Set(); // Track outputs marked as pollution in recipes
+
+        const processChain = (node) => {
+            if (node.error) return;
+
+            // Track outputs from this node
+            if (node.outputs && !node.isRawMaterial) {
+                node.outputs.forEach(output => {
+                    const current = totalOutputs.get(output.productId) || 0;
+                    totalOutputs.set(output.productId, current + output.ratePerMin);
+
+                    // Check if this output is marked as pollution in the recipe
+                    if (output.isPollution === true) {
+                        pollutionOutputs.add(output.productId);
+                    }
+                });
+            }
+
+            // Also check the recipe directly for pollution flags
+            if (node.recipe?.outputs) {
+                node.recipe.outputs.forEach(output => {
+                    if (isPollutionOutput(output)) {
+                        pollutionOutputs.add(output.productId);
+                    }
+                });
+            }
+
+            // Track inputs consumed by this node
+            if (node.inputs && !node.isRawMaterial) {
+                node.inputs.forEach(input => {
+                    const current = totalInputs.get(input.productId) || 0;
+                    totalInputs.set(input.productId, current + input.ratePerMin);
+                });
+            }
+
+            // Recursively process child chains
+            if (node.inputChains) {
+                node.inputChains.forEach(processChain);
+            }
+        };
+
+        processChain(chain);
+
+        // Calculate net outputs (produced - consumed)
+        const netOutputs = new Map();
+        totalOutputs.forEach((produced, productId) => {
+            const consumed = totalInputs.get(productId) || 0;
+            const net = produced - consumed;
+            if (net > 0.001) { // Only track meaningful amounts
+                netOutputs.set(productId, net);
+            }
+        });
+
+        // Categorize outputs
+        const mainProduct = {
+            productId: targetProductId,
+            product: this.getProduct(targetProductId),
+            rate: netOutputs.get(targetProductId) || 0
+        };
+
+        // Remove main product from net outputs for byproducts list
+        netOutputs.delete(targetProductId);
+
+        // Categorize remaining outputs using data-driven detection
+        const byproducts = [];
+        const waste = [];
+
+        netOutputs.forEach((rate, productId) => {
+            const product = this.getProduct(productId);
+            const item = { productId, product, rate };
+
+            // Use data-driven waste detection:
+            // 1. Check product.isWaste flag
+            // 2. Check product.type === 'virtual'
+            // 3. Check if recipe marked this as isPollution
+            // 4. Check product.excludeFromStats && !storable
+            const isWaste = isWasteProduct(product) || pollutionOutputs.has(productId);
+
+            if (isWaste) {
+                waste.push(item);
+            } else {
+                byproducts.push(item);
+            }
+        });
+
+        // Sort by rate (highest first)
+        byproducts.sort((a, b) => b.rate - a.rate);
+        waste.sort((a, b) => b.rate - a.rate);
+
+        return {
+            totalOutputs,
+            totalInputs,
+            netOutputs,
+            mainProduct,
+            byproducts,
+            waste
         };
     }
 }
